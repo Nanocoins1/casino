@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>HATHOR Royal Casino 🎰</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Josefin+Sans:wght@300;400;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+:root{
+  --bg:#080608;--bg2:#0d0a0f;
+  --gold:#c9a84c;--gold2:#e8d080;--gold3:#8a5c1a;
+  --cream:#f0e8d0;--red:#c0392b;--felt:#0b3d1e;--felt2:#0e4a25;
+  --card:#faf6ee;--shadow:0 8px 40px rgba(0,0,0,0.8);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);font-family:'Josefin Sans',sans-serif;color:var(--cream);min-height:100vh;overflow-x:hidden;}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:#111;}
+::-webkit-scrollbar-thumb{background:var(--gold3);border-radius:3px;}
+
+/* AUTH */
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 0%,#1a0a2e,#080608);}
+.auth-card{background:rgba(10,8,15,.97);border:1px solid rgba(201,168,76,.25);border-radius:2px;padding:56px 64px;width:460px;position:relative;box-shadow:0 0 120px rgba(201,168,76,.08),inset 0 1px 0 rgba(201,168,76,.15);}
+.auth-card::before,.auth-card::after{content:'';position:absolute;width:20px;height:20px;border-color:var(--gold);border-style:solid;opacity:.5;}
+.auth-card::before{top:-1px;left:-1px;border-width:2px 0 0 2px;}
+.auth-card::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0;}
+.auth-logo{text-align:center;margin-bottom:44px;}
+.auth-logo h1{font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:700;color:var(--gold);letter-spacing:6px;text-shadow:0 0 60px rgba(201,168,76,.3);}
+.auth-logo .sub{font-size:11px;letter-spacing:6px;color:rgba(240,232,208,.35);margin-top:10px;}
+.field{margin-bottom:20px;}
+.field label{display:block;font-size:10px;letter-spacing:3px;color:rgba(240,232,208,.4);margin-bottom:10px;text-transform:uppercase;}
+.field input{width:100%;padding:14px 18px;background:rgba(255,255,255,.03);border:1px solid rgba(201,168,76,.15);border-radius:1px;color:var(--cream);font-family:'Josefin Sans',sans-serif;font-size:15px;outline:none;transition:border-color .25s;}
+.field input:focus{border-color:rgba(201,168,76,.5);}
+.btn-gold{width:100%;padding:16px;background:linear-gradient(135deg,#c9a84c,#e8d080,#a07830);color:#080608;border:none;border-radius:1px;font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:700;letter-spacing:3px;cursor:pointer;transition:all .25s;margin-top:8px;}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 6px 30px rgba(201,168,76,.35);}
+.btn-gold:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+/* HEADER */
+.header{display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:68px;background:rgba(4,3,10,.97);border-bottom:1px solid rgba(201,168,76,.12);position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);}
+.header-logo{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:var(--gold);letter-spacing:4px;display:flex;align-items:center;gap:10px;}
+.nav-tabs{display:flex;gap:4px;}
+.nav-btn{padding:7px 14px;background:transparent;border:1px solid transparent;color:rgba(240,232,208,.5);border-radius:1px;cursor:pointer;font-family:'Josefin Sans',sans-serif;font-size:12px;letter-spacing:2px;transition:all .2s;}
+.nav-btn:hover{color:var(--gold);border-color:rgba(201,168,76,.2);}
+.nav-btn.active{border-color:rgba(201,168,76,.5);color:var(--gold);background:rgba(201,168,76,.08);}
+.header-right{display:flex;align-items:center;gap:12px;}
+.token-display{display:flex;align-items:center;gap:8px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:24px;padding:7px 16px;font-family:'DM Mono',monospace;font-size:13px;color:var(--gold);}
+.avatar-btn{width:40px;height:40px;border-radius:50%;background:rgba(201,168,76,.1);border:2px solid rgba(201,168,76,.3);cursor:pointer;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:17px;transition:all .2s;}
+.avatar-btn:hover{border-color:var(--gold);}
+.avatar-btn img{width:100%;height:100%;object-fit:cover;}
+
+/* LEVEL BADGE */
+.lvl-badge{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.4);border:1px solid rgba(201,168,76,.15);border-radius:20px;padding:5px 12px;font-size:12px;}
+.lvl-badge .emoji{font-size:14px;}
+.xp-bar{width:60px;height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(--gold3),var(--gold));border-radius:2px;transition:width .6s ease;}
+
+/* LOBBY */
+.lobby{padding:48px 40px;max-width:1400px;margin:0 auto;}
+.lobby-hero{text-align:center;margin-bottom:56px;}
+.lobby-hero h2{font-family:'Cormorant Garamond',serif;font-size:60px;font-weight:400;color:var(--cream);line-height:1.1;}
+.lobby-hero h2 em{color:var(--gold);font-style:italic;}
+.lobby-hero p{font-size:12px;letter-spacing:4px;color:rgba(240,232,208,.3);margin-top:14px;text-transform:uppercase;}
+.games-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-bottom:40px;}
+.game-card{background:rgba(10,8,15,.8);border:1px solid rgba(201,168,76,.1);border-radius:2px;padding:36px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:14px;}
+.game-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(201,168,76,.04),transparent 60%);opacity:0;transition:opacity .3s;}
+.game-card:hover{border-color:rgba(201,168,76,.4);transform:translateY(-3px);box-shadow:0 16px 60px rgba(0,0,0,.5);}
+.game-card:hover::before{opacity:1;}
+.game-icon{font-size:44px;}
+.game-card h3{font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--cream);}
+.game-card p{font-size:13px;color:rgba(240,232,208,.4);line-height:1.6;}
+.game-badge{position:absolute;top:14px;right:14px;font-size:10px;letter-spacing:2px;padding:3px 10px;border-radius:1px;}
+.badge-live{background:rgba(192,57,43,.2);color:#e07070;border:1px solid rgba(192,57,43,.3);}
+.badge-hot{background:rgba(201,168,76,.15);color:var(--gold);border:1px solid rgba(201,168,76,.3);}
+
+/* DAILY BONUS MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);}
+.modal{background:rgba(10,8,15,.98);border:1px solid rgba(201,168,76,.25);border-radius:2px;padding:40px;width:380px;box-shadow:0 0 80px rgba(0,0,0,.9);}
+.modal h3{font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--gold);margin-bottom:8px;letter-spacing:2px;}
+.modal p{font-size:13px;color:rgba(240,232,208,.5);margin-bottom:24px;letter-spacing:1px;line-height:1.6;}
+.bonus-amount{font-family:'Cormorant Garamond',serif;font-size:52px;color:var(--gold);text-align:center;margin:16px 0;text-shadow:0 0 40px rgba(201,168,76,.4);}
+.modal-btns{display:flex;gap:10px;}
+.btn-sm-cancel{flex:1;padding:12px;border-radius:1px;background:transparent;border:1px solid rgba(240,232,208,.2);color:rgba(240,232,208,.5);cursor:pointer;font-size:12px;letter-spacing:2px;}
+
+/* LEVELUP TOAST */
+.levelup-toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:rgba(4,3,10,.97);border:1px solid var(--gold);border-radius:2px;padding:20px 40px;z-index:500;animation:toastIn .4s ease;text-align:center;box-shadow:0 0 60px rgba(201,168,76,.2);}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,-30px)}to{opacity:1;transform:translate(-50%,0)}}
+.levelup-toast h3{font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--gold);}
+.levelup-toast p{font-size:12px;color:rgba(240,232,208,.5);margin-top:4px;letter-spacing:2px;}
+
+/* EMOJI RAIN */
+.emoji-rain{position:fixed;pointer-events:none;z-index:400;font-size:36px;animation:emojiFloat 2s ease forwards;}
+@keyframes emojiFloat{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-120px) scale(1.5)}}
+
+/* CARD */
+.card{width:58px;height:82px;background:var(--card);border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-shadow:0 4px 12px rgba(0,0,0,.5);font-weight:700;user-select:none;position:relative;transition:transform .2s;}
+.card:hover{transform:translateY(-4px);}
+.card.red{color:#c0392b;}
+.card.black{color:#111;}
+.card-r{font-size:13px;position:absolute;top:4px;left:6px;line-height:1;}
+.card-s{font-size:20px;}
+.card.hidden{background:linear-gradient(135deg,#1a2a4a,#0d1a30);border:1px solid rgba(201,168,76,.2);}
+.card.hidden::after{content:'🂠';font-size:34px;color:rgba(201,168,76,.3);}
+.card.sm{width:46px;height:66px;}
+.card.sm .card-r{font-size:11px;}
+.card.sm .card-s{font-size:16px;}
+
+/* SLOTS */
+.slots-wrap{min-height:calc(100vh - 68px);display:flex;align-items:center;justify-content:center;padding:40px;background:radial-gradient(ellipse at 50% 0%,#1a0a00,#080608 70%);}
+.slots-machine{background:linear-gradient(180deg,#1a1208,#0d0905);border:3px solid var(--gold3);border-radius:12px;padding:36px;width:500px;box-shadow:0 0 80px rgba(201,168,76,.1),inset 0 2px 0 rgba(201,168,76,.2);position:relative;}
+.slots-machine::before{content:'🎰 HATHOR SLOTS';position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--bg);padding:0 16px;font-size:11px;letter-spacing:4px;color:var(--gold);white-space:nowrap;}
+.slots-display{display:flex;gap:10px;margin:28px 0;background:rgba(0,0,0,.6);border:2px solid rgba(201,168,76,.2);border-radius:6px;padding:14px;}
+.reel{flex:1;height:96px;display:flex;align-items:center;justify-content:center;font-size:52px;background:rgba(0,0,0,.4);border-radius:4px;border:1px solid rgba(201,168,76,.1);}
+.reel.spinning{animation:reelSpin .08s linear infinite;}
+.reel.win{animation:reelWin .4s ease;}
+@keyframes reelSpin{0%{transform:translateY(0)}50%{transform:translateY(-4px)}100%{transform:translateY(0)}}
+@keyframes reelWin{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+.slots-bet{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.bet-ctrl{display:flex;align-items:center;gap:8px;}
+.bet-btn{width:32px;height:32px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);border-radius:2px;color:var(--gold);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.bet-btn:hover{background:rgba(201,168,76,.25);}
+.bet-val{font-family:'DM Mono',monospace;font-size:17px;color:var(--gold);min-width:80px;text-align:center;}
+.slots-spin{width:100%;padding:17px;background:linear-gradient(135deg,#c9a84c,#e8d080,#a07830);color:#080608;border:none;border-radius:4px;font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:700;letter-spacing:3px;cursor:pointer;transition:all .2s;margin-top:6px;}
+.slots-spin:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 30px rgba(201,168,76,.4);}
+.slots-spin:disabled{opacity:.5;cursor:not-allowed;}
+.slots-result{text-align:center;min-height:30px;margin:10px 0;font-family:'Cormorant Garamond',serif;font-size:19px;}
+.slots-result.win{color:#4caf50;}
+.slots-result.lose{color:#666;}
+.paytable{margin-top:22px;border-top:1px solid rgba(201,168,76,.1);padding-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.pay-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;}
+.pay-row span:last-child{color:var(--gold);font-family:'DM Mono',monospace;}
+
+/* ROULETTE */
+.roulette-wrap{min-height:calc(100vh - 68px);display:flex;flex-direction:column;align-items:center;padding:36px;background:radial-gradient(ellipse at 50% 20%,#001a0a,#080608 70%);}
+.roulette-wrap h2{font-family:'Cormorant Garamond',serif;font-size:38px;color:var(--gold);letter-spacing:4px;margin-bottom:36px;}
+.roulette-layout{display:flex;gap:44px;align-items:flex-start;flex-wrap:wrap;justify-content:center;}
+.wheel-container{position:relative;width:260px;height:260px;flex-shrink:0;}
+.wheel-outer{width:260px;height:260px;border-radius:50%;background:conic-gradient(#1a1a1a 0deg,#c0392b 9.73deg,#1a1a1a 19.46deg,#c0392b 29.19deg,#1a1a1a 38.92deg,#c0392b 48.65deg,#1a1a1a 58.38deg,#c0392b 68.11deg,#1a1a1a 77.84deg,#c0392b 87.57deg,#1a1a1a 97.3deg,#c0392b 107.03deg,#1a1a1a 116.76deg,#c0392b 126.49deg,#1a1a1a 136.22deg,#c0392b 145.95deg,#1a1a1a 155.68deg,#c0392b 165.41deg,#1a1a1a 175.14deg,#00802a 184.87deg,#1a1a1a 194.6deg,#c0392b 204.33deg,#1a1a1a 214.06deg,#c0392b 223.79deg,#1a1a1a 233.52deg,#c0392b 243.25deg,#1a1a1a 252.98deg,#c0392b 262.71deg,#1a1a1a 272.44deg,#c0392b 282.17deg,#1a1a1a 291.9deg,#c0392b 301.63deg,#1a1a1a 311.36deg,#c0392b 321.09deg,#1a1a1a 330.82deg,#c0392b 340.55deg,#1a1a1a 350.28deg,#c0392b 360deg);border:6px solid var(--gold3);box-shadow:0 0 40px rgba(0,0,0,.8),inset 0 0 20px rgba(0,0,0,.5);transition:transform 4s cubic-bezier(.17,.67,.12,.99);position:absolute;inset:0;}
+.wheel-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:56px;height:56px;border-radius:50%;background:radial-gradient(circle,#c9a84c,#8a5c1a);border:3px solid var(--gold);z-index:2;display:flex;align-items:center;justify-content:center;font-size:9px;letter-spacing:1px;color:#080608;font-weight:700;}
+.wheel-pointer{position:absolute;top:-14px;left:50%;transform:translateX(-50%);width:0;height:0;z-index:3;border-left:9px solid transparent;border-right:9px solid transparent;border-top:22px solid var(--gold);}
+.roulette-board{background:var(--felt);border:2px solid var(--gold3);border-radius:4px;padding:10px;min-width:340px;}
+.r-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-bottom:7px;}
+.r-cell{padding:9px 5px;text-align:center;cursor:pointer;border-radius:2px;font-size:13px;font-weight:600;transition:all .15s;border:1px solid transparent;font-family:'DM Mono',monospace;}
+.r-cell.black{background:rgba(20,20,20,.8);}
+.r-cell.red{background:rgba(150,30,20,.6);}
+.r-cell:hover,.r-cell.selected{border-color:var(--gold);transform:scale(1.05);box-shadow:0 0 10px rgba(201,168,76,.3);}
+.r-outside{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-top:5px;}
+.r-out-cell{padding:9px;text-align:center;cursor:pointer;background:rgba(10,40,20,.8);border:1px solid rgba(201,168,76,.12);border-radius:2px;font-size:11px;letter-spacing:1px;transition:all .15s;}
+.r-out-cell:hover,.r-out-cell.selected{border-color:var(--gold);background:rgba(201,168,76,.1);}
+.r-controls{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.btn-roulette{flex:1;padding:11px;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.25);color:var(--gold);border-radius:2px;cursor:pointer;font-size:12px;letter-spacing:1px;transition:all .2s;min-width:70px;}
+.btn-roulette:hover:not(:disabled){background:rgba(201,168,76,.28);}
+.btn-roulette.spin{background:linear-gradient(135deg,#c9a84c,#e8d080,#a07830);color:#080608;font-weight:700;}
+.btn-roulette:disabled{opacity:.4;cursor:not-allowed;}
+
+/* BLACKJACK */
+.bj-wrap{min-height:calc(100vh - 68px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;background:radial-gradient(ellipse at 50% 30%,#001a10,#080608 70%);}
+.bj-table{background:radial-gradient(ellipse,var(--felt2),var(--felt) 70%,#050e08);border:8px solid #2a1a08;border-radius:50% 50% 10px 10px / 30% 30% 10px 10px;width:780px;min-height:460px;padding:44px 80px;box-shadow:0 0 0 3px rgba(201,168,76,.3),0 20px 80px rgba(0,0,0,.8);display:flex;flex-direction:column;align-items:center;gap:22px;position:relative;}
+.bj-table::before{content:'HATHOR BLACKJACK';position:absolute;bottom:56px;left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:6px;color:rgba(201,168,76,.08);white-space:nowrap;}
+.bj-hand-label{font-size:10px;letter-spacing:3px;color:rgba(240,232,208,.4);text-transform:uppercase;}
+.bj-cards{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;}
+.bj-score{font-family:'Cormorant Garamond',serif;font-size:19px;color:var(--gold);background:rgba(0,0,0,.4);padding:3px 14px;border-radius:12px;margin-top:6px;}
+.bj-controls{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;justify-content:center;}
+.bj-btn{padding:11px 28px;border-radius:2px;cursor:pointer;font-family:'Josefin Sans',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;transition:all .2s;border:none;}
+.bj-hit{background:rgba(76,175,80,.25);color:#88ff88;border:1px solid rgba(76,175,80,.4);}
+.bj-hit:hover{background:rgba(76,175,80,.45);}
+.bj-stand{background:rgba(201,168,76,.2);color:var(--gold);border:1px solid rgba(201,168,76,.4);}
+.bj-stand:hover{background:rgba(201,168,76,.4);}
+.bj-deal{background:linear-gradient(135deg,#c9a84c,#e8d080,#a07830);color:#080608;font-weight:700;padding:13px 44px;}
+.bj-deal:hover{transform:translateY(-2px);box-shadow:0 6px 30px rgba(201,168,76,.35);}
+.bj-double{background:rgba(100,150,255,.2);color:#aaccff;border:1px solid rgba(100,150,255,.4);}
+.bj-double:hover{background:rgba(100,150,255,.4);}
+.bj-status{font-family:'Cormorant Garamond',serif;font-size:26px;letter-spacing:2px;min-height:38px;text-align:center;}
+.bj-status.win{color:#4caf50;}
+.bj-status.lose{color:#e07070;}
+.bj-status.push{color:var(--gold);}
+
+/* POKER */
+.poker-screen{display:flex;flex-direction:column;min-height:calc(100vh - 68px);background:radial-gradient(ellipse at 50% 40%,#0b3d1e,#040a07);}
+.poker-header{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:rgba(0,0,0,.5);border-bottom:1px solid rgba(201,168,76,.1);}
+.poker-phase{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);padding:4px 14px;border-radius:20px;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);}
+.p-table-area{flex:1;display:flex;align-items:center;justify-content:center;padding:20px;}
+.p-table{position:relative;width:780px;height:420px;background:radial-gradient(ellipse at center,#1a5c38,#0d3322 60%,#08200f);border-radius:210px;border:14px solid #2a1a08;box-shadow:0 0 0 3px rgba(201,168,76,.3),0 0 80px rgba(0,0,0,.9),inset 0 0 50px rgba(0,0,0,.5);}
+.p-table::before{content:'HATHOR CASINO';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:11px;letter-spacing:8px;color:rgba(201,168,76,.06);white-space:nowrap;pointer-events:none;font-family:'Cormorant Garamond',serif;}
+.p-community{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:8px;}
+.p-community-cards{display:flex;gap:5px;}
+.p-pot{font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);background:rgba(0,0,0,.6);padding:4px 14px;border-radius:20px;border:1px solid rgba(201,168,76,.2);}
+.p-seat{position:absolute;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .3s;}
+.p-seat-0{bottom:-82px;left:50%;transform:translateX(-50%);}
+.p-seat-1{bottom:-62px;left:8%;}
+.p-seat-2{top:50%;left:-108px;transform:translateY(-50%);}
+.p-seat-3{top:-82px;left:50%;transform:translateX(-50%);}
+.p-seat-4{top:50%;right:-108px;transform:translateY(-50%);}
+.p-seat-5{bottom:-62px;right:8%;}
+.p-player{background:rgba(0,0,0,.8);border:2px solid rgba(255,255,255,.07);border-radius:6px;padding:7px 12px;min-width:115px;text-align:center;transition:all .3s;position:relative;}
+.p-player.active{border-color:var(--gold);box-shadow:0 0 22px rgba(201,168,76,.4);}
+.p-player.folded{opacity:.3;}
+.p-player.winner{border-color:#4caf50;box-shadow:0 0 22px rgba(76,175,80,.5);}
+.p-player.me{border-color:rgba(120,180,255,.35);}
+.p-avatar{width:32px;height:32px;border-radius:50%;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.25);margin:0 auto 4px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.p-avatar img{width:100%;height:100%;object-fit:cover;}
+.p-name{font-size:10px;font-weight:600;color:var(--cream);white-space:nowrap;}
+.p-tokens{font-family:'DM Mono',monospace;font-size:10px;color:var(--gold);}
+.p-bet{font-size:9px;color:rgba(240,232,208,.45);}
+.p-d-chip{position:absolute;top:-5px;right:-5px;background:var(--gold);color:#080608;font-size:7px;font-weight:900;border-radius:50%;width:14px;height:14px;display:flex;align-items:center;justify-content:center;}
+.p-cards-row{display:flex;gap:3px;}
+.p-hand-name{font-size:8px;color:#4caf50;margin-top:1px;}
+.p-status-tag{font-size:8px;padding:1px 5px;border-radius:6px;background:rgba(255,100,100,.2);color:#ff8888;}
+.p-status-tag.allin{background:rgba(255,165,0,.2);color:orange;}
+.p-action-bar{background:rgba(0,0,0,.75);border-top:1px solid rgba(201,168,76,.1);padding:14px 24px;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;}
+.p-act-btn{padding:10px 20px;border-radius:2px;cursor:pointer;font-family:'Josefin Sans',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;transition:all .2s;border:none;}
+.p-fold{background:rgba(180,50,50,.25);color:#ff8888;border:1px solid rgba(180,50,50,.35);}
+.p-fold:hover{background:rgba(180,50,50,.5);}
+.p-check{background:rgba(50,150,50,.25);color:#88ff88;border:1px solid rgba(50,150,50,.35);}
+.p-check:hover{background:rgba(50,150,50,.5);}
+.p-call{background:rgba(50,100,200,.25);color:#88aaff;border:1px solid rgba(50,100,200,.35);}
+.p-call:hover{background:rgba(50,100,200,.5);}
+.p-raise{background:rgba(201,168,76,.2);color:var(--gold);border:1px solid rgba(201,168,76,.35);}
+.p-raise:hover{background:rgba(201,168,76,.4);}
+.p-allin{background:rgba(200,50,200,.2);color:#ff88ff;border:1px solid rgba(200,50,200,.35);}
+.p-allin:hover{background:rgba(200,50,200,.4);}
+.p-raise-inp{width:80px;padding:9px 8px;background:rgba(0,0,0,.4);border:1px solid rgba(201,168,76,.25);border-radius:2px;color:var(--cream);font-family:'DM Mono',monospace;font-size:12px;text-align:center;outline:none;}
+
+/* CHAT */
+.poker-bottom{display:flex;flex-direction:column;}
+.chat-panel{background:rgba(0,0,0,.6);border-top:1px solid rgba(201,168,76,.08);height:180px;display:flex;flex-direction:column;}
+.chat-msgs{flex:1;overflow-y:auto;padding:10px 16px;display:flex;flex-direction:column;gap:5px;}
+.chat-msg{font-size:12px;line-height:1.4;}
+.chat-msg .chat-name{color:var(--gold);font-weight:600;margin-right:6px;}
+.chat-msg .chat-name .chat-lv{font-size:11px;margin-right:3px;}
+.chat-msg .chat-text{color:rgba(240,232,208,.7);}
+.chat-msg.system{color:rgba(201,168,76,.4);font-style:italic;font-size:11px;}
+.chat-input-row{display:flex;gap:8px;padding:8px 12px;border-top:1px solid rgba(201,168,76,.07);}
+.chat-inp{flex:1;background:rgba(255,255,255,.03);border:1px solid rgba(201,168,76,.12);border-radius:1px;padding:8px 12px;color:var(--cream);font-size:12px;outline:none;font-family:'Josefin Sans',sans-serif;}
+.chat-inp:focus{border-color:rgba(201,168,76,.3);}
+.chat-send{padding:8px 16px;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.25);color:var(--gold);border-radius:1px;cursor:pointer;font-size:11px;letter-spacing:1px;transition:all .15s;}
+.chat-send:hover{background:rgba(201,168,76,.3);}
+.emoji-btns{display:flex;gap:4px;padding:0 12px 8px;}
+.emoji-btn{background:none;border:none;font-size:20px;cursor:pointer;opacity:.5;transition:opacity .15s;padding:2px;}
+.emoji-btn:hover{opacity:1;}
+
+/* POKER LOBBY */
+.poker-lobby{padding:32px 40px;max-width:960px;margin:0 auto;width:100%;}
+.p-lobby-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+.p-lobby-card{background:rgba(10,8,15,.8);border:1px solid rgba(201,168,76,.1);border-radius:2px;padding:26px;}
+.p-lobby-card h3{font-size:10px;letter-spacing:3px;color:rgba(240,232,208,.4);margin-bottom:18px;text-transform:uppercase;}
+.rooms-list{display:flex;flex-direction:column;gap:9px;min-height:70px;}
+.room-row{background:rgba(0,0,0,.3);border:1px solid rgba(201,168,76,.07);border-radius:2px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all .2s;}
+.room-row:hover{border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.04);}
+.room-info strong{color:var(--gold);font-size:13px;display:block;}
+.room-info span{color:rgba(240,232,208,.35);font-size:11px;}
+.btn-join-sm{padding:5px 12px;background:transparent;border:1px solid rgba(201,168,76,.25);color:var(--gold);border-radius:1px;cursor:pointer;font-size:11px;letter-spacing:1px;transition:all .15s;}
+.btn-join-sm:hover{background:rgba(201,168,76,.1);}
+.lobby-select{width:100%;padding:11px 13px;background:rgba(0,0,0,.4);border:1px solid rgba(201,168,76,.18);border-radius:1px;color:var(--cream);font-size:14px;outline:none;margin-bottom:13px;appearance:none;}
+.lobby-input{width:100%;padding:11px 13px;background:rgba(0,0,0,.4);border:1px solid rgba(201,168,76,.18);border-radius:1px;color:var(--cream);font-size:14px;outline:none;margin-bottom:9px;text-transform:uppercase;letter-spacing:2px;}
+.lobby-input:focus,.lobby-select:focus{border-color:rgba(201,168,76,.45);}
+.checkbox-row{display:flex;align-items:center;gap:9px;margin-bottom:14px;cursor:pointer;}
+.checkbox-row input{accent-color:var(--gold);width:15px;height:15px;}
+.checkbox-row span{font-size:13px;color:rgba(240,232,208,.55);}
+.empty-msg{color:rgba(240,232,208,.2);font-size:12px;text-align:center;padding:20px 0;}
+
+/* WAITING ROOM */
+.waiting-room{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:18px;padding:40px;}
+.w-code{font-family:'DM Mono',monospace;font-size:34px;color:var(--gold);letter-spacing:10px;background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.2);padding:14px 28px;border-radius:2px;}
+.w-players{display:flex;flex-direction:column;gap:7px;width:300px;}
+.w-player{background:rgba(10,8,15,.8);border:1px solid rgba(201,168,76,.08);border-radius:2px;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;}
+.w-tag{font-size:9px;color:var(--gold);background:rgba(201,168,76,.1);padding:2px 7px;border-radius:7px;letter-spacing:1px;}
+
+/* LEADERBOARD */
+.leaderboard{padding:44px 40px;max-width:760px;margin:0 auto;}
+.leaderboard h2{font-family:'Cormorant Garamond',serif;font-size:38px;color:var(--gold);margin-bottom:36px;letter-spacing:3px;text-align:center;}
+.lb-row{display:flex;align-items:center;gap:14px;background:rgba(10,8,15,.8);border:1px solid rgba(201,168,76,.07);border-radius:2px;padding:14px 22px;margin-bottom:7px;transition:border-color .2s;}
+.lb-row:hover{border-color:rgba(201,168,76,.2);}
+.lb-row.top{border-color:rgba(201,168,76,.25);background:rgba(201,168,76,.03);}
+.lb-rank{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:rgba(240,232,208,.18);min-width:32px;text-align:center;}
+.lb-rank.gold{color:var(--gold);}
+.lb-rank.silver{color:#aaa;}
+.lb-rank.bronze{color:#c87941;}
+.lb-avatar{width:38px;height:38px;border-radius:50%;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:17px;}
+.lb-avatar img{width:100%;height:100%;object-fit:cover;}
+.lb-name{flex:1;font-size:14px;font-weight:600;}
+.lb-level{font-size:14px;}
+.lb-tokens{font-family:'DM Mono',monospace;font-size:13px;color:var(--gold);}
+
+/* ACTION TOAST */
+.a-toast{position:fixed;top:82px;left:50%;transform:translateX(-50%);background:rgba(4,3,10,.97);border:1px solid rgba(201,168,76,.4);border-radius:2px;padding:18px 34px;text-align:center;z-index:999;animation:toastIn .3s ease;min-width:280px;box-shadow:0 8px 40px rgba(0,0,0,.8);}
+.a-toast h3{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold);}
+.a-toast p{font-size:12px;color:rgba(240,232,208,.55);margin-top:4px;letter-spacing:1px;}
+
+/* AVATAR MODAL */
+.upload-area{border:2px dashed rgba(201,168,76,.2);border-radius:4px;padding:28px;text-align:center;cursor:pointer;transition:border-color .2s;margin-bottom:14px;}
+.upload-area:hover{border-color:rgba(201,168,76,.45);}
+.upload-area p{color:rgba(240,232,208,.35);font-size:12px;letter-spacing:1px;}
+.err{color:#e07070;font-size:12px;margin-top:8px;text-align:center;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef,useCallback,useMemo}=React;
+const socket=io();
+const fmt=n=>Number(n||0).toLocaleString();
+
+// ── Sound engine (Web Audio API) ──────────────────────────
+const AudioCtx=window.AudioContext||window.webkitAudioContext;
+let ctx=null;
+function getCtx(){if(!ctx)ctx=new AudioCtx();return ctx;}
+function playTone(freq,dur=0.1,vol=0.15,type='sine'){
+  try{const c=getCtx();const o=c.createOscillator();const g=c.createGain();
+  o.connect(g);g.connect(c.destination);o.type=type;o.frequency.value=freq;
+  g.gain.setValueAtTime(vol,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur);
+  o.start();o.stop(c.currentTime+dur);}catch(e){}
+}
+const sounds={
+  card:()=>{playTone(800,0.05,0.08,'square');setTimeout(()=>playTone(600,0.05,0.06,'square'),50);},
+  chips:()=>{[0,30,60].forEach(d=>setTimeout(()=>playTone(400+Math.random()*200,0.08,0.07,'triangle'),d));},
+  win:()=>{[523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,0.15,0.12,'sine'),i*120));},
+  lose:()=>{playTone(200,0.4,0.1,'sawtooth');},
+  spin:()=>{[1,2,3].forEach(i=>setTimeout(()=>playTone(300*i,0.05,0.06,'triangle'),i*40));},
+  click:()=>playTone(900,0.04,0.06,'sine'),
+  bonus:()=>{[400,500,600,800,1000].forEach((f,i)=>setTimeout(()=>playTone(f,0.12,0.1,'sine'),i*80));},
+  levelup:()=>{[523,659,784,880,1047].forEach((f,i)=>setTimeout(()=>playTone(f,0.2,0.15,'sine'),i*100));},
+  chat:()=>playTone(1200,0.06,0.05,'sine'),
+};
+
+// ── Card component ────────────────────────────────────────
+function Card({card,sm,hidden}){
+  if(hidden||!card)return <div className={`card hidden${sm?' sm':''}`}/>;
+  return(<div className={`card${card.red?' red':' black'}${sm?' sm':''}`}>
+    <span className="card-r">{card.rank}</span>
+    <span className="card-s">{card.suit}</span>
+  </div>);
+}
+
+// ── Level badge ───────────────────────────────────────────
+function LvBadge({xp,level,levelInfo,nextLevel}){
+  const pct=nextLevel?Math.min(100,Math.round(((xp||0)-(levelInfo?.xpNeeded||0))/((nextLevel?.xpNeeded||1)-(levelInfo?.xpNeeded||0))*100)):100;
+  return(
+    <div className="lvl-badge">
+      <span className="emoji">{levelInfo?.emoji||'🥉'}</span>
+      <span style={{fontSize:11,color:'rgba(240,232,208,.55)',letterSpacing:'1px'}}>{levelInfo?.name||'Bronze'}</span>
+      <div className="xp-bar"><div className="xp-fill" style={{width:pct+'%'}}/></div>
+    </div>
+  );
+}
+
+// ── Emoji rain ────────────────────────────────────────────
+function EmojiRain({emojis}){
+  return emojis.map(e=>(
+    <div key={e.id} className="emoji-rain" style={{left:e.x+'vw',top:e.y+'vh',position:'fixed',pointerEvents:'none',zIndex:400,fontSize:36}}>
+      {e.emoji}
+    </div>
+  ));
+}
+
+// ── AUTH ──────────────────────────────────────────────────
+function Auth({onLogin}){
+  const [name,setName]=useState('');
+  const [loading,setLoading]=useState(false);
+  useEffect(()=>{const n=localStorage.getItem('hrc_name');if(n)setName(n);},[]);
+  const submit=()=>{
+    if(!name.trim())return;setLoading(true);
+    sounds.click();
+    socket.emit('register',{name:name.trim(),uid:localStorage.getItem('hrc_uid')||null});
+    socket.once('registered',data=>{localStorage.setItem('hrc_uid',data.uid);localStorage.setItem('hrc_name',data.name);onLogin(data);setLoading(false);});
+  };
+  return(<div className="auth-wrap">
+    <div className="auth-card">
+      <div className="auth-logo">
+        <h1>HATHOR</h1>
+        <div className="sub">Royal Casino · Est. 2026</div>
+      </div>
+      <div className="field">
+        <label>Your Name</label>
+        <input value={name} onChange={e=>setName(e.target.value)} placeholder="Enter your name" onKeyDown={e=>e.key==='Enter'&&submit()}/>
+      </div>
+      <button className="btn-gold" onClick={submit} disabled={loading}>{loading?'Entering...':'Enter Casino'}</button>
+      <p style={{textAlign:'center',marginTop:14,fontSize:10,color:'rgba(240,232,208,.2)',letterSpacing:'2px'}}>NEW MEMBERS RECEIVE 10,000 TOKENS</p>
+    </div>
+  </div>);
+}
+
+// ── Daily Bonus Modal ─────────────────────────────────────
+function DailyBonus({onClose,onClaim}){
+  const [claimed,setClaimed]=useState(false);
+  const [amount,setAmount]=useState(0);
+  const claim=()=>{
+    socket.emit('claimDailyBonus');
+    socket.once('dailyBonusResult',res=>{
+      if(res.alreadyClaimed){onClose();return;}
+      setAmount(res.amount);setClaimed(true);sounds.bonus();
+    });
+  };
+  return(<div className="modal-bg">
+    <div className="modal">
+      {!claimed?(<>
+        <h3>🎁 Daily Bonus</h3>
+        <p>Welcome back! Claim your daily reward and keep playing. Bonuses grow with daily streaks!</p>
+        <div style={{textAlign:'center',fontSize:36,marginBottom:16}}>🎰</div>
+        <div className="modal-btns">
+          <button className="btn-sm-cancel" onClick={onClose}>Later</button>
+          <button className="btn-gold" style={{flex:1}} onClick={claim}>Claim Bonus</button>
+        </div>
+      </>):(<>
+        <h3>🎉 Bonus Received!</h3>
+        <div className="bonus-amount">+{fmt(amount)}</div>
+        <p style={{textAlign:'center'}}>Tokens added to your account!</p>
+        <button className="btn-gold" style={{marginTop:16}} onClick={()=>{onClaim(amount);onClose();}}>Continue</button>
+      </>)}
+    </div>
+  </div>);
+}
+
+// ── Avatar Modal ──────────────────────────────────────────
+function AvatarModal({user,onClose,onUpdate}){
+  const [preview,setPreview]=useState(user.avatar||null);
+  const [file,setFile]=useState(null);
+  const fileRef=useRef();
+  const onFile=e=>{const f=e.target.files[0];if(!f)return;setFile(f);const r=new FileReader();r.onload=ev=>setPreview(ev.target.result);r.readAsDataURL(f);};
+  const save=async()=>{
+    if(!file){onClose();return;}
+    const fd=new FormData();fd.append('avatar',file);
+    const res=await fetch('/upload-avatar',{method:'POST',headers:{'x-user-id':user.uid},body:fd});
+    const data=await res.json();
+    if(data.url){socket.emit('updateAvatar',{avatarUrl:data.url});onUpdate(data.url);}
+    onClose();
+  };
+  return(<div className="modal-bg" onClick={onClose}>
+    <div className="modal" onClick={e=>e.stopPropagation()}>
+      <h3>Your Avatar</h3>
+      <div className="upload-area" onClick={()=>fileRef.current.click()}>
+        {preview?<img src={preview} style={{width:90,height:90,borderRadius:'50%',objectFit:'cover'}} alt=""/>
+          :<p>Click to upload photo<br/><span style={{fontSize:11}}>JPG, PNG — max 2MB</span></p>}
+        <input ref={fileRef} type="file" accept="image/*" style={{display:'none'}} onChange={onFile}/>
+      </div>
+      <div className="modal-btns">
+        <button className="btn-sm-cancel" onClick={onClose}>Cancel</button>
+        <button className="btn-gold" style={{flex:1,padding:'12px'}} onClick={save}>Save</button>
+      </div>
+    </div>
+  </div>);
+}
+
+// ── SLOTS ─────────────────────────────────────────────────
+const SYM=['🍒','🍋','🔔','⭐','💎','🃏','7️⃣','🎰'];
+const PAY={'💎💎💎':50,'7️⃣7️⃣7️⃣':40,'🎰🎰🎰':35,'⭐⭐⭐':25,'🔔🔔🔔':20,'🍒🍒🍒':15,'🍋🍋🍋':10,'🃏🃏🃏':8};
+function getMultiplier(r){const k=r.join('');if(PAY[k])return PAY[k];if(r[0]===r[1]||r[1]===r[2])return 2;if(r.includes('🍒'))return 1.5;return 0;}
+function Slots({user,setUser}){
+  const [reels,setReels]=useState(['🎰','🎰','🎰']);
+  const [spinning,setSpinning]=useState([false,false,false]);
+  const [bet,setBet]=useState(50);
+  const [result,setResult]=useState(null);
+  const [anim,setAnim]=useState(['🎰','🎰','🎰']);
+  const spin=()=>{
+    if(user.tokens<bet)return;
+    setUser(u=>({...u,tokens:u.tokens-bet}));setResult(null);setSpinning([true,true,true]);sounds.spin();
+    const final=[0,1,2].map(()=>SYM[Math.floor(Math.random()*SYM.length)]);
+    const iv=setInterval(()=>setAnim([0,1,2].map(()=>SYM[Math.floor(Math.random()*SYM.length)])),80);
+    setTimeout(()=>{
+      clearInterval(iv);setAnim(final);setSpinning([false,false,false]);setReels(final);
+      const m=getMultiplier(final);const won=Math.floor(bet*m);
+      if(won>0){setUser(u=>({...u,tokens:u.tokens+won}));setResult({msg:m>=20?`🎉 JACKPOT! +${fmt(won)}`:`✨ WIN! +${fmt(won)}`,win:true});sounds.win();socket.emit('addXP',{xp:20});}
+      else{setResult({msg:'No win this time...',win:false});sounds.lose();}
+      socket.emit('saveTokens',{tokens:user.tokens-bet+(won||0)});
+    },2000);
+  };
+  return(<div className="slots-wrap">
+    <div className="slots-machine">
+      <div className="slots-display">
+        {anim.map((s,i)=><div key={i} className={`reel${spinning[i]?' spinning':reels[i]===anim[i]&&result?.win?' win':''}`}>{s}</div>)}
+      </div>
+      <div className="slots-bet">
+        <span style={{fontSize:10,letterSpacing:'2px',color:'rgba(240,232,208,.4)'}}>BET</span>
+        <div className="bet-ctrl">
+          <button className="bet-btn" onClick={()=>{sounds.click();setBet(Math.max(10,bet-10));}}>−</button>
+          <div className="bet-val">🪙{fmt(bet)}</div>
+          <button className="bet-btn" onClick={()=>{sounds.click();setBet(Math.min(user.tokens,bet+10));}}>+</button>
+        </div>
+        <div style={{fontSize:11,color:'rgba(240,232,208,.4)',letterSpacing:'1px'}}>BAL:{fmt(user.tokens)}</div>
+      </div>
+      <div className={`slots-result${result?.win?' win':result?' lose':''}`}>{result?.msg||''}</div>
+      <button className="slots-spin" onClick={spin} disabled={spinning.some(Boolean)||user.tokens<bet}>
+        {spinning.some(Boolean)?'SPINNING...':'SPIN'}
+      </button>
+      <div className="paytable">
+        {Object.entries(PAY).map(([k,v])=><div className="pay-row" key={k}><span>{k}</span><span>×{v}</span></div>)}
+      </div>
+    </div>
+  </div>);
+}
+
+// ── ROULETTE ──────────────────────────────────────────────
+const RED_N=new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
+function Roulette({user,setUser}){
+  const [sel,setSel]=useState(null);
+  const [betType,setBetType]=useState(null);
+  const [bet,setBet]=useState(100);
+  const [spinning,setSpinning]=useState(false);
+  const [deg,setDeg]=useState(0);
+  const [result,setResult]=useState(null);
+  const placeBet=(type,value)=>{sounds.click();setSel(value);setBetType({type,value});};
+  const spinW=()=>{
+    if(!betType||user.tokens<bet)return;
+    setUser(u=>({...u,tokens:u.tokens-bet}));setSpinning(true);setResult(null);sounds.spin();
+    const num=Math.floor(Math.random()*37);
+    setDeg(d=>d+1800+Math.random()*360);
+    setTimeout(()=>{
+      setSpinning(false);
+      const isRed=RED_N.has(num),isEven=num>0&&num%2===0;
+      let payout=0;const{type}=betType;
+      if(type==='number'&&betType.value===num)payout=bet*35;
+      else if(type==='red'&&isRed)payout=bet*2;
+      else if(type==='black'&&!isRed&&num>0)payout=bet*2;
+      else if(type==='even'&&isEven)payout=bet*2;
+      else if(type==='odd'&&num>0&&num%2!==0)payout=bet*2;
+      else if(type==='low'&&num>=1&&num<=18)payout=bet*2;
+      else if(type==='high'&&num>=19)payout=bet*2;
+      if(payout>0){setUser(u=>({...u,tokens:u.tokens+payout}));setResult({msg:`${num}${isRed?' 🔴':num===0?' 🟢':' ⚫'} WIN +${fmt(payout)}`,win:true});sounds.win();socket.emit('addXP',{xp:15});}
+      else{setResult({msg:`${num}${isRed?' 🔴':num===0?' 🟢':' ⚫'} — No win`,win:false});sounds.lose();}
+      socket.emit('saveTokens',{tokens:user.tokens-bet+payout});
+    },4200);
+  };
+  return(<div className="roulette-wrap">
+    <h2>🎡 Roulette</h2>
+    <div className="roulette-layout">
+      <div>
+        <div className="wheel-container">
+          <div className="wheel-outer" style={{transform:`rotate(${deg}deg)`}}/>
+          <div className="wheel-pointer"/>
+          <div className="wheel-center">HATHOR</div>
+        </div>
+        <div style={{textAlign:'center',marginTop:16,fontFamily:"'Cormorant Garamond',serif",fontSize:17,color:result?.win?'#4caf50':result?'#e07070':'rgba(240,232,208,.4)'}}>
+          {result?.msg||(spinning?'Spinning...':'Place your bet')}
+        </div>
+      </div>
+      <div>
+        <div className="roulette-board">
+          <div style={{marginBottom:3}}>
+            <div className={`r-cell${sel===0?' selected':''}`} style={{background:'rgba(0,120,42,.6)',textAlign:'center'}} onClick={()=>placeBet('number',0)}>0</div>
+          </div>
+          <div className="r-grid">
+            {Array.from({length:36},(_,i)=>i+1).map(n=>(
+              <div key={n} className={`r-cell${RED_N.has(n)?' red':' black'}${sel===n?' selected':''}`} onClick={()=>placeBet('number',n)}>{n}</div>
+            ))}
+          </div>
+          <div className="r-outside">
+            {[['red','🔴 Red'],['black','⚫ Black'],['even','Even'],['odd','Odd'],['low','1–18'],['high','19–36']].map(([t,l])=>(
+              <div key={t} className={`r-out-cell${betType?.type===t?' selected':''}`} onClick={()=>placeBet(t,null)}>{l}</div>
+            ))}
+          </div>
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:8,marginTop:8}}>
+          <button className="bet-btn" onClick={()=>setBet(Math.max(10,bet-50))}>−</button>
+          <div className="bet-val" style={{fontSize:14}}>🪙{fmt(bet)}</div>
+          <button className="bet-btn" onClick={()=>setBet(Math.min(user.tokens,bet+50))}>+</button>
+        </div>
+        <div className="r-controls" style={{marginTop:8}}>
+          <button className="btn-roulette spin" onClick={spinW} disabled={spinning||!betType}>{spinning?'Spinning...':'SPIN'}</button>
+          <button className="btn-roulette" onClick={()=>{setSel(null);setBetType(null);}}>Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>);
+}
+
+// ── BLACKJACK ─────────────────────────────────────────────
+function mkDeck(){return shuffle([...Array(4)].flatMap(()=>['2','3','4','5','6','7','8','9','10','J','Q','K','A'].map(r=>({rank:r,suit:['♠','♥','♦','♣'][Math.floor(Math.random()*4)],red:Math.random()>.5,value:['J','Q','K'].includes(r)?10:r==='A'?11:parseInt(r)}))));}
+function shuffle(a){const d=[...a];for(let i=d.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[d[i],d[j]]=[d[j],d[i]];}return d;}
+function bjScore(h){let s=h.reduce((a,c)=>a+c.value,0);let ac=h.filter(c=>c.rank==='A').length;while(s>21&&ac>0){s-=10;ac--;}return s;}
+function Blackjack({user,setUser}){
+  const [deck,setDeck]=useState([]);const [player,setPlayer]=useState([]);const [dealer,setDealer]=useState([]);
+  const [phase,setPhase]=useState('betting');const [bet,setBet]=useState(100);const [status,setStatus]=useState('');const [sType,setSType]=useState('');
+  const deal=()=>{
+    if(user.tokens<bet)return;
+    sounds.card();
+    const d=mkDeck();const p=[d.pop(),d.pop()];const dl=[d.pop(),d.pop()];
+    setDeck(d);setPlayer(p);setDealer(dl);setPhase('playing');setStatus('');
+    setUser(u=>({...u,tokens:u.tokens-bet}));
+    if(bjScore(p)===21)endGame(p,dl,d,true);
+  };
+  const hit=()=>{sounds.card();const d=[...deck];const p=[...player,d.pop()];setDeck(d);setPlayer(p);if(bjScore(p)>21)endGame(p,dealer,d,false,true);};
+  const stand=()=>revealDealer(player,[...dealer],[...deck]);
+  const double=()=>{
+    if(user.tokens<bet){stand();return;}
+    sounds.card();setUser(u=>({...u,tokens:u.tokens-bet}));
+    const d=[...deck];const p=[...player,d.pop()];setDeck(d);setPlayer(p);
+    if(bjScore(p)>21)endGame(p,dealer,d,false,true,true);else revealDealer(p,[...dealer],d,true);
+  };
+  const revealDealer=(p,dl,d,dbl=false)=>{sounds.card();while(bjScore(dl)<17)dl.push(d.pop());setDealer(dl);setDeck(d);endGame(p,dl,d,false,false,dbl);};
+  const endGame=(p,dl,d,bj=false,bust=false,dbl=false)=>{
+    setPhase('done');const ps=bjScore(p),ds=bjScore(dl);const m=dbl?2:1;
+    let msg='',type='',win=0;
+    if(bust){msg='BUST!';type='lose';sounds.lose();}
+    else if(bj){msg='BLACKJACK! 🎉';type='win';win=Math.floor(bet*m*2.5);sounds.win();}
+    else if(ds>21){msg='Dealer bust! You win!';type='win';win=bet*m*2;sounds.win();}
+    else if(ps>ds){msg='You win! 🎉';type='win';win=bet*m*2;sounds.win();}
+    else if(ps===ds){msg='Push';type='push';win=bet*m;}
+    else{msg='Dealer wins.';type='lose';sounds.lose();}
+    if(win>0){setUser(u=>({...u,tokens:u.tokens+win}));socket.emit('addXP',{xp:type==='win'?25:5});}
+    setStatus(msg);setSType(type);
+    socket.emit('saveTokens',{tokens:user.tokens-bet*m+win});
+  };
+  const ps=bjScore(player),ds=bjScore(dealer);
+  return(<div className="bj-wrap">
+    <div className="bj-table">
+      <div style={{textAlign:'center'}}>
+        <div className="bj-hand-label">Dealer</div>
+        <div className="bj-cards" style={{marginTop:7}}>{dealer.map((c,i)=><Card key={i} card={c} hidden={phase==='playing'&&i===1}/>)}</div>
+        {phase!=='betting'&&<div className="bj-score">{phase==='playing'?dealer[0]?.value:ds}</div>}
+      </div>
+      <div className={`bj-status${sType?' '+sType:''}`}>{status}</div>
+      <div style={{textAlign:'center'}}>
+        <div className="bj-hand-label">Your Hand{ps>0?` — ${ps}`:''}</div>
+        <div className="bj-cards" style={{marginTop:7}}>{player.map((c,i)=><Card key={i} card={c}/>)}</div>
+      </div>
+      <div className="bj-controls">
+        {phase==='betting'?(<>
+          <div style={{display:'flex',alignItems:'center',gap:9}}>
+            <button className="bet-btn" onClick={()=>setBet(Math.max(10,bet-50))}>−</button>
+            <div className="bet-val">🪙{fmt(bet)}</div>
+            <button className="bet-btn" onClick={()=>setBet(Math.min(user.tokens,bet+50))}>+</button>
+          </div>
+          <button className="bj-btn bj-deal" onClick={deal}>DEAL</button>
+        </>):(phase==='playing'?(<>
+          <button className="bj-btn bj-hit" onClick={hit}>HIT</button>
+          <button className="bj-btn bj-stand" onClick={stand}>STAND</button>
+          {player.length===2&&<button className="bj-btn bj-double" onClick={double}>DOUBLE</button>}
+        </>):(
+          <button className="bj-btn bj-deal" onClick={()=>{setPhase('betting');setPlayer([]);setDealer([]);setStatus('');}}>NEW HAND</button>
+        ))}
+      </div>
+    </div>
+    <div style={{marginTop:14,color:'rgba(240,232,208,.25)',fontSize:11,letterSpacing:'2px'}}>BALANCE: 🪙 {fmt(user.tokens)}</div>
+  </div>);
+}
+
+// ── CHAT PANEL ────────────────────────────────────────────
+const EMOJI_QUICK=['👏','🔥','😤','😂','😱','🤑','💪','❤️'];
+function ChatPanel({roomId,user}){
+  const [msg,setMsg]=useState('');
+  const [msgs,setMsgs]=useState([]);
+  const endRef=useRef();
+  useEffect(()=>{
+    socket.on('chatMsg',m=>{setMsgs(p=>[...p,m].slice(-80));sounds.chat();});
+    socket.on('chatHistory',h=>setMsgs(h||[]));
+    return()=>{socket.off('chatMsg');socket.off('chatHistory');};
+  },[]);
+  useEffect(()=>{endRef.current?.scrollIntoView({behavior:'smooth'});},[msgs]);
+  const send=()=>{if(!msg.trim())return;socket.emit('chatMsg',{msg,roomId});setMsg('');sounds.click();};
+  const sendEmoji=e=>{socket.emit('emoji',{emoji:e,roomId});sounds.click();};
+  return(<div className="chat-panel">
+    <div className="chat-msgs">
+      {msgs.map((m,i)=>(
+        m.system
+          ?<div key={i} className="chat-msg system">{m.msg}</div>
+          :<div key={i} className="chat-msg">
+            <span className="chat-name"><span className="chat-lv">{m.levelEmoji}</span>{m.name}:</span>
+            <span className="chat-text">{m.msg}</span>
+          </div>
+      ))}
+      <div ref={endRef}/>
+    </div>
+    <div className="emoji-btns">
+      {EMOJI_QUICK.map(e=><button key={e} className="emoji-btn" onClick={()=>sendEmoji(e)}>{e}</button>)}
+    </div>
+    <div className="chat-input-row">
+      <input className="chat-inp" value={msg} onChange={e=>setMsg(e.target.value)} placeholder="Say something..." onKeyDown={e=>e.key==='Enter'&&send()}/>
+      <button className="chat-send" onClick={send}>Send</button>
+    </div>
+  </div>);
+}
+
+// ── POKER TABLE ───────────────────────────────────────────
+const SEAT_CLS=['p-seat-0','p-seat-1','p-seat-2','p-seat-3','p-seat-4','p-seat-5'];
+function PokerTable({state,user,roomId,onLeave}){
+  const [raise,setRaise]=useState('');
+  const [toast,setToast]=useState(null);
+  const [floatingEmojis,setFloatingEmojis]=useState([]);
+  const myIdx=state.players.findIndex(p=>p.id===user.uid);
+  const me=state.players[myIdx];
+  const myTurn=state.actionIndex===myIdx&&!me?.folded&&!me?.allIn;
+  const toCall=me?Math.max(0,state.currentBet-me.bet):0;
+  const canCheck=me&&me.bet>=state.currentBet;
+
+  useEffect(()=>{
+    socket.on('actionResult',res=>{
+      if(res.event==='winner'||res.event==='showdown'){
+        setToast({title:res.event==='winner'?`🏆 ${res.winner} wins!`:'🃏 Showdown!',msg:res.hand||'Takes the pot'});
+        if(res.winner===user.name)sounds.win(); else sounds.lose();
+        setTimeout(()=>setToast(null),4500);
+      }
+      if(res.levelUp) socket.emit('levelUp',res.newLevel);
+    });
+    socket.on('emojiReaction',({uid,name,emoji})=>{
+      const id=Date.now()+Math.random();
+      const x=10+Math.random()*80,y=30+Math.random()*40;
+      setFloatingEmojis(p=>[...p,{id,emoji,x,y}]);
+      setTimeout(()=>setFloatingEmojis(p=>p.filter(e=>e.id!==id)),2200);
+    });
+    return()=>{socket.off('actionResult');socket.off('emojiReaction');};
+  },[]);
+
+  const act=type=>{sounds.chips();socket.emit('action',{type,amount:type==='raise'?parseInt(raise)||state.bigBlind:0});setRaise('');};
+  const reordered=[];
+  if(myIdx>=0)for(let i=0;i<state.players.length;i++)reordered.push(state.players[(myIdx+i)%state.players.length]);
+  else reordered.push(...state.players);
+
+  return(<div className="poker-screen">
+    <div className="poker-header">
+      <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:20,color:'var(--gold)',letterSpacing:3}}>HATHOR POKER</div>
+      <div className="poker-phase">{state.phase?.toUpperCase()}</div>
+      <div style={{display:'flex',alignItems:'center',gap:10}}>
+        <span style={{fontSize:11,color:'rgba(240,232,208,.35)',letterSpacing:'1px'}}>Room: <strong style={{color:'var(--gold)',letterSpacing:2}}>{roomId}</strong></span>
+        <div className="token-display" style={{padding:'5px 13px',fontSize:12}}>🪙 {fmt(me?.tokens||0)}</div>
+        <button className="nav-btn" onClick={onLeave}>Leave</button>
+      </div>
+    </div>
+    <div className="p-table-area">
+      <div className="p-table">
+        <div className="p-community">
+          <div className="p-community-cards">
+            {[0,1,2,3,4].map(i=><Card key={i} card={state.community?.[i]||null} sm/>)}
+          </div>
+          <div className="p-pot">POT 🪙 {fmt(state.pot)}</div>
+          {state.currentBet>0&&<div style={{fontSize:10,color:'rgba(240,232,208,.35)',letterSpacing:'1px'}}>Bet: {fmt(state.currentBet)}</div>}
+        </div>
+        {reordered.map((p,si)=>{
+          const origIdx=state.players.findIndex(x=>x.id===p.id);
+          const isActive=state.actionIndex===origIdx;
+          return(<div className={`p-seat ${SEAT_CLS[si]}`} key={p.id}>
+            <div className={`p-player${isActive?' active':''}${p.folded?' folded':''}${p.id===user.uid?' me':''}`}>
+              {p.isDealer&&<div className="p-d-chip">D</div>}
+              <div className="p-avatar">{p.avatar?<img src={p.avatar} alt=""/>:(p.isBot?'🤖':'👤')}</div>
+              <div className="p-name">{p.name}{p.id===user.uid?' (you)':''}</div>
+              <div className="p-tokens">🪙{fmt(p.tokens)}</div>
+              {p.bet>0&&<div className="p-bet">Bet:{fmt(p.bet)}</div>}
+              {p.folded&&!p.allIn&&<div className="p-status-tag">FOLD</div>}
+              {p.allIn&&<div className="p-status-tag allin">ALL IN</div>}
+              {p.bestHand&&<div className="p-hand-name">{p.bestHand.name}</div>}
+            </div>
+            <div className="p-cards-row">{p.cards?.map((c,ci)=><Card key={ci} card={c} sm/>)}</div>
+          </div>);
+        })}
+      </div>
+    </div>
+    <div className="poker-bottom">
+      <div className="p-action-bar">
+        {myTurn?(<>
+          <span style={{fontSize:11,color:'rgba(240,232,208,.35)',letterSpacing:'1px',marginRight:4}}>YOUR TURN</span>
+          <button className="p-act-btn p-fold" onClick={()=>act('fold')}>Fold</button>
+          {canCheck?<button className="p-act-btn p-check" onClick={()=>act('check')}>Check</button>
+            :<button className="p-act-btn p-call" onClick={()=>act('call')}>Call {fmt(toCall)}</button>}
+          <input className="p-raise-inp" type="number" min={state.bigBlind} placeholder={`+${state.bigBlind}`} value={raise} onChange={e=>setRaise(e.target.value)}/>
+          <button className="p-act-btn p-raise" onClick={()=>act('raise')} disabled={!raise}>Raise</button>
+          <button className="p-act-btn p-allin" onClick={()=>act('allin')}>All In {fmt(me?.tokens)}</button>
+        </>):(
+          <p style={{color:'rgba(240,232,208,.25)',fontSize:12,letterSpacing:'2px'}}>
+            {state.players[state.actionIndex]?`WAITING FOR ${state.players[state.actionIndex].name.toUpperCase()}...`:'WAITING...'}
+          </p>
+        )}
+      </div>
+      <ChatPanel roomId={roomId} user={user}/>
+    </div>
+    {toast&&<div className="a-toast"><h3>{toast.title}</h3><p>{toast.msg}</p></div>}
+    <EmojiRain emojis={floatingEmojis}/>
+  </div>);
+}
+
+// ── POKER LOBBY ───────────────────────────────────────────
+function PokerLobby({user,onJoinRoom,onBack}){
+  const [rooms,setRooms]=useState([]);
+  const [buyIn,setBuyIn]=useState('500');
+  const [withBots,setWithBots]=useState(false);
+  const [joinCode,setJoinCode]=useState('');
+  const [err,setErr]=useState('');
+  useEffect(()=>{
+    socket.emit('getRooms');
+    socket.on('roomList',setRooms);
+    socket.on('error',setErr);
+    const t=setInterval(()=>socket.emit('getRooms'),3000);
+    return()=>{socket.off('roomList');socket.off('error');clearInterval(t);};
+  },[]);
+  const create=()=>{sounds.click();socket.emit('createRoom',{buyIn:parseInt(buyIn),withBots});socket.once('roomCreated',({roomId})=>onJoinRoom(roomId));};
+  const join=id=>{sounds.click();socket.emit('joinRoom',{roomId:id||joinCode});};
+  return(<div className="poker-lobby">
+    <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:28}}>
+      <button className="nav-btn" onClick={onBack}>← Back</button>
+      <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:34,color:'var(--gold)',letterSpacing:2}}>♠ Texas Hold'em</h2>
+    </div>
+    <div className="p-lobby-grid">
+      <div className="p-lobby-card">
+        <h3>Open Tables</h3>
+        <div className="rooms-list">
+          {rooms.length===0?<div className="empty-msg">No open tables</div>
+            :rooms.map(r=><div className="room-row" key={r.id} onClick={()=>join(r.id)}>
+              <div className="room-info"><strong>Table {r.id}</strong><span>{r.host} · {r.players}p{r.bots>0?`+${r.bots}🤖`:''} · {fmt(r.buyIn)} buy-in</span></div>
+              <button className="btn-join-sm">Join</button>
+            </div>)}
+        </div>
+        <div style={{marginTop:18}}>
+          <div style={{fontSize:10,letterSpacing:'2px',color:'rgba(240,232,208,.35)',marginBottom:9}}>JOIN BY CODE</div>
+          <div style={{display:'flex',gap:7}}>
+            <input className="lobby-input" style={{marginBottom:0}} value={joinCode} onChange={e=>setJoinCode(e.target.value.toUpperCase())} placeholder="ABCDEF" maxLength={6}/>
+            <button className="btn-join-sm" style={{padding:'11px 18px'}} onClick={()=>join()}>Join</button>
+          </div>
+        </div>
+        {err&&<p className="err">{err}</p>}
+      </div>
+      <div className="p-lobby-card">
+        <h3>Create Table</h3>
+        <select className="lobby-select" value={buyIn} onChange={e=>setBuyIn(e.target.value)}>
+          <option value="200">200 tokens — Casual</option>
+          <option value="500">500 tokens — Standard</option>
+          <option value="1000">1,000 tokens — High Stakes</option>
+          <option value="5000">5,000 tokens — VIP</option>
+        </select>
+        <label className="checkbox-row"><input type="checkbox" checked={withBots} onChange={e=>setWithBots(e.target.checked)}/><span>Add AI bots (play solo)</span></label>
+        <p style={{fontSize:11,color:'rgba(240,232,208,.25)',marginBottom:18,lineHeight:1.7}}>
+          Blinds: {Math.max(10,Math.floor(parseInt(buyIn)/20))}/{Math.max(20,Math.floor(parseInt(buyIn)/10))}<br/>Max 6 players · AI: Aggressive, Passive, Bluff styles
+        </p>
+        <button className="btn-gold" onClick={create}>Create Table</button>
+      </div>
+    </div>
+  </div>);
+}
+
+function WaitingRoom({state,user,roomId,onBack}){
+  const isHost=state.players.filter(p=>!p.isBot)[0]?.id===user.uid;
+  return(<div className="waiting-room">
+    <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:30,color:'var(--gold)'}}>Waiting for Players</h2>
+    <div style={{textAlign:'center'}}>
+      <div style={{fontSize:10,letterSpacing:'3px',color:'rgba(240,232,208,.3)',marginBottom:7}}>ROOM CODE</div>
+      <div className="w-code">{roomId}</div>
+    </div>
+    <div className="w-players">
+      {state.players.map((p,i)=><div className="w-player" key={p.id}>
+        <span>{p.name}</span>
+        {p.isBot?<span className="w-tag">BOT</span>:i===0?<span className="w-tag">HOST</span>:null}
+      </div>)}
+    </div>
+    {isHost&&state.players.length>=2
+      ?<button className="btn-gold" style={{width:200}} onClick={()=>socket.emit('startGame')}>Start Game</button>
+      :<p style={{color:'rgba(240,232,208,.25)',fontSize:11,letterSpacing:'2px'}}>{isHost?'NEED 2+ PLAYERS':'WAITING FOR HOST...'}</p>}
+    <button className="nav-btn" onClick={onBack}>← Leave</button>
+  </div>);
+}
+
+// ── LEADERBOARD ───────────────────────────────────────────
+function Leaderboard({user}){
+  const [board,setBoard]=useState([]);
+  useEffect(()=>{fetch('/leaderboard').then(r=>r.json()).then(setBoard).catch(()=>{});},[]);
+  const rc=i=>i===0?'gold':i===1?'silver':i===2?'bronze':'';
+  return(<div className="leaderboard">
+    <h2>🏆 Leaderboard</h2>
+    {board.length===0?<div className="empty-msg">Play games to appear here!</div>
+      :board.map((p,i)=><div className={`lb-row${i<3?' top':''}`} key={i}>
+        <div className={`lb-rank${rc(i)?' '+rc(i):''}`}>{i===0?'🥇':i===1?'🥈':i===2?'🥉':p.rank}</div>
+        <div className="lb-avatar">{p.avatar?<img src={p.avatar} alt=""/>:'👤'}</div>
+        <div className="lb-name">{p.name}{p.name===user.name?<span style={{fontSize:10,color:'var(--gold)',marginLeft:7}}>YOU</span>:null}</div>
+        <div className="lb-level">{p.levelInfo?.emoji}</div>
+        <div className="lb-tokens">🪙{fmt(p.tokens)}</div>
+      </div>)}
+  </div>);
+}
+
+// ── APP ───────────────────────────────────────────────────
+function App(){
+  const [user,setUser]=useState(null);
+  const [page,setPage]=useState('lobby');
+  const [roomId,setRoomId]=useState(null);
+  const [gameState,setGameState]=useState(null);
+  const [showAvatar,setShowAvatar]=useState(false);
+  const [showBonus,setShowBonus]=useState(false);
+  const [levelUpMsg,setLevelUpMsg]=useState(null);
+  const [floatingEmojis,setFloatingEmojis]=useState([]);
+
+  useEffect(()=>{
+    socket.on('gameState',s=>{setGameState(s);if(!roomId)setRoomId(s.roomId);});
+    socket.on('roomCreated',({roomId:id})=>setRoomId(id));
+    socket.on('dailyBonusAvailable',()=>setShowBonus(true));
+    socket.on('levelUp',lv=>{setLevelUpMsg(lv);sounds.levelup();setTimeout(()=>setLevelUpMsg(null),4000);});
+    socket.on('emojiReaction',({emoji})=>{
+      const id=Date.now()+Math.random();
+      const x=5+Math.random()*90,y=10+Math.random()*60;
+      setFloatingEmojis(p=>[...p,{id,emoji,x,y}]);
+      setTimeout(()=>setFloatingEmojis(p=>p.filter(e=>e.id!==id)),2200);
+    });
+    return()=>{socket.off('gameState');socket.off('roomCreated');socket.off('dailyBonusAvailable');socket.off('levelUp');socket.off('emojiReaction');};
+  },[]);
+
+  if(!user) return <Auth onLogin={d=>setUser(d)}/>;
+
+  const lvInfo=user.levelInfo||{name:'Bronze',emoji:'🥉',xpNeeded:0};
+  const nextLv=user.nextLevel||null;
+  const nav=pg=>{sounds.click();setPage(pg);if(pg!=='poker'){setRoomId(null);setGameState(null);}};
+
+  return(<div style={{minHeight:'100vh',display:'flex',flexDirection:'column'}}>
+    <div className="header">
+      <div className="header-logo">🎰 HATHOR</div>
+      <div className="nav-tabs">
+        {[['lobby','Lobby'],['slots','Slots'],['roulette','Roulette'],['blackjack','Blackjack'],['poker','Poker'],['leaderboard','🏆']].map(([pg,lbl])=>(
+          <button key={pg} className={`nav-btn${page===pg?' active':''}`} onClick={()=>nav(pg)}>{lbl}</button>
+        ))}
+      </div>
+      <div className="header-right">
+        <LvBadge xp={user.xp||0} levelInfo={lvInfo} nextLevel={nextLv}/>
+        <div className="token-display">🪙{fmt(user.tokens)}</div>
+        <div className="avatar-btn" onClick={()=>setShowAvatar(true)}>
+          {user.avatar?<img src={user.avatar} alt=""/>:'👤'}
+        </div>
+      </div>
+    </div>
+
+    {page==='lobby'&&<div className="lobby">
+      <div className="lobby-hero">
+        <h2>Welcome to<br/><em>HATHOR Royal</em></h2>
+        <p>Las Vegas · Monte Carlo · All in one place</p>
+      </div>
+      <div className="games-grid">
+        {[
+          {pg:'poker',icon:'♠',title:"Texas Hold'em",desc:'Multiplayer with friends or AI bots. Real-time chat at the table.',badge:'LIVE',bc:'badge-live'},
+          {pg:'slots',icon:'🎰',title:'Slots',desc:'Spin the reels. 8 symbols, big jackpots.',badge:'HOT',bc:'badge-hot'},
+          {pg:'roulette',icon:'🎡',title:'Roulette',desc:'Red, black, or your lucky number.',badge:'LIVE',bc:'badge-live'},
+          {pg:'blackjack',icon:'🃏',title:'Blackjack',desc:'Beat the dealer to 21. Hit, stand, double.',badge:'HOT',bc:'badge-hot'},
+        ].map(g=><div className="game-card" key={g.pg} onClick={()=>nav(g.pg)}>
+          <span className={`game-badge ${g.bc}`}>{g.badge}</span>
+          <div className="game-icon">{g.icon}</div>
+          <h3>{g.title}</h3>
+          <p>{g.desc}</p>
+        </div>)}
+      </div>
+      <div style={{textAlign:'center',color:'rgba(240,232,208,.15)',fontSize:10,letterSpacing:'3px'}}>VIRTUAL TOKENS ONLY · ENTERTAINMENT ONLY · NO REAL MONEY</div>
+    </div>}
+
+    {page==='slots'&&<Slots user={user} setUser={setUser}/>}
+    {page==='roulette'&&<Roulette user={user} setUser={setUser}/>}
+    {page==='blackjack'&&<Blackjack user={user} setUser={setUser}/>}
+    {page==='leaderboard'&&<Leaderboard user={user}/>}
+
+    {page==='poker'&&(
+      roomId&&gameState?(
+        gameState.status==='waiting'
+          ?<div className="poker-screen"><WaitingRoom state={gameState} user={user} roomId={roomId} onBack={()=>{setRoomId(null);setGameState(null);}}/></div>
+          :<PokerTable state={gameState} user={user} roomId={roomId} onLeave={()=>{setRoomId(null);setGameState(null);setPage('poker');}}/>
+      ):<PokerLobby user={user} onJoinRoom={id=>setRoomId(id)} onBack={()=>nav('lobby')}/>
+    )}
+
+    {showAvatar&&<AvatarModal user={user} onClose={()=>setShowAvatar(false)} onUpdate={url=>setUser(u=>({...u,avatar:url}))}/>}
+    {showBonus&&<DailyBonus onClose={()=>setShowBonus(false)} onClaim={amt=>setUser(u=>({...u,tokens:u.tokens+amt}))}/>}
+    {levelUpMsg&&<div className="levelup-toast"><h3>{levelUpMsg.emoji} Level Up!</h3><p>You reached {levelUpMsg.name}!</p></div>}
+    <EmojiRain emojis={floatingEmojis}/>
+  </div>);
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
