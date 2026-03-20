@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>HATHOR Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Orbitron:wght@700;900&family=DM+Mono&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#04040a;--bg2:#080812;--gold:#f0c060;--gold2:#ffd980;
+  --green:#00e676;--red:#ff3d71;--neon:#00e5ff;--cream:#e8e0d0;
+  --border:rgba(255,255,255,0.08);--glass:rgba(255,255,255,0.04);
+}
+body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cream);min-height:100vh;}
+::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-thumb{background:#8a6020;border-radius:2px;}
+
+/* Login */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;}
+.login-card{width:360px;padding:48px 40px;background:rgba(8,8,18,.95);border:1px solid rgba(240,192,96,.2);border-radius:20px;box-shadow:0 0 80px rgba(124,58,237,.1);}
+.login-card h1{font-family:'Orbitron',monospace;font-size:28px;color:var(--gold);text-align:center;margin-bottom:6px;letter-spacing:3px;}
+.login-card p{font-size:10px;letter-spacing:3px;color:rgba(232,224,208,.2);text-align:center;margin-bottom:32px;}
+.inp{width:100%;padding:12px 16px;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:8px;color:var(--cream);font-size:14px;font-family:'Space Grotesk',sans-serif;outline:none;margin-bottom:12px;transition:border-color .2s;}
+.inp:focus{border-color:rgba(240,192,96,.5);}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 20px;border-radius:8px;border:none;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;letter-spacing:.5px;transition:all .2s;}
+.btn-primary{background:linear-gradient(135deg,#c9a84c,#f0c060,#a07830);color:#080600;width:100%;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(240,192,96,.35);}
+.btn-ghost{background:var(--glass);border:1px solid var(--border);color:rgba(232,224,208,.6);}
+.btn-ghost:hover{border-color:var(--border);color:var(--cream);background:rgba(255,255,255,.07);}
+.btn-danger{background:rgba(255,61,113,.15);border:1px solid rgba(255,61,113,.3);color:#ff8ca0;}
+.btn-danger:hover{background:rgba(255,61,113,.3);}
+.btn-success{background:rgba(0,230,118,.12);border:1px solid rgba(0,230,118,.3);color:#80ffbb;}
+.btn-success:hover{background:rgba(0,230,118,.25);}
+.btn-sm{padding:6px 12px;font-size:11px;border-radius:6px;}
+.btn-info{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25);color:var(--neon);}
+.btn-info:hover{background:rgba(0,229,255,.2);}
+.err{color:var(--red);font-size:12px;text-align:center;margin-top:8px;}
+
+/* Main layout */
+.app{display:none;min-height:100vh;flex-direction:column;}
+.app.visible{display:flex;}
+.header{height:60px;padding:0 28px;display:flex;align-items:center;justify-content:space-between;background:rgba(4,4,10,.9);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);}
+.header-logo{font-family:'Orbitron',monospace;font-size:16px;font-weight:900;letter-spacing:3px;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.header-right{display:flex;align-items:center;gap:10px;font-size:11px;color:rgba(232,224,208,.3);letter-spacing:1px;}
+.online-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);display:inline-block;margin-right:4px;}
+
+/* Tabs */
+.tabs{display:flex;gap:2px;padding:0 28px;border-bottom:1px solid var(--border);background:rgba(4,4,10,.7);}
+.tab{padding:14px 18px;cursor:pointer;font-size:12px;font-weight:600;letter-spacing:1px;color:rgba(232,224,208,.35);border-bottom:2px solid transparent;transition:all .2s;}
+.tab:hover{color:rgba(232,224,208,.7);}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+
+/* Content */
+.content{flex:1;padding:32px 28px;max-width:1200px;margin:0 auto;width:100%;}
+.section{display:none;} .section.active{display:block;}
+
+/* Cards */
+.card{background:rgba(8,8,18,.7);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:20px;backdrop-filter:blur(16px);}
+.card h3{font-family:'Orbitron',monospace;font-size:16px;color:var(--gold);margin-bottom:18px;letter-spacing:1px;}
+.card-label{font-size:9px;letter-spacing:3px;color:rgba(232,224,208,.3);text-transform:uppercase;margin-bottom:6px;display:block;}
+
+/* Overview stats */
+.overview-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.stat-box{padding:20px;background:rgba(8,8,18,.7);border:1px solid var(--border);border-radius:12px;text-align:center;}
+.stat-box .val{font-family:'Orbitron',monospace;font-size:26px;font-weight:700;color:var(--gold);margin:8px 0;}
+.stat-box .lbl{font-size:10px;letter-spacing:2px;color:rgba(232,224,208,.3);text-transform:uppercase;}
+.stat-box .ico{font-size:28px;}
+
+/* Players table */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{padding:10px 14px;text-align:left;font-size:9px;letter-spacing:2px;color:rgba(232,224,208,.3);text-transform:uppercase;border-bottom:1px solid var(--border);}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.03);transition:background .15s;}
+tbody tr:hover{background:rgba(255,255,255,.03);}
+tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
+.mono{font-family:'DM Mono',monospace;font-size:12px;}
+.gold{color:var(--gold);}
+.green{color:var(--green);}
+.actions-cell{display:flex;gap:6px;align-items:center;}
+
+/* Form rows */
+.form-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px;}
+.form-group{display:flex;flex-direction:column;gap:6px;min-width:160px;}
+.form-group.flex1{flex:1;}
+.inp-sm{padding:9px 13px;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:8px;color:var(--cream);font-size:13px;font-family:'Space Grotesk',sans-serif;outline:none;transition:border-color .2s;}
+.inp-sm:focus{border-color:rgba(240,192,96,.4);}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;padding:14px 24px;border-radius:12px;background:rgba(8,8,18,.97);border:1px solid rgba(240,192,96,.3);box-shadow:0 8px 32px rgba(0,0,0,.6);font-size:13px;z-index:999;animation:toastIn .3s ease;max-width:320px;}
+@keyframes toastIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.toast.ok{border-color:rgba(0,230,118,.35);color:var(--green);}
+.toast.err{border-color:rgba(255,61,113,.35);color:#ff8ca0;}
+
+/* Promo badges */
+.promo-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;}
+.promo-code{font-family:'Orbitron',monospace;font-size:16px;color:var(--gold);letter-spacing:3px;}
+.promo-info{font-size:11px;color:rgba(232,224,208,.35);margin-top:3px;}
+.uses-bar{width:80px;height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;margin-top:4px;}
+.uses-fill{height:100%;background:var(--green);border-radius:2px;transition:width .5s;}
+
+/* Gift modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(12px);z-index:500;display:flex;align-items:center;justify-content:center;}
+.modal{width:380px;padding:36px;background:rgba(8,8,18,.97);border:1px solid rgba(240,192,96,.2);border-radius:18px;box-shadow:0 0 60px rgba(0,0,0,.8);}
+.modal h3{font-family:'Orbitron',monospace;font-size:20px;color:var(--gold);margin-bottom:6px;}
+.modal p{font-size:12px;color:rgba(232,224,208,.35);margin-bottom:20px;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-card">
+    <h1>⬡ HATHOR</h1>
+    <p>ADMIN PANEL · SECURE ACCESS</p>
+    <input class="inp" type="password" id="pwInp" placeholder="Admin password" onkeydown="if(event.key==='Enter')login()"/>
+    <button class="btn btn-primary" onclick="login()">Enter Admin Panel</button>
+    <div class="err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app" id="app">
+  <div class="header">
+    <div class="header-logo">⬡ HATHOR ADMIN</div>
+    <div class="header-right">
+      <span><span class="online-dot"></span>LIVE</span>
+      <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('overview',this)">📊 Overview</div>
+    <div class="tab" onclick="showTab('players',this)">👥 Players</div>
+    <div class="tab" onclick="showTab('give',this)">🎁 Give Tokens</div>
+    <div class="tab" onclick="showTab('promos',this)">🎫 Promo Codes</div>
+  </div>
+
+  <div class="content">
+
+    <!-- OVERVIEW -->
+    <div class="section active" id="sec-overview">
+      <div class="overview-grid" id="overviewGrid">
+        <div class="stat-box"><div class="ico">👥</div><div class="val" id="ov-players">—</div><div class="lbl">Total Players</div></div>
+        <div class="stat-box"><div class="ico">🪙</div><div class="val" id="ov-tokens">—</div><div class="lbl">Tokens in Circulation</div></div>
+        <div class="stat-box"><div class="ico">🏆</div><div class="val" id="ov-jackpot">—</div><div class="lbl">Current Jackpot</div></div>
+        <div class="stat-box"><div class="ico">🌟</div><div class="val" id="ov-richest">—</div><div class="lbl">Richest Player</div></div>
+      </div>
+      <div class="card">
+        <h3>Quick Actions</h3>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-success" onclick="showTab('give',document.querySelectorAll('.tab')[2])">🎁 Give Tokens to Player</button>
+          <button class="btn btn-info" onclick="showTab('promos',document.querySelectorAll('.tab')[3])">🎫 Create Promo Code</button>
+          <button class="btn btn-ghost" onclick="loadOverview()">🔄 Refresh Stats</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLAYERS -->
+    <div class="section" id="sec-players">
+      <div class="card">
+        <h3>All Players</h3>
+        <div style="display:flex;gap:10px;margin-bottom:16px;">
+          <input class="inp-sm" id="searchInp" placeholder="Search by name..." oninput="filterPlayers()" style="flex:1;"/>
+          <button class="btn btn-ghost btn-sm" onclick="loadPlayers()">🔄 Refresh</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>#</th><th>Name</th><th>Tokens</th><th>Level</th><th>XP</th><th>Games</th><th>Joined</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="playersBody">
+              <tr><td colspan="8" style="text-align:center;padding:32px;color:rgba(232,224,208,.2);">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- GIVE TOKENS -->
+    <div class="section" id="sec-give">
+      <div class="card">
+        <h3>🎁 Give Tokens to Player</h3>
+        <div class="form-row">
+          <div class="form-group flex1">
+            <label class="card-label">Player Name (partial ok)</label>
+            <input class="inp-sm" id="giveNameInp" placeholder="e.g. Raimis"/>
+          </div>
+          <div class="form-group">
+            <label class="card-label">Amount</label>
+            <input class="inp-sm" id="giveAmountInp" type="number" placeholder="e.g. 5000" min="1"/>
+          </div>
+          <button class="btn btn-success" onclick="giveTokens()">Give Tokens ✓</button>
+        </div>
+        <div id="giveResult" style="font-size:13px;margin-top:8px;"></div>
+      </div>
+
+      <div class="card">
+        <h3>⚙️ Set Exact Balance</h3>
+        <p style="font-size:12px;color:rgba(232,224,208,.3);margin-bottom:16px;">Directly set a player's token balance to a specific amount.</p>
+        <div class="form-row">
+          <div class="form-group flex1">
+            <label class="card-label">Player UID (from players list)</label>
+            <input class="inp-sm" id="setUidInp" placeholder="Paste UID here"/>
+          </div>
+          <div class="form-group">
+            <label class="card-label">New Balance</label>
+            <input class="inp-sm" id="setAmountInp" type="number" placeholder="e.g. 100000" min="0"/>
+          </div>
+          <button class="btn btn-info" onclick="setTokens()">Set Balance</button>
+        </div>
+        <div id="setResult" style="font-size:13px;margin-top:8px;"></div>
+      </div>
+    </div>
+
+    <!-- PROMO CODES -->
+    <div class="section" id="sec-promos">
+      <div class="card">
+        <h3>🎫 Create Promo Code</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="card-label">Code (e.g. WELCOME500)</label>
+            <input class="inp-sm" id="promoCodeInp" placeholder="HATHOR2026" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()"/>
+          </div>
+          <div class="form-group">
+            <label class="card-label">Token Reward</label>
+            <input class="inp-sm" id="promoAmountInp" type="number" placeholder="e.g. 1000" min="1"/>
+          </div>
+          <div class="form-group">
+            <label class="card-label">Max Uses (0 = unlimited)</label>
+            <input class="inp-sm" id="promoUsesInp" type="number" placeholder="e.g. 100" min="0" value="100"/>
+          </div>
+          <button class="btn btn-primary" onclick="createPromo()">Create Code ✓</button>
+        </div>
+        <div id="promoResult" style="font-size:13px;margin-top:8px;"></div>
+      </div>
+      <div class="card">
+        <h3>Active Promo Codes</h3>
+        <div id="promoList"><p style="color:rgba(232,224,208,.2);font-size:13px;">Loading...</p></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Gift modal -->
+<div class="modal-overlay" id="giftModal" style="display:none;">
+  <div class="modal">
+    <h3>🎁 Gift Tokens</h3>
+    <p>Send tokens directly to <strong id="giftPlayerName" style="color:var(--gold)"></strong></p>
+    <input class="inp-sm" id="giftAmountInp" type="number" placeholder="Amount to gift" min="1" style="width:100%;margin-bottom:14px;"/>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeGift()">Cancel</button>
+      <button class="btn btn-success" style="flex:1" onclick="confirmGift()">Send Gift 🎁</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let API_KEY = '';
+let allPlayers = [];
+let giftTargetUid = '';
+
+const fmt = n => Number(n||0).toLocaleString();
+
+// ── Auth ──────────────────────────────────────────
+function login() {
+  const pw = document.getElementById('pwInp').value;
+  if(!pw) return;
+  fetch('/admin/overview', {headers:{'x-admin-key':pw}})
+    .then(r => {
+      if(r.ok) {
+        API_KEY = pw;
+        sessionStorage.setItem('admin_key', pw);
+        document.getElementById('loginWrap').style.display = 'none';
+        document.getElementById('app').classList.add('visible');
+        loadOverview();
+        loadPlayers();
+        loadPromos();
+      } else {
+        document.getElementById('loginErr').textContent = '❌ Wrong password';
+      }
+    }).catch(() => document.getElementById('loginErr').textContent = '❌ Connection error');
+}
+
+function logout() {
+  sessionStorage.removeItem('admin_key');
+  location.reload();
+}
+
+// Auto-login if session exists
+window.onload = () => {
+  const saved = sessionStorage.getItem('admin_key');
+  if(saved) { document.getElementById('pwInp').value = saved; login(); }
+};
+
+// ── Tabs ──────────────────────────────────────────
+function showTab(name, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('sec-'+name).classList.add('active');
+  if(name === 'promos') loadPromos();
+  if(name === 'players') loadPlayers();
+}
+
+// ── API helpers ───────────────────────────────────
+const api = (url, opts={}) => fetch(url, {
+  ...opts,
+  headers: {'x-admin-key': API_KEY, 'content-type':'application/json', ...(opts.headers||{})}
+}).then(r => r.json());
+
+// ── Overview ──────────────────────────────────────
+function loadOverview() {
+  api('/admin/overview').then(d => {
+    document.getElementById('ov-players').textContent = fmt(d.totalPlayers);
+    document.getElementById('ov-tokens').textContent = fmt(d.totalTokens);
+    document.getElementById('ov-jackpot').textContent = '🪙 '+fmt(d.jackpot);
+    document.getElementById('ov-richest').textContent = d.richest ? d.richest.name : '—';
+  }).catch(() => {});
+}
+
+// ── Players ───────────────────────────────────────
+function loadPlayers() {
+  api('/admin/players').then(players => {
+    allPlayers = players;
+    renderPlayers(players);
+  });
+}
+
+function filterPlayers() {
+  const q = document.getElementById('searchInp').value.toLowerCase();
+  renderPlayers(allPlayers.filter(p => p.name.toLowerCase().includes(q)));
+}
+
+const LEVEL_NAMES = ['','🥉 Bronze','🥈 Silver','🥇 Gold','💎 Platinum','👑 Diamond','🌟 VIP'];
+
+function renderPlayers(players) {
+  const body = document.getElementById('playersBody');
+  if(!players.length) { body.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px;color:rgba(232,224,208,.2);">No players found</td></tr>'; return; }
+  body.innerHTML = players.map((p,i) => `
+    <tr>
+      <td class="mono" style="color:rgba(232,224,208,.3)">${i+1}</td>
+      <td><strong>${escHtml(p.name)}</strong></td>
+      <td class="mono gold">🪙 ${fmt(p.tokens)}</td>
+      <td>${LEVEL_NAMES[p.level]||p.level}</td>
+      <td class="mono">${fmt(p.xp)}</td>
+      <td class="mono">${p.games_played||0}</td>
+      <td class="mono" style="font-size:11px;color:rgba(232,224,208,.35)">${(p.created_at||'').slice(0,10)}</td>
+      <td><div class="actions-cell">
+        <button class="btn btn-success btn-sm" onclick="openGift('${p.uid}','${escHtml(p.name)}')">🎁</button>
+        <button class="btn btn-ghost btn-sm" onclick="copyUid('${p.uid}')">📋 UID</button>
+        <button class="btn btn-danger btn-sm" onclick="deletePlayer('${p.uid}','${escHtml(p.name)}')">🗑️</button>
+      </div></td>
+    </tr>
+  `).join('');
+}
+
+function copyUid(uid) {
+  navigator.clipboard.writeText(uid).then(() => toast('UID copied!','ok'));
+}
+
+function deletePlayer(uid, name) {
+  if(!confirm(`Delete player "${name}"? This cannot be undone!`)) return;
+  api(`/admin/player/${uid}`, {method:'DELETE'}).then(d => {
+    if(d.ok) { toast(`${name} deleted`,'ok'); loadPlayers(); loadOverview(); }
+  });
+}
+
+// ── Gift tokens ───────────────────────────────────
+function openGift(uid, name) {
+  giftTargetUid = uid;
+  document.getElementById('giftPlayerName').textContent = name;
+  document.getElementById('giftAmountInp').value = '';
+  document.getElementById('giftModal').style.display = 'flex';
+}
+function closeGift() { document.getElementById('giftModal').style.display = 'none'; }
+function confirmGift() {
+  const amount = parseInt(document.getElementById('giftAmountInp').value);
+  if(!amount || amount < 1) return;
+  api('/admin/give-tokens', {method:'POST', body: JSON.stringify({uid:giftTargetUid, amount})})
+    .then(d => {
+      if(d.ok) { toast(`🎁 Sent ${fmt(amount)} tokens to ${d.player}!`,'ok'); closeGift(); loadPlayers(); loadOverview(); }
+      else toast(d.error,'err');
+    });
+}
+
+function giveTokens() {
+  const name = document.getElementById('giveNameInp').value.trim();
+  const amount = parseInt(document.getElementById('giveAmountInp').value);
+  if(!name || !amount) return;
+  api('/admin/give-tokens', {method:'POST', body: JSON.stringify({name, amount})})
+    .then(d => {
+      const el = document.getElementById('giveResult');
+      if(d.ok) {
+        el.innerHTML = `<span style="color:var(--green)">✅ Sent ${fmt(amount)} tokens to ${d.player}! New balance: ${fmt(d.newBalance)}</span>`;
+        loadPlayers(); loadOverview();
+      } else el.innerHTML = `<span style="color:var(--red)">❌ ${d.error}</span>`;
+    });
+}
+
+function setTokens() {
+  const uid = document.getElementById('setUidInp').value.trim();
+  const amount = parseInt(document.getElementById('setAmountInp').value);
+  if(!uid || isNaN(amount)) return;
+  api('/admin/set-tokens', {method:'POST', body: JSON.stringify({uid, amount})})
+    .then(d => {
+      const el = document.getElementById('setResult');
+      if(d.ok) {
+        el.innerHTML = `<span style="color:var(--green)">✅ ${d.player}'s balance set to ${fmt(d.newBalance)}</span>`;
+        loadPlayers(); loadOverview();
+      } else el.innerHTML = `<span style="color:var(--red)">❌ ${d.error}</span>`;
+    });
+}
+
+// ── Promo codes ───────────────────────────────────
+function createPromo() {
+  const code = document.getElementById('promoCodeInp').value.trim();
+  const amount = parseInt(document.getElementById('promoAmountInp').value);
+  const maxUses = parseInt(document.getElementById('promoUsesInp').value)||100;
+  if(!code || !amount) return;
+  api('/admin/create-promo', {method:'POST', body: JSON.stringify({code, amount, maxUses})})
+    .then(d => {
+      const el = document.getElementById('promoResult');
+      if(d.ok) {
+        el.innerHTML = `<span style="color:var(--green)">✅ Created: <strong style="color:var(--gold);letter-spacing:2px">${d.code}</strong> → 🪙${fmt(d.amount)} (max ${d.maxUses} uses)</span>`;
+        document.getElementById('promoCodeInp').value = '';
+        document.getElementById('promoAmountInp').value = '';
+        loadPromos();
+      } else el.innerHTML = `<span style="color:var(--red)">❌ ${d.error}</span>`;
+    });
+}
+
+function loadPromos() {
+  api('/admin/promos').then(codes => {
+    const el = document.getElementById('promoList');
+    if(!codes.length) { el.innerHTML = '<p style="color:rgba(232,224,208,.2);font-size:13px;">No promo codes yet</p>'; return; }
+    el.innerHTML = codes.map(c => {
+      const pct = c.max_uses > 0 ? Math.round(c.used_count/c.max_uses*100) : 0;
+      return `
+      <div class="promo-row">
+        <div>
+          <div class="promo-code">${c.code}</div>
+          <div class="promo-info">🪙 ${fmt(c.amount)} tokens · ${c.used_count}/${c.max_uses} uses · Created ${(c.created_at||'').slice(0,10)}</div>
+          <div class="uses-bar"><div class="uses-fill" style="width:${pct}%"></div></div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn btn-ghost btn-sm" onclick="copyCode('${c.code}')">📋 Copy</button>
+          <button class="btn btn-danger btn-sm" onclick="deletePromo('${c.code}')">🗑️</button>
+        </div>
+      </div>`;
+    }).join('');
+  });
+}
+
+function copyCode(code) {
+  navigator.clipboard.writeText(code).then(() => toast(`Code "${code}" copied!`,'ok'));
+}
+
+function deletePromo(code) {
+  if(!confirm(`Delete promo code "${code}"?`)) return;
+  api(`/admin/promo/${code}`, {method:'DELETE'}).then(() => { toast('Deleted','ok'); loadPromos(); });
+}
+
+// ── Toast ─────────────────────────────────────────
+let toastTimer;
+function toast(msg, type='ok') {
+  const el = document.getElementById('toastEl')||createToast();
+  el.textContent = (type==='ok'?'✅ ':'❌ ') + msg;
+  el.className = 'toast ' + type;
+  el.style.display = 'block';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.style.display='none', 3500);
+}
+function createToast() {
+  const el = document.createElement('div');
+  el.id = 'toastEl'; el.className = 'toast';
+  el.style.display = 'none';
+  document.body.appendChild(el);
+  return el;
+}
+
+function escHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// Auto refresh overview every 30s
+setInterval(() => {
+  const key = sessionStorage.getItem('admin_key');
+  if(key) { loadOverview(); }
+}, 30000);
+</script>
+</body>
+</html>
