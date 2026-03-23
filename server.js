@@ -452,7 +452,7 @@ app.post('/api/croupier', express.json(), async (req,res)=>{
       method:'POST',
       headers:{'x-api-key':apiKey,'anthropic-version':'2023-06-01','content-type':'application/json'},
       body: JSON.stringify({
-        model:'claude-haiku-4-5',
+        model:'claude-haiku-4-5-20251001',
         max_tokens:200,
         system:`You are Viktor, the charming AI croupier at HATHOR Royal Casino — an elegant, witty, slightly mysterious casino dealer. You know the player personally.
 
