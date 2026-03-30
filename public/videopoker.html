@@ -254,7 +254,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 <script>
 // ── Auth ──
 const uid = localStorage.getItem('casino_uid');
-if(!uid) location.href='/login.html';
+if(!uid) localStorage.setItem('login_return', location.href); location.href = '/login.html';
 let balance = parseInt(localStorage.getItem('casino_tokens')||'1000');
 function saveBalance(){localStorage.setItem('casino_tokens',balance);}
 function updateBalanceDisplay(){document.getElementById('balanceDisplay').textContent=balance;}
