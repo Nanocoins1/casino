@@ -122,17 +122,17 @@ const storage = multer.diskStorage({
   filename:(req,file,cb)=>cb(null,req.headers['x-user-id']+path.extname(file.originalname))
 });
 const upload = multer({storage,limits:{fileSize:2*1024*1024}});
-app.use(express.static(path.join(__dirname,'public')));
-app.use(express.json());
-
-// Root → lobby (new unified game lobby)
+// Root → new lobby BEFORE static middleware
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'lobby.html'));
 });
-// Keep old casino accessible at /casino
+// Old casino still accessible at /casino
 app.get('/casino', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+
+app.use(express.static(path.join(__dirname,'public'), { index: false }));
+app.use(express.json());
 
 app.post('/upload-avatar', upload.single('avatar'), (req,res)=>{
   const uid=req.headers['x-user-id'];
