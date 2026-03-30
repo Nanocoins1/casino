@@ -607,7 +607,7 @@ function showToast(msg, type) {
 }
 
 // ── Init ───────────────────────────────────────────────────
-if(!uid) { window.location.href = '/login.html'; }
+if(!uid) { window.localStorage.setItem('login_return', location.href); location.href = '/login.html'; }
 else {
   const saved = localStorage.getItem('casino_tokens');
   if(saved) tokens = parseInt(saved);

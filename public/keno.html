@@ -769,7 +769,7 @@ const PAYOUTS = {
 function init() {
   uid = localStorage.getItem('casino_uid');
   if (!uid) {
-    window.location.href = '/login.html';
+    window.localStorage.setItem('login_return', location.href); location.href = '/login.html';
     return;
   }
 

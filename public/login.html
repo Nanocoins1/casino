@@ -193,13 +193,17 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 </div>
 
 <script>
+// Return URL support
+const _returnUrl = new URLSearchParams(location.search).get('return') || localStorage.getItem('login_return') || '/';
+function _getReturn(){ const u=_returnUrl; localStorage.removeItem('login_return'); return u; }
+
 // Redirect if already logged in
 (async function(){
   const token = localStorage.getItem('casino_session');
   if(!token) return;
   try {
     const r = await fetch('/api/auth/me', {headers:{'Authorization':'Bearer '+token}});
-    if(r.ok) { window.location.href = '/'; }
+    if(r.ok) { window.location.href = _getReturn(); }
   } catch(e){}
 })();
 
@@ -270,7 +274,7 @@ async function doLogin() {
       localStorage.setItem('casino_uid', data.uid);
       localStorage.setItem('casino_name', data.user.name);
       showSuccess();
-      setTimeout(() => window.location.href = '/', 1200);
+      setTimeout(() => window.location.href = _getReturn(), 1200);
     } else {
       showErr(data.error || 'Prisijungti nepavyko');
       btn.disabled = false;

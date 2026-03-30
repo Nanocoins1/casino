@@ -374,9 +374,9 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 
 <script>
 // ── Auth guard ──
-const uid = localStorage.getItem('uid');
-const tokens = parseFloat(localStorage.getItem('tokens') || '0');
-if (!uid) { location.href = '/login.html'; }
+const uid = localStorage.getItem('casino_uid');
+const tokens = parseFloat(localStorage.getItem('tokens') || '10000');
+if (!uid) { localStorage.setItem('login_return', location.href); location.href = '/login.html'; }
 
 // ── State ──
 let balance = tokens;
