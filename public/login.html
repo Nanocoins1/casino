@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>HATHOR Royal Casino — Prisijungimas</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#04040a;--bg2:#080812;--gold:#f0c060;--gold2:#ffd980;
+  --green:#00e676;--red:#ff3d71;--neon:#00e5ff;--cream:#e8e0d0;
+  --border:rgba(255,255,255,0.08);--glass:rgba(255,255,255,0.04);
+}
+html,body{height:100%;}
+body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cream);
+  display:flex;align-items:center;justify-content:center;min-height:100vh;
+  background-image:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(124,58,237,.15),transparent),
+    radial-gradient(ellipse 60% 40% at 80% 80%,rgba(240,192,96,.06),transparent);}
+
+/* Card */
+.card{width:100%;max-width:440px;padding:0 20px;}
+.logo-wrap{text-align:center;margin-bottom:36px;}
+.logo{font-family:'Orbitron',monospace;font-size:28px;font-weight:900;letter-spacing:4px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo-sub{font-size:10px;letter-spacing:4px;color:rgba(232,224,208,.2);margin-top:6px;}
+
+/* Panel */
+.panel{background:rgba(8,8,18,.92);border:1px solid rgba(240,192,96,.12);border-radius:20px;
+  padding:36px 32px;box-shadow:0 0 80px rgba(124,58,237,.08),0 40px 80px rgba(0,0,0,.6);}
+@media(max-width:480px){.panel{padding:28px 20px;}}
+
+/* Tabs */
+.auth-tabs{display:flex;background:rgba(0,0,0,.4);border-radius:10px;padding:4px;margin-bottom:28px;}
+.auth-tab{flex:1;padding:9px;text-align:center;border-radius:7px;font-size:13px;font-weight:600;
+  cursor:pointer;transition:all .2s;color:rgba(232,224,208,.35);letter-spacing:.5px;}
+.auth-tab.active{background:rgba(240,192,96,.12);color:var(--gold);border:1px solid rgba(240,192,96,.2);}
+
+/* Form */
+.form-section{display:none;}
+.form-section.active{display:block;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:10px;letter-spacing:2px;color:rgba(232,224,208,.3);
+  text-transform:uppercase;margin-bottom:7px;}
+.inp{width:100%;padding:12px 16px;background:rgba(0,0,0,.5);border:1px solid var(--border);
+  border-radius:10px;color:var(--cream);font-family:'Space Grotesk',sans-serif;font-size:14px;
+  outline:none;transition:all .2s;}
+.inp:focus{border-color:rgba(240,192,96,.45);box-shadow:0 0 0 3px rgba(240,192,96,.06);}
+.inp::placeholder{color:rgba(232,224,208,.18);}
+.inp-wrap{position:relative;}
+.eye-btn{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;
+  color:rgba(232,224,208,.3);cursor:pointer;font-size:16px;padding:4px;transition:color .2s;}
+.eye-btn:hover{color:rgba(232,224,208,.7);}
+
+/* Password strength */
+.pwd-strength{margin-top:6px;display:none;}
+.pwd-strength.visible{display:block;}
+.pwd-bar{height:3px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden;margin-bottom:4px;}
+.pwd-fill{height:100%;border-radius:2px;transition:width .3s,background .3s;}
+.pwd-label{font-size:10px;letter-spacing:1px;}
+
+/* Hint */
+.field-hint{font-size:11px;color:rgba(232,224,208,.25);margin-top:5px;}
+
+/* Error */
+.err{padding:10px 14px;border-radius:8px;background:rgba(255,61,113,.1);border:1px solid rgba(255,61,113,.25);
+  color:#ff8ca0;font-size:12px;margin-bottom:16px;display:none;line-height:1.5;}
+.err.visible{display:block;}
+
+/* Submit btn */
+.submit-btn{width:100%;padding:14px;border-radius:10px;border:none;cursor:pointer;
+  font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;letter-spacing:.5px;
+  background:linear-gradient(135deg,#c9a84c,#f0c060,#a07830);color:#080600;
+  transition:all .2s;margin-top:4px;}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(240,192,96,.35);}
+.submit-btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none;}
+
+/* Legal */
+.legal{font-size:10px;color:rgba(232,224,208,.2);text-align:center;margin-top:16px;line-height:1.7;}
+.legal a{color:rgba(240,192,96,.4);text-decoration:none;}
+.legal a:hover{color:var(--gold);}
+
+/* Age warning */
+.age-warn{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:9px;
+  background:rgba(255,61,113,.07);border:1px solid rgba(255,61,113,.18);margin-bottom:16px;font-size:11px;
+  color:rgba(255,140,160,.8);line-height:1.6;}
+.age-warn .icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+
+/* Divider */
+.divider{text-align:center;color:rgba(232,224,208,.15);font-size:11px;letter-spacing:2px;
+  position:relative;margin:20px 0;}
+.divider::before,.divider::after{content:'';position:absolute;top:50%;width:calc(50% - 40px);
+  height:1px;background:rgba(255,255,255,.06);}
+.divider::before{left:0;}.divider::after{right:0;}
+
+/* Spinner */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(8,6,0,.25);
+  border-top-color:#080600;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Success */
+.success-wrap{text-align:center;padding:20px 0;display:none;}
+.success-wrap.visible{display:block;}
+.success-icon{font-size:52px;margin-bottom:16px;display:block;}
+.success-title{font-family:'Orbitron',monospace;font-size:18px;color:var(--green);margin-bottom:8px;}
+.success-desc{font-size:13px;color:rgba(232,224,208,.4);}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo-wrap">
+    <div class="logo">⬡ HATHOR</div>
+    <div class="logo-sub">ROYAL CASINO</div>
+  </div>
+
+  <div class="panel">
+    <!-- Tabs -->
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Prisijungti</div>
+      <div class="auth-tab" id="tab-register" onclick="switchTab('register')">Registruotis</div>
+    </div>
+
+    <!-- Error box -->
+    <div class="err" id="errBox"></div>
+
+    <!-- Success -->
+    <div class="success-wrap" id="successWrap">
+      <span class="success-icon">🎰</span>
+      <div class="success-title">Sveiki atvykę!</div>
+      <div class="success-desc">Nukreipiame į kazino...</div>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div class="form-section active" id="form-login">
+      <div class="field">
+        <label>El. paštas</label>
+        <input class="inp" id="loginEmail" type="email" placeholder="jusu@pastas.lt" autocomplete="email" onkeydown="if(event.key==='Enter')doLogin()"/>
+      </div>
+      <div class="field">
+        <label>Slaptažodis</label>
+        <div class="inp-wrap">
+          <input class="inp" id="loginPwd" type="password" placeholder="••••••••" autocomplete="current-password" style="padding-right:44px;" onkeydown="if(event.key==='Enter')doLogin()"/>
+          <button class="eye-btn" onclick="togglePwd('loginPwd',this)" tabindex="-1">👁</button>
+        </div>
+      </div>
+      <button class="submit-btn" id="loginBtn" onclick="doLogin()">Prisijungti →</button>
+      <div class="legal">
+        Neturite paskyros? <a href="#" onclick="switchTab('register');return false;">Registruokitės čia</a>
+      </div>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div class="form-section" id="form-register">
+      <div class="age-warn">
+        <span class="icon">🔞</span>
+        <span>Registracija ir žaidimas leidžiami <strong>tik nuo 18 metų</strong>. Jaunesniems asmenims prieiga draudžiama pagal Lietuvos azartinių lošimų įstatymą.</span>
+      </div>
+      <div class="field">
+        <label>Vardas ir Pavardė</label>
+        <input class="inp" id="regName" type="text" placeholder="Vardenis Pavardenis" autocomplete="name"/>
+      </div>
+      <div class="field">
+        <label>El. paštas</label>
+        <input class="inp" id="regEmail" type="email" placeholder="jusu@pastas.lt" autocomplete="email"/>
+      </div>
+      <div class="field">
+        <label>Slaptažodis</label>
+        <div class="inp-wrap">
+          <input class="inp" id="regPwd" type="password" placeholder="Bent 8 simboliai" autocomplete="new-password" style="padding-right:44px;" oninput="checkStrength(this.value)"/>
+          <button class="eye-btn" onclick="togglePwd('regPwd',this)" tabindex="-1">👁</button>
+        </div>
+        <div class="pwd-strength" id="pwdStrength">
+          <div class="pwd-bar"><div class="pwd-fill" id="pwdFill"></div></div>
+          <div class="pwd-label" id="pwdLabel"></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Pakartokite Slaptažodį</label>
+        <div class="inp-wrap">
+          <input class="inp" id="regPwd2" type="password" placeholder="••••••••" autocomplete="new-password" style="padding-right:44px;" onkeydown="if(event.key==='Enter')doRegister()"/>
+          <button class="eye-btn" onclick="togglePwd('regPwd2',this)" tabindex="-1">👁</button>
+        </div>
+      </div>
+      <button class="submit-btn" id="regBtn" onclick="doRegister()">Sukurti Paskyrą →</button>
+      <div class="legal">
+        Registruodamiesi sutinkate su <a href="#">Naudojimo taisyklėmis</a> ir patvirtinate, kad esate 18+ metų amžiaus.<br/>
+        Jau turite paskyrą? <a href="#" onclick="switchTab('login');return false;">Prisijunkite</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Redirect if already logged in
+(async function(){
+  const token = localStorage.getItem('casino_session');
+  if(!token) return;
+  try {
+    const r = await fetch('/api/auth/me', {headers:{'Authorization':'Bearer '+token}});
+    if(r.ok) { window.location.href = '/'; }
+  } catch(e){}
+})();
+
+function switchTab(tab) {
+  ['login','register'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('active', t===tab);
+    document.getElementById('form-'+t).classList.toggle('active', t===tab);
+  });
+  hideErr();
+}
+
+function togglePwd(id, btn) {
+  const inp = document.getElementById(id);
+  if(inp.type === 'password') { inp.type='text'; btn.textContent='🙈'; }
+  else { inp.type='password'; btn.textContent='👁'; }
+}
+
+function checkStrength(pwd) {
+  const el = document.getElementById('pwdStrength');
+  const fill = document.getElementById('pwdFill');
+  const label = document.getElementById('pwdLabel');
+  if(!pwd) { el.classList.remove('visible'); return; }
+  el.classList.add('visible');
+  let score = 0;
+  if(pwd.length >= 8) score++;
+  if(pwd.length >= 12) score++;
+  if(/[A-Z]/.test(pwd)) score++;
+  if(/[0-9]/.test(pwd)) score++;
+  if(/[^A-Za-z0-9]/.test(pwd)) score++;
+  const levels = [
+    {w:'20%', bg:'var(--red)', txt:'Labai silpnas'},
+    {w:'40%', bg:'#ff8c00', txt:'Silpnas'},
+    {w:'60%', bg:'var(--gold)', txt:'Vidutinis'},
+    {w:'80%', bg:'#80ff80', txt:'Stiprus'},
+    {w:'100%', bg:'var(--green)', txt:'Labai stiprus'},
+  ];
+  const lv = levels[Math.min(score, levels.length-1)];
+  fill.style.width = lv.w;
+  fill.style.background = lv.bg;
+  label.textContent = lv.txt;
+  label.style.color = lv.bg;
+}
+
+function showErr(msg) {
+  const el = document.getElementById('errBox');
+  el.textContent = msg; el.classList.add('visible');
+}
+function hideErr() {
+  document.getElementById('errBox').classList.remove('visible');
+}
+
+async function doLogin() {
+  hideErr();
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPwd').value;
+  if(!email || !password) { showErr('Užpildykite visus laukus'); return; }
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Jungiamasi...';
+  try {
+    const r = await fetch('/api/auth/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email, password})
+    });
+    const data = await r.json();
+    if(data.ok) {
+      localStorage.setItem('casino_session', data.token);
+      localStorage.setItem('casino_uid', data.uid);
+      localStorage.setItem('casino_name', data.user.name);
+      showSuccess();
+      setTimeout(() => window.location.href = '/', 1200);
+    } else {
+      showErr(data.error || 'Prisijungti nepavyko');
+      btn.disabled = false;
+      btn.innerHTML = 'Prisijungti →';
+    }
+  } catch(e) {
+    showErr('Ryšio klaida. Patikrinkite internetą.');
+    btn.disabled = false;
+    btn.innerHTML = 'Prisijungti →';
+  }
+}
+
+async function doRegister() {
+  hideErr();
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPwd').value;
+  const password2 = document.getElementById('regPwd2').value;
+  if(!name) { showErr('Įveskite vardą ir pavardę'); return; }
+  if(!email) { showErr('Įveskite el. paštą'); return; }
+  if(password.length < 8) { showErr('Slaptažodis turi būti bent 8 simbolių'); return; }
+  if(password !== password2) { showErr('Slaptažodžiai nesutampa'); return; }
+  const btn = document.getElementById('regBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Kuriama paskyra...';
+  try {
+    const r = await fetch('/api/auth/register', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({name, email, password})
+    });
+    const data = await r.json();
+    if(data.ok) {
+      localStorage.setItem('casino_session', data.token);
+      localStorage.setItem('casino_uid', data.uid);
+      localStorage.setItem('casino_name', data.user.name);
+      showSuccess();
+      // After register, redirect to KYC
+      setTimeout(() => window.location.href = '/kyc.html', 1400);
+    } else {
+      showErr(data.error || 'Registracija nepavyko');
+      btn.disabled = false;
+      btn.innerHTML = 'Sukurti Paskyrą →';
+    }
+  } catch(e) {
+    showErr('Ryšio klaida. Patikrinkite internetą.');
+    btn.disabled = false;
+    btn.innerHTML = 'Sukurti Paskyrą →';
+  }
+}
+
+function showSuccess() {
+  document.getElementById('form-login').classList.remove('active');
+  document.getElementById('form-register').classList.remove('active');
+  document.getElementById('errBox').classList.remove('visible');
+  document.querySelector('.auth-tabs').style.display = 'none';
+  document.getElementById('successWrap').classList.add('visible');
+}
+</script>
+</body>
+</html>

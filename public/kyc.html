@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>HATHOR Casino — Tapatybės Patikrinimas (KYC)</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#04040a;--bg2:#080812;--gold:#f0c060;--gold2:#ffd980;
+  --green:#00e676;--red:#ff3d71;--neon:#00e5ff;--cream:#e8e0d0;
+  --border:rgba(255,255,255,0.08);--glass:rgba(255,255,255,0.04);
+  --purple:#7c3aed;
+}
+body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cream);min-height:100vh;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:#8a6020;border-radius:2px;}
+
+.header{height:60px;padding:0 28px;display:flex;align-items:center;justify-content:space-between;
+  background:rgba(4,4,10,.95);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);}
+.logo{font-family:'Orbitron',monospace;font-size:16px;font-weight:900;letter-spacing:3px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.back{padding:7px 16px;border-radius:8px;border:1px solid var(--border);background:var(--glass);
+  color:rgba(232,224,208,.5);font-size:12px;cursor:pointer;text-decoration:none;font-family:'Space Grotesk',sans-serif;transition:all .2s;}
+.back:hover{color:var(--cream);border-color:rgba(255,255,255,.2);}
+
+.wrap{max-width:720px;margin:0 auto;padding:48px 24px 80px;}
+
+/* Hero */
+.hero{text-align:center;margin-bottom:40px;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:7px 18px;border-radius:20px;
+  background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.3);color:#a78bfa;font-size:11px;letter-spacing:2px;margin-bottom:20px;}
+.hero h1{font-family:'Orbitron',monospace;font-size:28px;color:var(--gold);letter-spacing:2px;margin-bottom:12px;}
+.hero p{font-size:13px;color:rgba(232,224,208,.45);line-height:1.8;max-width:500px;margin:0 auto;}
+
+/* Status card */
+.status-card{padding:28px;border-radius:16px;margin-bottom:32px;text-align:center;display:none;}
+.status-card.visible{display:block;}
+.status-card.unverified{background:rgba(255,255,255,.03);border:1px solid var(--border);}
+.status-card.pending{background:rgba(240,192,96,.07);border:1px solid rgba(240,192,96,.25);}
+.status-card.approved{background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.3);}
+.status-card.rejected{background:rgba(255,61,113,.07);border:1px solid rgba(255,61,113,.3);}
+.status-icon{font-size:48px;margin-bottom:16px;display:block;}
+.status-title{font-family:'Orbitron',monospace;font-size:20px;margin-bottom:8px;}
+.status-card.pending .status-title{color:var(--gold);}
+.status-card.approved .status-title{color:var(--green);}
+.status-card.rejected .status-title{color:var(--red);}
+.status-card.unverified .status-title{color:rgba(232,224,208,.6);}
+.status-desc{font-size:13px;color:rgba(232,224,208,.45);line-height:1.7;}
+.rejection-reason{margin-top:14px;padding:12px 16px;background:rgba(255,61,113,.08);border:1px solid rgba(255,61,113,.2);
+  border-radius:8px;font-size:12px;color:#ff8ca0;line-height:1.6;}
+
+/* Steps indicator */
+.steps-indicator{display:flex;align-items:center;gap:0;margin-bottom:32px;}
+.step-item{flex:1;text-align:center;position:relative;}
+.step-item:not(:last-child)::after{content:'';position:absolute;top:16px;left:50%;width:100%;height:2px;
+  background:rgba(255,255,255,.08);z-index:0;}
+.step-item.done:not(:last-child)::after{background:var(--gold);}
+.step-circle{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;position:relative;z-index:1;background:rgba(255,255,255,.05);border:2px solid var(--border);}
+.step-item.active .step-circle{background:linear-gradient(135deg,#c9a84c,#f0c060);border-color:var(--gold);color:#080600;}
+.step-item.done .step-circle{background:rgba(0,230,118,.15);border-color:var(--green);color:var(--green);}
+.step-label{font-size:10px;color:rgba(232,224,208,.3);letter-spacing:1px;margin-top:6px;display:block;}
+.step-item.active .step-label,.step-item.done .step-label{color:rgba(232,224,208,.6);}
+
+/* Card */
+.card{background:rgba(8,8,18,.8);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:20px;backdrop-filter:blur(16px);}
+.card h3{font-family:'Orbitron',monospace;font-size:15px;color:var(--gold);margin-bottom:20px;letter-spacing:1px;}
+.step-content{display:none;}
+.step-content.active{display:block;}
+
+/* Form */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:520px){.form-grid{grid-template-columns:1fr;}}
+.field{display:flex;flex-direction:column;gap:7px;}
+.field.full{grid-column:1/-1;}
+.field label{font-size:10px;letter-spacing:2px;color:rgba(232,224,208,.35);text-transform:uppercase;}
+.inp{width:100%;padding:11px 14px;background:rgba(0,0,0,.5);border:1px solid var(--border);border-radius:9px;
+  color:var(--cream);font-family:'Space Grotesk',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
+.inp:focus{border-color:rgba(240,192,96,.5);}
+.inp::placeholder{color:rgba(232,224,208,.2);}
+select.inp{cursor:pointer;}
+select.inp option{background:#080812;}
+
+/* File upload zones */
+.upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px;}
+@media(max-width:520px){.upload-grid{grid-template-columns:1fr;}}
+.upload-zone{border:2px dashed rgba(255,255,255,.1);border-radius:12px;padding:24px 16px;text-align:center;
+  cursor:pointer;transition:all .25s;position:relative;background:rgba(0,0,0,.3);}
+.upload-zone:hover,.upload-zone.dragover{border-color:rgba(240,192,96,.4);background:rgba(240,192,96,.04);}
+.upload-zone.has-file{border-color:rgba(0,230,118,.4);background:rgba(0,230,118,.04);}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-icon{font-size:28px;margin-bottom:10px;display:block;}
+.upload-title{font-size:13px;font-weight:600;color:rgba(232,224,208,.8);margin-bottom:4px;}
+.upload-sub{font-size:11px;color:rgba(232,224,208,.3);}
+.upload-filename{font-size:11px;color:var(--green);margin-top:6px;word-break:break-all;}
+.required-badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:9px;letter-spacing:1px;
+  background:rgba(255,61,113,.15);border:1px solid rgba(255,61,113,.25);color:#ff8ca0;margin-left:6px;}
+.optional-badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:9px;letter-spacing:1px;
+  background:rgba(255,255,255,.05);border:1px solid var(--border);color:rgba(232,224,208,.3);margin-left:6px;}
+
+/* Info boxes */
+.info-box{padding:14px 16px;border-radius:10px;margin-top:16px;font-size:12px;line-height:1.7;
+  background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.15);color:rgba(0,229,255,.7);}
+.info-box strong{color:var(--neon);}
+
+/* Buttons */
+.btn-row{display:flex;gap:12px;margin-top:24px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 24px;border-radius:10px;
+  border:none;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;letter-spacing:.5px;transition:all .2s;}
+.btn-primary{background:linear-gradient(135deg,#c9a84c,#f0c060,#a07830);color:#080600;flex:1;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(240,192,96,.35);}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+.btn-ghost{background:var(--glass);border:1px solid var(--border);color:rgba(232,224,208,.55);}
+.btn-ghost:hover{color:var(--cream);background:rgba(255,255,255,.07);}
+
+/* Error */
+.err-box{padding:12px 16px;border-radius:9px;background:rgba(255,61,113,.1);border:1px solid rgba(255,61,113,.25);
+  color:#ff8ca0;font-size:13px;margin-top:14px;display:none;}
+.err-box.visible{display:block;}
+
+/* Loading spinner */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(8,6,0,.3);border-top-color:#080600;
+  border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Accepted docs list */
+.docs-list{list-style:none;padding:0;}
+.docs-list li{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04);
+  font-size:13px;color:rgba(232,224,208,.6);}
+.docs-list li:last-child{border-bottom:none;}
+.docs-list li::before{content:'✓';color:var(--green);font-weight:700;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">⬡ HATHOR</div>
+  <a class="back" href="/">← Grįžti į Kazino</a>
+</div>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="hero-badge">🛡️ KYC — TAPATYBĖS PATIKRINIMAS</div>
+    <h1>Paskyros Patvirtinimas</h1>
+    <p>Pagal Lietuvos azartinių lošimų įstatymą, visi žaidėjai privalo patvirtinti savo tapatybę ir amžių prieš pradėdami žaisti. Tai užtikrina, kad kazino naudotų tik pilnamečiai asmenys.</p>
+  </div>
+
+  <!-- Status card (rodomas kai statusas žinomas) -->
+  <div class="status-card" id="statusCard">
+    <span class="status-icon" id="statusIcon"></span>
+    <div class="status-title" id="statusTitle"></div>
+    <div class="status-desc" id="statusDesc"></div>
+    <div class="rejection-reason" id="rejectionReason" style="display:none;"></div>
+  </div>
+
+  <!-- Form (rodomas kai reikia pateikti) -->
+  <div id="formSection" style="display:none;">
+    <!-- Steps indicator -->
+    <div class="steps-indicator">
+      <div class="step-item active" id="stp1">
+        <div class="step-circle">1</div>
+        <span class="step-label">ASMENINĖ INFO</span>
+      </div>
+      <div class="step-item" id="stp2">
+        <div class="step-circle">2</div>
+        <span class="step-label">DOKUMENTAI</span>
+      </div>
+      <div class="step-item" id="stp3">
+        <div class="step-circle">3</div>
+        <span class="step-label">PATVIRTINIMAS</span>
+      </div>
+    </div>
+
+    <!-- Step 1: Personal info -->
+    <div class="step-content active" id="step1">
+      <div class="card">
+        <h3>1. Asmeninė Informacija</h3>
+        <div class="form-grid">
+          <div class="field full">
+            <label>Vardas ir Pavardė *</label>
+            <input class="inp" id="fullName" type="text" placeholder="Vardenis Pavardenis" autocomplete="name"/>
+          </div>
+          <div class="field">
+            <label>Gimimo Data *</label>
+            <input class="inp" id="birthDate" type="date" max="" autocomplete="bday"/>
+          </div>
+          <div class="field">
+            <label>Šalis *</label>
+            <select class="inp" id="country">
+              <option value="">— Pasirinkite —</option>
+              <option value="LT">🇱🇹 Lietuva</option>
+              <option value="LV">🇱🇻 Latvija</option>
+              <option value="EE">🇪🇪 Estija</option>
+              <option value="PL">🇵🇱 Lenkija</option>
+              <option value="DE">🇩🇪 Vokietija</option>
+              <option value="GB">🇬🇧 Jungtinė Karalystė</option>
+              <option value="FR">🇫🇷 Prancūzija</option>
+              <option value="SE">🇸🇪 Švedija</option>
+              <option value="NO">🇳🇴 Norvegija</option>
+              <option value="FI">🇫🇮 Suomija</option>
+              <option value="NL">🇳🇱 Nyderlandai</option>
+              <option value="BE">🇧🇪 Belgija</option>
+              <option value="AT">🇦🇹 Austrija</option>
+              <option value="CH">🇨🇭 Šveicarija</option>
+              <option value="OTHER">🌍 Kita</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Dokumento Tipas *</label>
+            <select class="inp" id="idType">
+              <option value="passport">Pasas</option>
+              <option value="id_card">Asmens tapatybės kortelė</option>
+              <option value="drivers_license">Vairuotojo pažymėjimas</option>
+              <option value="residence_permit">Leidimas gyventi</option>
+            </select>
+          </div>
+        </div>
+        <div class="info-box">
+          <strong>ℹ️ Svarbu:</strong> Vardas ir pavardė turi tiksliai sutapti su dokumentuose nurodytais. Amžius bus automatiškai patikrintas — žaisti leidžiama tik nuo <strong>18 metų</strong>.
+        </div>
+        <div class="err-box" id="err1"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="goStep2()">Tęsti →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Documents -->
+    <div class="step-content" id="step2">
+      <div class="card">
+        <h3>2. Dokumentų Įkėlimas</h3>
+        <p style="font-size:12px;color:rgba(232,224,208,.4);margin-bottom:20px;line-height:1.7;">
+          Įkelkite aiškias, nesuglamžytas nuotraukas. Dokumentai turi būti galiojantys ir nesibaigiančiu terminu.
+        </p>
+
+        <div class="upload-grid">
+          <!-- ID Front -->
+          <div>
+            <div style="font-size:11px;letter-spacing:2px;color:rgba(232,224,208,.3);text-transform:uppercase;margin-bottom:8px;">
+              Dokumento Priekinė Pusė <span class="required-badge">PRIVALOMA</span>
+            </div>
+            <div class="upload-zone" id="zone-id_front" onclick="triggerUpload('id_front')">
+              <input type="file" id="file-id_front" accept="image/*,.pdf" onchange="handleFile('id_front',this)"/>
+              <span class="upload-icon">🪪</span>
+              <div class="upload-title">Priekinė pusė</div>
+              <div class="upload-sub">JPG, PNG arba PDF · maks. 8 MB</div>
+              <div class="upload-filename" id="fn-id_front"></div>
+            </div>
+          </div>
+          <!-- ID Back -->
+          <div>
+            <div style="font-size:11px;letter-spacing:2px;color:rgba(232,224,208,.3);text-transform:uppercase;margin-bottom:8px;">
+              Dokumento Galinė Pusė <span class="optional-badge">REKOMENDUOJAMA</span>
+            </div>
+            <div class="upload-zone" id="zone-id_back" onclick="triggerUpload('id_back')">
+              <input type="file" id="file-id_back" accept="image/*,.pdf" onchange="handleFile('id_back',this)"/>
+              <span class="upload-icon">🪪</span>
+              <div class="upload-title">Galinė pusė</div>
+              <div class="upload-sub">JPG, PNG arba PDF · maks. 8 MB</div>
+              <div class="upload-filename" id="fn-id_back"></div>
+            </div>
+          </div>
+          <!-- Selfie -->
+          <div style="grid-column:1/-1;">
+            <div style="font-size:11px;letter-spacing:2px;color:rgba(232,224,208,.3);text-transform:uppercase;margin-bottom:8px;">
+              Selfie su Dokumentu <span class="required-badge">PRIVALOMA</span>
+            </div>
+            <div class="upload-zone" id="zone-selfie" onclick="triggerUpload('selfie')" style="max-width:100%;">
+              <input type="file" id="file-selfie" accept="image/*" capture="user" onchange="handleFile('selfie',this)"/>
+              <span class="upload-icon">🤳</span>
+              <div class="upload-title">Nuotrauka su dokumentu rankose</div>
+              <div class="upload-sub">Laikykite dokumentą matomomis detalėmis · JPG arba PNG · maks. 8 MB</div>
+              <div class="upload-filename" id="fn-selfie"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-box" style="background:rgba(0,230,118,.05);border-color:rgba(0,230,118,.15);color:rgba(0,230,118,.7);">
+          <strong>✅ Priimami dokumentai:</strong><br/>
+          <ul class="docs-list" style="margin-top:8px;">
+            <li>Pasas (visos šalys)</li>
+            <li>Asmens tapatybės kortelė (ES šalys)</li>
+            <li>Vairuotojo pažymėjimas (su nuotrauka)</li>
+            <li>Leidimas gyventi</li>
+          </ul>
+        </div>
+        <div class="err-box" id="err2"></div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="goStep1()">← Atgal</button>
+          <button class="btn btn-primary" onclick="goStep3()">Peržiūrėti →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Review & Submit -->
+    <div class="step-content" id="step3">
+      <div class="card">
+        <h3>3. Peržiūra ir Pateikimas</h3>
+        <div id="reviewContent" style="font-size:13px;color:rgba(232,224,208,.7);line-height:2;"></div>
+        <div class="info-box" style="margin-top:20px;">
+          <strong>🔒 Duomenų apsauga:</strong> Jūsų dokumentai saugomi užšifruoti ir naudojami tik amžiaus bei tapatybės patikrinimui. Duomenys neperduodami trečiosioms šalims.
+        </div>
+        <div class="err-box" id="err3"></div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="goStep2()">← Atgal</button>
+          <button class="btn btn-primary" id="submitBtn" onclick="submitKYC()">
+            Pateikti Dokumentus ✓
+          </button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /formSection -->
+
+  <!-- No UID message -->
+  <div id="noUid" style="display:none;text-align:center;padding:60px 20px;">
+    <div style="font-size:48px;margin-bottom:16px;">⚠️</div>
+    <div style="font-family:'Orbitron',monospace;font-size:18px;color:var(--gold);margin-bottom:12px;">Sesija nerasta</div>
+    <div style="font-size:13px;color:rgba(232,224,208,.4);margin-bottom:24px;">Pirmiausia prisijunkite prie kazino, tada grįžkite čia.</div>
+    <a class="back" href="/" style="display:inline-block;padding:12px 28px;color:var(--cream);">← Eiti į Kazino</a>
+  </div>
+</div>
+
+<script>
+let uid = null;
+let uploadedFiles = {};
+let formData = {};
+
+// ── Init ──────────────────────────────────────────────────
+window.onload = async () => {
+  uid = localStorage.getItem('casino_uid');
+  if(!uid) { document.getElementById('noUid').style.display='block'; return; }
+
+  // Set max birth date to today
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('birthDate').max = today;
+
+  // Check existing KYC status
+  try {
+    const r = await fetch(`/api/kyc/status/${uid}`);
+    const data = await r.json();
+    showStatus(data);
+  } catch(e) {
+    showFormSection();
+  }
+};
+
+function showStatus(data) {
+  const card = document.getElementById('statusCard');
+  const icon = document.getElementById('statusIcon');
+  const title = document.getElementById('statusTitle');
+  const desc = document.getElementById('statusDesc');
+  const reason = document.getElementById('rejectionReason');
+
+  if(data.status === 'approved') {
+    card.className = 'status-card approved visible';
+    icon.textContent = '✅';
+    title.textContent = 'Paskyra Patvirtinta!';
+    desc.textContent = 'Jūsų tapatybė sėkmingai patvirtinta. Galite žaisti visus kazino žaidimus. Linkime sėkmės!';
+  } else if(data.status === 'pending') {
+    card.className = 'status-card pending visible';
+    icon.textContent = '⏳';
+    title.textContent = 'Laukiama Peržiūros';
+    desc.textContent = 'Jūsų dokumentai pateikti ir yra tikrinami. Tai paprastai užtrunka 1–24 valandas. Gavę patvirtinimą, gausite pranešimą.';
+  } else if(data.status === 'rejected') {
+    card.className = 'status-card rejected visible';
+    icon.textContent = '❌';
+    title.textContent = 'Dokumentai Atmesti';
+    desc.textContent = 'Apgailestaujame, jūsų dokumentai nebuvo priimti. Galite pateikti naujus dokumentus.';
+    if(data.rejection_reason) {
+      reason.textContent = '📋 Priežastis: ' + data.rejection_reason;
+      reason.style.display = 'block';
+    }
+    // Allow resubmission
+    setTimeout(() => showFormSection(), 100);
+  } else {
+    // unverified — show form immediately
+    showFormSection();
+    return;
+  }
+}
+
+function showFormSection() {
+  document.getElementById('formSection').style.display = 'block';
+}
+
+// ── Steps navigation ──────────────────────────────────────
+function goStep1() {
+  setStep(1);
+}
+
+function goStep2() {
+  const name = document.getElementById('fullName').value.trim();
+  const dob = document.getElementById('birthDate').value;
+  const country = document.getElementById('country').value;
+  const err = document.getElementById('err1');
+
+  if(!name) { showErr(err,'Įveskite vardą ir pavardę'); return; }
+  if(!dob) { showErr(err,'Pasirinkite gimimo datą'); return; }
+  if(!country) { showErr(err,'Pasirinkite šalį'); return; }
+
+  // Age check client side
+  const age = calcAge(dob);
+  if(age < 18) {
+    showErr(err,'⛔ Jums turi būti bent 18 metų. Iki 18 metų kazino paslaugos neteikiamos.');
+    return;
+  }
+  if(age > 120) { showErr(err,'Neteisinga gimimo data'); return; }
+
+  hideErr(err);
+  formData.full_name = name;
+  formData.birth_date = dob;
+  formData.country = country;
+  formData.id_type = document.getElementById('idType').value;
+  setStep(2);
+}
+
+function goStep3() {
+  const err = document.getElementById('err2');
+  if(!uploadedFiles['id_front']) { showErr(err,'Privaloma įkelti dokumento priekinę pusę'); return; }
+  if(!uploadedFiles['selfie']) { showErr(err,'Privaloma įkelti selfie su dokumentu'); return; }
+  hideErr(err);
+
+  // Build review
+  const idTypeNames = {
+    passport:'Pasas', id_card:'Asmens tapatybės kortelė',
+    drivers_license:'Vairuotojo pažymėjimas', residence_permit:'Leidimas gyventi'
+  };
+  const countryNames = {LT:'Lietuva',LV:'Latvija',EE:'Estija',PL:'Lenkija',DE:'Vokietija',
+    GB:'Jungtinė Karalystė',FR:'Prancūzija',SE:'Švedija',NO:'Norvegija',FI:'Suomija',
+    NL:'Nyderlandai',BE:'Belgija',AT:'Austrija',CH:'Šveicarija',OTHER:'Kita'};
+
+  document.getElementById('reviewContent').innerHTML = `
+    <table style="width:100%;border-collapse:collapse;">
+      <tr><td style="padding:8px 0;color:rgba(232,224,208,.35);width:40%">Vardas ir pavardė</td><td style="color:var(--cream)">${esc(formData.full_name)}</td></tr>
+      <tr><td style="padding:8px 0;color:rgba(232,224,208,.35)">Gimimo data</td><td style="color:var(--cream)">${formData.birth_date} (${calcAge(formData.birth_date)} m.)</td></tr>
+      <tr><td style="padding:8px 0;color:rgba(232,224,208,.35)">Šalis</td><td style="color:var(--cream)">${countryNames[formData.country]||formData.country}</td></tr>
+      <tr><td style="padding:8px 0;color:rgba(232,224,208,.35)">Dokumento tipas</td><td style="color:var(--cream)">${idTypeNames[formData.id_type]||formData.id_type}</td></tr>
+      <tr><td style="padding:8px 0;color:rgba(232,224,208,.35)">Dokumentai</td><td style="color:var(--green)">
+        ✓ Priekinė pusė${uploadedFiles['id_back']?' · ✓ Galinė pusė':''} · ✓ Selfie
+      </td></tr>
+    </table>
+  `;
+  setStep(3);
+}
+
+function setStep(n) {
+  for(let i=1;i<=3;i++){
+    document.getElementById('step'+i).classList.toggle('active', i===n);
+    const si = document.getElementById('stp'+i);
+    si.classList.remove('active','done');
+    if(i===n) si.classList.add('active');
+    else if(i<n) si.classList.add('done');
+    if(i<n) si.querySelector('.step-circle').textContent='✓';
+    else if(i>n) si.querySelector('.step-circle').textContent=i;
+  }
+}
+
+// ── File uploads ──────────────────────────────────────────
+function triggerUpload(field) {
+  document.getElementById('file-'+field).click();
+}
+
+function handleFile(field, input) {
+  const file = input.files[0];
+  if(!file) return;
+  uploadedFiles[field] = file;
+  const zone = document.getElementById('zone-'+field);
+  zone.classList.add('has-file');
+  document.getElementById('fn-'+field).textContent = '✓ ' + file.name;
+}
+
+// Drag & drop
+['id_front','id_back','selfie'].forEach(field => {
+  window.addEventListener('DOMContentLoaded', () => {
+    const zone = document.getElementById('zone-'+field);
+    if(!zone) return;
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault(); zone.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if(file) { uploadedFiles[field]=file; zone.classList.add('has-file'); document.getElementById('fn-'+field).textContent='✓ '+file.name; }
+    });
+  });
+});
+
+// ── Submit ────────────────────────────────────────────────
+async function submitKYC() {
+  const btn = document.getElementById('submitBtn');
+  const err = document.getElementById('err3');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Siunčiama...';
+
+  const fd = new FormData();
+  fd.append('uid', uid);
+  fd.append('full_name', formData.full_name);
+  fd.append('birth_date', formData.birth_date);
+  fd.append('country', formData.country);
+  fd.append('id_type', formData.id_type);
+  if(uploadedFiles.id_front) fd.append('id_front', uploadedFiles.id_front);
+  if(uploadedFiles.id_back) fd.append('id_back', uploadedFiles.id_back);
+  if(uploadedFiles.selfie) fd.append('selfie', uploadedFiles.selfie);
+
+  try {
+    const r = await fetch('/api/kyc/submit', {method:'POST', body:fd});
+    const data = await r.json();
+    if(data.ok) {
+      document.getElementById('formSection').style.display='none';
+      showStatus({status:'pending'});
+      document.getElementById('statusCard').classList.add('visible');
+    } else {
+      showErr(err, data.error||'Įvyko klaida. Bandykite dar kartą.');
+      btn.disabled = false;
+      btn.innerHTML = 'Pateikti Dokumentus ✓';
+    }
+  } catch(e) {
+    showErr(err,'Ryšio klaida. Patikrinkite internetą ir bandykite dar kartą.');
+    btn.disabled = false;
+    btn.innerHTML = 'Pateikti Dokumentus ✓';
+  }
+}
+
+// ── Helpers ───────────────────────────────────────────────
+function calcAge(dob) {
+  const today = new Date(), b = new Date(dob);
+  let age = today.getFullYear() - b.getFullYear();
+  const m = today.getMonth() - b.getMonth();
+  if(m < 0 || (m === 0 && today.getDate() < b.getDate())) age--;
+  return age;
+}
+function showErr(el, msg) { el.textContent = msg; el.classList.add('visible'); el.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+function hideErr(el) { el.classList.remove('visible'); }
+function esc(s) { return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+</script>
+</body>
+</html>

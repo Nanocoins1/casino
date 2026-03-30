@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>HATHOR — Baccarat</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#04040a;--bg2:#080812;
+  --gold:#f0c060;--gold2:#ffd980;--gold3:#8a6020;
+  --green:#00e676;--red:#ff3d71;--neon:#00e5ff;
+  --cream:#e8e0d0;--border:rgba(255,255,255,0.08);--glass:rgba(255,255,255,0.04);
+  --felt:#0a2a14;--felt2:#0d3318;--felt-border:rgba(255,255,255,0.12);
+  --card-bg:#fdf8f0;--card-red:#d42b2b;--card-black:#0d0d1a;
+}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cream);display:flex;flex-direction:column;}
+
+/* ── Header ── */
+.header{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;
+  background:rgba(4,4,10,.98);border-bottom:1px solid var(--border);flex-shrink:0;z-index:10;}
+.back-btn{padding:6px 14px;border-radius:7px;border:1px solid var(--border);background:var(--glass);
+  color:rgba(232,224,208,.5);font-size:11px;cursor:pointer;text-decoration:none;transition:all .2s;letter-spacing:1px;}
+.back-btn:hover{color:var(--cream);border-color:rgba(255,255,255,.2);}
+.game-title{font-family:'Orbitron',monospace;font-size:18px;font-weight:900;letter-spacing:3px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;background-clip:text;}
+.balance-wrap{display:flex;align-items:center;gap:6px;}
+.balance-label{font-size:10px;letter-spacing:2px;color:rgba(232,224,208,.4);}
+.balance-val{font-family:'DM Mono',monospace;font-size:15px;color:var(--gold);font-weight:700;}
+
+/* ── Main layout ── */
+.main{flex:1;display:grid;grid-template-columns:1fr 300px;overflow:hidden;}
+@media(max-width:900px){.main{grid-template-columns:1fr;grid-template-rows:1fr auto;}}
+
+/* ── Table area ── */
+.table-area{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse 80% 60% at 50% 50%,#0d3a1a,#04040a);
+  padding:20px;gap:16px;overflow:hidden;position:relative;}
+
+/* Felt table */
+.felt-table{width:100%;max-width:700px;background:var(--felt);border-radius:20px;
+  border:2px solid rgba(255,255,255,0.1);box-shadow:0 0 60px rgba(0,0,0,.8),inset 0 0 40px rgba(0,0,0,.4);
+  padding:20px;display:flex;flex-direction:column;gap:16px;position:relative;}
+.felt-table::before{content:'';position:absolute;inset:4px;border-radius:16px;
+  border:1px solid rgba(255,255,255,0.06);pointer-events:none;}
+
+/* Deck position (for animation origin) */
+.deck-slot{position:absolute;top:20px;right:20px;width:52px;height:74px;
+  border-radius:6px;border:2px dashed rgba(255,255,255,0.15);
+  background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;}
+.deck-slot-inner{width:44px;height:66px;border-radius:4px;
+  background:linear-gradient(135deg,#1a1a4e,#2a2a6e);border:1px solid rgba(255,255,255,.1);
+  display:flex;align-items:center;justify-content:center;font-size:20px;}
+
+/* Hands row */
+.hands-row{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:start;}
+
+.hand-zone{display:flex;flex-direction:column;align-items:center;gap:8px;}
+.hand-label{font-size:10px;letter-spacing:3px;color:rgba(232,224,208,.5);font-weight:700;}
+.hand-label.winner-label{color:var(--gold);text-shadow:0 0 12px var(--gold);}
+.cards-row{display:flex;gap:6px;min-height:80px;align-items:center;justify-content:center;flex-wrap:wrap;}
+.hand-score{font-family:'Orbitron',monospace;font-size:22px;font-weight:900;color:rgba(232,224,208,.15);
+  transition:all .4s;min-width:32px;text-align:center;}
+.hand-score.visible{color:var(--cream);}
+.hand-score.natural{color:var(--gold);text-shadow:0 0 16px var(--gold);}
+
+/* Tie divider */
+.tie-divider{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding-top:20px;}
+.vs-text{font-family:'Orbitron',monospace;font-size:11px;color:rgba(232,224,208,.3);letter-spacing:2px;}
+
+/* Betting areas on felt */
+.bet-areas-row{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;}
+.bet-area{padding:10px 8px;border-radius:10px;border:2px solid rgba(255,255,255,.12);
+  background:rgba(0,0,0,.25);cursor:pointer;transition:all .25s;text-align:center;position:relative;
+  min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;}
+.bet-area:hover{border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.06);}
+.bet-area.selected{border-color:var(--gold);background:rgba(240,192,96,.1);box-shadow:0 0 16px rgba(240,192,96,.2);}
+.bet-area.win-flash{animation:winFlash .8s ease;}
+@keyframes winFlash{0%,100%{background:rgba(0,230,118,.1);border-color:var(--green);}
+  50%{background:rgba(0,230,118,.3);border-color:var(--green);box-shadow:0 0 30px rgba(0,230,118,.4);}}
+.bet-area-name{font-size:9px;letter-spacing:2px;font-weight:700;color:rgba(232,224,208,.5);}
+.bet-area-odds{font-family:'DM Mono',monospace;font-size:10px;color:rgba(232,224,208,.35);}
+.bet-area-chip{position:absolute;top:-10px;right:-8px;width:28px;height:28px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;
+  font-size:9px;font-weight:800;display:none;align-items:center;justify-content:center;
+  border:2px solid rgba(0,0,0,.4);box-shadow:0 2px 8px rgba(0,0,0,.4);}
+.bet-area-chip.visible{display:flex;}
+.bet-area.player-area.selected{border-color:#00e5ff;background:rgba(0,229,255,.08);}
+.bet-area.tie-area.selected{border-color:var(--gold);background:rgba(240,192,96,.1);}
+.bet-area.banker-area.selected{border-color:var(--red);background:rgba(255,61,113,.08);}
+.bet-area.tie-area{min-width:70px;}
+
+/* Playing cards */
+.card{width:52px;height:74px;border-radius:6px;background:var(--card-bg);
+  border:1px solid rgba(0,0,0,.15);box-shadow:2px 4px 12px rgba(0,0,0,.5);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;cursor:default;flex-shrink:0;
+  transform-style:preserve-3d;transition:transform .5s cubic-bezier(.4,0,.2,1);}
+.card.face-down{transform:rotateY(180deg);}
+.card-inner{width:100%;height:100%;border-radius:6px;transform-style:preserve-3d;position:relative;}
+.card-front,.card-back{position:absolute;inset:0;border-radius:6px;backface-visibility:hidden;
+  display:flex;align-items:center;justify-content:center;}
+.card-back{background:linear-gradient(135deg,#1a1a4e,#2a2a6e);
+  border:1px solid rgba(255,255,255,.1);transform:rotateY(0deg);}
+.card-back-inner{width:38px;height:58px;border-radius:3px;
+  border:2px solid rgba(255,255,255,.15);
+  background:repeating-linear-gradient(45deg,rgba(255,255,255,.03) 0,rgba(255,255,255,.03) 2px,transparent 2px,transparent 8px);}
+.card-front{background:var(--card-bg);transform:rotateY(180deg);
+  flex-direction:column;justify-content:flex-start;padding:3px;}
+.card-rank-top{font-family:'DM Mono',monospace;font-size:13px;font-weight:700;line-height:1;align-self:flex-start;}
+.card-suit-top{font-size:10px;line-height:1;align-self:flex-start;margin-top:-1px;}
+.card-center-suit{font-size:26px;line-height:1;margin:auto;}
+.card-rank-bot{font-family:'DM Mono',monospace;font-size:13px;font-weight:700;line-height:1;
+  align-self:flex-end;transform:rotate(180deg);}
+.card.red .card-rank-top,.card.red .card-suit-top,.card.red .card-rank-bot,.card.red .card-center-suit{color:var(--card-red);}
+.card.black .card-rank-top,.card.black .card-suit-top,.card.black .card-rank-bot,.card.black .card-center-suit{color:var(--card-black);}
+
+/* Card slide-in animation */
+@keyframes slideInLeft{from{transform:translateX(200px) translateY(-60px) rotate(15deg);opacity:0;}to{transform:none;opacity:1;}}
+@keyframes slideInRight{from{transform:translateX(-200px) translateY(-60px) rotate(-15deg);opacity:0;}to{transform:none;opacity:1;}}
+.card.deal-player{animation:slideInLeft .45s cubic-bezier(.2,.8,.4,1) forwards;}
+.card.deal-banker{animation:slideInRight .45s cubic-bezier(.2,.8,.4,1) forwards;}
+
+/* Status bar */
+.status-bar{text-align:center;min-height:36px;display:flex;align-items:center;justify-content:center;}
+.status-msg{font-family:'Orbitron',monospace;font-size:13px;letter-spacing:2px;
+  color:rgba(232,224,208,.5);transition:all .3s;}
+.status-msg.active{color:var(--cream);}
+.status-msg.win{color:var(--green);text-shadow:0 0 16px var(--green);}
+.status-msg.lose{color:var(--red);}
+.status-msg.tie{color:var(--gold);text-shadow:0 0 12px var(--gold);}
+.status-msg.natural{color:var(--gold2);text-shadow:0 0 20px var(--gold);}
+
+/* ── Right panel ── */
+.right-panel{background:var(--bg2);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;}
+
+.panel-section{padding:14px 16px;border-bottom:1px solid var(--border);}
+.panel-title{font-size:9px;letter-spacing:3px;color:rgba(232,224,208,.35);font-weight:700;margin-bottom:10px;}
+
+/* Bet type selector */
+.bet-type-tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;}
+.btt{padding:8px 4px;border-radius:7px;border:1px solid var(--border);background:var(--glass);
+  color:rgba(232,224,208,.4);font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer;
+  text-align:center;transition:all .2s;}
+.btt:hover{color:var(--cream);border-color:rgba(255,255,255,.2);}
+.btt.active.player{background:rgba(0,229,255,.12);border-color:#00e5ff;color:#00e5ff;}
+.btt.active.tie{background:rgba(240,192,96,.12);border-color:var(--gold);color:var(--gold);}
+.btt.active.banker{background:rgba(255,61,113,.12);border-color:var(--red);color:var(--red);}
+
+/* Amount input */
+.amount-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.amount-input{flex:1;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:8px;
+  color:var(--cream);font-family:'DM Mono',monospace;font-size:16px;font-weight:700;
+  padding:8px 12px;outline:none;transition:border-color .2s;min-width:0;}
+.amount-input:focus{border-color:var(--gold);}
+.quick-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;}
+.qbtn{padding:6px 2px;border-radius:6px;border:1px solid var(--border);background:var(--glass);
+  color:rgba(232,224,208,.5);font-size:10px;font-weight:700;cursor:pointer;
+  text-align:center;transition:all .2s;letter-spacing:0.5px;}
+.qbtn:hover{color:var(--cream);border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.06);}
+
+/* Deal button */
+.deal-btn{width:100%;padding:14px;border-radius:10px;border:none;cursor:pointer;
+  font-family:'Orbitron',monospace;font-size:14px;font-weight:900;letter-spacing:2px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;
+  transition:all .2s;box-shadow:0 4px 20px rgba(240,192,96,.3);}
+.deal-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 28px rgba(240,192,96,.45);}
+.deal-btn:active:not(:disabled){transform:translateY(0);}
+.deal-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.deal-btn.dealing{background:linear-gradient(135deg,#555,#666);color:rgba(255,255,255,.6);}
+
+/* Current bet display */
+.current-bet-info{display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
+.cbi-label{font-size:10px;letter-spacing:1px;color:rgba(232,224,208,.3);}
+.cbi-val{font-family:'DM Mono',monospace;font-size:13px;color:var(--gold);}
+
+/* History */
+.history-pills{display:flex;flex-wrap:wrap;gap:4px;}
+.history-pill{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:800;letter-spacing:0.5px;}
+.history-pill.B{background:rgba(255,61,113,.2);color:var(--red);border:1px solid rgba(255,61,113,.3);}
+.history-pill.P{background:rgba(0,229,255,.15);color:#00e5ff;border:1px solid rgba(0,229,255,.25);}
+.history-pill.T{background:rgba(240,192,96,.15);color:var(--gold);border:1px solid rgba(240,192,96,.25);}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
+.stat-box{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;
+  padding:8px;text-align:center;}
+.stat-val{font-family:'DM Mono',monospace;font-size:16px;font-weight:700;}
+.stat-val.p{color:#00e5ff;}
+.stat-val.t{color:var(--gold);}
+.stat-val.b{color:var(--red);}
+.stat-label{font-size:8px;letter-spacing:1.5px;color:rgba(232,224,208,.3);margin-top:2px;}
+
+/* Win popup */
+.win-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);
+  background:linear-gradient(135deg,#0d2a14,#1a4a22);border:2px solid var(--green);
+  border-radius:16px;padding:28px 40px;text-align:center;z-index:100;
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1);pointer-events:none;
+  box-shadow:0 0 60px rgba(0,230,118,.3);}
+.win-popup.show{transform:translate(-50%,-50%) scale(1);}
+.win-popup.lose-popup{background:linear-gradient(135deg,#2a0d0d,#4a1a1a);border-color:var(--red);
+  box-shadow:0 0 60px rgba(255,61,113,.3);}
+.wp-label{font-size:10px;letter-spacing:3px;color:rgba(232,224,208,.5);margin-bottom:6px;}
+.wp-amount{font-family:'Orbitron',monospace;font-size:32px;font-weight:900;color:var(--green);}
+.wp-amount.lose{color:var(--red);}
+.wp-sub{font-size:11px;color:rgba(232,224,208,.4);margin-top:4px;}
+.overlay-bg{position:fixed;inset:0;z-index:99;display:none;}
+.overlay-bg.show{display:block;}
+
+/* ── Mobile panel ── */
+@media(max-width:900px){
+  .right-panel{border-left:none;border-top:1px solid var(--border);max-height:300px;overflow-y:auto;}
+  .table-area{padding:12px;}
+  .felt-table{padding:12px;}
+  .card{width:44px;height:63px;}
+  .card-rank-top,.card-rank-bot{font-size:11px;}
+  .card-center-suit{font-size:20px;}
+}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--gold3);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="/" class="back-btn">← ATGAL</a>
+  <div class="game-title">🃏 BACCARAT</div>
+  <div class="balance-wrap">
+    <span class="balance-label">BALANSAS</span>
+    <span class="balance-val" id="balanceDisplay">0</span>
+  </div>
+</div>
+
+<div class="main">
+  <!-- ── Felt Table ── -->
+  <div class="table-area">
+    <div class="felt-table">
+      <!-- Deck -->
+      <div class="deck-slot">
+        <div class="deck-slot-inner">🂠</div>
+      </div>
+
+      <!-- Hands -->
+      <div class="hands-row">
+        <!-- Player hand -->
+        <div class="hand-zone" id="playerZone">
+          <div class="hand-label" id="playerLabel">ŽAIDĖJAS</div>
+          <div class="cards-row" id="playerCards"></div>
+          <div class="hand-score" id="playerScore">—</div>
+        </div>
+
+        <!-- Tie divider -->
+        <div class="tie-divider">
+          <div class="vs-text">VS</div>
+        </div>
+
+        <!-- Banker hand -->
+        <div class="hand-zone" id="bankerZone">
+          <div class="hand-label" id="bankerLabel">BANKININKAS</div>
+          <div class="cards-row" id="bankerCards"></div>
+          <div class="hand-score" id="bankerScore">—</div>
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div class="status-bar">
+        <div class="status-msg" id="statusMsg">Pasirinkite lažybą ir spauskite DALINTI</div>
+      </div>
+
+      <!-- Betting areas on felt -->
+      <div class="bet-areas-row">
+        <div class="bet-area player-area" id="feltPlayer" onclick="selectBetType('player')">
+          <div class="bet-area-name">ŽAIDĖJAS</div>
+          <div class="bet-area-odds">1:1</div>
+          <div class="bet-area-chip" id="chipPlayer">●</div>
+        </div>
+        <div class="bet-area tie-area" id="feltTie" onclick="selectBetType('tie')">
+          <div class="bet-area-name">LYGIOSIOS</div>
+          <div class="bet-area-odds">8:1</div>
+          <div class="bet-area-chip" id="chipTie">●</div>
+        </div>
+        <div class="bet-area banker-area" id="feltBanker" onclick="selectBetType('banker')">
+          <div class="bet-area-name">BANKININKAS</div>
+          <div class="bet-area-odds">0.95:1</div>
+          <div class="bet-area-chip" id="chipBanker">●</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Right Panel ── -->
+  <div class="right-panel">
+    <!-- Bet type -->
+    <div class="panel-section">
+      <div class="panel-title">LAŽYBOS TIPAS</div>
+      <div class="bet-type-tabs">
+        <div class="btt player" id="tabPlayer" onclick="selectBetType('player')">ŽAIDĖJAS</div>
+        <div class="btt tie" id="tabTie" onclick="selectBetType('tie')">LYGIOSIOS</div>
+        <div class="btt banker" id="tabBanker" onclick="selectBetType('banker')">BANKININKAS</div>
+      </div>
+    </div>
+
+    <!-- Amount -->
+    <div class="panel-section">
+      <div class="panel-title">SUMA</div>
+      <div class="amount-row">
+        <input type="number" class="amount-input" id="betAmount" value="10" min="1" max="99999" placeholder="0"/>
+      </div>
+      <div class="quick-btns">
+        <div class="qbtn" onclick="setQuick(5)">5</div>
+        <div class="qbtn" onclick="setQuick(25)">25</div>
+        <div class="qbtn" onclick="setQuick(100)">100</div>
+        <div class="qbtn" onclick="setQuick(500)">500</div>
+        <div class="qbtn" onclick="halveBet()">½</div>
+        <div class="qbtn" onclick="doubleBet()">×2</div>
+        <div class="qbtn" onclick="setQuick(1000)">1K</div>
+        <div class="qbtn" onclick="maxBet()">MAX</div>
+      </div>
+      <div class="current-bet-info">
+        <span class="cbi-label">PASIRINKTA:</span>
+        <span class="cbi-val" id="currentBetLabel">—</span>
+      </div>
+    </div>
+
+    <!-- Deal -->
+    <div class="panel-section">
+      <button class="deal-btn" id="dealBtn" onclick="startRound()">DALINTI</button>
+    </div>
+
+    <!-- History -->
+    <div class="panel-section">
+      <div class="panel-title">PASKUTINIAI 10</div>
+      <div class="history-pills" id="historyPills">
+        <span style="font-size:11px;color:rgba(232,224,208,.2)">Nėra istorijos</span>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="panel-section">
+      <div class="panel-title">STATISTIKA</div>
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-val p" id="statP">0</div>
+          <div class="stat-label">ŽAIDĖJAS</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val t" id="statT">0</div>
+          <div class="stat-label">LYGIOSIOS</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val b" id="statB">0</div>
+          <div class="stat-label">BANKININKAS</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Win popup -->
+<div class="overlay-bg" id="overlayBg" onclick="closePopup()"></div>
+<div class="win-popup" id="winPopup">
+  <div class="wp-label" id="wpLabel">LAIMĖJOTE</div>
+  <div class="wp-amount" id="wpAmount">+0</div>
+  <div class="wp-sub" id="wpSub"></div>
+</div>
+
+<script>
+// ── Auth guard ──
+const uid = localStorage.getItem('uid');
+const tokens = parseFloat(localStorage.getItem('tokens') || '0');
+if (!uid) { location.href = '/login.html'; }
+
+// ── State ──
+let balance = tokens;
+let betType = null;       // 'player' | 'tie' | 'banker'
+let betAmount = 10;
+let isDealing = false;
+let history = JSON.parse(localStorage.getItem('bac_history') || '[]');
+let stats = JSON.parse(localStorage.getItem('bac_stats') || '{"P":0,"T":0,"B":0}');
+let deck = [];
+
+// ── Balance display ──
+function renderBalance() {
+  document.getElementById('balanceDisplay').textContent = balance.toLocaleString('lt-LT', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+renderBalance();
+
+// ── Deck helpers ──
+const SUITS = ['♠','♥','♦','♣'];
+const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+const RED_SUITS = new Set(['♥','♦']);
+
+function buildDeck() {
+  deck = [];
+  for (const suit of SUITS)
+    for (const rank of RANKS)
+      deck.push({ rank, suit, isRed: RED_SUITS.has(suit) });
+  // Shuffle (8-deck shoe)
+  for (let d = 0; d < 7; d++)
+    for (const suit of SUITS)
+      for (const rank of RANKS)
+        deck.push({ rank, suit, isRed: RED_SUITS.has(suit) });
+  shuffle(deck);
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+function drawCard() {
+  if (deck.length < 10) buildDeck();
+  return deck.pop();
+}
+
+function cardValue(card) {
+  if (['10','J','Q','K'].includes(card.rank)) return 0;
+  if (card.rank === 'A') return 1;
+  return parseInt(card.rank, 10);
+}
+
+function handTotal(cards) {
+  return cards.reduce((s, c) => s + cardValue(c), 0) % 10;
+}
+
+// ── Card rendering ──
+function createCardEl(card, faceDown, side) {
+  const el = document.createElement('div');
+  el.className = 'card' + (card.isRed ? ' red' : ' black') + ` deal-${side}`;
+  el.innerHTML = `
+    <div class="card-front">
+      <span class="card-rank-top">${card.rank}</span>
+      <span class="card-suit-top">${card.suit}</span>
+      <span class="card-center-suit">${card.suit}</span>
+      <span class="card-rank-bot">${card.rank}</span>
+    </div>
+    <div class="card-back"><div class="card-back-inner"></div></div>`;
+  if (faceDown) el.classList.add('face-down');
+  return el;
+}
+
+function flipCard(el) {
+  return new Promise(res => {
+    el.style.transition = 'transform .5s cubic-bezier(.4,0,.2,1)';
+    el.classList.remove('face-down');
+    setTimeout(res, 520);
+  });
+}
+
+// ── Bet type selection ──
+function selectBetType(type) {
+  if (isDealing) return;
+  betType = type;
+
+  // Tabs
+  document.querySelectorAll('.btt').forEach(t => t.classList.remove('active'));
+  const tabMap = {player:'tabPlayer', tie:'tabTie', banker:'tabBanker'};
+  document.getElementById(tabMap[type]).classList.add('active');
+
+  // Felt areas
+  document.querySelectorAll('.bet-area').forEach(a => a.classList.remove('selected'));
+  const feltMap = {player:'feltPlayer', tie:'feltTie', banker:'feltBanker'};
+  document.getElementById(feltMap[type]).classList.add('selected');
+
+  // Label
+  const labelMap = {player:'Žaidėjas (1:1)', tie:'Lygiosios (8:1)', banker:'Bankininkas (0.95:1)'};
+  document.getElementById('currentBetLabel').textContent = labelMap[type];
+
+  updateChips();
+}
+
+function updateChips() {
+  document.querySelectorAll('.bet-area-chip').forEach(c => c.classList.remove('visible'));
+  if (!betType) return;
+  const chipMap = {player:'chipPlayer', tie:'chipTie', banker:'chipBanker'};
+  const chip = document.getElementById(chipMap[betType]);
+  if (chip) {
+    chip.classList.add('visible');
+    const amt = parseFloat(document.getElementById('betAmount').value) || 0;
+    chip.textContent = amt >= 1000 ? (amt/1000).toFixed(1)+'K' : amt;
+  }
+}
+
+document.getElementById('betAmount').addEventListener('input', updateChips);
+
+// ── Quick bet buttons ──
+function setQuick(v) { document.getElementById('betAmount').value = v; updateChips(); }
+function halveBet() {
+  const v = parseFloat(document.getElementById('betAmount').value) || 0;
+  document.getElementById('betAmount').value = Math.max(1, Math.floor(v / 2));
+  updateChips();
+}
+function doubleBet() {
+  const v = parseFloat(document.getElementById('betAmount').value) || 0;
+  document.getElementById('betAmount').value = Math.min(balance, v * 2);
+  updateChips();
+}
+function maxBet() {
+  document.getElementById('betAmount').value = Math.floor(balance);
+  updateChips();
+}
+
+// ── Status helper ──
+function setStatus(msg, cls = '') {
+  const el = document.getElementById('statusMsg');
+  el.className = 'status-msg ' + cls;
+  el.textContent = msg;
+}
+
+// ── Score display ──
+function showScore(side, value, isNatural = false) {
+  const el = document.getElementById(side + 'Score');
+  el.textContent = value;
+  el.className = 'hand-score visible' + (isNatural ? ' natural' : '');
+}
+
+function hideScores() {
+  ['player','banker'].forEach(s => {
+    const el = document.getElementById(s + 'Score');
+    el.textContent = '—';
+    el.className = 'hand-score';
+  });
+}
+
+// ── Clear table ──
+function clearTable() {
+  document.getElementById('playerCards').innerHTML = '';
+  document.getElementById('bankerCards').innerHTML = '';
+  hideScores();
+  ['playerLabel','bankerLabel'].forEach(id => {
+    document.getElementById(id).className = 'hand-label';
+  });
+  document.querySelectorAll('.bet-area').forEach(a => a.classList.remove('win-flash'));
+}
+
+// ── Deal animation ──
+function dealCardTo(container, card, faceDown, side, delay = 0) {
+  return new Promise(res => {
+    setTimeout(() => {
+      const el = createCardEl(card, faceDown, side);
+      container.appendChild(el);
+      // Force reflow for animation
+      el.getBoundingClientRect();
+      res(el);
+    }, delay);
+  });
+}
+
+// ── Main round logic ──
+async function startRound() {
+  if (isDealing) return;
+
+  betAmount = parseFloat(document.getElementById('betAmount').value) || 0;
+
+  if (!betType) { setStatus('Pasirinkite lažybos tipą!', 'active'); return; }
+  if (betAmount < 1) { setStatus('Minimalus statymas yra 1!', 'active'); return; }
+  if (betAmount > balance) { setStatus('Nepakanka lėšų!', 'active'); return; }
+
+  isDealing = true;
+  const btn = document.getElementById('dealBtn');
+  btn.disabled = true;
+  btn.classList.add('dealing');
+  btn.textContent = 'DALINAMAS...';
+
+  balance -= betAmount;
+  renderBalance();
+  saveBalance();
+  clearTable();
+  buildDeck();
+
+  const pContainer = document.getElementById('playerCards');
+  const bContainer = document.getElementById('bankerCards');
+
+  // Draw initial 4 cards
+  const pCard1 = drawCard();
+  const bCard1 = drawCard();
+  const pCard2 = drawCard();
+  const bCard2 = drawCard();
+
+  setStatus('Dalinami korteliai...', 'active');
+
+  // Deal animation: p1, b1, p2, b2
+  const elP1 = await dealCardTo(pContainer, pCard1, false, 'player', 0);
+  const elB1 = await dealCardTo(bContainer, bCard1, false, 'banker', 220);
+  const elP2 = await dealCardTo(pContainer, pCard2, false, 'player', 440);
+  const elB2 = await dealCardTo(bContainer, bCard2, false, 'banker', 660);
+
+  await delay(900);
+
+  // Show scores
+  const pTotal = handTotal([pCard1, pCard2]);
+  const bTotal = handTotal([bCard1, bCard2]);
+  const pNatural = pTotal >= 8;
+  const bNatural = bTotal >= 8;
+
+  showScore('player', pTotal, pNatural);
+  showScore('banker', bTotal, bNatural);
+
+  let playerCards = [pCard1, pCard2];
+  let bankerCards = [bCard1, bCard2];
+
+  // Natural check
+  if (pNatural || bNatural) {
+    setStatus('NATURALI RANKA!', 'natural');
+    await delay(800);
+    await resolveRound(playerCards, bankerCards);
+    return;
+  }
+
+  // Third card rules — Player
+  let pDrewThird = false;
+  let pThirdCard = null;
+  if (pTotal <= 5) {
+    setStatus('Žaidėjas ima kortą...', 'active');
+    await delay(500);
+    pThirdCard = drawCard();
+    playerCards.push(pThirdCard);
+    await dealCardTo(pContainer, pThirdCard, false, 'player', 0);
+    pDrewThird = true;
+    await delay(500);
+    showScore('player', handTotal(playerCards), false);
+  }
+
+  // Third card rules — Banker
+  const pFinal = handTotal(playerCards);
+  const bFinal2 = handTotal(bankerCards);
+  let bankerDraws = false;
+
+  if (!pDrewThird) {
+    bankerDraws = bFinal2 <= 5;
+  } else {
+    const pThirdVal = cardValue(pThirdCard);
+    if (bFinal2 <= 2) bankerDraws = true;
+    else if (bFinal2 === 3) bankerDraws = pThirdVal !== 8;
+    else if (bFinal2 === 4) bankerDraws = [2,3,4,5,6,7].includes(pThirdVal);
+    else if (bFinal2 === 5) bankerDraws = [4,5,6,7].includes(pThirdVal);
+    else if (bFinal2 === 6) bankerDraws = [6,7].includes(pThirdVal);
+    else bankerDraws = false;
+  }
+
+  if (bankerDraws) {
+    setStatus('Bankininkas ima kortą...', 'active');
+    await delay(500);
+    const bThirdCard = drawCard();
+    bankerCards.push(bThirdCard);
+    await dealCardTo(bContainer, bThirdCard, false, 'banker', 0);
+    await delay(500);
+    showScore('banker', handTotal(bankerCards), false);
+  }
+
+  await delay(400);
+  await resolveRound(playerCards, bankerCards);
+}
+
+async function resolveRound(playerCards, bankerCards) {
+  const pFinal = handTotal(playerCards);
+  const bFinal = handTotal(bankerCards);
+
+  showScore('player', pFinal, pFinal >= 8);
+  showScore('banker', bFinal, bFinal >= 8);
+
+  let result;
+  if (pFinal > bFinal) result = 'player';
+  else if (bFinal > pFinal) result = 'banker';
+  else result = 'tie';
+
+  // History & stats
+  const rKey = {player:'P', banker:'B', tie:'T'}[result];
+  history.unshift(rKey);
+  if (history.length > 10) history = history.slice(0, 10);
+  stats[rKey] = (stats[rKey] || 0) + 1;
+  localStorage.setItem('bac_history', JSON.stringify(history));
+  localStorage.setItem('bac_stats', JSON.stringify(stats));
+  renderHistory();
+  renderStats();
+
+  // Payout
+  let won = 0;
+  let userWon = false;
+  if (betType === result) {
+    if (result === 'player') won = betAmount * 2;
+    else if (result === 'banker') won = betAmount + Math.floor(betAmount * 0.95 * 100) / 100;
+    else if (result === 'tie') won = betAmount * 9;
+    userWon = true;
+  } else if (result === 'tie' && betType !== 'tie') {
+    // Push: return bet on tie
+    won = betAmount;
+  }
+
+  balance += won;
+  renderBalance();
+  saveBalance();
+
+  // Flash winning area
+  const flashMap = {player:'feltPlayer', tie:'feltTie', banker:'feltBanker'};
+  document.getElementById(flashMap[result]).classList.add('win-flash');
+
+  // Winner label
+  const winnerLabel = {player:'playerLabel', banker:'bankerLabel', tie:null};
+  if (winnerLabel[result]) {
+    document.getElementById(winnerLabel[result]).className = 'hand-label winner-label';
+  }
+
+  // Status message
+  const statusMap = {player:'ŽAIDĖJAS LAIMI!', banker:'BANKININKAS LAIMI!', tie:'LYGIOSIOS!'};
+  const statusClassMap = {player:'win', banker:'lose', tie:'tie'};
+  setStatus(statusMap[result], statusClassMap[result]);
+
+  // API log
+  logGame(betType, result, won > 0 ? won - (result !== 'tie' || betType === 'tie' ? betAmount : 0) : -betAmount);
+
+  // Show popup
+  await delay(600);
+  showResultPopup(userWon, won, result, betType, pFinal, bFinal);
+
+  // Reset dealing state
+  isDealing = false;
+  const btn = document.getElementById('dealBtn');
+  btn.disabled = false;
+  btn.classList.remove('dealing');
+  btn.textContent = 'DALINTI';
+}
+
+function showResultPopup(userWon, won, result, myBet, pScore, bScore) {
+  const popup = document.getElementById('winPopup');
+  const bg = document.getElementById('overlayBg');
+  const label = document.getElementById('wpLabel');
+  const amount = document.getElementById('wpAmount');
+  const sub = document.getElementById('wpSub');
+
+  popup.classList.remove('lose-popup');
+
+  const resultName = {player:'Žaidėjas', banker:'Bankininkas', tie:'Lygiosios'};
+
+  if (result === 'tie' && myBet !== 'tie') {
+    // Push
+    label.textContent = 'LYGIOSIOS — GRĄŽINTA';
+    amount.textContent = `${won.toFixed(2)} ₮`;
+    amount.className = 'wp-amount';
+    sub.textContent = `Žaidėjas: ${pScore} | Bankininkas: ${bScore}`;
+  } else if (userWon) {
+    label.textContent = 'LAIMĖJOTE!';
+    const profit = won - betAmount;
+    amount.textContent = `+${profit.toFixed(2)} ₮`;
+    amount.className = 'wp-amount';
+    sub.textContent = `${resultName[result]} laimėjo! (${pScore} vs ${bScore})`;
+  } else {
+    popup.classList.add('lose-popup');
+    label.textContent = 'PRALAIMĖJOTE';
+    amount.textContent = `-${betAmount.toFixed(2)} ₮`;
+    amount.className = 'wp-amount lose';
+    sub.textContent = `${resultName[result]} laimėjo! (${pScore} vs ${bScore})`;
+  }
+
+  bg.classList.add('show');
+  popup.classList.add('show');
+
+  setTimeout(closePopup, 3200);
+}
+
+function closePopup() {
+  document.getElementById('winPopup').classList.remove('show');
+  document.getElementById('overlayBg').classList.remove('show');
+}
+
+// ── History & Stats ──
+function renderHistory() {
+  const container = document.getElementById('historyPills');
+  if (history.length === 0) {
+    container.innerHTML = '<span style="font-size:11px;color:rgba(232,224,208,.2)">Nėra istorijos</span>';
+    return;
+  }
+  container.innerHTML = history.map(r =>
+    `<div class="history-pill ${r}">${r}</div>`
+  ).join('');
+}
+
+function renderStats() {
+  document.getElementById('statP').textContent = stats.P || 0;
+  document.getElementById('statT').textContent = stats.T || 0;
+  document.getElementById('statB').textContent = stats.B || 0;
+}
+
+// ── Balance persistence ──
+function saveBalance() {
+  localStorage.setItem('tokens', balance.toFixed(2));
+}
+
+// ── API logging ──
+async function logGame(betType, result, netWon) {
+  try {
+    await fetch('/api/log-game', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        uid,
+        game: 'baccarat',
+        bet: betAmount,
+        result: result,
+        won: netWon
+      })
+    });
+  } catch(e) { /* silent */ }
+}
+
+// ── Utility ──
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ── Init ──
+buildDeck();
+renderHistory();
+renderStats();
+setStatus('Pasirinkite lažybą ir spauskite DALINTI');
+</script>
+</body>
+</html>

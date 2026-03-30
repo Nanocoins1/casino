@@ -48,6 +48,20 @@ db.exec(`
     amount INTEGER DEFAULT 50000
   );
   INSERT OR IGNORE INTO jackpot(id,amount) VALUES(1,50000);
+  CREATE TABLE IF NOT EXISTS kyc (
+    uid TEXT PRIMARY KEY,
+    status TEXT DEFAULT 'unverified',
+    full_name TEXT,
+    birth_date TEXT,
+    country TEXT,
+    id_type TEXT DEFAULT 'passport',
+    id_front TEXT,
+    id_back TEXT,
+    selfie TEXT,
+    rejection_reason TEXT,
+    submitted_at TEXT,
+    reviewed_at TEXT
+  );
 `);
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'hathor2026';
@@ -293,7 +307,9 @@ io.on('connection', socket=>{
     socket.uid=id;sockets[id]={socket,user:u};
     const lvInfo=getLvInfo(u.xp||0);
     const nextLv=nextLvInfo(u.xp||0);
-    socket.emit('registered',{uid:id,name:u.name,tokens:u.tokens,avatar:u.avatar,level:u.level,xp:u.xp,levelInfo:lvInfo,nextLevel:nextLv});
+    const kycRow=db.prepare('SELECT status,rejection_reason FROM kyc WHERE uid=?').get(id);
+    const kycStatus=kycRow?.status||'unverified';
+    socket.emit('registered',{uid:id,name:u.name,tokens:u.tokens,avatar:u.avatar,level:u.level,xp:u.xp,levelInfo:lvInfo,nextLevel:nextLv,kycStatus,kycRejectionReason:kycRow?.rejection_reason||null});
     const today=new Date().toISOString().split('T')[0];
     if(u.last_bonus!==today) socket.emit('dailyBonusAvailable');
   });
@@ -310,7 +326,10 @@ io.on('connection', socket=>{
   });
 
   socket.on('saveTokens',({tokens})=>{
-    const u=getUser(socket.uid);if(!u)return;u.tokens=Math.max(0,tokens);saveUser(u);
+    const u=getUser(socket.uid);if(!u)return;
+    const kycRow=db.prepare('SELECT status FROM kyc WHERE uid=?').get(socket.uid);
+    if(!kycRow||kycRow.status!=='approved'){socket.emit('kycRequired');return;}
+    u.tokens=Math.max(0,tokens);saveUser(u);
   });
 
   socket.on('addXP',({xp,game})=>{
@@ -1089,6 +1108,232 @@ app.get('/admin/overview', adminAuth, (req,res)=>{
   res.json({totalPlayers, totalTokens, richest, newest, jackpot: getJackpot()});
 });
 
+
+// ══════════════════════════════════════════════════════════
+// EL. PAŠTO REGISTRACIJA / AUTENTIFIKACIJA
+// ══════════════════════════════════════════════════════════
+db.exec(`
+  CREATE TABLE IF NOT EXISTS auth (
+    uid TEXT PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    salt TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now'))
+  );
+  CREATE TABLE IF NOT EXISTS sessions (
+    token TEXT PRIMARY KEY,
+    uid TEXT NOT NULL,
+    expires_at TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now'))
+  );
+`);
+
+const { scrypt, randomBytes: rndBytes } = require('crypto');
+
+async function hashPwd(password, salt) {
+  return new Promise((resolve, reject) => {
+    scrypt(password, salt, 64, (err, h) => err ? reject(err) : resolve(h.toString('hex')));
+  });
+}
+function makeSession(uid) {
+  const token = rndBytes(32).toString('hex');
+  const exp = new Date(Date.now() + 30*24*60*60*1000).toISOString();
+  db.prepare('INSERT INTO sessions(token,uid,expires_at) VALUES(?,?,?)').run(token, uid, exp);
+  return token;
+}
+function checkSession(token) {
+  if(!token) return null;
+  return db.prepare("SELECT uid FROM sessions WHERE token=? AND expires_at > datetime('now')").get(token)?.uid || null;
+}
+
+// Registracija
+app.post('/api/auth/register', express.json(), async (req, res) => {
+  const { name, email, password } = req.body;
+  if(!name||!email||!password) return res.status(400).json({error:'Trūksta privalomų laukų'});
+  if(password.length < 8) return res.status(400).json({error:'Slaptažodis turi būti bent 8 simbolių'});
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({error:'Neteisingas el. pašto formatas'});
+  const exists = db.prepare('SELECT uid FROM auth WHERE email=?').get(email.toLowerCase());
+  if(exists) return res.status(400).json({error:'Šis el. paštas jau užregistruotas'});
+  try {
+    const salt = rndBytes(16).toString('hex');
+    const hash = await hashPwd(password, salt);
+    const uid = uuidv4();
+    const user = {uid, name, tokens:10000, avatar:null, level:1, xp:0, total_won:0, games_played:0, last_bonus:null};
+    saveUser(user);
+    db.prepare('INSERT INTO auth(uid,email,password_hash,salt) VALUES(?,?,?,?)').run(uid, email.toLowerCase(), hash, salt);
+    const token = makeSession(uid);
+    res.json({ok:true, token, uid, user:{...user, levelInfo:getLvInfo(0), kycStatus:'unverified'}});
+  } catch(e) { res.status(500).json({error:'Serverio klaida: '+e.message}); }
+});
+
+// Prisijungimas
+app.post('/api/auth/login', express.json(), async (req, res) => {
+  const { email, password } = req.body;
+  if(!email||!password) return res.status(400).json({error:'Įveskite el. paštą ir slaptažodį'});
+  const authRow = db.prepare('SELECT * FROM auth WHERE email=?').get(email.toLowerCase());
+  if(!authRow) return res.status(401).json({error:'Neteisingas el. paštas arba slaptažodis'});
+  try {
+    const hash = await hashPwd(password, authRow.salt);
+    if(hash !== authRow.password_hash) return res.status(401).json({error:'Neteisingas el. paštas arba slaptažodis'});
+    const user = getUser(authRow.uid);
+    if(!user) return res.status(404).json({error:'Paskyra nerasta'});
+    const token = makeSession(authRow.uid);
+    const kycRow = db.prepare('SELECT status FROM kyc WHERE uid=?').get(authRow.uid);
+    res.json({ok:true, token, uid:authRow.uid, user:{
+      ...user, levelInfo:getLvInfo(user.xp||0), nextLevel:nextLvInfo(user.xp||0),
+      kycStatus: kycRow?.status||'unverified'
+    }});
+  } catch(e) { res.status(500).json({error:'Serverio klaida'}); }
+});
+
+// Sesijos patikrinimas
+app.get('/api/auth/me', (req, res) => {
+  const token = (req.headers.authorization||'').replace('Bearer ','') || req.headers['x-session-token'];
+  const uid = checkSession(token);
+  if(!uid) return res.status(401).json({error:'Sesija negaliojanti'});
+  const user = getUser(uid);
+  if(!user) return res.status(404).json({error:'Vartotojas nerastas'});
+  const kycRow = db.prepare('SELECT status FROM kyc WHERE uid=?').get(uid);
+  res.json({uid, user:{...user, kycStatus:kycRow?.status||'unverified'}});
+});
+
+// Atsijungimas
+app.post('/api/auth/logout', express.json(), (req, res) => {
+  const token = req.body?.token || req.headers['x-session-token'];
+  if(token) db.prepare('DELETE FROM sessions WHERE token=?').run(token);
+  res.json({ok:true});
+});
+
+// Admin: el. pašto vartotojai
+app.get('/admin/auth-users', adminAuth, (req, res) => {
+  const rows = db.prepare(`SELECT a.email, a.created_at, u.name, u.tokens, u.level
+    FROM auth a LEFT JOIN users u ON a.uid=u.uid ORDER BY a.created_at DESC LIMIT 200`).all();
+  res.json(rows);
+});
+
+// ══════════════════════════════════════════════════════════
+// KYC / AMŽIAUS PATIKRINIMO SISTEMA
+// ══════════════════════════════════════════════════════════
+if(!fs.existsSync('./kyc-docs')) fs.mkdirSync('./kyc-docs',{recursive:true});
+
+const kycStorage=multer.diskStorage({
+  destination:'./kyc-docs/',
+  filename:(req,file,cb)=>{
+    const uid=req.body?.uid||req.headers['x-user-id']||'unknown';
+    cb(null,`${uid}_${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
+  }
+});
+const kycUpload=multer({
+  storage:kycStorage,
+  limits:{fileSize:8*1024*1024},
+  fileFilter:(req,file,cb)=>{
+    const ok=['.jpg','.jpeg','.png','.pdf','.webp'];
+    cb(null,ok.includes(path.extname(file.originalname).toLowerCase()));
+  }
+});
+
+function calcAge(birthDate){
+  const today=new Date(),b=new Date(birthDate);
+  let age=today.getFullYear()-b.getFullYear();
+  const m=today.getMonth()-b.getMonth();
+  if(m<0||(m===0&&today.getDate()<b.getDate()))age--;
+  return age;
+}
+function getKYC(uid){return db.prepare('SELECT * FROM kyc WHERE uid=?').get(uid);}
+
+// Pateikti KYC dokumentus
+app.post('/api/kyc/submit', kycUpload.fields([
+  {name:'id_front',maxCount:1},
+  {name:'id_back',maxCount:1},
+  {name:'selfie',maxCount:1}
+]),(req,res)=>{
+  const {uid,full_name,birth_date,country,id_type}=req.body;
+  if(!uid||!full_name||!birth_date) return res.status(400).json({error:'Trūksta privalomų laukų'});
+
+  const age=calcAge(birth_date);
+  if(isNaN(age)||age>120) return res.status(400).json({error:'Neteisinga gimimo data'});
+  if(age<18) return res.status(400).json({error:'Jums turi būti bent 18 metų, kad galėtumėte žaisti.',underage:true});
+
+  const files=req.files||{};
+  const id_front=files.id_front?.[0]?`/kyc-file/${files.id_front[0].filename}`:null;
+  const id_back=files.id_back?.[0]?`/kyc-file/${files.id_back[0].filename}`:null;
+  const selfie=files.selfie?.[0]?`/kyc-file/${files.selfie[0].filename}`:null;
+
+  if(!id_front||!selfie) return res.status(400).json({error:'Dokumento priekis ir selfie yra privalomi'});
+
+  const existing=getKYC(uid);
+  if(existing?.status==='approved') return res.status(400).json({error:'Jūsų paskyra jau patvirtinta'});
+
+  db.prepare(`INSERT INTO kyc(uid,status,full_name,birth_date,country,id_type,id_front,id_back,selfie,submitted_at)
+    VALUES(?,?,?,?,?,?,?,?,?,datetime('now'))
+    ON CONFLICT(uid) DO UPDATE SET
+      status='pending',full_name=excluded.full_name,birth_date=excluded.birth_date,
+      country=excluded.country,id_type=excluded.id_type,id_front=excluded.id_front,
+      id_back=excluded.id_back,selfie=excluded.selfie,
+      submitted_at=datetime('now'),rejection_reason=NULL,reviewed_at=NULL
+    WHERE kyc.status NOT IN ('approved')
+  `).run(uid,'pending',full_name,birth_date,country||'',id_type||'passport',id_front,id_back,selfie);
+
+  res.json({ok:true,status:'pending'});
+});
+
+// KYC statusas
+app.get('/api/kyc/status/:uid',(req,res)=>{
+  const k=getKYC(req.params.uid);
+  res.json({
+    status:k?.status||'unverified',
+    full_name:k?.full_name||null,
+    rejection_reason:k?.rejection_reason||null,
+    submitted_at:k?.submitted_at||null,
+    reviewed_at:k?.reviewed_at||null,
+  });
+});
+
+// Admin: rodyti KYC dokumentą (apsaugotas)
+app.get('/kyc-file/:filename', adminAuth,(req,res)=>{
+  const filename=path.basename(req.params.filename);
+  const filePath=path.join(__dirname,'kyc-docs',filename);
+  if(!fs.existsSync(filePath)) return res.status(404).send('Not found');
+  res.sendFile(filePath);
+});
+
+// Admin: sąrašas pagal statusą
+app.get('/admin/kyc',adminAuth,(req,res)=>{
+  const status=req.query.status||'pending';
+  const rows=db.prepare(`SELECT k.*,u.name as username,u.tokens,u.games_played,u.created_at as reg_date
+    FROM kyc k LEFT JOIN users u ON k.uid=u.uid
+    WHERE k.status=? ORDER BY k.submitted_at DESC`).all(status);
+  res.json(rows);
+});
+
+// Admin: KYC statistika
+app.get('/admin/kyc/stats',adminAuth,(req,res)=>{
+  const pending=db.prepare("SELECT COUNT(*) as c FROM kyc WHERE status='pending'").get().c;
+  const approved=db.prepare("SELECT COUNT(*) as c FROM kyc WHERE status='approved'").get().c;
+  const rejected=db.prepare("SELECT COUNT(*) as c FROM kyc WHERE status='rejected'").get().c;
+  res.json({pending,approved,rejected});
+});
+
+// Admin: patvirtinti KYC
+app.post('/admin/kyc/approve/:uid',adminAuth,(req,res)=>{
+  db.prepare("UPDATE kyc SET status='approved',reviewed_at=datetime('now') WHERE uid=?").run(req.params.uid);
+  if(sockets[req.params.uid]) sockets[req.params.uid].socket.emit('kycStatusUpdate',{status:'approved'});
+  res.json({ok:true});
+});
+
+// Admin: atmesti KYC
+app.post('/admin/kyc/reject/:uid',adminAuth,express.json(),(req,res)=>{
+  const reason=req.body?.reason||'Dokumentų nepavyko patvirtinti';
+  db.prepare("UPDATE kyc SET status='rejected',rejection_reason=?,reviewed_at=datetime('now') WHERE uid=?").run(reason,req.params.uid);
+  if(sockets[req.params.uid]) sockets[req.params.uid].socket.emit('kycStatusUpdate',{status:'rejected',reason});
+  res.json({ok:true});
+});
+
+// Admin: ištrinti KYC įrašą (leidžia pakartotinai pateikti)
+app.delete('/admin/kyc/:uid',adminAuth,(req,res)=>{
+  db.prepare('DELETE FROM kyc WHERE uid=?').run(req.params.uid);
+  res.json({ok:true});
+});
 
 const PORT=process.env.PORT||3000;
 
