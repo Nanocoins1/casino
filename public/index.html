@@ -4517,10 +4517,9 @@ function App(){
             {p:'roulette',icon:'🎡',badge:'LIVE',bc:'badge-live'},
             {p:'blackjack',icon:'🃏',badge:'HOT',bc:'badge-hot'},
             {p:'sports',icon:'⚽',badge:'LIVE',bc:'badge-live'},
-            {p:'pyramid',icon:'🏺',badge:'NEW',bc:'badge-new'},
             {p:'pyramid',icon:'🏺',badge:'HOT',bc:'badge-hot'},
-            {p:'cashier',icon:'💳',badge:'NEW',bc:'badge-new'},
-            {p:'stats',icon:'📊',badge:'NEW',bc:'badge-new'},
+            {p:'cashier',icon:'💳',badge:'',bc:''},
+            {p:'stats',icon:'📊',badge:'',bc:''},
             {p:'leaderboard',icon:'🏆',badge:null,bc:''},
           ].map(c=>(
             <div className="game-card" key={c.p} onClick={()=>nav(c.p)}>
@@ -4532,6 +4531,34 @@ function App(){
             </div>
           ))}
           </div>
+
+          {/* ── NEW GAMES SECTION ── */}
+          <div style={{marginTop:40,marginBottom:8}}>
+            <div style={{fontFamily:'Orbitron,monospace',fontSize:11,letterSpacing:'3px',color:'rgba(232,224,208,.2)',marginBottom:16,display:'flex',alignItems:'center',gap:12}}>
+              <span>✦ NAUJI ŽAIDIMAI</span>
+              <div style={{flex:1,height:1,background:'rgba(255,255,255,.05)'}}/>
+            </div>
+            <div className="games-grid">
+              {[
+                {href:'/crash.html',icon:'🚀',title:'CRASH',desc:'Aviator stiliaus — išimkite iki katastrofos!',badge:'🔥 HOT'},
+                {href:'/mines.html',icon:'💣',title:'MINES',desc:'5×5 lentelė — deimantai ar minos?',badge:'⭐ POPULIARUS'},
+                {href:'/wheel.html',icon:'🎡',title:'LUCKY WHEEL',desc:'Sukite ratą — iki 100×',badge:''},
+                {href:'/dice.html',icon:'🎲',title:'DICE / LIMBO / HI-LO',desc:'3 žaidimai viename',badge:'✨ NAUJAS'},
+                {href:'/keno.html',icon:'🎱',title:'KENO',desc:'80 kamuolių loterija',badge:''},
+                {href:'/baccarat.html',icon:'🃏',title:'BACCARAT',desc:'Player, Banker arba Tie',badge:''},
+                {href:'/videopoker.html',icon:'🎴',title:'VIDEO POKER',desc:'Jacks or Better — iki 800×',badge:'✨ NAUJAS'},
+              ].map((g,i)=>(
+                <a key={i} href={g.href} className="game-card" style={{textDecoration:'none',color:'inherit',display:'block'}}>
+                  <div className="game-card-glow"/>
+                  {g.badge&&<span className="game-badge badge-new">{g.badge}</span>}
+                  <div className="game-icon-wrap"><span>{g.icon}</span></div>
+                  <h3>{g.title}</h3>
+                  <p>{g.desc}</p>
+                </a>
+              ))}
+            </div>
+          </div>
+
           <p style={{textAlign:'center',marginTop:32,fontSize:10,color:'rgba(232,224,208,.12)',letterSpacing:'3px'}}>{t.disclaimer}</p>
         </div>
       )}
