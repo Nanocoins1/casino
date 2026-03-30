@@ -1335,6 +1335,303 @@ app.delete('/admin/kyc/:uid',adminAuth,(req,res)=>{
   res.json({ok:true});
 });
 
+// ══════════════════════════════════════════════════════════
+// RESPONSIBLE GAMBLING / SPORTS BETTING PROTECTION
+// ══════════════════════════════════════════════════════════
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS rg_limits (
+    uid TEXT PRIMARY KEY,
+    daily_deposit_limit INTEGER DEFAULT NULL,
+    daily_loss_limit INTEGER DEFAULT NULL,
+    daily_bet_limit INTEGER DEFAULT NULL,
+    session_limit_minutes INTEGER DEFAULT NULL,
+    self_exclusion_until TEXT DEFAULT NULL,
+    cool_off_until TEXT DEFAULT NULL,
+    updated_at TEXT DEFAULT (datetime('now'))
+  );
+  CREATE TABLE IF NOT EXISTS daily_tracking (
+    uid TEXT,
+    date TEXT,
+    deposited INTEGER DEFAULT 0,
+    lost INTEGER DEFAULT 0,
+    bet_total INTEGER DEFAULT 0,
+    PRIMARY KEY(uid, date)
+  );
+  CREATE TABLE IF NOT EXISTS sports_bets (
+    id TEXT PRIMARY KEY,
+    uid TEXT NOT NULL,
+    match_id TEXT,
+    match_desc TEXT,
+    selection TEXT,
+    odds REAL,
+    bet INTEGER,
+    potential_win INTEGER,
+    status TEXT DEFAULT 'pending',
+    result INTEGER DEFAULT NULL,
+    created_at TEXT DEFAULT (datetime('now'))
+  );
+`);
+
+// GET /api/rg/limits/:uid
+app.get('/api/rg/limits/:uid', (req, res) => {
+  const row = db.prepare('SELECT * FROM rg_limits WHERE uid=?').get(req.params.uid);
+  res.json(row || { uid: req.params.uid });
+});
+
+// POST /api/rg/limits
+app.post('/api/rg/limits', express.json(), (req, res) => {
+  const { uid, daily_deposit_limit, daily_loss_limit, daily_bet_limit, session_limit_minutes } = req.body;
+  if (!uid) return res.status(400).json({ error: 'uid required' });
+
+  const existing = db.prepare('SELECT * FROM rg_limits WHERE uid=?').get(uid);
+  const now = new Date().toISOString();
+
+  // Helper: a new value is "raising" a limit only if the new value is higher than existing (more permissive)
+  function isRaising(oldVal, newVal) {
+    if (newVal == null) return false;
+    if (oldVal == null) return false; // going from unlimited to a limit is always lowering
+    return newVal > oldVal;
+  }
+
+  const pendingRaise = {};
+  const fields = { daily_deposit_limit, daily_loss_limit, daily_bet_limit, session_limit_minutes };
+
+  if (existing) {
+    for (const [field, newVal] of Object.entries(fields)) {
+      if (newVal === undefined) continue;
+      if (isRaising(existing[field], newVal)) {
+        // Raising takes 24h — store with a note but do not apply yet
+        pendingRaise[field] = newVal;
+      }
+    }
+  }
+
+  if (!existing) {
+    db.prepare(`INSERT INTO rg_limits (uid, daily_deposit_limit, daily_loss_limit, daily_bet_limit, session_limit_minutes, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?)`).run(
+      uid,
+      daily_deposit_limit ?? null,
+      daily_loss_limit ?? null,
+      daily_bet_limit ?? null,
+      session_limit_minutes ?? null,
+      now
+    );
+  } else {
+    // Apply only limits that are being lowered (or set for the first time from null)
+    const toApply = {};
+    for (const [field, newVal] of Object.entries(fields)) {
+      if (newVal === undefined) continue;
+      if (!isRaising(existing[field], newVal)) {
+        toApply[field] = newVal;
+      }
+    }
+    if (Object.keys(toApply).length > 0) {
+      const setClauses = Object.keys(toApply).map(f => `${f}=?`).join(', ');
+      db.prepare(`UPDATE rg_limits SET ${setClauses}, updated_at=? WHERE uid=?`).run(
+        ...Object.values(toApply), now, uid
+      );
+    }
+  }
+
+  const updated = db.prepare('SELECT * FROM rg_limits WHERE uid=?').get(uid);
+  res.json({
+    ok: true,
+    limits: updated,
+    pendingRaise: Object.keys(pendingRaise).length > 0
+      ? { fields: pendingRaise, note: 'Limit increases take 24h to take effect for your protection.' }
+      : undefined
+  });
+});
+
+// POST /api/rg/self-exclude
+app.post('/api/rg/self-exclude', express.json(), (req, res) => {
+  const { uid, days } = req.body;
+  if (!uid) return res.status(400).json({ error: 'uid required' });
+  const allowed = [1, 7, 30, 180, 365, 'permanent'];
+  if (!allowed.includes(days)) return res.status(400).json({ error: 'days must be 1, 7, 30, 180, 365, or "permanent"' });
+
+  let until;
+  if (days === 'permanent') {
+    until = '9999-12-31T23:59:59.000Z';
+  } else {
+    const d = new Date();
+    d.setDate(d.getDate() + days);
+    until = d.toISOString();
+  }
+
+  db.prepare(`INSERT INTO rg_limits (uid, self_exclusion_until, updated_at) VALUES (?, ?, datetime('now'))
+    ON CONFLICT(uid) DO UPDATE SET self_exclusion_until=excluded.self_exclusion_until, updated_at=excluded.updated_at`).run(uid, until);
+
+  res.json({ ok: true, self_exclusion_until: until });
+});
+
+// POST /api/rg/cool-off
+app.post('/api/rg/cool-off', express.json(), (req, res) => {
+  const { uid, hours } = req.body;
+  if (!uid) return res.status(400).json({ error: 'uid required' });
+  const allowed = [24, 48, 72];
+  if (!allowed.includes(hours)) return res.status(400).json({ error: 'hours must be 24, 48, or 72' });
+
+  const until = new Date(Date.now() + hours * 60 * 60 * 1000).toISOString();
+
+  db.prepare(`INSERT INTO rg_limits (uid, cool_off_until, updated_at) VALUES (?, ?, datetime('now'))
+    ON CONFLICT(uid) DO UPDATE SET cool_off_until=excluded.cool_off_until, updated_at=excluded.updated_at`).run(uid, until);
+
+  res.json({ ok: true, cool_off_until: until });
+});
+
+// GET /api/rg/check/:uid
+app.get('/api/rg/check/:uid', (req, res) => {
+  const uid = req.params.uid;
+  const row = db.prepare('SELECT * FROM rg_limits WHERE uid=?').get(uid);
+
+  if (!row) return res.json({ allowed: true, reason: null });
+
+  const now = new Date().toISOString();
+
+  if (row.self_exclusion_until && now < row.self_exclusion_until) {
+    const permanent = row.self_exclusion_until === '9999-12-31T23:59:59.000Z';
+    return res.json({
+      allowed: false,
+      reason: permanent ? 'Account permanently self-excluded.' : `Self-excluded until ${row.self_exclusion_until}.`
+    });
+  }
+
+  if (row.cool_off_until && now < row.cool_off_until) {
+    return res.json({ allowed: false, reason: `Cool-off period active until ${row.cool_off_until}.` });
+  }
+
+  // Check daily limits
+  const today = new Date().toISOString().slice(0, 10);
+  const tracking = db.prepare('SELECT * FROM daily_tracking WHERE uid=? AND date=?').get(uid, today);
+
+  if (tracking) {
+    if (row.daily_bet_limit != null && tracking.bet_total >= row.daily_bet_limit) {
+      return res.json({ allowed: false, reason: `Daily bet limit of ${row.daily_bet_limit} reached.` });
+    }
+    if (row.daily_loss_limit != null && tracking.lost >= row.daily_loss_limit) {
+      return res.json({ allowed: false, reason: `Daily loss limit of ${row.daily_loss_limit} reached.` });
+    }
+    if (row.daily_deposit_limit != null && tracking.deposited >= row.daily_deposit_limit) {
+      return res.json({ allowed: false, reason: `Daily deposit limit of ${row.daily_deposit_limit} reached.` });
+    }
+  }
+
+  res.json({ allowed: true, reason: null });
+});
+
+// POST /api/rg/track-bet
+app.post('/api/rg/track-bet', express.json(), (req, res) => {
+  const { uid, bet, loss } = req.body;
+  if (!uid) return res.status(400).json({ error: 'uid required' });
+  const today = new Date().toISOString().slice(0, 10);
+  db.prepare(`INSERT INTO daily_tracking (uid, date, bet_total, lost) VALUES (?, ?, ?, ?)
+    ON CONFLICT(uid, date) DO UPDATE SET
+      bet_total = bet_total + excluded.bet_total,
+      lost = lost + excluded.lost`).run(uid, today, bet || 0, loss || 0);
+  res.json({ ok: true });
+});
+
+// POST /api/sports/place-bet
+app.post('/api/sports/place-bet', express.json(), (req, res) => {
+  const { uid, match_id, match_desc, selection, odds, bet } = req.body;
+  if (!uid || !bet || !odds) return res.status(400).json({ error: 'uid, bet, odds required' });
+
+  const row = db.prepare('SELECT * FROM rg_limits WHERE uid=?').get(uid);
+  const now = new Date().toISOString();
+
+  // Check self-exclusion
+  if (row?.self_exclusion_until && now < row.self_exclusion_until) {
+    const permanent = row.self_exclusion_until === '9999-12-31T23:59:59.000Z';
+    return res.json({ ok: false, error: permanent ? 'Account permanently self-excluded.' : `Self-excluded until ${row.self_exclusion_until}.` });
+  }
+
+  // Check cool-off
+  if (row?.cool_off_until && now < row.cool_off_until) {
+    return res.json({ ok: false, error: `Cool-off period active until ${row.cool_off_until}.` });
+  }
+
+  const today = now.slice(0, 10);
+  const tracking = db.prepare('SELECT * FROM daily_tracking WHERE uid=? AND date=?').get(uid, today);
+
+  // Check daily bet limit
+  if (row?.daily_bet_limit != null) {
+    const currentBets = (tracking?.bet_total || 0);
+    if (currentBets + bet > row.daily_bet_limit) {
+      return res.json({ ok: false, error: `Bet would exceed daily bet limit of ${row.daily_bet_limit}.` });
+    }
+  }
+
+  // Check daily loss limit (conservative: count full bet as potential loss)
+  if (row?.daily_loss_limit != null) {
+    const currentLoss = (tracking?.lost || 0);
+    if (currentLoss + bet > row.daily_loss_limit) {
+      return res.json({ ok: false, error: `Bet would exceed daily loss limit of ${row.daily_loss_limit}.` });
+    }
+  }
+
+  const user = getUser(uid);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  if (user.tokens < bet) return res.json({ ok: false, error: 'Insufficient tokens' });
+
+  const betId = uuidv4();
+  const potential_win = Math.floor(bet * odds);
+
+  // Deduct tokens
+  db.prepare('UPDATE users SET tokens=tokens-? WHERE uid=?').run(bet, uid);
+
+  // Store bet
+  db.prepare(`INSERT INTO sports_bets (id, uid, match_id, match_desc, selection, odds, bet, potential_win)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run(betId, uid, match_id || null, match_desc || null, selection || null, odds, bet, potential_win);
+
+  // Update daily tracking
+  db.prepare(`INSERT INTO daily_tracking (uid, date, bet_total, lost) VALUES (?, ?, ?, 0)
+    ON CONFLICT(uid, date) DO UPDATE SET bet_total = bet_total + excluded.bet_total`).run(uid, today, bet);
+
+  res.json({ ok: true, betId, potential_win, tokens: user.tokens - bet });
+});
+
+// GET /admin/sports-bets
+app.get('/admin/sports-bets', adminAuth, (req, res) => {
+  try {
+    const bets = db.prepare(`SELECT sb.*, u.name as player_name
+      FROM sports_bets sb LEFT JOIN users u ON sb.uid=u.uid
+      ORDER BY sb.created_at DESC LIMIT 500`).all();
+    res.json(bets);
+  } catch(e) { res.json([]); }
+});
+
+// POST /admin/sports-settle/:betId
+app.post('/admin/sports-settle/:betId', adminAuth, express.json(), (req, res) => {
+  const { won } = req.body;
+  if (typeof won !== 'boolean') return res.status(400).json({ error: 'won (boolean) required' });
+
+  const bet = db.prepare('SELECT * FROM sports_bets WHERE id=?').get(req.params.betId);
+  if (!bet) return res.status(404).json({ error: 'Bet not found' });
+  if (bet.status !== 'pending') return res.status(400).json({ error: 'Bet already settled' });
+
+  const status = won ? 'won' : 'lost';
+  const result = won ? bet.potential_win : 0;
+
+  db.prepare("UPDATE sports_bets SET status=?, result=? WHERE id=?").run(status, result, bet.id);
+
+  if (won) {
+    db.prepare('UPDATE users SET tokens=tokens+? WHERE uid=?').run(bet.potential_win, bet.uid);
+  } else {
+    // Record the actual loss in daily tracking
+    const today = new Date().toISOString().slice(0, 10);
+    db.prepare(`INSERT INTO daily_tracking (uid, date, lost) VALUES (?, ?, ?)
+      ON CONFLICT(uid, date) DO UPDATE SET lost = lost + excluded.lost`).run(bet.uid, today, bet.bet);
+  }
+
+  if (sockets[bet.uid]) {
+    sockets[bet.uid].socket.emit('sportsBetSettled', { betId: bet.id, status, result });
+  }
+
+  res.json({ ok: true, status, result });
+});
+
 const PORT=process.env.PORT||3000;
 
 // ── AI Support Chat ───────────────────────────────
