@@ -130,6 +130,7 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
 
   <div class="tabs">
     <div class="tab active" onclick="showTab('overview',this)">📊 Overview</div>
+    <div class="tab" onclick="showTab('kyc',this)">🛡️ KYC <span id="kycBadge" style="display:none;background:rgba(255,61,113,.8);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;margin-left:4px;"></span></div>
     <div class="tab" onclick="showTab('players',this)">👥 Players</div>
     <div class="tab" onclick="showTab('give',this)">🎁 Give Tokens</div>
     <div class="tab" onclick="showTab('promos',this)">🎫 Promo Codes</div>
@@ -152,6 +153,25 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
           <button class="btn btn-info" onclick="showTab('promos',document.querySelectorAll('.tab')[3])">🎫 Create Promo Code</button>
           <button class="btn btn-ghost" onclick="loadOverview()">🔄 Refresh Stats</button>
         </div>
+      </div>
+    </div>
+
+    <!-- KYC -->
+    <div class="section" id="sec-kyc">
+      <div class="overview-grid" style="grid-template-columns:repeat(3,1fr);">
+        <div class="stat-box"><div class="ico">⏳</div><div class="val" id="kyc-pending">—</div><div class="lbl">Laukia Peržiūros</div></div>
+        <div class="stat-box"><div class="ico">✅</div><div class="val" id="kyc-approved">—</div><div class="lbl">Patvirtinta</div></div>
+        <div class="stat-box"><div class="ico">❌</div><div class="val" id="kyc-rejected">—</div><div class="lbl">Atmesta</div></div>
+      </div>
+      <div class="card">
+        <h3>🛡️ KYC Paraiškos</h3>
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-sm" onclick="loadKYC('pending')" id="kyc-btn-pending" style="border-color:rgba(240,192,96,.4);color:var(--gold);">⏳ Laukiantys</button>
+          <button class="btn btn-ghost btn-sm" onclick="loadKYC('approved')" id="kyc-btn-approved">✅ Patvirtinti</button>
+          <button class="btn btn-ghost btn-sm" onclick="loadKYC('rejected')" id="kyc-btn-rejected">❌ Atmesti</button>
+          <button class="btn btn-ghost btn-sm" onclick="loadKYCStats();loadKYC(currentKYCFilter)">🔄 Atnaujinti</button>
+        </div>
+        <div id="kycList"><p style="color:rgba(232,224,208,.2);font-size:13px;">Kraunama...</p></div>
       </div>
     </div>
 
@@ -242,6 +262,19 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
   </div>
 </div>
 
+<!-- Reject KYC modal -->
+<div class="modal-overlay" id="rejectModal" style="display:none;">
+  <div class="modal">
+    <h3>❌ Atmesti KYC</h3>
+    <p style="font-size:13px;color:rgba(232,224,208,.4);margin-bottom:14px;">Nurodykite atmetimo priežastį (bus rodoma žaidėjui):</p>
+    <textarea id="rejectReason" class="inp-sm" rows="3" style="width:100%;resize:vertical;margin-bottom:14px;" placeholder="pvz. Dokumento nuotrauka neaiški, trūksta selfie..."></textarea>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeReject()">Atšaukti</button>
+      <button class="btn btn-danger" style="flex:1" onclick="confirmReject()">Atmesti ❌</button>
+    </div>
+  </div>
+</div>
+
 <!-- Gift modal -->
 <div class="modal-overlay" id="giftModal" style="display:none;">
   <div class="modal">
@@ -276,6 +309,7 @@ function login() {
         loadOverview();
         loadPlayers();
         loadPromos();
+        loadKYCStats();
       } else {
         document.getElementById('loginErr').textContent = '❌ Wrong password';
       }
@@ -301,6 +335,7 @@ function showTab(name, el) {
   document.getElementById('sec-'+name).classList.add('active');
   if(name === 'promos') loadPromos();
   if(name === 'players') loadPlayers();
+  if(name === 'kyc') { loadKYCStats(); loadKYC('pending'); }
 }
 
 // ── API helpers ───────────────────────────────────
@@ -483,10 +518,94 @@ function escHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
+// ── KYC ───────────────────────────────────────────
+let currentKYCFilter = 'pending';
+let rejectTargetUid = '';
+
+function loadKYCStats() {
+  api('/admin/kyc/stats').then(d => {
+    document.getElementById('kyc-pending').textContent = fmt(d.pending);
+    document.getElementById('kyc-approved').textContent = fmt(d.approved);
+    document.getElementById('kyc-rejected').textContent = fmt(d.rejected);
+    const badge = document.getElementById('kycBadge');
+    if(d.pending > 0) { badge.textContent = d.pending; badge.style.display='inline'; }
+    else badge.style.display='none';
+  }).catch(()=>{});
+}
+
+function loadKYC(status) {
+  currentKYCFilter = status;
+  ['pending','approved','rejected'].forEach(s => {
+    const btn = document.getElementById('kyc-btn-'+s);
+    btn.style.borderColor = s===status ? 'rgba(240,192,96,.4)' : '';
+    btn.style.color = s===status ? 'var(--gold)' : '';
+  });
+  const el = document.getElementById('kycList');
+  el.innerHTML = '<p style="color:rgba(232,224,208,.2);font-size:13px;">Kraunama...</p>';
+  api('/admin/kyc?status='+status).then(rows => {
+    if(!rows.length) { el.innerHTML='<p style="color:rgba(232,224,208,.2);font-size:13px;padding:20px 0;">Nėra įrašų</p>'; return; }
+    el.innerHTML = rows.map(k => `
+      <div style="background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+          <div>
+            <div style="font-size:15px;font-weight:700;color:var(--cream);margin-bottom:4px;">${escHtml(k.full_name||'—')}</div>
+            <div style="font-size:11px;color:rgba(232,224,208,.35);letter-spacing:1px;margin-bottom:8px;">
+              👤 ${escHtml(k.username||'?')} &nbsp;|&nbsp; 🎂 ${k.birth_date||'?'} &nbsp;|&nbsp; 🌍 ${k.country||'?'} &nbsp;|&nbsp; 🪪 ${idTypeName(k.id_type)}
+            </div>
+            <div style="font-size:11px;color:rgba(232,224,208,.25);">
+              Pateikta: ${(k.submitted_at||'').slice(0,16)}
+              ${k.reviewed_at ? ' &nbsp;|&nbsp; Peržiūrėta: '+(k.reviewed_at||'').slice(0,16) : ''}
+            </div>
+            ${k.rejection_reason ? `<div style="margin-top:8px;font-size:11px;color:#ff8ca0;background:rgba(255,61,113,.08);padding:6px 10px;border-radius:6px;">❌ ${escHtml(k.rejection_reason)}</div>` : ''}
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;">
+            ${k.id_front ? `<a href="${k.id_front}?key=${API_KEY}" target="_blank" class="btn btn-info btn-sm">🪪 Dok. priekis</a>` : ''}
+            ${k.id_back ? `<a href="${k.id_back}?key=${API_KEY}" target="_blank" class="btn btn-ghost btn-sm">🪪 Dok. galas</a>` : ''}
+            ${k.selfie ? `<a href="${k.selfie}?key=${API_KEY}" target="_blank" class="btn btn-ghost btn-sm">🤳 Selfie</a>` : ''}
+          </div>
+        </div>
+        ${status === 'pending' ? `
+        <div style="display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.05);">
+          <button class="btn btn-success btn-sm" onclick="approveKYC('${k.uid}')">✅ Patvirtinti</button>
+          <button class="btn btn-danger btn-sm" onclick="openReject('${k.uid}')">❌ Atmesti</button>
+        </div>` : ''}
+        ${status === 'rejected' ? `
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.05);">
+          <button class="btn btn-success btn-sm" onclick="approveKYC('${k.uid}')">✅ Vis tiek patvirtinti</button>
+        </div>` : ''}
+      </div>
+    `).join('');
+  }).catch(()=>{ el.innerHTML='<p style="color:var(--red);font-size:13px;">Klaida kraunant KYC duomenis</p>'; });
+}
+
+function idTypeName(t) {
+  return {passport:'Pasas',id_card:'ATK',drivers_license:'Vairuotojo pažymėjimas',residence_permit:'Leidimas gyventi'}[t]||t||'?';
+}
+
+function approveKYC(uid) {
+  if(!confirm('Patvirtinti šį žaidėją?')) return;
+  api(`/admin/kyc/approve/${uid}`,{method:'POST'}).then(d => {
+    if(d.ok) { toast('✅ Žaidėjas patvirtintas!','ok'); loadKYC(currentKYCFilter); loadKYCStats(); }
+  });
+}
+
+function openReject(uid) {
+  rejectTargetUid = uid;
+  document.getElementById('rejectReason').value = '';
+  document.getElementById('rejectModal').style.display='flex';
+}
+function closeReject() { document.getElementById('rejectModal').style.display='none'; }
+function confirmReject() {
+  const reason = document.getElementById('rejectReason').value.trim() || 'Dokumentų nepavyko patvirtinti';
+  api(`/admin/kyc/reject/${rejectTargetUid}`,{method:'POST',body:JSON.stringify({reason})}).then(d => {
+    if(d.ok) { toast('KYC atmesta','ok'); closeReject(); loadKYC(currentKYCFilter); loadKYCStats(); }
+  });
+}
+
 // Auto refresh overview every 30s
 setInterval(() => {
   const key = sessionStorage.getItem('admin_key');
-  if(key) { loadOverview(); }
+  if(key) { loadOverview(); loadKYCStats(); }
 }, 30000);
 </script>
 </body>

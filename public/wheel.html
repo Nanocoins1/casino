@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>HATHOR — Lucky Wheel</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#04040a;--gold:#f0c060;--gold2:#ffd980;--green:#00e676;--red:#ff3d71;--neon:#00e5ff;--cream:#e8e0d0;--border:rgba(255,255,255,0.08);--glass:rgba(255,255,255,0.04);}
+html,body{height:100%;}
+body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cream);display:flex;flex-direction:column;overflow:hidden;}
+.header{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(4,4,10,.98);border-bottom:1px solid var(--border);flex-shrink:0;}
+.logo{font-family:'Orbitron',monospace;font-size:14px;font-weight:900;letter-spacing:3px;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.game-title{font-family:'Orbitron',monospace;font-size:16px;font-weight:900;letter-spacing:2px;}
+.balance{font-family:'DM Mono',monospace;font-size:14px;color:var(--gold);}
+.back-btn{padding:6px 14px;border-radius:7px;border:1px solid var(--border);background:var(--glass);color:rgba(232,224,208,.5);font-size:11px;cursor:pointer;text-decoration:none;transition:all .2s;}
+.back-btn:hover{color:var(--cream);}
+.main{flex:1;display:grid;grid-template-columns:1fr 300px;overflow:hidden;}
+@media(max-width:700px){.main{grid-template-columns:1fr;grid-template-rows:1fr auto;}}
+.game-area{display:flex;align-items:center;justify-content:center;background:#060610;padding:20px;position:relative;overflow:hidden;}
+.game-area::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(124,58,237,.08),transparent 70%);pointer-events:none;}
+
+/* Wheel */
+.wheel-wrap{position:relative;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;}
+.wheel-container{position:relative;width:min(340px,80vw);height:min(340px,80vw);}
+.pointer{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:28px;z-index:10;filter:drop-shadow(0 4px 8px rgba(240,192,96,.6));animation:pointerBob 2s ease-in-out infinite;}
+@keyframes pointerBob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(3px)}}
+canvas#wheelCanvas{border-radius:50%;box-shadow:0 0 60px rgba(124,58,237,.3),0 0 120px rgba(124,58,237,.1),inset 0 0 30px rgba(0,0,0,.5);}
+
+/* Result display */
+.result-display{text-align:center;min-height:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.result-mult{font-family:'Orbitron',monospace;font-size:42px;font-weight:900;color:var(--gold);transition:all .3s;}
+.result-label{font-size:11px;letter-spacing:3px;color:rgba(232,224,208,.25);margin-top:4px;}
+
+/* Right panel */
+.bet-panel{background:rgba(8,8,18,.95);border-left:1px solid var(--border);padding:20px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;}
+@media(max-width:700px){.bet-panel{border-left:none;border-top:1px solid var(--border);padding:14px 16px;max-height:260px;}}
+.panel-title{font-family:'Orbitron',monospace;font-size:12px;color:rgba(232,224,208,.3);letter-spacing:2px;}
+.bet-label{font-size:10px;letter-spacing:2px;color:rgba(232,224,208,.3);text-transform:uppercase;margin-bottom:6px;}
+.bet-inp{width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid var(--border);border-radius:9px;color:var(--gold);font-family:'DM Mono',monospace;font-size:15px;font-weight:700;outline:none;transition:border-color .2s;}
+.bet-inp:focus{border-color:rgba(240,192,96,.4);}
+.bet-quick{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:6px;}
+.bq{padding:5px;border-radius:6px;border:1px solid var(--border);background:var(--glass);color:rgba(232,224,208,.5);font-size:10px;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;}
+.bq:hover{border-color:rgba(240,192,96,.3);color:var(--gold);}
+
+/* Mode select */
+.mode-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
+.mode-btn{padding:9px 4px;border-radius:8px;border:1px solid var(--border);background:var(--glass);color:rgba(232,224,208,.4);font-size:11px;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;}
+.mode-btn:hover{border-color:rgba(240,192,96,.3);color:var(--gold);}
+.mode-btn.active{background:rgba(240,192,96,.12);border-color:rgba(240,192,96,.35);color:var(--gold);}
+.mode-desc{font-size:10px;color:rgba(232,224,208,.25);margin-top:8px;line-height:1.6;}
+
+/* Spin button */
+.spin-btn{width:100%;padding:14px;border-radius:12px;border:none;cursor:pointer;font-family:'Orbitron',monospace;font-size:14px;font-weight:900;letter-spacing:1px;background:linear-gradient(135deg,#c9a84c,#f0c060,#a07830);color:#080600;transition:all .2s;}
+.spin-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(240,192,96,.4);}
+.spin-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+
+/* History */
+.hist-row{display:flex;gap:5px;flex-wrap:wrap;}
+.hist-pill{padding:3px 8px;border-radius:10px;font-family:'DM Mono',monospace;font-size:11px;font-weight:700;}
+
+/* Stats */
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.stat-box{padding:9px;border-radius:8px;background:rgba(0,0,0,.3);border:1px solid var(--border);text-align:center;}
+.stat-v{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;color:var(--gold);}
+.stat-l{font-size:9px;letter-spacing:1px;color:rgba(232,224,208,.25);margin-top:2px;}
+
+/* Toast */
+.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-20px);padding:12px 24px;border-radius:12px;font-size:13px;font-weight:600;z-index:999;opacity:0;transition:all .3s;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.win{background:rgba(0,230,118,.2);border:1px solid rgba(0,230,118,.4);color:var(--green);}
+.toast.loss{background:rgba(255,61,113,.2);border:1px solid rgba(255,61,113,.3);color:#ff8ca0;}
+</style>
+</head>
+<body>
+<div class="header">
+  <a class="back-btn" href="/">← Lobby</a>
+  <div class="game-title">🎡 LUCKY WHEEL</div>
+  <div class="balance">🪙 <span id="bal">—</span></div>
+</div>
+<div class="main">
+  <div class="game-area">
+    <div class="wheel-wrap">
+      <div class="wheel-container">
+        <div class="pointer">▼</div>
+        <canvas id="wheelCanvas"></canvas>
+      </div>
+      <div class="result-display">
+        <div class="result-mult" id="resultMult">?</div>
+        <div class="result-label" id="resultLabel">SUKITE RATĄ</div>
+      </div>
+    </div>
+  </div>
+  <div class="bet-panel">
+    <div class="panel-title">🎡 LUCKY WHEEL</div>
+    <div>
+      <div class="bet-label">Statymų suma</div>
+      <input class="bet-inp" id="betInp" type="number" value="100" min="10"/>
+      <div class="bet-quick">
+        <button class="bq" onclick="ab(50)">+50</button>
+        <button class="bq" onclick="ab(100)">+100</button>
+        <button class="bq" onclick="hb()">½</button>
+        <button class="bq" onclick="db()">×2</button>
+      </div>
+    </div>
+    <div>
+      <div class="bet-label">Rizikos lygis</div>
+      <div class="mode-grid">
+        <div class="mode-btn active" onclick="setMode('low',this)">🟢 Žemas</div>
+        <div class="mode-btn" onclick="setMode('med',this)">🟡 Vidutinis</div>
+        <div class="mode-btn" onclick="setMode('high',this)">🔴 Aukštas</div>
+      </div>
+      <div class="mode-desc" id="modeDesc">Dažniau laimėsite, bet mažiau. Tobula pradedantiesiems.</div>
+    </div>
+    <button class="spin-btn" id="spinBtn" onclick="spin()">SUKTI 🎡</button>
+    <div>
+      <div class="bet-label">Istorija</div>
+      <div class="hist-row" id="histRow"></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-v" id="stWin">0</div><div class="stat-l">LAIMĖTA</div></div>
+      <div class="stat-box"><div class="stat-v" id="stLoss">0</div><div class="stat-l">PRARASTA</div></div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toastEl"></div>
+<script>
+const uid = localStorage.getItem('casino_uid');
+if(!uid) location.href='/login.html';
+let tokens = parseInt(localStorage.getItem('casino_tokens')||'10000');
+let spinning = false;
+let mode = 'low';
+let wins = 0, losses = 0;
+let history = [];
+
+// Wheel segments per mode
+const MODES = {
+  low: [
+    {label:'0.2×',mult:0.2,color:'#1a0a20',count:2},
+    {label:'0.5×',mult:0.5,color:'#2d1a4a',count:3},
+    {label:'1×',  mult:1,  color:'#3d2060',count:5},
+    {label:'1.5×',mult:1.5,color:'#4a2a7a',count:4},
+    {label:'2×',  mult:2,  color:'#5a3090',count:5},
+    {label:'3×',  mult:3,  color:'#f0c060',count:3},
+    {label:'5×',  mult:5,  color:'#f0a020',count:2},
+    {label:'10×', mult:10, color:'#ff6030',count:1},
+  ],
+  med: [
+    {label:'0×',  mult:0,  color:'#1a0515',count:3},
+    {label:'0.5×',mult:0.5,color:'#2d1040',count:2},
+    {label:'1×',  mult:1,  color:'#3d2060',count:3},
+    {label:'2×',  mult:2,  color:'#5a3090',count:4},
+    {label:'3×',  mult:3,  color:'#f0c060',count:3},
+    {label:'5×',  mult:5,  color:'#f0a020',count:2},
+    {label:'10×', mult:10, color:'#ff6030',count:2},
+    {label:'25×', mult:25, color:'#ff3050',count:1},
+  ],
+  high: [
+    {label:'0×',  mult:0,  color:'#1a0515',count:8},
+    {label:'1×',  mult:1,  color:'#3d2060',count:3},
+    {label:'3×',  mult:3,  color:'#f0c060',count:2},
+    {label:'5×',  mult:5,  color:'#f0a020',count:2},
+    {label:'10×', mult:10, color:'#ff6030',count:2},
+    {label:'25×', mult:25, color:'#ff3050',count:1},
+    {label:'50×', mult:50, color:'#ff0080',count:1},
+    {label:'100×',mult:100,color:'#c000ff',count:1},
+  ]
+};
+const MODE_DESC = {
+  low:'Dažniau laimėsite, bet mažiau. Tobula pradedantiesiems.',
+  med:'Subalansuota rizika ir atlygiai. Rekomenduojama.',
+  high:'Retas laimėjimas bet milžiniški atlygiai. Tik drąsiems!'
+};
+
+let segments = [];
+let canvas, ctx, currentAngle = 0;
+
+function buildSegments() {
+  segments = [];
+  MODES[mode].forEach(s => {
+    for(let i=0;i<s.count;i++) segments.push({...s});
+  });
+  // Shuffle
+  for(let i=segments.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[segments[i],segments[j]]=[segments[j],segments[i]];}
+}
+
+function initCanvas(){
+  canvas = document.getElementById('wheelCanvas');
+  const sz = canvas.parentElement.clientWidth;
+  canvas.width = canvas.height = sz;
+  ctx = canvas.getContext('2d');
+}
+
+function drawWheel(angle=0){
+  if(!canvas) return;
+  const sz = canvas.width;
+  const cx = sz/2, cy = sz/2, r = sz/2 - 4;
+  ctx.clearRect(0,0,sz,sz);
+  const sliceAngle = (2*Math.PI)/segments.length;
+  // Outer glow
+  ctx.save();
+  ctx.shadowColor='rgba(124,58,237,.4)';ctx.shadowBlur=20;
+  ctx.beginPath();ctx.arc(cx,cy,r+2,0,2*Math.PI);
+  ctx.strokeStyle='rgba(124,58,237,.5)';ctx.lineWidth=3;ctx.stroke();
+  ctx.restore();
+  segments.forEach((seg,i)=>{
+    const start = angle + i*sliceAngle, end = start+sliceAngle;
+    // Slice
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,start,end);ctx.closePath();
+    ctx.fillStyle=seg.color;ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.07)';ctx.lineWidth=1;ctx.stroke();
+    // Label
+    ctx.save();
+    ctx.translate(cx,cy);ctx.rotate(start+sliceAngle/2);
+    ctx.textAlign='right';ctx.fillStyle='rgba(255,255,255,.9)';
+    ctx.font=`bold ${Math.max(10,sz/30)}px Orbitron,monospace`;
+    ctx.shadowColor='rgba(0,0,0,.6)';ctx.shadowBlur=4;
+    ctx.fillText(seg.label, r-8, 4);
+    ctx.restore();
+  });
+  // Center circle
+  ctx.beginPath();ctx.arc(cx,cy,sz/10,0,2*Math.PI);
+  const grad=ctx.createRadialGradient(cx,cy,0,cx,cy,sz/10);
+  grad.addColorStop(0,'#2a1a50');grad.addColorStop(1,'#0d0820');
+  ctx.fillStyle=grad;ctx.fill();
+  ctx.strokeStyle='rgba(240,192,96,.3)';ctx.lineWidth=2;ctx.stroke();
+  // Center logo
+  ctx.fillStyle='rgba(240,192,96,.8)';ctx.font=`bold ${sz/14}px Orbitron,monospace`;
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('⬡',cx,cy);
+}
+
+function setMode(m,el){
+  mode=m;
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('modeDesc').textContent=MODE_DESC[m];
+  buildSegments();drawWheel(currentAngle);
+}
+
+function spin(){
+  if(spinning) return;
+  const bet=parseInt(document.getElementById('betInp').value)||100;
+  if(bet<10) return;
+  if(bet>tokens){showToast('Nepakanka žetonų','loss');return;}
+  tokens-=bet;localStorage.setItem('casino_tokens',tokens);updateBal();
+  spinning=true;
+  document.getElementById('spinBtn').disabled=true;
+  document.getElementById('resultLabel').textContent='SUKASI...';
+  document.getElementById('resultMult').textContent='🎡';
+
+  // Pick result
+  const resultIdx=Math.floor(Math.random()*segments.length);
+  const seg=segments[resultIdx];
+  const sliceAngle=(2*Math.PI)/segments.length;
+  // Target angle: pointer at top (offset -PI/2), pointing at segment center
+  const targetSegAngle=-(resultIdx*sliceAngle+sliceAngle/2)+Math.PI/2;
+  const extraSpins=(5+Math.floor(Math.random()*4))*2*Math.PI;
+  const totalAngle=extraSpins+targetSegAngle-(currentAngle%(2*Math.PI));
+  const duration=4000+Math.random()*1500;
+  const start=performance.now();
+  const startAngle=currentAngle;
+
+  function animate(now){
+    const elapsed=now-start;
+    const t=Math.min(1,elapsed/duration);
+    const ease=1-Math.pow(1-t,4);
+    currentAngle=startAngle+totalAngle*ease;
+    drawWheel(currentAngle);
+    if(t<1){requestAnimationFrame(animate);}
+    else{
+      currentAngle=startAngle+totalAngle;
+      drawWheel(currentAngle);
+      // Result
+      const won=Math.floor(bet*seg.mult);
+      tokens+=won;localStorage.setItem('casino_tokens',tokens);updateBal();
+      if(won>bet){wins++;document.getElementById('stWin').textContent=wins;showToast(`🎉 ${seg.label} — +🪙${fmt(won-bet)}`,'win');}
+      else if(won===0){losses++;document.getElementById('stLoss').textContent=losses;showToast(`😢 ${seg.label} — Prarasta 🪙${fmt(bet)}`,'loss');}
+      else{losses++;document.getElementById('stLoss').textContent=losses;showToast(`${seg.label} — 🪙${fmt(won)}`,'loss');}
+      document.getElementById('resultMult').textContent=seg.label;
+      document.getElementById('resultMult').style.color=seg.mult>=3?'var(--green)':seg.mult>=1?'var(--gold)':'var(--red)';
+      document.getElementById('resultLabel').textContent=won>bet?'LAIMĖJOTE! 🎉':won===0?'PRALAIMĖJOTE 😢':'GRĄŽINTA';
+      addHistory(seg);
+      logGame(bet,won);
+      spinning=false;
+      document.getElementById('spinBtn').disabled=false;
+      buildSegments();
+    }
+  }
+  requestAnimationFrame(animate);
+}
+
+function addHistory(seg){
+  history.unshift(seg);if(history.length>12)history.pop();
+  const el=document.getElementById('histRow');
+  el.innerHTML=history.map(s=>{
+    const color=s.mult>=10?'#ff6030':s.mult>=3?'var(--gold)':s.mult>=1?'rgba(232,224,208,.5)':'var(--red)';
+    return `<div class="hist-pill" style="background:rgba(255,255,255,.05);color:${color}">${s.label}</div>`;
+  }).join('');
+}
+
+function fmt(n){return Number(n).toLocaleString();}
+function updateBal(){document.getElementById('bal').textContent=fmt(tokens);}
+function ab(n){document.getElementById('betInp').value=Math.max(10,parseInt(document.getElementById('betInp').value||0)+n);}
+function hb(){document.getElementById('betInp').value=Math.max(10,Math.floor(parseInt(document.getElementById('betInp').value||10)/2));}
+function db(){document.getElementById('betInp').value=Math.min(tokens,parseInt(document.getElementById('betInp').value||10)*2);}
+let toastTimer;
+function showToast(msg,type){const el=document.getElementById('toastEl');el.textContent=msg;el.className='toast '+type+' show';clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3000);}
+function logGame(bet,result){fetch('/api/log-game',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid,game:'wheel',bet,result,won:result>bet})}).catch(()=>{});}
+
+window.addEventListener('load',()=>{
+  initCanvas();buildSegments();drawWheel();updateBal();
+});
+window.addEventListener('resize',()=>{initCanvas();drawWheel(currentAngle);});
+</script>
+</body>
+</html>

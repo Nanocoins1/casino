@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>HATHOR — Mines</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#04040a;--gold:#f0c060;--gold2:#ffd980;--green:#00e676;--red:#ff3d71;--neon:#00e5ff;--cream:#e8e0d0;--border:rgba(255,255,255,0.08);--glass:rgba(255,255,255,0.04);}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cream);display:flex;flex-direction:column;}
+.header{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(4,4,10,.98);border-bottom:1px solid var(--border);flex-shrink:0;}
+.logo{font-family:'Orbitron',monospace;font-size:14px;font-weight:900;letter-spacing:3px;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.game-title{font-family:'Orbitron',monospace;font-size:16px;font-weight:900;letter-spacing:2px;}
+.balance{font-family:'DM Mono',monospace;font-size:14px;color:var(--gold);}
+.back-btn{padding:6px 14px;border-radius:7px;border:1px solid var(--border);background:var(--glass);color:rgba(232,224,208,.5);font-size:11px;cursor:pointer;text-decoration:none;transition:all .2s;}
+.back-btn:hover{color:var(--cream);}
+.main{flex:1;display:grid;grid-template-columns:1fr 280px;overflow:hidden;}
+@media(max-width:680px){.main{grid-template-columns:1fr;grid-template-rows:1fr auto;}}
+
+/* Game area */
+.game-area{display:flex;align-items:center;justify-content:center;background:#060610;padding:20px;overflow:auto;}
+.grid-wrap{display:flex;flex-direction:column;gap:8px;align-items:center;}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;max-width:380px;width:100%;}
+.cell{aspect-ratio:1;border-radius:12px;border:2px solid rgba(255,255,255,.08);background:rgba(8,8,24,.8);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:28px;
+  transition:all .2s;position:relative;overflow:hidden;}
+.cell::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.06),transparent);pointer-events:none;}
+.cell.idle:hover{border-color:rgba(240,192,96,.4);background:rgba(30,25,60,.9);transform:scale(1.04);box-shadow:0 0 20px rgba(240,192,96,.15);}
+.cell.gem{background:linear-gradient(135deg,rgba(0,100,60,.7),rgba(0,50,30,.9));border-color:rgba(0,230,118,.5);animation:gemReveal .3s ease-out;}
+.cell.gem::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at center,rgba(0,230,118,.2),transparent 70%);pointer-events:none;}
+.cell.mine{background:linear-gradient(135deg,rgba(120,0,20,.8),rgba(60,0,10,.9));border-color:rgba(255,61,113,.6);animation:mineReveal .3s ease-out;}
+.cell.mine::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at center,rgba(255,61,113,.25),transparent 70%);pointer-events:none;}
+.cell.revealed-gem{cursor:default;pointer-events:none;}
+.cell.safe-show{background:rgba(0,100,60,.3);border-color:rgba(0,230,118,.25);pointer-events:none;}
+.cell.mine-show{background:rgba(80,0,15,.5);border-color:rgba(255,61,113,.3);pointer-events:none;}
+.cell.inactive{pointer-events:none;opacity:.6;}
+@keyframes gemReveal{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes mineReveal{0%{transform:scale(1)}30%{transform:scale(1.2)}100%{transform:scale(1)}}
+
+/* Multiplier display */
+.mult-display{text-align:center;margin-top:16px;}
+.mult-val{font-family:'Orbitron',monospace;font-size:36px;font-weight:900;color:var(--green);transition:all .2s;}
+.mult-val.inactive{color:rgba(232,224,208,.2);}
+.mult-sub{font-size:11px;letter-spacing:2px;color:rgba(232,224,208,.25);margin-top:4px;}
+
+/* Right panel */
+.bet-panel{background:rgba(8,8,18,.95);border-left:1px solid var(--border);padding:20px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;}
+@media(max-width:680px){.bet-panel{border-left:none;border-top:1px solid var(--border);padding:14px 16px;}}
+.panel-title{font-family:'Orbitron',monospace;font-size:12px;color:rgba(232,224,208,.3);letter-spacing:2px;}
+.bet-label{font-size:10px;letter-spacing:2px;color:rgba(232,224,208,.3);text-transform:uppercase;margin-bottom:6px;}
+.bet-inp{width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid var(--border);border-radius:9px;color:var(--gold);font-family:'DM Mono',monospace;font-size:15px;font-weight:700;outline:none;transition:border-color .2s;}
+.bet-inp:focus{border-color:rgba(240,192,96,.4);}
+.bet-quick{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:6px;}
+.bq{padding:5px;border-radius:6px;border:1px solid var(--border);background:var(--glass);color:rgba(232,224,208,.5);font-size:10px;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;}
+.bq:hover{border-color:rgba(240,192,96,.3);color:var(--gold);}
+/* Mines count */
+.mines-select{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;}
+.mine-opt{padding:7px 4px;border-radius:7px;border:1px solid var(--border);background:var(--glass);color:rgba(232,224,208,.4);font-size:11px;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;}
+.mine-opt:hover{border-color:rgba(255,61,113,.3);color:#ff8ca0;}
+.mine-opt.active{background:rgba(255,61,113,.15);border-color:rgba(255,61,113,.4);color:var(--red);}
+/* Stats row */
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.stat-box{padding:10px;border-radius:9px;background:rgba(0,0,0,.3);border:1px solid var(--border);text-align:center;}
+.stat-v{font-family:'Orbitron',monospace;font-size:14px;font-weight:700;color:var(--gold);}
+.stat-l{font-size:9px;letter-spacing:1px;color:rgba(232,224,208,.25);margin-top:2px;}
+/* Main button */
+.main-btn{width:100%;padding:14px;border-radius:12px;border:none;cursor:pointer;font-family:'Orbitron',monospace;font-size:13px;font-weight:900;letter-spacing:1px;transition:all .2s;}
+.main-btn.start{background:linear-gradient(135deg,#c9a84c,#f0c060,#a07830);color:#080600;}
+.main-btn.start:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(240,192,96,.4);}
+.main-btn.cashout{background:linear-gradient(135deg,#00b894,#00e676);color:#003320;}
+.main-btn.cashout:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,230,118,.4);}
+.main-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+/* Progress bar */
+.progress-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:rgba(232,224,208,.3);}
+.progress-bar{height:4px;border-radius:2px;background:rgba(255,255,255,.07);margin-top:6px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--neon),var(--gold));transition:width .3s;}
+/* Toast */
+.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-20px);padding:12px 24px;border-radius:12px;font-size:13px;font-weight:600;z-index:999;opacity:0;transition:all .3s;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.win{background:rgba(0,230,118,.2);border:1px solid rgba(0,230,118,.4);color:var(--green);}
+.toast.loss{background:rgba(255,61,113,.2);border:1px solid rgba(255,61,113,.3);color:#ff8ca0;}
+</style>
+</head>
+<body>
+<div class="header">
+  <a class="back-btn" href="/">← Lobby</a>
+  <div class="game-title">💣 MINES</div>
+  <div class="balance">🪙 <span id="bal">—</span></div>
+</div>
+<div class="main">
+  <div class="game-area">
+    <div>
+      <div class="grid" id="grid"></div>
+      <div class="mult-display">
+        <div class="mult-val inactive" id="multVal">1.00×</div>
+        <div class="mult-sub" id="multSub">PASIRINKITE IR STATYTI</div>
+      </div>
+    </div>
+  </div>
+  <div class="bet-panel">
+    <div class="panel-title">💣 MINES</div>
+    <div>
+      <div class="bet-label">Statymų suma</div>
+      <input class="bet-inp" id="betInp" type="number" value="100" min="10"/>
+      <div class="bet-quick">
+        <button class="bq" onclick="ab(50)">+50</button>
+        <button class="bq" onclick="ab(100)">+100</button>
+        <button class="bq" onclick="hb()">½</button>
+        <button class="bq" onclick="db()">×2</button>
+      </div>
+    </div>
+    <div>
+      <div class="bet-label">Minų skaičius</div>
+      <div class="mines-select" id="minesSel">
+        <div class="mine-opt active" onclick="setMines(1,this)">1</div>
+        <div class="mine-opt" onclick="setMines(3,this)">3</div>
+        <div class="mine-opt" onclick="setMines(5,this)">5</div>
+        <div class="mine-opt" onclick="setMines(10,this)">10</div>
+        <div class="mine-opt" onclick="setMines(20,this)">20</div>
+      </div>
+    </div>
+    <div>
+      <div class="progress-row"><span>Žemai →</span><span>Aukštas rizika →</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="riskFill" style="width:4%"></div></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-v" id="sGems">0</div><div class="stat-l">DEIMANTAI</div></div>
+      <div class="stat-box"><div class="stat-v" id="sPot">0</div><div class="stat-l">POTENCIALAS</div></div>
+    </div>
+    <button class="main-btn start" id="mainBtn" onclick="handleMain()">STATYTI</button>
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-v" id="stWin">0</div><div class="stat-l">LAIMĖJIMAI</div></div>
+      <div class="stat-box"><div class="stat-v" id="stLoss">0</div><div class="stat-l">PRARADIMAI</div></div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toastEl"></div>
+<script>
+const uid = localStorage.getItem('casino_uid');
+if(!uid) location.href = '/login.html';
+let tokens = parseInt(localStorage.getItem('casino_tokens')||'10000');
+let playing = false;
+let mines = 1;
+let betAmt = 100;
+let minePositions = new Set();
+let revealedSafe = [];
+let stats = {wins:0,losses:0};
+
+const TOTAL = 25;
+function getMult(safe, m) {
+  if(safe === 0) return 1.0;
+  let p = 1;
+  for(let i=0;i<safe;i++) p *= (TOTAL-m-i)/(TOTAL-i);
+  return Math.max(1.01, parseFloat((0.97/p).toFixed(2)));
+}
+
+function fmt(n){return Number(n).toLocaleString();}
+function updateBal(){document.getElementById('bal').textContent=fmt(tokens);}
+
+function buildGrid(){
+  const g=document.getElementById('grid');
+  g.innerHTML='';
+  for(let i=0;i<TOTAL;i++){
+    const c=document.createElement('div');
+    c.className='cell';
+    c.dataset.idx=i;
+    c.innerHTML='<span style="opacity:.15;font-size:20px">?</span>';
+    c.onclick=()=>clickCell(i);
+    g.appendChild(c);
+  }
+}
+
+function setMines(n,el){
+  if(playing) return;
+  mines=n;
+  document.querySelectorAll('.mine-opt').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('riskFill').style.width=(n/25*100)+'%';
+}
+
+function handleMain(){
+  if(!playing) startGame();
+  else cashout();
+}
+
+function startGame(){
+  betAmt=parseInt(document.getElementById('betInp').value)||100;
+  if(betAmt<10) return;
+  if(betAmt>tokens){showToast('Nepakanka žetonų','loss');return;}
+  tokens-=betAmt;
+  localStorage.setItem('casino_tokens',tokens);
+  updateBal();
+  playing=true;
+  revealedSafe=[];
+  minePositions.clear();
+  // Place mines
+  const arr=[...Array(TOTAL).keys()];
+  for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}
+  arr.slice(0,mines).forEach(i=>minePositions.add(i));
+  buildGrid();
+  updateMult();
+  document.getElementById('mainBtn').className='main-btn cashout';
+  document.getElementById('mainBtn').textContent='IŠIMTI 🪙'+fmt(betAmt);
+  document.getElementById('multVal').className='mult-val';
+  document.getElementById('multSub').textContent='ATRASKITE DEIMANTUS';
+  document.getElementById('sGems').textContent='0';
+}
+
+function clickCell(idx){
+  if(!playing) return;
+  const cells=document.querySelectorAll('.cell');
+  const c=cells[idx];
+  if(c.classList.contains('revealed-gem')||c.classList.contains('mine')) return;
+  if(minePositions.has(idx)){
+    // HIT MINE
+    c.className='cell mine';
+    c.innerHTML='💣';
+    playing=false;
+    // Reveal all
+    setTimeout(()=>{
+      cells.forEach((cc,i)=>{
+        if(i!==idx){
+          if(minePositions.has(i)){cc.className='cell mine-show';cc.innerHTML='💣';}
+          else if(!cc.classList.contains('revealed-gem')){cc.className='cell safe-show';cc.innerHTML='💎';}
+        }
+      });
+    },400);
+    stats.losses++;
+    document.getElementById('stLoss').textContent=stats.losses;
+    document.getElementById('mainBtn').className='main-btn start';
+    document.getElementById('mainBtn').textContent='STATYTI';
+    document.getElementById('multVal').className='mult-val inactive';
+    document.getElementById('multVal').textContent='1.00×';
+    document.getElementById('multSub').textContent='MINA! PRALAIMĖTA 💣';
+    showToast('💣 Mina! Praradote 🪙'+fmt(betAmt),'loss');
+    logGame(betAmt,0);
+  } else {
+    c.className='cell gem revealed-gem';
+    c.innerHTML='💎';
+    revealedSafe.push(idx);
+    updateMult();
+    if(revealedSafe.length===TOTAL-mines){
+      // Auto cashout - all safe revealed
+      cashout();
+    }
+  }
+}
+
+function updateMult(){
+  const m=getMult(revealedSafe.length,mines);
+  const potential=Math.floor(betAmt*m);
+  document.getElementById('multVal').textContent=m.toFixed(2)+'×';
+  document.getElementById('sPot').textContent=fmt(potential);
+  document.getElementById('sGems').textContent=revealedSafe.length;
+  if(playing){
+    document.getElementById('mainBtn').textContent='IŠIMTI 🪙'+fmt(potential);
+  }
+}
+
+function cashout(){
+  if(!playing) return;
+  playing=false;
+  const m=getMult(revealedSafe.length,mines);
+  const won=Math.floor(betAmt*m);
+  tokens+=won;
+  localStorage.setItem('casino_tokens',tokens);
+  updateBal();
+  stats.wins++;
+  document.getElementById('stWin').textContent=stats.wins;
+  document.getElementById('mainBtn').className='main-btn start';
+  document.getElementById('mainBtn').textContent='STATYTI';
+  document.getElementById('multSub').textContent='LAIMĖJOTE! +🪙'+fmt(won-betAmt);
+  showToast('💎 ×'+m.toFixed(2)+' — Laimėjote 🪙'+fmt(won),'win');
+  logGame(betAmt,won);
+  // Reveal mines
+  document.querySelectorAll('.cell').forEach((c,i)=>{
+    if(!c.classList.contains('revealed-gem')&&minePositions.has(i)){c.className='cell mine-show';c.innerHTML='💣';}
+    else if(!c.classList.contains('revealed-gem')){c.className='cell inactive';c.innerHTML='💎';}
+  });
+}
+
+function ab(n){document.getElementById('betInp').value=Math.max(10,parseInt(document.getElementById('betInp').value||0)+n);}
+function hb(){document.getElementById('betInp').value=Math.max(10,Math.floor(parseInt(document.getElementById('betInp').value||10)/2));}
+function db(){document.getElementById('betInp').value=Math.min(tokens,parseInt(document.getElementById('betInp').value||10)*2);}
+
+let toastTimer;
+function showToast(msg,type){
+  const el=document.getElementById('toastEl');
+  el.textContent=msg;el.className='toast '+type+' show';
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3000);
+}
+function logGame(bet,result){
+  fetch('/api/log-game',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid,game:'mines',bet,result,won:result>0})}).catch(()=>{});
+}
+
+updateBal();
+buildGrid();
+</script>
+</body>
+</html>
