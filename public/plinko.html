@@ -310,6 +310,99 @@ function saveTokens() {
 }
 
 // ─────────────────────────────────────────────────────────────────────
+//  GARSO VARIKLIS (Web Audio API — be išorinių failų)
+// ─────────────────────────────────────────────────────────────────────
+let _ac = null;
+function ac() {
+  if (!_ac) _ac = new (window.AudioContext || window.webkitAudioContext)();
+  if (_ac.state === 'suspended') _ac.resume();
+  return _ac;
+}
+
+const sfx = {
+  // Trumpas "tik" kai kamuolys atsimuša į nagą
+  tick(row = 0) {
+    try {
+      const c = ac(), o = c.createOscillator(), g = c.createGain();
+      o.connect(g); g.connect(c.destination);
+      const freq = 400 + row * 30 + Math.random() * 80;
+      o.frequency.setValueAtTime(freq, c.currentTime);
+      o.type = 'triangle';
+      g.gain.setValueAtTime(0.18, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.06);
+      o.start(c.currentTime);
+      o.stop(c.currentTime + 0.06);
+    } catch(e) {}
+  },
+
+  // Kritimas — trumpas "whoosh"
+  drop() {
+    try {
+      const c = ac(), o = c.createOscillator(), g = c.createGain();
+      o.connect(g); g.connect(c.destination);
+      o.type = 'sawtooth';
+      o.frequency.setValueAtTime(600, c.currentTime);
+      o.frequency.exponentialRampToValueAtTime(120, c.currentTime + 0.18);
+      g.gain.setValueAtTime(0.12, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.18);
+      o.start(c.currentTime);
+      o.stop(c.currentTime + 0.2);
+    } catch(e) {}
+  },
+
+  // Nusileidimas į kaušą — "thud"
+  land() {
+    try {
+      const c = ac(), o = c.createOscillator(), g = c.createGain();
+      o.connect(g); g.connect(c.destination);
+      o.type = 'sine';
+      o.frequency.setValueAtTime(140, c.currentTime);
+      o.frequency.exponentialRampToValueAtTime(60, c.currentTime + 0.12);
+      g.gain.setValueAtTime(0.35, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.18);
+      o.start(c.currentTime);
+      o.stop(c.currentTime + 0.2);
+    } catch(e) {}
+  },
+
+  // Didelis laimėjimas — kylantis arpegio
+  bigWin(mult) {
+    try {
+      const c = ac();
+      const notes = mult >= 50
+        ? [523, 659, 784, 1047, 1319]  // C5 E5 G5 C6 E6
+        : [523, 659, 784, 1047];        // C5 E5 G5 C6
+      notes.forEach((freq, i) => {
+        const o = c.createOscillator(), g = c.createGain();
+        o.connect(g); g.connect(c.destination);
+        o.type = 'sine';
+        o.frequency.setValueAtTime(freq, c.currentTime + i * 0.1);
+        g.gain.setValueAtTime(0, c.currentTime + i * 0.1);
+        g.gain.linearRampToValueAtTime(0.22, c.currentTime + i * 0.1 + 0.04);
+        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + i * 0.1 + 0.28);
+        o.start(c.currentTime + i * 0.1);
+        o.stop(c.currentTime + i * 0.1 + 0.3);
+      });
+    } catch(e) {}
+  },
+
+  // Pralaimėjimas — žemyn einantis tonas
+  lose() {
+    try {
+      const c = ac(), o = c.createOscillator(), g = c.createGain();
+      o.connect(g); g.connect(c.destination);
+      o.type = 'sine';
+      o.frequency.setValueAtTime(330, c.currentTime);
+      o.frequency.exponentialRampToValueAtTime(180, c.currentTime + 0.25);
+      g.gain.setValueAtTime(0.18, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.28);
+      o.start(c.currentTime);
+      o.stop(c.currentTime + 0.3);
+    } catch(e) {}
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────
 //  STARS BACKGROUND
 // ─────────────────────────────────────────────────────────────────────
 (function initStars() {
@@ -805,6 +898,7 @@ function updateBall(ball, dt) {
 
         peg.flashTimer = 8;
         spawnPegHit(peg.x, peg.y);
+        sfx.tick(peg.row);
 
         // Ensure downward movement
         if (ball.vy < 1) ball.vy = 1.5;
@@ -844,6 +938,9 @@ function landBall(ball, bucketIdx) {
   balance += profit;
   updateBalance();
   saveTokens();
+  sfx.land();
+  if (mult >= 2) sfx.bigWin(mult);
+  else if (profit < 0) sfx.lose();
 
   const textColor = profit >= 0 ? '#00ff88' : '#ff3366';
   const textStr = profit >= 0 ? `+${win} 🪙` : `-${ball.bet} 🪙`;
@@ -945,6 +1042,7 @@ document.getElementById('drop-btn').addEventListener('click', () => {
 
   balance -= bet;
   updateBalance();
+  sfx.drop();
 
   // Determine bucket
   const bucketTarget = Math.floor(Math.random() * BUCKETS);
