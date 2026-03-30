@@ -2058,16 +2058,29 @@ function EmojiParticles({particles}){
 }
 
 // ═══════════════════════════════════════════════════
-// AUTH
+// AUTH — sesijos tikrinimas, redirect į login.html
 // ═══════════════════════════════════════════════════
 function Auth({onLogin,t=LANGS.en}){
-  const [name,setName]=useState(getName()||'');
-  const [loading,setLoading]=useState(false);
-  const go=()=>{
-    if(!name.trim())return; sfx.click(); setLoading(true);
-    socket.emit('register',{name:name.trim(),uid:getUser()});
-    socket.once('registered',d=>{localStorage.setItem('hrc_uid',d.uid);localStorage.setItem('hrc_name',d.name);onLogin(d);setLoading(false);});
-  };
+  useEffect(()=>{
+    const token=localStorage.getItem('casino_session');
+    if(!token){ window.location.href='/login.html'; return; }
+    fetch('/api/auth/me',{headers:{'Authorization':'Bearer '+token}})
+      .then(r=>r.ok?r.json():null)
+      .then(data=>{
+        if(!data){ localStorage.removeItem('casino_session'); window.location.href='/login.html'; return; }
+        const uid=data.uid;
+        const name=data.user?.name||localStorage.getItem('casino_name')||'Žaidėjas';
+        localStorage.setItem('hrc_uid',uid);
+        localStorage.setItem('hrc_name',name);
+        socket.emit('register',{name,uid});
+        socket.once('registered',d=>{
+          localStorage.setItem('hrc_uid',d.uid);
+          localStorage.setItem('hrc_name',d.name);
+          onLogin(d);
+        });
+      })
+      .catch(()=>{ window.location.href='/login.html'; });
+  },[]);
   return(
     <div className="auth-scene">
       <div className="auth-card">
@@ -2075,12 +2088,10 @@ function Auth({onLogin,t=LANGS.en}){
           <h1>HATHOR</h1>
           <p>ROYAL CASINO · EST. 2026</p>
         </div>
-        <div className="field">
-          <label className="inp-label">Your Name</label>
-          <input className="inp" value={name} onChange={e=>setName(e.target.value)} placeholder={t.yourName} onKeyDown={e=>e.key==='Enter'&&go()}/>
+        <div style={{textAlign:'center',padding:'20px',color:'rgba(232,224,208,.5)',fontSize:13}}>
+          <div style={{fontSize:28,marginBottom:12}}>⬡</div>
+          Tikrinamas prisijungimas...
         </div>
-        <button className="btn btn-primary btn-block btn-lg" onClick={go} disabled={loading}>{loading?'Entering...':'t.enterCasino'}</button>
-        <div className="new-player-note">{t.newPlayer}</div>
       </div>
     </div>
   );
@@ -4486,6 +4497,12 @@ function App(){
           <div className={`token-chip${tokenBump?' bump':''}`}>🪙 {fmt(user.tokens)}</div>
           <button className="btn btn-ghost btn-sm" onClick={()=>window.open("/cashier.html","_self")} style={{borderColor:"rgba(0,230,118,.3)",color:"#80ffbb"}}>💳 Cashier</button>
           <div className="avatar" onClick={()=>setShowAvatar(true)}>{user.avatar?<img src={user.avatar} alt=""/>:'👤'}</div>
+          <button className="btn btn-ghost btn-sm" style={{borderColor:"rgba(255,61,113,.25)",color:"rgba(255,140,160,.7)",fontSize:10}} onClick={()=>{
+            const t=localStorage.getItem('casino_session');
+            if(t) fetch('/api/auth/logout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:t})});
+            ['casino_session','casino_uid','casino_name','hrc_uid','hrc_name'].forEach(k=>localStorage.removeItem(k));
+            window.location.href='/login.html';
+          }}>⏻ Išeiti</button>
         </div>
       </div>
       <MobileNav page={page} nav={nav} t={t}/>
