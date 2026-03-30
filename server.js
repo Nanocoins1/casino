@@ -125,6 +125,15 @@ const upload = multer({storage,limits:{fileSize:2*1024*1024}});
 app.use(express.static(path.join(__dirname,'public')));
 app.use(express.json());
 
+// Root → lobby (new unified game lobby)
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'lobby.html'));
+});
+// Keep old casino accessible at /casino
+app.get('/casino', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 app.post('/upload-avatar', upload.single('avatar'), (req,res)=>{
   const uid=req.headers['x-user-id'];
   if(!req.file) return res.status(400).json({error:'No file'});
