@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>HATHOR Royal Casino — Lobby</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@400;600;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#04040a;--bg2:#080812;--gold:#f0c060;--gold2:#ffd980;--green:#00e676;--red:#ff3d71;
+  --neon:#00e5ff;--cream:#e8e0d0;--border:rgba(255,255,255,0.08);--glass:rgba(255,255,255,0.04);
+  --purple:#7c3aed;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cream);min-height:100vh;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:#3a2010;border-radius:2px;}
+
+/* ── Header ── */
+.header{height:64px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;
+  background:rgba(4,4,10,.95);border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);}
+.logo{font-family:'Orbitron',monospace;font-size:18px;font-weight:900;letter-spacing:4px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;background-clip:text;}
+.header-right{display:flex;align-items:center;gap:14px;}
+.balance-chip{display:flex;align-items:center;gap:8px;padding:7px 14px;border-radius:20px;
+  background:rgba(240,192,96,.08);border:1px solid rgba(240,192,96,.2);}
+.balance-val{font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:var(--gold);}
+.header-btn{padding:7px 16px;border-radius:8px;border:1px solid var(--border);background:var(--glass);
+  color:rgba(232,224,208,.5);font-size:12px;cursor:pointer;text-decoration:none;
+  font-family:'Space Grotesk',sans-serif;transition:all .2s;font-weight:600;}
+.header-btn:hover{color:var(--cream);border-color:rgba(255,255,255,.2);}
+.header-btn.kyc-warn{border-color:rgba(240,192,96,.4);color:var(--gold);}
+.kyc-dot{width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block;margin-right:5px;box-shadow:0 0 6px var(--red);}
+
+/* ── Hero ── */
+.hero{padding:56px 24px 40px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(124,58,237,.12),transparent),
+    radial-gradient(ellipse 50% 40% at 80% 60%,rgba(240,192,96,.05),transparent);pointer-events:none;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 18px;border-radius:20px;
+  background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.3);color:#a78bfa;
+  font-size:11px;letter-spacing:3px;margin-bottom:20px;}
+.hero h1{font-family:'Orbitron',monospace;font-size:clamp(28px,5vw,52px);font-weight:900;letter-spacing:3px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:14px;}
+.hero-sub{font-size:14px;color:rgba(232,224,208,.4);max-width:500px;margin:0 auto 32px;line-height:1.8;}
+
+/* Jackpot ticker */
+.jackpot-bar{display:inline-flex;align-items:center;gap:12px;padding:10px 24px;border-radius:12px;
+  background:rgba(240,192,96,.08);border:1px solid rgba(240,192,96,.2);}
+.jackpot-label{font-size:10px;letter-spacing:3px;color:rgba(240,192,96,.5);}
+.jackpot-val{font-family:'Orbitron',monospace;font-size:22px;font-weight:900;color:var(--gold);
+  text-shadow:0 0 20px rgba(240,192,96,.4);}
+
+/* ── KYC Banner ── */
+.kyc-banner{margin:0 24px 24px;padding:16px 24px;border-radius:14px;
+  background:rgba(240,192,96,.07);border:1px solid rgba(240,192,96,.25);
+  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.kyc-banner.hidden{display:none;}
+.kyc-banner-text{font-size:13px;color:rgba(232,224,208,.7);line-height:1.6;}
+.kyc-banner-text strong{color:var(--gold);}
+.kyc-link{padding:9px 20px;border-radius:9px;border:1px solid rgba(240,192,96,.35);
+  background:rgba(240,192,96,.1);color:var(--gold);font-size:12px;font-weight:700;
+  text-decoration:none;white-space:nowrap;transition:all .2s;}
+.kyc-link:hover{background:rgba(240,192,96,.2);}
+
+/* ── Category filter ── */
+.filter-wrap{padding:0 24px;margin-bottom:28px;display:flex;gap:8px;flex-wrap:wrap;overflow-x:auto;}
+.filter-btn{padding:8px 18px;border-radius:20px;border:1px solid var(--border);background:var(--glass);
+  color:rgba(232,224,208,.4);font-size:12px;font-weight:600;cursor:pointer;
+  white-space:nowrap;transition:all .2s;letter-spacing:.5px;}
+.filter-btn:hover{color:rgba(232,224,208,.8);border-color:rgba(255,255,255,.2);}
+.filter-btn.active{background:rgba(240,192,96,.12);border-color:rgba(240,192,96,.35);color:var(--gold);}
+
+/* ── Game Grid ── */
+.section-wrap{padding:0 24px 60px;}
+.section-title{font-family:'Orbitron',monospace;font-size:13px;letter-spacing:2px;
+  color:rgba(232,224,208,.25);margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.section-title::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.05);}
+
+.games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:40px;}
+@media(max-width:520px){.games-grid{grid-template-columns:repeat(2,1fr);gap:10px;}}
+
+.game-card{border-radius:16px;border:1px solid var(--border);background:rgba(8,8,20,.8);
+  cursor:pointer;text-decoration:none;overflow:hidden;transition:all .25s;display:flex;flex-direction:column;
+  position:relative;}
+.game-card:hover{transform:translateY(-4px);border-color:rgba(240,192,96,.25);
+  box-shadow:0 12px 40px rgba(0,0,0,.5);}
+.game-card.locked{opacity:.5;cursor:not-allowed;filter:grayscale(.5);}
+.game-card.locked:hover{transform:none;box-shadow:none;border-color:var(--border);}
+
+/* Badge */
+.game-badge{position:absolute;top:10px;right:10px;padding:3px 9px;border-radius:10px;font-size:9px;
+  font-weight:700;letter-spacing:1px;z-index:2;}
+.badge-hot{background:rgba(255,61,113,.25);border:1px solid rgba(255,61,113,.4);color:#ff8ca0;}
+.badge-new{background:rgba(0,230,118,.2);border:1px solid rgba(0,230,118,.35);color:var(--green);}
+.badge-popular{background:rgba(240,192,96,.18);border:1px solid rgba(240,192,96,.35);color:var(--gold);}
+.badge-rtp{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.2);color:var(--neon);}
+
+/* Game visual */
+.game-visual{height:130px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.game-emoji{font-size:52px;transition:transform .3s;position:relative;z-index:1;}
+.game-card:hover .game-emoji{transform:scale(1.1);}
+.game-visual-bg{position:absolute;inset:0;opacity:.6;}
+
+/* Game info */
+.game-info{padding:14px 14px 16px;}
+.game-name{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;color:var(--cream);
+  letter-spacing:.5px;margin-bottom:4px;}
+.game-desc{font-size:11px;color:rgba(232,224,208,.3);line-height:1.5;margin-bottom:10px;}
+.game-tags{display:flex;gap:5px;flex-wrap:wrap;}
+.game-tag{padding:2px 8px;border-radius:6px;font-size:9px;letter-spacing:1px;font-weight:600;}
+
+/* Play button overlay */
+.game-card::after{content:'ŽAISTI';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:'Orbitron',monospace;font-size:15px;font-weight:900;letter-spacing:3px;
+  color:rgba(240,192,96,.9);background:rgba(4,4,10,.85);opacity:0;transition:opacity .2s;border-radius:16px;}
+.game-card:not(.locked):hover::after{opacity:1;}
+
+/* Stats bar */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:0 24px 32px;padding:20px 24px;
+  background:rgba(8,8,18,.7);border:1px solid var(--border);border-radius:14px;}
+@media(max-width:600px){.stats-bar{grid-template-columns:repeat(2,1fr);}}
+.stat-item{text-align:center;}
+.stat-v{font-family:'Orbitron',monospace;font-size:20px;font-weight:700;color:var(--gold);}
+.stat-l{font-size:9px;letter-spacing:2px;color:rgba(232,224,208,.25);margin-top:3px;}
+
+/* Promo banner */
+.promo{margin:0 24px 28px;padding:24px;border-radius:16px;
+  background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(0,229,255,.08));
+  border:1px solid rgba(124,58,237,.25);display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.promo-icon{font-size:48px;flex-shrink:0;}
+.promo-text h3{font-family:'Orbitron',monospace;font-size:16px;color:var(--gold);margin-bottom:6px;}
+.promo-text p{font-size:12px;color:rgba(232,224,208,.4);line-height:1.7;}
+.promo-btn{margin-left:auto;padding:10px 22px;border-radius:9px;border:1px solid rgba(240,192,96,.35);
+  background:rgba(240,192,96,.1);color:var(--gold);font-size:12px;font-weight:700;
+  cursor:pointer;text-decoration:none;white-space:nowrap;transition:all .2s;font-family:'Space Grotesk',sans-serif;}
+.promo-btn:hover{background:rgba(240,192,96,.2);}
+
+/* Footer */
+.footer{padding:32px 24px;border-top:1px solid var(--border);text-align:center;}
+.footer p{font-size:11px;color:rgba(232,224,208,.15);line-height:2;max-width:700px;margin:0 auto;}
+.footer a{color:rgba(240,192,96,.3);text-decoration:none;}
+.footer a:hover{color:var(--gold);}
+.footer-links{display:flex;gap:20px;justify-content:center;margin-bottom:16px;flex-wrap:wrap;}
+.footer-links a{font-size:11px;color:rgba(232,224,208,.25);text-decoration:none;letter-spacing:1px;}
+.footer-links a:hover{color:rgba(232,224,208,.6);}
+
+/* Age badge */
+.age-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:8px;
+  background:rgba(255,61,113,.1);border:1px solid rgba(255,61,113,.2);color:#ff8ca0;font-size:11px;font-weight:700;}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;padding:14px 22px;border-radius:12px;
+  background:rgba(8,8,18,.97);border:1px solid rgba(240,192,96,.25);font-size:13px;
+  z-index:999;opacity:0;transform:translateY(16px);transition:all .3s;pointer-events:none;max-width:320px;}
+.toast.show{opacity:1;transform:translateY(0);}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="logo">⬡ HATHOR</div>
+  <div class="header-right">
+    <div class="balance-chip">🪙 <span class="balance-val" id="balVal">—</span></div>
+    <a class="header-btn kyc-warn" id="kycBtn" href="/kyc.html" style="display:none">
+      <span class="kyc-dot"></span>Patvirtinti
+    </a>
+    <a class="header-btn" href="/verify.html">🔐 Fair Play</a>
+    <a class="header-btn" href="/admin.html">⚙️ Admin</a>
+    <a class="header-btn" id="logoutBtn" onclick="logout()" href="#">Atsijungti</a>
+  </div>
+</div>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-badge">✦ LICENZIJUOTA KAZINO PLATFORMA</div>
+  <h1>HATHOR ROYAL CASINO</h1>
+  <div class="hero-sub">50+ žaidimų, tiesioginės lažybos, kriptovaliutų mokėjimai. Sąžiningumas patvirtinamas kriptografiškai.</div>
+  <div class="jackpot-bar">
+    <span class="jackpot-label">JACKPOT</span>
+    <span class="jackpot-val" id="jackpotVal">🪙 —</span>
+  </div>
+</div>
+
+<!-- KYC Banner -->
+<div class="kyc-banner hidden" id="kycBanner">
+  <div class="kyc-banner-text">
+    <strong>⚠️ Paskyra nepatvirtinta</strong><br/>
+    Norėdami žaisti, turite patvirtinti tapatybę ir amžių. Tai reikalauja Lietuvos ir ES azartinių lošimų taisyklės.
+  </div>
+  <a class="kyc-link" href="/kyc.html">Patvirtinti dabar →</a>
+</div>
+
+<!-- Stats bar -->
+<div class="stats-bar">
+  <div class="stat-item"><div class="stat-v">50+</div><div class="stat-l">ŽAIDIMŲ</div></div>
+  <div class="stat-item"><div class="stat-v" id="onlinePlayers">—</div><div class="stat-l">ŽAIDŽIA DABAR</div></div>
+  <div class="stat-item"><div class="stat-v">97%</div><div class="stat-l">VIDUTINIS RTP</div></div>
+  <div class="stat-item"><div class="stat-v">24/7</div><div class="stat-l">PALAIKYMAS</div></div>
+</div>
+
+<!-- Promo -->
+<div class="promo">
+  <div class="promo-icon">🎁</div>
+  <div class="promo-text">
+    <h3>Sveikiname! Jums 🪙10,000 žetonų</h3>
+    <p>Kiekviena diena — naujas bonusas. Žaiskite, kaupikaite XP, kelkitės į aukštesnius lygius ir atrakinkite VIP privilegijas.</p>
+  </div>
+  <a class="promo-btn" href="/">Žaisti dabar</a>
+</div>
+
+<!-- Filter -->
+<div class="filter-wrap">
+  <button class="filter-btn active" onclick="filterGames('all',this)">🎰 Visi</button>
+  <button class="filter-btn" onclick="filterGames('popular',this)">🔥 Populiarūs</button>
+  <button class="filter-btn" onclick="filterGames('slots',this)">🎰 Slotai</button>
+  <button class="filter-btn" onclick="filterGames('table',this)">🃏 Stalo</button>
+  <button class="filter-btn" onclick="filterGames('crash',this)">📈 Crash</button>
+  <button class="filter-btn" onclick="filterGames('live',this)">⚽ Sportas</button>
+  <button class="filter-btn" onclick="filterGames('instant',this)">⚡ Greiti</button>
+</div>
+
+<!-- Games -->
+<div class="section-wrap">
+
+  <!-- CRASH / ORIGINALS -->
+  <div class="section-title" data-cat="crash">📈 CRASH & ORIGINALS</div>
+  <div class="games-grid" id="grid-crash">
+
+    <a href="/crash.html" class="game-card" data-cat="crash popular">
+      <div class="game-badge badge-hot">🔥 HOT</div>
+      <div class="game-visual" style="background:linear-gradient(135deg,#060618,#0d0a30);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(0,229,255,.15),transparent 70%);"></div>
+        <span class="game-emoji">🚀</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">CRASH</div>
+        <div class="game-desc">Aviator stiliaus žaidimas. Išimkite iki katastrofos!</div>
+        <div class="game-tags">
+          <span class="game-tag" style="background:rgba(0,229,255,.1);color:var(--neon)">RTP 97%</span>
+          <span class="game-tag" style="background:rgba(255,61,113,.1);color:#ff8ca0">DIDELĖ RIZIKA</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="/mines.html" class="game-card" data-cat="crash popular instant">
+      <div class="game-badge badge-popular">⭐ POPULIARUS</div>
+      <div class="game-visual" style="background:linear-gradient(135deg,#060820,#0a0a18);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(255,61,113,.12),transparent 70%);"></div>
+        <span class="game-emoji">💣</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">MINES</div>
+        <div class="game-desc">5×5 lentelė. Raskite deimantus, išvenkite minų!</div>
+        <div class="game-tags">
+          <span class="game-tag" style="background:rgba(0,230,118,.1);color:var(--green)">RTP 97%</span>
+          <span class="game-tag" style="background:rgba(255,255,255,.05);color:rgba(232,224,208,.4)">1-20 MINOS</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="/dice.html" class="game-card" data-cat="crash instant">
+      <div class="game-visual" style="background:linear-gradient(135deg,#080618,#0d0825);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(124,58,237,.15),transparent 70%);"></div>
+        <span class="game-emoji">🎲</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">DICE</div>
+        <div class="game-desc">Meskite kauliukus virš arba žemiau tikslinio skaičiaus</div>
+        <div class="game-tags">
+          <span class="game-tag" style="background:rgba(0,229,255,.1);color:var(--neon)">RTP 97%</span>
+          <span class="game-tag" style="background:rgba(255,255,255,.05);color:rgba(232,224,208,.4)">REGULIUOJAMA</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="/dice.html#limbo" class="game-card" data-cat="crash instant">
+      <div class="game-badge badge-new">✨ NAUJAS</div>
+      <div class="game-visual" style="background:linear-gradient(135deg,#060815,#0a0820);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(0,229,255,.1),transparent 70%);"></div>
+        <span class="game-emoji">🚀</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">LIMBO</div>
+        <div class="game-desc">Nustatykite tikslą — ar raketа pasieks jį?</div>
+        <div class="game-tags">
+          <span class="game-tag" style="background:rgba(240,192,96,.1);color:var(--gold)">MAX 1000×</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="/dice.html#hilo" class="game-card" data-cat="crash table instant">
+      <div class="game-visual" style="background:linear-gradient(135deg,#08060f,#100818);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(124,58,237,.12),transparent 70%);"></div>
+        <span class="game-emoji">🃏</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">HI-LO</div>
+        <div class="game-desc">Aukščiau ar žemiau? Kaupkite streak'ą!</div>
+        <div class="game-tags">
+          <span class="game-tag" style="background:rgba(0,230,118,.1);color:var(--green)">NERIBOTA</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="/wheel.html" class="game-card" data-cat="crash instant popular">
+      <div class="game-visual" style="background:linear-gradient(135deg,#0d0518,#120a20);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(160,80,240,.15),transparent 70%);"></div>
+        <span class="game-emoji">🎡</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">LUCKY WHEEL</div>
+        <div class="game-desc">Sukite ratą — 3 rizikos lygiai, iki 100×!</div>
+        <div class="game-tags">
+          <span class="game-tag" style="background:rgba(160,80,240,.15);color:#c084fc">3 LYGIAI</span>
+          <span class="game-tag" style="background:rgba(255,61,113,.1);color:#ff8ca0">MAX 100×</span>
+        </div>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- SLOTS -->
+  <div class="section-title" data-cat="slots">🎰 SLOT MAŠINOS</div>
+  <div class="games-grid" id="grid-slots">
+
+    <a href="/" class="game-card" data-cat="slots popular">
+      <div class="game-badge badge-hot">🔥 HOT</div>
+      <div class="game-visual" style="background:linear-gradient(135deg,#1a0810,#2a1020);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(240,192,96,.12),transparent 70%);"></div>
+        <span class="game-emoji">🍒</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">CLASSIC FRUITS</div>
+        <div class="game-desc">Klasikinė vaisių mašina, 20 laimėjimo linijų</div>
+        <div class="game-tags"><span class="game-tag" style="background:rgba(240,192,96,.1);color:var(--gold)">RTP 96%</span><span class="game-tag" style="background:rgba(255,255,255,.05);color:rgba(232,224,208,.4)">20 LINIJŲ</span></div>
+      </div>
+    </a>
+
+    <a href="/" class="game-card" data-cat="slots popular">
+      <div class="game-badge badge-popular">⭐ POPULIARUS</div>
+      <div class="game-visual" style="background:linear-gradient(135deg,#1a1200,#2a1e00);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(240,160,0,.1),transparent 70%);"></div>
+        <span class="game-emoji">🏺</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">EGYPTIAN GOLD</div>
+        <div class="game-desc">Egipto lobiai, laukiniai simboliai, free spins</div>
+        <div class="game-tags"><span class="game-tag" style="background:rgba(240,192,96,.1);color:var(--gold)">RTP 97%</span><span class="game-tag" style="background:rgba(0,229,255,.08);color:var(--neon)">FREE SPINS</span></div>
+      </div>
+    </a>
+
+    <a href="/" class="game-card" data-cat="slots">
+      <div class="game-visual" style="background:linear-gradient(135deg,#000820,#001030);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(0,100,255,.1),transparent 70%);"></div>
+        <span class="game-emoji">🚀</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">SPACE FORTUNE</div>
+        <div class="game-desc">Kosmoso avantūra su dideliais koeficientais</div>
+        <div class="game-tags"><span class="game-tag" style="background:rgba(0,229,255,.1);color:var(--neon)">RTP 96.5%</span></div>
+      </div>
+    </a>
+
+    <a href="/" class="game-card" data-cat="slots popular">
+      <div class="game-visual" style="background:linear-gradient(135deg,#08001a,#120028);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(160,80,240,.12),transparent 70%);"></div>
+        <span class="game-emoji">💎</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">DIAMOND VIP</div>
+        <div class="game-desc">Prabangios deimantų mašinos su mega jackpot</div>
+        <div class="game-tags"><span class="game-tag" style="background:rgba(160,80,240,.15);color:#c084fc">VIP</span><span class="game-tag" style="background:rgba(240,192,96,.1);color:var(--gold)">JACKPOT</span></div>
+      </div>
+    </a>
+
+    <a href="/" class="game-card" data-cat="slots">
+      <div class="game-badge badge-new">✨ NAUJAS</div>
+      <div class="game-visual" style="background:linear-gradient(135deg,#0a1800,#0d2000);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(0,200,50,.08),transparent 70%);"></div>
+        <span class="game-emoji">🌿</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">JUNGLE SPIRIT</div>
+        <div class="game-desc">Džiunglių dvasia, daugintojai iki ×25</div>
+        <div class="game-tags"><span class="game-tag" style="background:rgba(0,230,118,.1);color:var(--green)">RTP 97.5%</span></div>
+      </div>
+    </a>
+
+    <a href="/" class="game-card" data-cat="slots">
+      <div class="game-visual" style="background:linear-gradient(135deg,#1a0000,#2a0808);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(255,50,0,.08),transparent 70%);"></div>
+        <span class="game-emoji">🐉</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">DRAGON'S TREASURE</div>
+        <div class="game-desc">Drakono ola su paslėptais lobiais</div>
+        <div class="game-tags"><span class="game-tag" style="background:rgba(255,61,113,.1);color:#ff8ca0">MAX ×500</span></div>
+      </div>
+    </a>
+
+    <a href="/" class="game-card" data-cat="slots">
+      <div class="game-visual" style="background:linear-gradient(135deg,#001520,#002030);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(0,180,255,.08),transparent 70%);"></div>
+        <span class="game-emoji">🧜</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">OCEAN DEPTHS</div>
+        <div class="game-desc">Povandeninė nuotykis su 243 laimėjimo būdais</div>
+        <div class="game-tags"><span class="game-tag" style="background:rgba(0,229,255,.1);color:var(--neon)">243 WAYS</span></div>
+      </div>
+    </a>
+
+    <a href="/" class="game-card" data-cat="slots">
+      <div class="game-visual" style="background:linear-gradient(135deg,#180010,#200018);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(200,0,150,.08),transparent 70%);"></div>
+        <span class="game-emoji">🌙</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">MOON MAGIC</div>
+        <div class="game-desc">Magiška nakties mašina su expanding wilds</div>
+        <div class="game-tags"><span class="game-tag" style="background:rgba(160,80,240,.12);color:#c084fc">EXPANDING WILDS</span></div>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- TABLE GAMES -->
+  <div class="section-title" data-cat="table">🃏 STALO ŽAIDIMAI</div>
+  <div class="games-grid" id="grid-table">
+
+    <a href="/baccarat.html" class="game-card" data-cat="table popular">
+      <div class="game-badge badge-popular">⭐ POPULIARUS</div>
+      <div class="game-visual" style="background:linear-gradient(135deg,#040d06,#081508);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(0,150,50,.1),transparent 70%);"></div>
+        <span class="game-emoji">🃏</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">BACCARAT</div>
+        <div class="game-desc">Klasikinis baccarat — Player, Banker ar Tie</div>
+        <div class="game-tags"><span class="game-tag" style="background:rgba(0,230,118,.1);color:var(--green)">RTP 98.7%</span></div>
+      </div>
+    </a>
+
+    <a href="/" class="game-card" data-cat="table popular">
+      <div class="game-badge badge-hot">🔥 HOT</div>
+      <div class="game-visual" style="background:linear-gradient(135deg,#040c06,#081208);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(0,200,60,.08),transparent 70%);"></div>
+        <span class="game-emoji">🃏</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">BLACKJACK</div>
+        <div class="game-desc">21 — klasikinis blackjack prieš dilerį</div>
+        <div class="game-tags"><span class="game-tag" style="background:rgba(0,230,118,.1);color:var(--green)">RTP 99.5%</span><span class="game-tag" style="background:rgba(255,255,255,.05);color:rgba(232,224,208,.4)">DOUBLE DOWN</span></div>
+      </div>
+    </a>
+
+    <a href="/videopoker.html" class="game-card" data-cat="table">
+      <div class="game-badge badge-new">✨ NAUJAS</div>
+      <div class="game-visual" style="background:linear-gradient(135deg,#06040f,#0a0618);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(124,58,237,.1),transparent 70%);"></div>
+        <span class="game-emoji">🎴</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">VIDEO POKER</div>
+        <div class="game-desc">Jacks or Better — laikykite, pakeiskite, laimėkite!</div>
+        <div class="game-tags"><span class="game-tag" style="background:rgba(0,230,118,.1);color:var(--green)">RTP 99.5%</span><span class="game-tag" style="background:rgba(240,192,96,.1);color:var(--gold)">MAX 800×</span></div>
+      </div>
+    </a>
+
+    <a href="/" class="game-card" data-cat="table popular">
+      <div class="game-visual" style="background:linear-gradient(135deg,#0a0800,#141000);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(200,160,0,.08),transparent 70%);"></div>
+        <span class="game-emoji">♠️</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">TEXAS HOLD'EM</div>
+        <div class="game-desc">Multiplayer pokeris su botais ir gyvais žaidėjais</div>
+        <div class="game-tags"><span class="game-tag" style="background:rgba(240,192,96,.1);color:var(--gold)">MULTIPLAYER</span><span class="game-tag" style="background:rgba(0,229,255,.08);color:var(--neon)">LIVE BOTS</span></div>
+      </div>
+    </a>
+
+    <a href="/keno.html" class="game-card" data-cat="table instant">
+      <div class="game-visual" style="background:linear-gradient(135deg,#000818,#001020);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(0,100,200,.08),transparent 70%);"></div>
+        <span class="game-emoji">🎱</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">KENO</div>
+        <div class="game-desc">80 kamuolių loterija — pasirinkite iki 10 skaičių</div>
+        <div class="game-tags"><span class="game-tag" style="background:rgba(0,229,255,.1);color:var(--neon)">RTP 95%</span><span class="game-tag" style="background:rgba(255,255,255,.05);color:rgba(232,224,208,.4)">20 KAMUOLIŲ</span></div>
+      </div>
+    </a>
+
+    <a href="/" class="game-card" data-cat="table">
+      <div class="game-visual" style="background:linear-gradient(135deg,#0a0500,#150800);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(255,120,0,.06),transparent 70%);"></div>
+        <span class="game-emoji">🎰</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">3 CARD POKER</div>
+        <div class="game-desc">Trijų kortelių pokeris — greitas ir linksmas</div>
+        <div class="game-tags"><span class="game-tag" style="background:rgba(255,61,113,.1);color:#ff8ca0">RTP 97.7%</span></div>
+      </div>
+    </a>
+
+    <a href="/" class="game-card" data-cat="table">
+      <div class="game-visual" style="background:linear-gradient(135deg,#040a04,#060e06);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(0,180,30,.06),transparent 70%);"></div>
+        <span class="game-emoji">🎯</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">EUROPEAN ROULETTE</div>
+        <div class="game-desc">Europietiška ruletė su vienu nuliu</div>
+        <div class="game-tags"><span class="game-tag" style="background:rgba(0,230,118,.1);color:var(--green)">RTP 97.3%</span></div>
+      </div>
+    </a>
+
+    <a href="/" class="game-card" data-cat="table">
+      <div class="game-visual" style="background:linear-gradient(135deg,#0a0004,#150008);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(200,0,50,.06),transparent 70%);"></div>
+        <span class="game-emoji">🎡</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">AMERICAN ROULETTE</div>
+        <div class="game-desc">Amerikietiška ruletė su dviguba nuliu</div>
+        <div class="game-tags"><span class="game-tag" style="background:rgba(255,61,113,.1);color:#ff8ca0">RTP 94.7%</span></div>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- INSTANT / SPORTS -->
+  <div class="section-title" data-cat="live">⚽ SPORTO LAŽYBOS</div>
+  <div class="games-grid" id="grid-live">
+
+    <a href="/" class="game-card" data-cat="live popular">
+      <div class="game-badge badge-hot">🔥 LIVE</div>
+      <div class="game-visual" style="background:linear-gradient(135deg,#031a06,#052a0a);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(0,200,50,.08),transparent 70%);"></div>
+        <span class="game-emoji">⚽</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">FUTBOLAS</div>
+        <div class="game-desc">Premier League, La Liga, Champions League ir dar daugiau</div>
+        <div class="game-tags"><span class="game-tag" style="background:rgba(0,230,118,.15);color:var(--green)">LIVE ODDS</span><span class="game-tag" style="background:rgba(255,255,255,.05);color:rgba(232,224,208,.4)">20+ LYGŲ</span></div>
+      </div>
+    </a>
+
+    <a href="/" class="game-card" data-cat="live popular">
+      <div class="game-visual" style="background:linear-gradient(135deg,#081520,#0d2030);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(255,120,0,.06),transparent 70%);"></div>
+        <span class="game-emoji">🏀</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">KREPŠINIS</div>
+        <div class="game-desc">NBA, Eurolyga, LKL rungtynės su live koeficientais</div>
+        <div class="game-tags"><span class="game-tag" style="background:rgba(255,120,0,.15);color:#ff9a3c">NBA LIVE</span></div>
+      </div>
+    </a>
+
+    <a href="/" class="game-card" data-cat="live">
+      <div class="game-visual" style="background:linear-gradient(135deg,#050a1a,#080f28);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(0,50,200,.06),transparent 70%);"></div>
+        <span class="game-emoji">🎾</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">TENISAS</div>
+        <div class="game-desc">ATP, WTA turnyrai, Grand Slam</div>
+        <div class="game-tags"><span class="game-tag" style="background:rgba(0,229,255,.1);color:var(--neon)">LIVE</span></div>
+      </div>
+    </a>
+
+    <a href="/" class="game-card" data-cat="live">
+      <div class="game-visual" style="background:linear-gradient(135deg,#0a1020,#101828);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(200,200,255,.04),transparent 70%);"></div>
+        <span class="game-emoji">🏒</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">LEDO RITULYS</div>
+        <div class="game-desc">NHL, Lietuvos čempionatas ir Europos lygos</div>
+        <div class="game-tags"><span class="game-tag" style="background:rgba(255,255,255,.07);color:rgba(232,224,208,.4)">NHL</span></div>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- INSTANT -->
+  <div class="section-title" data-cat="instant">⚡ GREITI ŽAIDIMAI</div>
+  <div class="games-grid" id="grid-instant">
+
+    <a href="/wheel.html" class="game-card" data-cat="instant popular">
+      <div class="game-visual" style="background:linear-gradient(135deg,#0d0520,#160830);">
+        <span class="game-emoji">🎡</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">LUCKY WHEEL</div>
+        <div class="game-desc">Sukite ir laimėkite iki 100×</div>
+        <div class="game-tags"><span class="game-tag" style="background:rgba(160,80,240,.12);color:#c084fc">INSTANT WIN</span></div>
+      </div>
+    </a>
+
+    <a href="/" class="game-card" data-cat="instant">
+      <div class="game-badge badge-new">✨ NAUJAS</div>
+      <div class="game-visual" style="background:linear-gradient(135deg,#100820,#180c30);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(150,0,255,.08),transparent 70%);"></div>
+        <span class="game-emoji">🔮</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">CRYSTAL BALL</div>
+        <div class="game-desc">Paskutinė kristalo rutulio loterija</div>
+        <div class="game-tags"><span class="game-tag" style="background:rgba(160,80,240,.12);color:#c084fc">JACKPOT</span></div>
+      </div>
+    </a>
+
+    <a href="/" class="game-card" data-cat="instant">
+      <div class="game-visual" style="background:linear-gradient(135deg,#050f08,#081508);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(0,180,50,.06),transparent 70%);"></div>
+        <span class="game-emoji">🍀</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">LUCKY CLOVER</div>
+        <div class="game-desc">Ieškokite keturialapio dobilas</div>
+        <div class="game-tags"><span class="game-tag" style="background:rgba(0,230,118,.1);color:var(--green)">INSTANT</span></div>
+      </div>
+    </a>
+
+    <a href="/" class="game-card" data-cat="instant">
+      <div class="game-visual" style="background:linear-gradient(135deg,#1a0a00,#251200);">
+        <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(255,150,0,.06),transparent 70%);"></div>
+        <span class="game-emoji">🎰</span>
+      </div>
+      <div class="game-info">
+        <div class="game-name">SPIN & WIN</div>
+        <div class="game-desc">Greitasis lošimas be jokių taisyklių</div>
+        <div class="game-tags"><span class="game-tag" style="background:rgba(240,192,96,.1);color:var(--gold)">GREITAS</span></div>
+      </div>
+    </a>
+
+  </div>
+
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <div class="footer-links">
+    <a href="/kyc.html">KYC Patikrinimas</a>
+    <a href="/verify.html">Provably Fair</a>
+    <a href="#">Atsakingas Lošimas</a>
+    <a href="#">Privatumo Politika</a>
+    <a href="#">Taisyklės ir Sąlygos</a>
+    <a href="#">Pagalba</a>
+  </div>
+  <p>
+    <span class="age-badge">🔞 18+</span><br/><br/>
+    HATHOR Royal Casino. Lošimas gali sukelti priklausomybę — lošk atsakingai.<br/>
+    Jei turite lošimo problemų, kreipkitės į pagalbos linija: <strong>116 123</strong><br/>
+    © 2025–2026 HATHOR Royal Casino. Visos teisės saugomos.
+  </p>
+</div>
+
+<div class="toast" id="toastEl"></div>
+
+<script>
+const uid = localStorage.getItem('casino_uid');
+if(!uid) { window.location.href = '/login.html'; }
+
+let tokens = parseInt(localStorage.getItem('casino_tokens')||'10000');
+
+// Balance
+function updateBal(){document.getElementById('balVal').textContent=Number(tokens).toLocaleString();}
+updateBal();
+
+// KYC status
+async function checkKYC(){
+  try {
+    const r = await fetch('/api/kyc/status/'+uid);
+    const d = await r.json();
+    if(d.status !== 'approved'){
+      document.getElementById('kycBtn').style.display='flex';
+      document.getElementById('kycBanner').classList.remove('hidden');
+    }
+  } catch(e){}
+}
+checkKYC();
+
+// Jackpot
+async function loadJackpot(){
+  try {
+    const r = await fetch('/api/jackpot');
+    const d = await r.json();
+    document.getElementById('jackpotVal').textContent='🪙 '+Number(d.amount).toLocaleString();
+  } catch(e){}
+}
+loadJackpot();
+setInterval(loadJackpot,10000);
+
+// Online players (simulate)
+document.getElementById('onlinePlayers').textContent = Math.floor(Math.random()*80+40);
+
+// Filter
+function filterGames(cat, el){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.game-card').forEach(c=>{
+    if(cat==='all'){c.style.display='flex';}
+    else{
+      const cats=(c.dataset.cat||'').split(' ');
+      c.style.display=cats.includes(cat)?'flex':'none';
+    }
+  });
+  // Hide/show section titles
+  document.querySelectorAll('.section-title').forEach(t=>{
+    if(cat==='all'){t.style.display='flex';}
+    else{
+      const secCat=t.dataset.cat||'';
+      const hasVisible = cat==='all'||secCat===cat||
+        (cat==='popular')||
+        (cat==='instant'&&['instant','crash'].includes(secCat));
+      t.style.display=cat==='all'?'flex':'none';
+    }
+  });
+  if(cat!=='all') document.querySelectorAll('.section-title').forEach(t=>t.style.display='none');
+}
+
+// Logout
+function logout(){
+  const token = localStorage.getItem('casino_session');
+  if(token) fetch('/api/auth/logout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})}).catch(()=>{});
+  localStorage.removeItem('casino_session');
+  localStorage.removeItem('casino_uid');
+  localStorage.removeItem('casino_name');
+  window.location.href='/login.html';
+}
+
+// Toast
+function showToast(msg){
+  const el=document.getElementById('toastEl');
+  el.textContent=msg;el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),3000);
+}
+</script>
+</body>
+</html>

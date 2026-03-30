@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>HATHOR — Video Poker</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#04040a;--bg2:#080812;
+  --gold:#f0c060;--gold2:#ffd980;--gold3:#8a6020;
+  --green:#00e676;--red:#ff3d71;--neon:#00e5ff;
+  --cream:#e8e0d0;--border:rgba(255,255,255,0.08);
+  --glass:rgba(255,255,255,0.04);
+  --card-bg:#fdf8f0;--card-back1:#1a0a2e;--card-back2:#2d1060;
+}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cream);display:flex;flex-direction:column;}
+
+/* ── Header ── */
+.header{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(4,4,10,.98);border-bottom:1px solid var(--border);flex-shrink:0;gap:12px;}
+.back-btn{padding:6px 14px;border-radius:7px;border:1px solid var(--border);background:var(--glass);color:rgba(232,224,208,.5);font-size:11px;cursor:pointer;text-decoration:none;transition:all .2s;white-space:nowrap;}
+.back-btn:hover{color:var(--cream);}
+.game-title{font-family:'Orbitron',monospace;font-size:15px;font-weight:900;letter-spacing:2px;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;white-space:nowrap;}
+.balance{font-family:'DM Mono',monospace;font-size:13px;color:var(--gold);white-space:nowrap;}
+.balance span{color:rgba(232,224,208,.4);font-size:10px;margin-right:4px;letter-spacing:1px;}
+
+/* ── Layout ── */
+.main{flex:1;display:grid;grid-template-columns:1fr 270px;overflow:hidden;}
+@media(max-width:700px){.main{grid-template-columns:1fr;grid-template-rows:1fr auto;}}
+
+/* ── Game area ── */
+.game-area{display:flex;flex-direction:column;align-items:center;justify-content:space-between;background:#060610;padding:20px 24px;overflow:hidden;gap:12px;}
+
+/* Result banner */
+.result-banner{height:54px;display:flex;align-items:center;justify-content:center;gap:16px;width:100%;}
+.result-name{font-family:'Orbitron',monospace;font-size:18px;font-weight:900;letter-spacing:2px;color:var(--gold);text-shadow:0 0 24px rgba(240,192,96,.6);opacity:0;transition:opacity .4s;}
+.result-name.show{opacity:1;}
+.result-win{font-family:'DM Mono',monospace;font-size:22px;font-weight:700;color:var(--green);text-shadow:0 0 20px rgba(0,230,118,.5);opacity:0;transition:opacity .4s .1s;}
+.result-win.show{opacity:1;}
+@keyframes winPop{0%{transform:scale(0.5);opacity:0}60%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+.result-win.animate{animation:winPop .5s forwards;}
+
+/* Cards */
+.cards-row{display:flex;gap:12px;justify-content:center;align-items:center;flex:1;}
+@media(max-width:500px){.cards-row{gap:6px;}}
+
+.card-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;user-select:none;}
+.card-wrap.dealt{cursor:pointer;}
+.card-wrap.no-click{cursor:default;pointer-events:none;}
+
+.hold-badge{height:22px;display:flex;align-items:center;justify-content:center;
+  font-family:'Orbitron',monospace;font-size:9px;font-weight:900;letter-spacing:2px;
+  color:var(--gold);border:1px solid var(--gold);border-radius:5px;padding:0 8px;
+  background:rgba(240,192,96,.12);opacity:0;transition:opacity .2s;}
+.hold-badge.show{opacity:1;}
+
+/* Card face/back */
+.card{
+  width:80px;height:116px;border-radius:10px;position:relative;
+  transition:transform .35s cubic-bezier(.4,0,.2,1),box-shadow .2s;
+  transform-style:preserve-3d;
+}
+@media(max-width:500px){.card{width:60px;height:88px;border-radius:8px;}}
+.card-wrap.held .card{
+  box-shadow:0 0 0 2px var(--gold),0 0 20px rgba(240,192,96,.5);
+  transform:translateY(-6px);
+}
+.card-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .4s cubic-bezier(.4,0,.2,1);}
+.card-inner.flipped{transform:rotateY(180deg);}
+.card-face,.card-back{
+  position:absolute;inset:0;border-radius:10px;backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+}
+@media(max-width:500px){.card-face,.card-back{border-radius:8px;}}
+
+/* Card face */
+.card-face{
+  background:var(--card-bg);display:flex;flex-direction:column;
+  justify-content:space-between;padding:5px 6px;
+  box-shadow:0 4px 14px rgba(0,0,0,.5);
+}
+.card-face.red .rank-tl,.card-face.red .rank-br,.card-face.red .suit-center{color:#cc1111;}
+.card-face.black .rank-tl,.card-face.black .rank-br,.card-face.black .suit-center{color:#111;}
+.rank-tl{font-family:'DM Mono',monospace;font-size:14px;font-weight:700;line-height:1;display:flex;flex-direction:column;align-items:flex-start;}
+.rank-tl .s{font-size:11px;line-height:1;}
+.rank-br{font-family:'DM Mono',monospace;font-size:14px;font-weight:700;line-height:1;display:flex;flex-direction:column;align-items:flex-end;transform:rotate(180deg);}
+.rank-br .s{font-size:11px;line-height:1;}
+.suit-center{font-size:34px;line-height:1;display:flex;align-items:center;justify-content:center;flex:1;}
+@media(max-width:500px){
+  .rank-tl{font-size:11px;}.rank-tl .s{font-size:9px;}
+  .rank-br{font-size:11px;}.rank-br .s{font-size:9px;}
+  .suit-center{font-size:26px;}
+}
+
+/* Card back */
+.card-back{
+  background:var(--card-back1);
+  transform:rotateY(180deg);
+  box-shadow:0 4px 14px rgba(0,0,0,.5);
+  overflow:hidden;
+}
+.card-back::before{
+  content:'';position:absolute;inset:5px;border-radius:7px;
+  border:2px solid rgba(180,100,255,.3);
+  background:repeating-linear-gradient(
+    45deg,
+    rgba(120,50,200,.15) 0px,rgba(120,50,200,.15) 3px,
+    transparent 3px,transparent 9px
+  );
+}
+.card-back::after{
+  content:'♦';position:absolute;inset:0;display:flex;align-items:center;
+  justify-content:center;font-size:28px;color:rgba(180,100,255,.25);
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* Controls row */
+.controls-row{display:flex;gap:12px;align-items:center;justify-content:center;width:100%;flex-wrap:wrap;}
+.action-btn{
+  padding:13px 36px;border-radius:12px;border:none;cursor:pointer;
+  font-family:'Orbitron',monospace;font-size:14px;font-weight:900;letter-spacing:1px;
+  background:linear-gradient(135deg,#c9a84c,#f0c060,#a07830);
+  color:#080600;transition:all .2s;
+}
+.action-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(240,192,96,.4);}
+.action-btn:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none;}
+.action-btn.draw-btn{background:linear-gradient(135deg,#0d5c2e,#00e676,#0a4422);color:#001a0a;}
+
+/* ── Side panel ── */
+.side-panel{background:rgba(8,8,18,.95);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;padding:16px;gap:14px;}
+@media(max-width:700px){.side-panel{border-left:none;border-top:1px solid var(--border);padding:12px 16px;}}
+.panel-section{display:flex;flex-direction:column;gap:8px;}
+.panel-title{font-family:'Orbitron',monospace;font-size:10px;color:rgba(232,224,208,.3);letter-spacing:2px;text-transform:uppercase;}
+
+/* Bet */
+.bet-row{display:flex;align-items:center;gap:8px;}
+.coin-display{display:flex;gap:4px;align-items:center;}
+.coin{width:28px;height:28px;border-radius:50%;border:2px solid var(--gold3);background:rgba(240,192,96,.1);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--gold3);font-weight:700;transition:all .2s;}
+.coin.active{background:var(--gold);border-color:var(--gold2);color:#060600;box-shadow:0 0 10px rgba(240,192,96,.5);}
+.coin:hover:not(.active){border-color:var(--gold);color:var(--gold);}
+.bet-amount{font-family:'DM Mono',monospace;font-size:22px;font-weight:700;color:var(--gold);min-width:60px;text-align:right;}
+.coin-label{font-size:10px;color:rgba(232,224,208,.3);letter-spacing:1px;}
+
+.bet-quick{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;}
+.bq{padding:5px;border-radius:6px;border:1px solid var(--border);background:var(--glass);color:rgba(232,224,208,.5);font-size:10px;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;}
+.bq:hover{border-color:rgba(240,192,96,.3);color:var(--gold);}
+.max-btn{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(240,192,96,.3);background:rgba(240,192,96,.06);color:var(--gold);font-family:'Orbitron',monospace;font-size:10px;font-weight:900;letter-spacing:1px;cursor:pointer;transition:all .2s;}
+.max-btn:hover{background:rgba(240,192,96,.12);box-shadow:0 0 12px rgba(240,192,96,.2);}
+
+/* Payout table */
+.payout-table{width:100%;border-collapse:collapse;}
+.payout-table tr{transition:background .2s;}
+.payout-table td{padding:4px 6px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.04);}
+.payout-table td:last-child{text-align:right;font-family:'DM Mono',monospace;color:var(--gold);font-weight:700;}
+.payout-table tr.highlight td{background:rgba(240,192,96,.12);color:var(--gold);}
+.payout-table tr.highlight td:first-child{color:var(--gold);font-weight:700;}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.stat-box{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;}
+.stat-val{font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:var(--gold);}
+.stat-val.green{color:var(--green);}
+.stat-lbl{font-size:9px;letter-spacing:1px;color:rgba(232,224,208,.3);text-transform:uppercase;margin-top:2px;}
+
+/* Flip animation for draw */
+@keyframes cardFlipOut{0%{transform:rotateY(0)}100%{transform:rotateY(-90deg)}}
+@keyframes cardFlipIn{0%{transform:rotateY(90deg)}100%{transform:rotateY(0)}}
+.flip-out{animation:cardFlipOut .2s ease-in forwards;}
+.flip-in{animation:cardFlipIn .2s ease-out forwards;}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a href="/" class="back-btn">← Atgal</a>
+  <div class="game-title">🎴 VIDEO POKERIS</div>
+  <div class="balance"><span>LIKUTIS</span><span id="balanceDisplay">0</span> ¢</div>
+</header>
+
+<div class="main">
+  <!-- Game area -->
+  <div class="game-area">
+    <!-- Result banner -->
+    <div class="result-banner">
+      <div class="result-name" id="resultName"></div>
+      <div class="result-win" id="resultWin"></div>
+    </div>
+
+    <!-- Cards -->
+    <div class="cards-row" id="cardsRow">
+      <!-- 5 cards rendered by JS -->
+    </div>
+
+    <!-- Buttons -->
+    <div class="controls-row">
+      <button class="action-btn" id="dealBtn" onclick="handleDeal()">DALINTI</button>
+      <button class="action-btn draw-btn" id="drawBtn" onclick="handleDraw()" disabled>KEISTI</button>
+    </div>
+  </div>
+
+  <!-- Side panel -->
+  <div class="side-panel">
+
+    <div class="panel-section">
+      <div class="panel-title">Statymas</div>
+      <div class="bet-row">
+        <div class="coin-display" id="coinDisplay"></div>
+        <div style="flex:1"></div>
+        <div>
+          <div class="coin-label">MONETŲ</div>
+          <div class="bet-amount" id="betAmount">1</div>
+        </div>
+      </div>
+      <div class="bet-quick">
+        <button class="bq" onclick="multBet(0.5)">½</button>
+        <button class="bq" onclick="multBet(2)">2×</button>
+        <button class="bq" onclick="addBet(-1)">-1</button>
+        <button class="bq" onclick="addBet(1)">+1</button>
+      </div>
+      <button class="max-btn" onclick="setMaxBet()">MAX STATYMAS (5×)</button>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-title">Išmokos (1 moneta)</div>
+      <table class="payout-table" id="payoutTable">
+        <tr data-hand="Royal Flush">     <td>Karališka spalva</td><td>800×</td></tr>
+        <tr data-hand="Straight Flush">  <td>Eilutė + spalva</td><td>50×</td></tr>
+        <tr data-hand="Four of a Kind">  <td>Keturios vienodos</td><td>25×</td></tr>
+        <tr data-hand="Full House">      <td>Full House</td><td>9×</td></tr>
+        <tr data-hand="Flush">           <td>Spalva (Flush)</td><td>6×</td></tr>
+        <tr data-hand="Straight">        <td>Eilutė (Straight)</td><td>4×</td></tr>
+        <tr data-hand="Three of a Kind"> <td>Trys vienodos</td><td>3×</td></tr>
+        <tr data-hand="Two Pair">        <td>Dvi poros</td><td>2×</td></tr>
+        <tr data-hand="Jacks or Better"> <td>Valetas ar geriau</td><td>1×</td></tr>
+        <tr data-hand="Nothing">         <td>Nieko</td><td>0×</td></tr>
+      </table>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-title">Statistika</div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-val" id="statGames">0</div><div class="stat-lbl">Žaidimai</div></div>
+        <div class="stat-box"><div class="stat-val green" id="statWins">0</div><div class="stat-lbl">Laimėjimai</div></div>
+        <div class="stat-box"><div class="stat-val" id="statBet">0</div><div class="stat-lbl">Pastatyta</div></div>
+        <div class="stat-box"><div class="stat-val green" id="statWon">0</div><div class="stat-lbl">Laimėta</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── Auth ──
+const uid = localStorage.getItem('casino_uid');
+if(!uid) location.href='/login.html';
+let balance = parseInt(localStorage.getItem('casino_tokens')||'1000');
+function saveBalance(){localStorage.setItem('casino_tokens',balance);}
+function updateBalanceDisplay(){document.getElementById('balanceDisplay').textContent=balance;}
+updateBalanceDisplay();
+
+// ── Stats ──
+let stats={games:0,wins:0,totalBet:0,totalWon:0};
+function updateStats(){
+  document.getElementById('statGames').textContent=stats.games;
+  document.getElementById('statWins').textContent=stats.wins;
+  document.getElementById('statBet').textContent=stats.totalBet;
+  document.getElementById('statWon').textContent=stats.totalWon;
+}
+
+// ── Bet ──
+let bet=1;
+function renderCoins(){
+  const cd=document.getElementById('coinDisplay');
+  cd.innerHTML='';
+  for(let i=1;i<=5;i++){
+    const c=document.createElement('div');
+    c.className='coin'+(i<=bet?' active':'');
+    c.textContent=i;
+    c.onclick=(()=>{const v=i;return()=>setBet(v);})();
+    cd.appendChild(c);
+  }
+  document.getElementById('betAmount').textContent=bet;
+}
+function setBet(v){bet=Math.max(1,Math.min(5,v));renderCoins();}
+function addBet(d){setBet(bet+d);}
+function multBet(m){setBet(Math.round(bet*m));}
+function setMaxBet(){setBet(5);}
+renderCoins();
+
+// ── Deck ──
+const RANKS=['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+const SUITS=['♠','♥','♦','♣'];
+const SUIT_COLOR={
+  '♠':'black','♣':'black','♥':'red','♦':'red'
+};
+
+function makeDeck(){
+  const d=[];
+  for(const s of SUITS)for(const r of RANKS)d.push({rank:r,suit:s});
+  return d;
+}
+function shuffle(d){
+  for(let i=d.length-1;i>0;i--){
+    const j=Math.random()*i|0;
+    [d[i],d[j]]=[d[j],d[i]];
+  }
+  return d;
+}
+
+// ── Game state ──
+let deck=[];
+let hand=[]; // [{rank,suit,held,faceUp}]
+let phase='idle'; // idle | dealt | drawing | result
+
+const PAYOUTS={
+  'Royal Flush':800,
+  'Straight Flush':50,
+  'Four of a Kind':25,
+  'Full House':9,
+  'Flush':6,
+  'Straight':4,
+  'Three of a Kind':3,
+  'Two Pair':2,
+  'Jacks or Better':1,
+  'Nothing':0
+};
+const HAND_LT={
+  'Royal Flush':'Karališka spalva',
+  'Straight Flush':'Eilutė + spalva',
+  'Four of a Kind':'Keturios vienodos',
+  'Full House':'Full House',
+  'Flush':'Spalva (Flush)',
+  'Straight':'Eilutė (Straight)',
+  'Three of a Kind':'Trys vienodos',
+  'Two Pair':'Dvi poros',
+  'Jacks or Better':'Valetas ar geriau',
+  'Nothing':'Nieko'
+};
+
+// ── Hand evaluation ──
+function rankVal(r){return RANKS.indexOf(r);}
+function evaluate(cards){
+  const ranks=cards.map(c=>rankVal(c.rank));
+  const suits=cards.map(c=>c.suit);
+  const sorted=[...ranks].sort((a,b)=>a-b);
+
+  // counts
+  const cnt={};
+  for(const r of ranks)cnt[r]=(cnt[r]||0)+1;
+  const counts=Object.values(cnt).sort((a,b)=>b-a);
+
+  const isFlush=suits.every(s=>s===suits[0]);
+  const isStr=(()=>{
+    const u=[...new Set(sorted)];
+    if(u.length!==5)return false;
+    // normal
+    if(u[4]-u[0]===4)return true;
+    // A-2-3-4-5
+    if(JSON.stringify(u)==='[0,1,2,3,12]')return true;
+    return false;
+  })();
+  const isRoyal=isFlush&&isStr&&sorted[0]===8; // 10,J,Q,K,A indices 8-12
+
+  if(isRoyal)return'Royal Flush';
+  if(isFlush&&isStr)return'Straight Flush';
+  if(counts[0]===4)return'Four of a Kind';
+  if(counts[0]===3&&counts[1]===2)return'Full House';
+  if(isFlush)return'Flush';
+  if(isStr)return'Straight';
+  if(counts[0]===3)return'Three of a Kind';
+  if(counts[0]===2&&counts[1]===2){
+    // check if pair is jacks or better
+    return'Two Pair';
+  }
+  if(counts[0]===2){
+    // Jacks or better: pair of J,Q,K,A
+    const pairRankIdx=parseInt(Object.keys(cnt).find(r=>cnt[r]===2));
+    if(pairRankIdx>=9)return'Jacks or Better'; // J=9,Q=10,K=11,A=12
+    return'Nothing';
+  }
+  return'Nothing';
+}
+
+// ── Render cards ──
+function renderCards(){
+  const row=document.getElementById('cardsRow');
+  row.innerHTML='';
+  hand.forEach((card,i)=>{
+    const wrap=document.createElement('div');
+    wrap.className='card-wrap'+(card.faceUp&&phase==='dealt'?' dealt':'')+(phase==='result'||phase==='idle'?' no-click':'');
+    if(card.held)wrap.classList.add('held');
+    wrap.onclick=()=>toggleHold(i);
+
+    const badge=document.createElement('div');
+    badge.className='hold-badge'+(card.held?' show':'');
+    badge.textContent='LAIKYTI';
+
+    const cardDiv=document.createElement('div');
+    cardDiv.className='card';
+    cardDiv.id='card'+i;
+
+    const inner=document.createElement('div');
+    inner.className='card-inner'+(card.faceUp?'':' flipped');
+    inner.id='cardInner'+i;
+
+    // face
+    const face=document.createElement('div');
+    face.className='card-face '+(SUIT_COLOR[card.suit]||'black');
+    face.innerHTML=`
+      <div class="rank-tl"><span>${card.rank}</span><span class="s">${card.suit}</span></div>
+      <div class="suit-center">${card.suit}</div>
+      <div class="rank-br"><span>${card.rank}</span><span class="s">${card.suit}</span></div>
+    `;
+
+    // back
+    const back=document.createElement('div');
+    back.className='card-back';
+
+    inner.appendChild(face);
+    inner.appendChild(back);
+    cardDiv.appendChild(inner);
+    wrap.appendChild(badge);
+    wrap.appendChild(cardDiv);
+    row.appendChild(wrap);
+  });
+}
+
+function toggleHold(i){
+  if(phase!=='dealt')return;
+  hand[i].held=!hand[i].held;
+  renderCards();
+}
+
+// ── Deal ──
+function handleDeal(){
+  if(balance<bet){alert('Nepakanka žetonų!');return;}
+  if(phase==='drawing')return;
+
+  hideResult();
+  clearPayoutHighlight();
+
+  balance-=bet;
+  saveBalance();
+  updateBalanceDisplay();
+
+  deck=shuffle(makeDeck());
+  hand=deck.splice(0,5).map(c=>({...c,held:false,faceUp:true}));
+  deck.splice(0,1); // burn
+
+  phase='dealt';
+  renderCards();
+
+  document.getElementById('dealBtn').disabled=true;
+  document.getElementById('drawBtn').disabled=false;
+}
+
+// ── Draw ──
+async function handleDraw(){
+  if(phase!=='dealt')return;
+  phase='drawing';
+  document.getElementById('drawBtn').disabled=true;
+  document.getElementById('dealBtn').disabled=true;
+
+  // Flip non-held cards face down then back up with new cards
+  const replaceIdx=hand.map((c,i)=>c.held?-1:i).filter(i=>i>=0);
+
+  // Step 1: flip non-held face down
+  for(const i of replaceIdx){
+    const inner=document.getElementById('cardInner'+i);
+    if(inner){
+      inner.classList.add('flipped');
+    }
+  }
+
+  await delay(280);
+
+  // Replace cards in hand
+  for(const i of replaceIdx){
+    if(deck.length===0)deck=shuffle(makeDeck());
+    hand[i]={...deck.shift(),held:false,faceUp:false};
+  }
+  renderCards(); // re-render with new back-showing cards
+
+  await delay(50);
+
+  // Step 2: flip new cards face up
+  for(const i of replaceIdx){
+    const inner=document.getElementById('cardInner'+i);
+    if(inner){
+      inner.classList.remove('flipped');
+    }
+  }
+
+  await delay(400);
+
+  // Evaluate
+  finishRound();
+}
+
+function delay(ms){return new Promise(r=>setTimeout(r,ms));}
+
+function finishRound(){
+  // Mark all face up
+  hand.forEach(c=>c.faceUp=true);
+  phase='result';
+  renderCards();
+
+  const handName=evaluate(hand);
+  const mult=(handName==='Royal Flush'&&bet===5)?4000/5:PAYOUTS[handName];
+  const won=mult*bet;
+
+  // Special Royal Flush max bet: 4000 total (800×5 = 4000)
+  // Actually at max bet Royal Flush = 4000, which is mult=800 for 5 coins = 4000
+  // Standard formula: won = PAYOUTS[hand] * bet. At bet=5 Royal Flush = 800*5=4000. Correct.
+
+  balance+=won;
+  saveBalance();
+  updateBalanceDisplay();
+
+  stats.games++;
+  stats.totalBet+=bet;
+  stats.totalWon+=won;
+  if(won>0)stats.wins++;
+  updateStats();
+
+  showResult(handName,won);
+  highlightPayout(handName);
+
+  // Log
+  logGame(handName,won);
+
+  document.getElementById('dealBtn').disabled=false;
+  document.getElementById('drawBtn').disabled=true;
+}
+
+function showResult(name,won){
+  const rn=document.getElementById('resultName');
+  const rw=document.getElementById('resultWin');
+  rn.textContent=HAND_LT[name]||name;
+  rn.classList.add('show');
+  if(won>0){
+    rw.textContent='+'+won+' ¢';
+    rw.classList.add('show','animate');
+  } else {
+    rw.textContent='';
+    rw.classList.remove('show','animate');
+  }
+}
+function hideResult(){
+  const rn=document.getElementById('resultName');
+  const rw=document.getElementById('resultWin');
+  rn.classList.remove('show');
+  rw.classList.remove('show','animate');
+}
+
+function highlightPayout(name){
+  document.querySelectorAll('#payoutTable tr').forEach(tr=>{
+    tr.classList.toggle('highlight',tr.dataset.hand===name);
+  });
+}
+function clearPayoutHighlight(){
+  document.querySelectorAll('#payoutTable tr').forEach(tr=>tr.classList.remove('highlight'));
+}
+
+// ── Initial idle hand (backs showing) ──
+function renderIdle(){
+  hand=Array.from({length:5},()=>({rank:'A',suit:'♠',held:false,faceUp:false}));
+  phase='idle';
+  renderCards();
+  document.getElementById('dealBtn').disabled=false;
+  document.getElementById('drawBtn').disabled=true;
+}
+renderIdle();
+
+// ── Log game ──
+function logGame(result,won){
+  try{
+    fetch('/api/log-game',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({uid,game:'videopoker',bet,result,won})
+    }).catch(()=>{});
+  }catch(e){}
+}
+</script>
+</body>
+</html>
