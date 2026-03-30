@@ -1592,6 +1592,21 @@ app.post('/api/sports/place-bet', express.json(), (req, res) => {
   res.json({ ok: true, betId, potential_win, tokens: user.tokens - bet });
 });
 
+// GET /admin/bets - game bet history
+app.get('/admin/bets', adminAuth, (req, res) => {
+  try {
+    const { limit = 200, game, won } = req.query;
+    let sql = `SELECT g.*, u.name FROM game_log g LEFT JOIN users u ON g.uid=u.uid WHERE 1=1`;
+    const params = [];
+    if (game) { sql += ' AND g.game=?'; params.push(game); }
+    if (won !== undefined && won !== '') { sql += ' AND g.won=?'; params.push(parseInt(won)); }
+    sql += ' ORDER BY g.ts DESC LIMIT ?';
+    params.push(parseInt(limit));
+    const rows = db.prepare(sql).all(...params);
+    res.json(rows);
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
 // GET /admin/sports-bets
 app.get('/admin/sports-bets', adminAuth, (req, res) => {
   try {

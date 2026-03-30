@@ -132,6 +132,8 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
     <div class="tab active" onclick="showTab('overview',this)">📊 Overview</div>
     <div class="tab" onclick="showTab('kyc',this)">🛡️ KYC <span id="kycBadge" style="display:none;background:rgba(255,61,113,.8);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;margin-left:4px;"></span></div>
     <div class="tab" onclick="showTab('players',this)">👥 Players</div>
+    <div class="tab" onclick="showTab('bets',this)">🎲 Lažybos</div>
+    <div class="tab" onclick="showTab('sports',this)">⚽ Sportas</div>
     <div class="tab" onclick="showTab('give',this)">🎁 Give Tokens</div>
     <div class="tab" onclick="showTab('promos',this)">🎫 Promo Codes</div>
   </div>
@@ -172,6 +174,71 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
           <button class="btn btn-ghost btn-sm" onclick="loadKYCStats();loadKYC(currentKYCFilter)">🔄 Atnaujinti</button>
         </div>
         <div id="kycList"><p style="color:rgba(232,224,208,.2);font-size:13px;">Kraunama...</p></div>
+      </div>
+    </div>
+
+    <!-- BETS LOG -->
+    <div class="section" id="sec-bets">
+      <div class="card">
+        <h3>🎲 Žaidimų Istorija</h3>
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
+          <select class="inp-sm" id="betsFilterGame" onchange="loadBets()" style="min-width:140px;">
+            <option value="">Visi žaidimai</option>
+            <option value="slots">Slots</option>
+            <option value="roulette">Roulette</option>
+            <option value="blackjack">Blackjack</option>
+            <option value="crash">Crash</option>
+            <option value="mines">Mines</option>
+            <option value="dice">Dice</option>
+            <option value="limbo">Limbo</option>
+            <option value="hilo">Hi-Lo</option>
+            <option value="wheel">Wheel</option>
+            <option value="keno">Keno</option>
+            <option value="baccarat">Baccarat</option>
+            <option value="videopoker">Video Poker</option>
+            <option value="pyramid">Pyramid</option>
+            <option value="sports">Sports</option>
+          </select>
+          <select class="inp-sm" id="betsFilterResult" onchange="loadBets()" style="min-width:130px;">
+            <option value="">Visi rezultatai</option>
+            <option value="1">Tik laimėjimai</option>
+            <option value="0">Tik praradimai</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" onclick="loadBets()">🔄 Atnaujinti</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Laikas</th><th>Žaidėjas</th><th>Žaidimas</th><th>Statymas</th><th>Rezultatas</th><th>Pelnas</th>
+            </tr></thead>
+            <tbody id="betsBody"><tr><td colspan="6" style="text-align:center;padding:24px;color:rgba(232,224,208,.2)">Kraunama...</td></tr></tbody>
+          </table>
+        </div>
+        <div id="betsTotals" style="margin-top:14px;display:flex;gap:16px;flex-wrap:wrap;font-size:13px;"></div>
+      </div>
+    </div>
+
+    <!-- SPORTS BETS -->
+    <div class="section" id="sec-sports">
+      <div class="card">
+        <h3>⚽ Sporto Lažybos</h3>
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+          <select class="inp-sm" id="sportsFilterStatus" onchange="loadSportsBets()" style="min-width:140px;">
+            <option value="">Visi statusai</option>
+            <option value="pending">Laukiama</option>
+            <option value="won">Laimėta</option>
+            <option value="lost">Pralaimėta</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" onclick="loadSportsBets()">🔄 Atnaujinti</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Laikas</th><th>Žaidėjas</th><th>Rungtynės</th><th>Pasirinkimas</th><th>Koef.</th><th>Statymas</th><th>Galimas laimėjimas</th><th>Statusas</th><th>Veiksmas</th>
+            </tr></thead>
+            <tbody id="sportsBody"><tr><td colspan="9" style="text-align:center;padding:24px;color:rgba(232,224,208,.2)">Kraunama...</td></tr></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -336,6 +403,8 @@ function showTab(name, el) {
   if(name === 'promos') loadPromos();
   if(name === 'players') loadPlayers();
   if(name === 'kyc') { loadKYCStats(); loadKYC('pending'); }
+  if(name === 'bets') loadBets();
+  if(name === 'sports') loadSportsBets();
 }
 
 // ── API helpers ───────────────────────────────────
@@ -600,6 +669,94 @@ function confirmReject() {
   api(`/admin/kyc/reject/${rejectTargetUid}`,{method:'POST',body:JSON.stringify({reason})}).then(d => {
     if(d.ok) { toast('KYC atmesta','ok'); closeReject(); loadKYC(currentKYCFilter); loadKYCStats(); }
   });
+}
+
+// ── Bets log ──────────────────────────────────────
+function loadBets() {
+  const game = document.getElementById('betsFilterGame').value;
+  const won  = document.getElementById('betsFilterResult').value;
+  let url = '/admin/bets?limit=200';
+  if(game) url += '&game=' + game;
+  if(won !== '') url += '&won=' + won;
+  api(url).then(rows => {
+    const body = document.getElementById('betsBody');
+    if(!rows || !rows.length) {
+      body.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:rgba(232,224,208,.2)">Įrašų nėra</td></tr>';
+      document.getElementById('betsTotals').innerHTML = '';
+      return;
+    }
+    let totalBet = 0, totalResult = 0, wins = 0;
+    body.innerHTML = rows.map(r => {
+      totalBet += r.bet || 0;
+      totalResult += r.result || 0;
+      if(r.won) wins++;
+      const profit = (r.result || 0) - (r.bet || 0);
+      const profitColor = profit > 0 ? 'var(--green)' : profit < 0 ? 'var(--red)' : 'rgba(232,224,208,.4)';
+      return `<tr>
+        <td class="mono" style="font-size:11px;color:rgba(232,224,208,.3)">${(r.ts||'').slice(0,16)}</td>
+        <td><strong>${escHtml(r.name||r.uid?.slice(0,8)||'?')}</strong></td>
+        <td><span style="background:rgba(255,255,255,.06);padding:2px 8px;border-radius:5px;font-size:11px">${r.game||'?'}</span></td>
+        <td class="mono gold">🪙${fmt(r.bet||0)}</td>
+        <td class="mono">${r.won ? '<span style="color:var(--green)">✅ Laimėta</span>' : '<span style="color:var(--red)">❌ Prarasta</span>'}</td>
+        <td class="mono" style="color:${profitColor}">${profit>=0?'+':''}🪙${fmt(profit)}</td>
+      </tr>`;
+    }).join('');
+    const house = totalBet - totalResult;
+    document.getElementById('betsTotals').innerHTML = `
+      <span style="color:rgba(232,224,208,.4)">Iš viso statymų: <strong class="gold">🪙${fmt(totalBet)}</strong></span>
+      <span style="color:rgba(232,224,208,.4)">Išmokėta: <strong style="color:var(--green)">🪙${fmt(totalResult)}</strong></span>
+      <span style="color:rgba(232,224,208,.4)">Kazino pelnas: <strong style="color:${house>=0?'var(--gold)':'var(--red)'}">🪙${fmt(house)}</strong></span>
+      <span style="color:rgba(232,224,208,.4)">Laimėjimų: <strong style="color:var(--neon)">${wins}/${rows.length}</strong></span>
+    `;
+  }).catch(() => {
+    document.getElementById('betsBody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--red)">Klaida kraunant duomenis</td></tr>';
+  });
+}
+
+// ── Sports bets ────────────────────────────────────
+function loadSportsBets() {
+  const status = document.getElementById('sportsFilterStatus').value;
+  let url = '/admin/sports-bets';
+  if(status) url += '?status=' + status;
+  api(url).then(rows => {
+    const body = document.getElementById('sportsBody');
+    if(!rows || !rows.length) {
+      body.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:rgba(232,224,208,.2)">Lažybų nėra</td></tr>';
+      return;
+    }
+    body.innerHTML = rows.map(r => {
+      const statusEl = r.status === 'won'
+        ? '<span style="color:var(--green)">✅ Laimėta</span>'
+        : r.status === 'lost'
+          ? '<span style="color:var(--red)">❌ Prarasta</span>'
+          : '<span style="color:var(--gold)">⏳ Laukiama</span>';
+      const settleBtn = r.status === 'pending'
+        ? `<div style="display:flex;gap:5px;">
+            <button class="btn btn-success btn-sm" onclick="settleSports('${r.id}',true)">✅ Laimėjo</button>
+            <button class="btn btn-danger btn-sm" onclick="settleSports('${r.id}',false)">❌ Pralaimėjo</button>
+           </div>`
+        : '—';
+      return `<tr>
+        <td class="mono" style="font-size:11px;color:rgba(232,224,208,.3)">${(r.created_at||'').slice(0,16)}</td>
+        <td><strong>${escHtml(r.name||'?')}</strong></td>
+        <td style="font-size:12px">${escHtml(r.match_desc||'—')}</td>
+        <td style="font-size:12px;color:var(--neon)">${escHtml(r.selection||'—')}</td>
+        <td class="mono">${(r.odds||0).toFixed(2)}</td>
+        <td class="mono gold">🪙${fmt(r.bet||0)}</td>
+        <td class="mono" style="color:var(--green)">🪙${fmt(r.potential_win||0)}</td>
+        <td>${statusEl}</td>
+        <td>${settleBtn}</td>
+      </tr>`;
+    }).join('');
+  }).catch(() => {
+    document.getElementById('sportsBody').innerHTML = '<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--red)">Klaida</td></tr>';
+  });
+}
+
+function settleSports(id, won) {
+  if(!confirm(won ? 'Pažymėti kaip LAIMĖTĄ?' : 'Pažymėti kaip PRALAIMĖTĄ?')) return;
+  api('/admin/sports-settle/'+id, {method:'POST', body: JSON.stringify({won})})
+    .then(d => { if(d.ok) { toast(won ? '✅ Lažyba patvirtinta!' : '❌ Lažyba atmesta', 'ok'); loadSportsBets(); } });
 }
 
 // Auto refresh overview every 30s
