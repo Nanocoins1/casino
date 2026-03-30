@@ -2792,18 +2792,25 @@ function SportsBetting({user,setUser,t=LANGS.en}){
   const totalOdd=slip.reduce((a,x)=>a*x.odd,1);
   const potWin=Math.floor(stake*totalOdd);
 
-  const placeBet=()=>{
+  const placeBet=async()=>{
     if(!slip.length||user.tokens<stake)return;
-    sfx.chip(); setUser(u=>({...u,tokens:u.tokens-stake}));
-    socket.emit('saveTokens',{tokens:user.tokens-stake});
-    const b={id:Date.now(),selections:[...slip],stake,totalOdd:parseFloat(totalOdd.toFixed(2)),potWin,status:'pending',time:new Date().toLocaleTimeString()};
-    setMyBets(prev=>[b,...prev]); setSlip([]);
-    setTimeout(()=>{
-      const won=Math.random()>.5;
-      setMyBets(prev=>prev.map(x=>x.id===b.id?{...x,status:won?'won':'lost'}:x));
-      if(won){setUser(u=>({...u,tokens:u.tokens+potWin}));socket.emit('saveTokens',{tokens:user.tokens-stake+potWin});sfx.win();socket.emit('addXP',{xp:50});}
-      else sfx.lose();
-    },6000+Math.random()*10000);
+    sfx.chip();
+    const matchDesc=slip.map(s=>s.match+' → '+s.pick).join(' | ');
+    const selectionStr=slip.map(s=>s.pick).join(' + ');
+    try {
+      const r=await fetch('/api/sports/place-bet',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({uid:user.uid,match_desc:matchDesc,selection:selectionStr,odds:parseFloat(totalOdd.toFixed(2)),bet:stake})});
+      const d=await r.json();
+      if(!d.ok){alert(d.error||'Klaida');return;}
+      setUser(u=>({...u,tokens:d.tokens}));
+      socket.emit('saveTokens',{tokens:d.tokens});
+      const status=d.pending_approval?'pending_approval':'pending';
+      const b={id:d.betId,selections:[...slip],stake,totalOdd:parseFloat(totalOdd.toFixed(2)),potWin,status,time:new Date().toLocaleTimeString()};
+      setMyBets(prev=>[b,...prev]); setSlip([]);
+      if(d.pending_approval){
+        alert('⏳ Lažyba laukia administratoriaus patvirtinimo (didelė suma). Tokenai rezervuoti.');
+      }
+    } catch(e){ alert('Ryšio klaida'); }
   };
 
   const fmtTime=iso=>{try{const d=new Date(iso);return d.toLocaleDateString('en',{month:'short',day:'numeric'})+' '+d.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'});}catch{return'?';}};

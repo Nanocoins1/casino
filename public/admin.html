@@ -133,6 +133,7 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
     <div class="tab" onclick="showTab('kyc',this)">🛡️ KYC <span id="kycBadge" style="display:none;background:rgba(255,61,113,.8);color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;margin-left:4px;"></span></div>
     <div class="tab" onclick="showTab('players',this)">👥 Players</div>
     <div class="tab" onclick="showTab('bets',this)">🎲 Lažybos</div>
+    <div class="tab" onclick="showTab('pending',this)">⏳ Laukia <span id="pendingBadge" style="display:none;background:rgba(255,165,0,.9);color:#000;border-radius:10px;padding:1px 7px;font-size:10px;margin-left:4px;"></span></div>
     <div class="tab" onclick="showTab('sports',this)">⚽ Sportas</div>
     <div class="tab" onclick="showTab('give',this)">🎁 Give Tokens</div>
     <div class="tab" onclick="showTab('promos',this)">🎫 Promo Codes</div>
@@ -215,6 +216,23 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
           </table>
         </div>
         <div id="betsTotals" style="margin-top:14px;display:flex;gap:16px;flex-wrap:wrap;font-size:13px;"></div>
+      </div>
+    </div>
+
+    <!-- PENDING BETS (large bets awaiting approval) -->
+    <div class="section" id="sec-pending">
+      <div class="card">
+        <h3>⏳ Didelės Lažybos — Laukia Patvirtinimo</h3>
+        <p style="color:rgba(232,224,208,.4);font-size:12px;margin-bottom:14px;">Lažybos ≥ 1000 tokenų reikalauja administratoriaus patvirtinimo prieš įvykdymą.</p>
+        <button class="btn btn-ghost btn-sm" onclick="loadPendingBets()" style="margin-bottom:14px;">🔄 Atnaujinti</button>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Žaidėjas</th><th>Suma</th><th>Galimas laimėjimas</th><th>Koeficientas</th><th>Rungtynės</th><th>Pasirinkimas</th><th>Data</th><th>Veiksmai</th>
+            </tr></thead>
+            <tbody id="pendingBody"><tr><td colspan="8" style="text-align:center;color:rgba(232,224,208,.3)">Nėra laukiančių lažybų</td></tr></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -404,6 +422,7 @@ function showTab(name, el) {
   if(name === 'players') loadPlayers();
   if(name === 'kyc') { loadKYCStats(); loadKYC('pending'); }
   if(name === 'bets') loadBets();
+  if(name === 'pending') loadPendingBets();
   if(name === 'sports') loadSportsBets();
 }
 
@@ -421,6 +440,12 @@ function loadOverview() {
     document.getElementById('ov-jackpot').textContent = '🪙 '+fmt(d.jackpot);
     document.getElementById('ov-richest').textContent = d.richest ? d.richest.name : '—';
   }).catch(() => {});
+  // Refresh pending bets badge
+  api('/admin/pending-bets').then(rows => {
+    const badge = document.getElementById('pendingBadge');
+    if(rows.length > 0) { badge.style.display='inline'; badge.textContent=rows.length; }
+    else badge.style.display='none';
+  }).catch(()=>{});
 }
 
 // ── Players ───────────────────────────────────────
@@ -711,6 +736,44 @@ function loadBets() {
   }).catch(() => {
     document.getElementById('betsBody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--red)">Klaida kraunant duomenis</td></tr>';
   });
+}
+
+// ── Pending bets (large bets awaiting approval) ────
+function loadPendingBets() {
+  api('/admin/pending-bets').then(rows => {
+    const badge = document.getElementById('pendingBadge');
+    if(rows.length > 0) { badge.style.display='inline'; badge.textContent=rows.length; }
+    else { badge.style.display='none'; }
+    const body = document.getElementById('pendingBody');
+    if(!rows.length){ body.innerHTML='<tr><td colspan="8" style="text-align:center;color:rgba(232,224,208,.3)">Nėra laukiančių lažybų</td></tr>'; return; }
+    body.innerHTML = rows.map(r => `<tr>
+      <td><strong>${r.player_name||r.uid.slice(0,8)}</strong><br/><span style="font-size:10px;color:rgba(232,224,208,.3)">${r.uid.slice(0,12)}</span><br/><span style="font-size:10px;color:rgba(232,224,208,.3)">Balansas: ${(r.player_tokens||0).toLocaleString()}</span></td>
+      <td style="color:var(--gold);font-weight:700">${r.bet.toLocaleString()} 🪙</td>
+      <td style="color:var(--green)">${r.potential_win.toLocaleString()} 🪙</td>
+      <td>${Number(r.odds).toFixed(2)}×</td>
+      <td style="font-size:11px;max-width:180px">${r.match_desc||'—'}</td>
+      <td style="font-size:11px">${r.selection||'—'}</td>
+      <td style="font-size:10px;color:rgba(232,224,208,.4)">${(r.created_at||'').slice(0,16)}</td>
+      <td>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+          <button class="btn btn-success btn-sm" onclick="approveBet('${r.id}')">✅ Patvirtinti</button>
+          <button class="btn btn-danger btn-sm" onclick="rejectBet('${r.id}')">❌ Atmesti</button>
+        </div>
+      </td>
+    </tr>`).join('');
+  });
+}
+
+function approveBet(id) {
+  if(!confirm('Patvirtinti šią lažybą? Tokenai jau rezervuoti, lažyba bus įvykdyta.')) return;
+  api('/admin/pending-bets/approve/'+id, {method:'POST'})
+    .then(d => { if(d.ok){ toast('✅ Lažyba patvirtinta!','ok'); loadPendingBets(); } else toast(d.error||'Klaida','err'); });
+}
+
+function rejectBet(id) {
+  const reason = prompt('Atmetimo priežastis (neprivaloma):') || 'Atsisakyta administratoriaus';
+  api('/admin/pending-bets/reject/'+id, {method:'POST', body: JSON.stringify({reason})})
+    .then(d => { if(d.ok){ toast('❌ Lažyba atmesta, tokenai grąžinti','ok'); loadPendingBets(); } else toast(d.error||'Klaida','err'); });
 }
 
 // ── Sports bets ────────────────────────────────────
