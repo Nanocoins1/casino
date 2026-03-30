@@ -62,6 +62,20 @@ db.exec(`
     submitted_at TEXT,
     reviewed_at TEXT
   );
+  CREATE TABLE IF NOT EXISTS pending_bets (
+    id TEXT PRIMARY KEY,
+    uid TEXT NOT NULL,
+    type TEXT DEFAULT 'sports',
+    match_desc TEXT,
+    selection TEXT,
+    odds REAL,
+    bet INTEGER,
+    potential_win INTEGER,
+    status TEXT DEFAULT 'pending',
+    reject_reason TEXT,
+    created_at TEXT DEFAULT (datetime('now')),
+    reviewed_at TEXT
+  );
 `);
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'hathor2026';
@@ -1577,6 +1591,16 @@ app.post('/api/sports/place-bet', express.json(), (req, res) => {
 
   const betId = uuidv4();
   const potential_win = Math.floor(bet * odds);
+  const BIG_BET_THRESHOLD = parseInt(process.env.BIG_BET_THRESHOLD || '1000');
+
+  // Large bets require admin approval — tokens reserved (deducted) but bet goes to pending_bets
+  if (bet >= BIG_BET_THRESHOLD) {
+    db.prepare('UPDATE users SET tokens=tokens-? WHERE uid=?').run(bet, uid);
+    db.prepare(`INSERT INTO pending_bets (id, uid, type, match_desc, selection, odds, bet, potential_win)
+      VALUES (?, ?, 'sports', ?, ?, ?, ?, ?)`).run(betId, uid, match_desc || null, selection || null, odds, bet, potential_win);
+    if (sockets[uid]) sockets[uid].socket.emit('betPendingApproval', { betId, bet, potential_win, match_desc, selection, odds });
+    return res.json({ ok: true, pending_approval: true, betId, bet, potential_win, tokens: user.tokens - bet });
+  }
 
   // Deduct tokens
   db.prepare('UPDATE users SET tokens=tokens-? WHERE uid=?').run(bet, uid);
@@ -1607,12 +1631,54 @@ app.get('/admin/bets', adminAuth, (req, res) => {
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
+// GET /admin/pending-bets
+app.get('/admin/pending-bets', adminAuth, (req, res) => {
+  try {
+    const rows = db.prepare(`SELECT pb.*, u.name as player_name, u.tokens as player_tokens
+      FROM pending_bets pb LEFT JOIN users u ON pb.uid=u.uid
+      WHERE pb.status='pending' ORDER BY pb.created_at DESC`).all();
+    res.json(rows);
+  } catch(e) { res.json([]); }
+});
+
+// POST /admin/pending-bets/approve/:id
+app.post('/admin/pending-bets/approve/:id', adminAuth, (req, res) => {
+  const pb = db.prepare('SELECT * FROM pending_bets WHERE id=?').get(req.params.id);
+  if (!pb) return res.status(404).json({ error: 'Not found' });
+  if (pb.status !== 'pending') return res.status(400).json({ error: 'Already reviewed' });
+  db.prepare("UPDATE pending_bets SET status='approved', reviewed_at=datetime('now') WHERE id=?").run(pb.id);
+  // Move to sports_bets
+  db.prepare(`INSERT INTO sports_bets (id, uid, match_desc, selection, odds, bet, potential_win)
+    VALUES (?, ?, ?, ?, ?, ?, ?)`).run(pb.id, pb.uid, pb.match_desc, pb.selection, pb.odds, pb.bet, pb.potential_win);
+  const today = new Date().toISOString().slice(0, 10);
+  db.prepare(`INSERT INTO daily_tracking (uid, date, bet_total, lost) VALUES (?, ?, ?, 0)
+    ON CONFLICT(uid, date) DO UPDATE SET bet_total = bet_total + excluded.bet_total`).run(pb.uid, today, pb.bet);
+  if (sockets[pb.uid]) sockets[pb.uid].socket.emit('betApproved', { betId: pb.id, potential_win: pb.potential_win });
+  res.json({ ok: true });
+});
+
+// POST /admin/pending-bets/reject/:id
+app.post('/admin/pending-bets/reject/:id', adminAuth, express.json(), (req, res) => {
+  const pb = db.prepare('SELECT * FROM pending_bets WHERE id=?').get(req.params.id);
+  if (!pb) return res.status(404).json({ error: 'Not found' });
+  if (pb.status !== 'pending') return res.status(400).json({ error: 'Already reviewed' });
+  const reason = req.body?.reason || 'Atsisakyta administratoriaus';
+  db.prepare("UPDATE pending_bets SET status='rejected', reject_reason=?, reviewed_at=datetime('now') WHERE id=?").run(reason, pb.id);
+  // Refund tokens
+  db.prepare('UPDATE users SET tokens=tokens+? WHERE uid=?').run(pb.bet, pb.uid);
+  if (sockets[pb.uid]) sockets[pb.uid].socket.emit('betRejected', { betId: pb.id, bet: pb.bet, reason });
+  res.json({ ok: true });
+});
+
 // GET /admin/sports-bets
 app.get('/admin/sports-bets', adminAuth, (req, res) => {
   try {
-    const bets = db.prepare(`SELECT sb.*, u.name as player_name
-      FROM sports_bets sb LEFT JOIN users u ON sb.uid=u.uid
-      ORDER BY sb.created_at DESC LIMIT 500`).all();
+    const { status } = req.query;
+    let sql = `SELECT sb.*, u.name as player_name FROM sports_bets sb LEFT JOIN users u ON sb.uid=u.uid WHERE 1=1`;
+    const params = [];
+    if (status) { sql += ' AND sb.status=?'; params.push(status); }
+    sql += ' ORDER BY sb.created_at DESC LIMIT 500';
+    const bets = db.prepare(sql).all(...params);
     res.json(bets);
   } catch(e) { res.json([]); }
 });
