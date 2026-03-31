@@ -1949,6 +1949,221 @@ body { color: #e8e2d4 !important; }
   box-shadow: 0 12px 40px rgba(0,0,0,0.7), 0 0 20px rgba(240,192,96,0.1) !important;
 }
 
+
+/* ═══════════════════════════════════════════════════
+   PROFESSIONAL PLATFORM LAYOUT (topsport level)
+═══════════════════════════════════════════════════ */
+
+/* ── App shell ── */
+.app-shell { display:flex; flex-direction:column; min-height:100vh; position:relative; z-index:1; }
+
+/* ── Top bar ── */
+.topbar {
+  height:60px; display:flex; align-items:center; gap:0;
+  background:rgba(6,6,16,.97); border-bottom:1px solid rgba(255,255,255,.06);
+  position:sticky; top:0; z-index:100; backdrop-filter:blur(20px);
+  padding:0 16px; flex-shrink:0;
+}
+.topbar-logo {
+  font-family:'Orbitron',monospace; font-size:17px; font-weight:900;
+  letter-spacing:3px; color:var(--gold); padding:0 20px 0 4px;
+  border-right:1px solid rgba(255,255,255,.06); margin-right:16px;
+  white-space:nowrap; flex-shrink:0;
+}
+.topbar-logo span { font-size:10px; letter-spacing:4px; color:rgba(240,192,96,.35); display:block; margin-top:-4px; }
+.topbar-nav { display:flex; gap:2px; flex:1; }
+.topbar-btn {
+  padding:7px 14px; border-radius:7px; border:none; background:transparent;
+  color:rgba(232,224,208,.45); font-family:'Space Grotesk',sans-serif;
+  font-size:12px; font-weight:600; letter-spacing:.5px; cursor:pointer;
+  transition:all .18s; white-space:nowrap;
+}
+.topbar-btn:hover { background:rgba(255,255,255,.06); color:var(--cream); }
+.topbar-btn.active { background:rgba(240,192,96,.1); color:var(--gold); }
+.topbar-right { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.tb-balance {
+  display:flex; align-items:center; gap:8px;
+  background:rgba(240,192,96,.08); border:1px solid rgba(240,192,96,.15);
+  border-radius:10px; padding:6px 14px;
+}
+.tb-bal-label { font-size:9px; letter-spacing:2px; color:rgba(240,192,96,.45); text-transform:uppercase; }
+.tb-bal-amount { font-family:'Orbitron',monospace; font-size:14px; font-weight:700; color:var(--gold); }
+.tb-user-btn {
+  width:36px; height:36px; border-radius:10px;
+  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1);
+  cursor:pointer; font-size:17px; display:flex; align-items:center; justify-content:center;
+}
+.tb-cashier {
+  padding:7px 14px; border-radius:9px; border:1px solid rgba(0,230,118,.25);
+  background:rgba(0,230,118,.07); color:#80ffbb; font-size:11px; font-weight:700;
+  cursor:pointer; letter-spacing:.5px; white-space:nowrap;
+}
+.tb-cashier:hover { background:rgba(0,230,118,.14); }
+.tb-logout {
+  padding:7px 12px; border-radius:9px; border:1px solid rgba(255,61,113,.2);
+  background:transparent; color:rgba(255,140,160,.6); font-size:11px;
+  cursor:pointer; letter-spacing:.5px;
+}
+.tb-logout:hover { background:rgba(255,61,113,.08); color:#ff8ca0; }
+
+/* ── App body (sidebar + main) ── */
+.app-body { display:flex; flex:1; min-height:0; }
+
+/* ── Sidebar ── */
+.sidebar {
+  width:220px; flex-shrink:0;
+  background:rgba(5,5,14,.95); border-right:1px solid rgba(255,255,255,.05);
+  padding:16px 0; position:sticky; top:60px; height:calc(100vh - 60px);
+  overflow-y:auto; overflow-x:hidden;
+}
+.sidebar::-webkit-scrollbar { width:2px; }
+.sidebar::-webkit-scrollbar-thumb { background:rgba(255,255,255,.08); }
+.sb-section-label {
+  font-size:9px; letter-spacing:3px; color:rgba(232,224,208,.2);
+  text-transform:uppercase; padding:16px 18px 6px; font-weight:600;
+}
+.sb-item {
+  display:flex; align-items:center; gap:12px;
+  padding:10px 18px; cursor:pointer; transition:all .15s;
+  color:rgba(232,224,208,.5); font-size:13px; font-weight:500;
+  border-left:3px solid transparent; position:relative;
+}
+.sb-item:hover { background:rgba(255,255,255,.04); color:var(--cream); }
+.sb-item.active { background:rgba(240,192,96,.07); color:var(--gold); border-left-color:var(--gold); }
+.sb-item-icon { font-size:18px; width:24px; text-align:center; flex-shrink:0; }
+.sb-item-badge {
+  margin-left:auto; font-size:9px; font-weight:700; padding:2px 7px;
+  border-radius:10px; background:rgba(255,61,113,.7); color:#fff;
+}
+.sb-item-badge.live { background:rgba(0,230,118,.25); color:#00e676; border:1px solid rgba(0,230,118,.3); }
+.sb-divider { height:1px; background:rgba(255,255,255,.05); margin:10px 18px; }
+
+/* ── Main content ── */
+.main-content { flex:1; overflow-y:auto; padding:24px; min-width:0; }
+.main-content::-webkit-scrollbar { width:4px; }
+.main-content::-webkit-scrollbar-thumb { background:rgba(255,255,255,.08); border-radius:2px; }
+
+/* ── Hero banner ── */
+.hero-banner {
+  border-radius:18px; padding:28px 32px;
+  background:linear-gradient(135deg,rgba(124,58,237,.25) 0%,rgba(0,229,255,.08) 50%,rgba(240,192,96,.12) 100%);
+  border:1px solid rgba(255,255,255,.07); margin-bottom:24px;
+  display:flex; justify-content:space-between; align-items:center; gap:20px;
+  position:relative; overflow:hidden;
+}
+.hero-banner::before {
+  content:''; position:absolute; inset:0; opacity:.04;
+  background:repeating-linear-gradient(45deg,#fff 0,#fff 1px,transparent 0,transparent 50%);
+  background-size:20px 20px;
+}
+.hero-greeting { font-family:'Orbitron',monospace; font-size:20px; font-weight:900; color:#fff; margin-bottom:8px; letter-spacing:1px; }
+.hero-greeting span { color:var(--gold); }
+.hero-stats { display:flex; gap:20px; flex-wrap:wrap; }
+.hero-stat { text-align:center; }
+.hero-stat-val { font-family:'Orbitron',monospace; font-size:16px; font-weight:700; color:var(--gold); }
+.hero-stat-lbl { font-size:9px; letter-spacing:2px; color:rgba(232,224,208,.3); text-transform:uppercase; margin-top:2px; }
+.hero-cards-deco { display:flex; gap:8px; opacity:.7; }
+.hero-cards-deco .hero-card { width:52px; height:74px; font-size:26px; line-height:74px; }
+.hero-banner .ai-insight { max-width:360px; font-size:11px; }
+
+/* ── Section header ── */
+.sec-hdr { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+.sec-hdr-title { font-family:'Orbitron',monospace; font-size:12px; font-weight:700; letter-spacing:2px; color:var(--cream); }
+.sec-hdr-line { flex:1; height:1px; background:rgba(255,255,255,.05); }
+.sec-hdr-count { font-size:10px; color:rgba(232,224,208,.25); }
+
+/* ── Category filter chips ── */
+.cat-chips { display:flex; gap:6px; margin-bottom:20px; flex-wrap:wrap; }
+.cat-chip {
+  padding:6px 16px; border-radius:20px;
+  background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07);
+  font-size:11px; font-weight:600; color:rgba(232,224,208,.4);
+  cursor:pointer; transition:all .18s; letter-spacing:.3px;
+}
+.cat-chip:hover { background:rgba(255,255,255,.08); color:var(--cream); }
+.cat-chip.active { background:rgba(240,192,96,.12); border-color:rgba(240,192,96,.3); color:var(--gold); }
+
+/* ── Games grid ── */
+.games-pro { display:grid; grid-template-columns:repeat(auto-fill,minmax(175px,1fr)); gap:12px; }
+
+/* ── Game card PRO ── */
+.gcard-pro {
+  position:relative; border-radius:14px; overflow:hidden;
+  cursor:pointer; border:1px solid rgba(255,255,255,.07);
+  transition:transform .2s, box-shadow .2s, border-color .2s;
+  background:#0a0a16; aspect-ratio:3/4; display:flex;
+  flex-direction:column; justify-content:flex-end; text-decoration:none;
+}
+.gcard-pro:hover { transform:translateY(-5px); box-shadow:0 20px 50px rgba(0,0,0,.7); border-color:rgba(240,192,96,.2); }
+.gcard-pro:hover .gcard-overlay { opacity:1; }
+.gcard-pro:hover .gcard-play-btn { transform:translateY(0); opacity:1; }
+.gcard-bg-pro { position:absolute; inset:0; z-index:0; }
+.gcard-shine {
+  position:absolute; inset:0; z-index:1;
+  background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.8) 100%);
+}
+.gcard-icon-pro {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-65%);
+  font-size:52px; z-index:2; filter:drop-shadow(0 4px 16px rgba(0,0,0,.6));
+  transition:transform .2s;
+}
+.gcard-pro:hover .gcard-icon-pro { transform:translate(-50%,-70%) scale(1.1); }
+.gcard-body { position:relative; z-index:3; padding:12px; }
+.gcard-name-pro { font-family:'Orbitron',monospace; font-size:10px; font-weight:700; letter-spacing:1.5px; color:#fff; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.gcard-desc-pro { font-size:9px; color:rgba(232,224,208,.35); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.gcard-badge-pro {
+  position:absolute; top:8px; left:8px; z-index:4;
+  font-size:8px; font-weight:700; padding:3px 8px; border-radius:20px;
+  backdrop-filter:blur(8px); letter-spacing:.5px;
+}
+.gcard-badge-pro.live { background:rgba(0,210,80,.25); border:1px solid rgba(0,210,80,.4); color:#00e676; }
+.gcard-badge-pro.hot { background:rgba(255,80,0,.25); border:1px solid rgba(255,80,0,.4); color:#ff9060; }
+.gcard-badge-pro.new { background:rgba(124,58,237,.3); border:1px solid rgba(124,58,237,.5); color:#c4b5fd; }
+.gcard-badge-pro.anim { background:rgba(0,229,255,.2); border:1px solid rgba(0,229,255,.4); color:#00e5ff; }
+.gcard-overlay {
+  position:absolute; inset:0; z-index:3; opacity:0; transition:opacity .2s;
+  background:rgba(240,192,96,.06);
+}
+.gcard-play-btn {
+  position:absolute; bottom:44px; left:50%; transform:translateX(-50%) translateY(8px);
+  z-index:5; opacity:0; transition:all .2s;
+  padding:7px 20px; border-radius:20px;
+  background:linear-gradient(135deg,#c9a84c,#f0c060);
+  color:#080600; font-size:10px; font-weight:800; letter-spacing:1.5px;
+  white-space:nowrap;
+}
+
+/* ── Jackpot bar ── */
+.jackpot-bar {
+  display:flex; align-items:center; gap:12px;
+  background:linear-gradient(90deg,rgba(240,192,96,.08),rgba(240,192,96,.03));
+  border:1px solid rgba(240,192,96,.12); border-radius:12px;
+  padding:12px 20px; margin-bottom:20px;
+}
+.jackpot-bar-label { font-size:10px; letter-spacing:3px; color:rgba(240,192,96,.5); text-transform:uppercase; }
+.jackpot-bar-amount { font-family:'Orbitron',monospace; font-size:20px; font-weight:900; color:var(--gold); }
+.jackpot-bar-pulse { width:8px; height:8px; border-radius:50%; background:var(--gold); animation:pulse 1.5s infinite; margin-left:auto; }
+
+/* ── AI insight in lobby ── */
+.ai-insight { display:inline-flex; align-items:flex-start; gap:8px; padding:8px 14px; background:rgba(124,58,237,.08); border:1px solid rgba(124,58,237,.18); border-radius:10px; font-size:11px; color:rgba(232,224,208,.55); line-height:1.5; margin-top:10px; }
+
+/* ── Mobile ── */
+@media(max-width:900px){
+  .sidebar { display:none; }
+  .main-content { padding:16px; }
+  .topbar-nav { gap:0; }
+  .topbar-btn { padding:6px 10px; font-size:11px; }
+  .tb-bal-amount { font-size:12px; }
+  .hero-banner { padding:18px; }
+  .hero-cards-deco { display:none; }
+  .hero-greeting { font-size:15px; }
+}
+@media(max-width:600px){
+  .games-pro { grid-template-columns:repeat(2,1fr); gap:8px; }
+  .topbar-logo span { display:none; }
+  .tb-cashier { display:none; }
+  .hero-stats { gap:12px; }
+}
 </style>
 </head>
 <body>
@@ -4452,6 +4667,23 @@ function MusicBtn(){
   );
 }
 
+const ALL_GAMES=[
+  {name:'POKERIS',desc:'Live multiplayer — iki 5 žaidėjų',icon:'♠️',badge:'🔴 LIVE',cat:'stalai',page:'poker',color:'linear-gradient(135deg,#1a0533,#3d1166)'},
+  {name:'BLACKJACK',desc:'21 — klasikinis kortų žaidimas',icon:'🃏',badge:'🔥 HOT',cat:'stalai',page:'blackjack',color:'linear-gradient(135deg,#0a2a14,#1a5c30)'},
+  {name:'RULETĖ',desc:'Europietiška ruletė su animacija',icon:'🎡',badge:'🔴 LIVE',cat:'stalai',page:'roulette',color:'linear-gradient(135deg,#1a0a00,#5c2a00)'},
+  {name:'BACCARAT',desc:'Player, Banker arba Tie',icon:'🎴',badge:'',cat:'stalai',href:'/baccarat.html',color:'linear-gradient(135deg,#001a2e,#003d6b)'},
+  {name:'VIDEO POKER',desc:'Jacks or Better — iki 800×',icon:'🂡',badge:'✨ NAUJAS',cat:'stalai',href:'/videopoker.html',color:'linear-gradient(135deg,#1a1a00,#4d4d00)'},
+  {name:'AUTOMATAI',desc:'Slotas su laimėjimų linijomis',icon:'🎰',badge:'🔥 HOT',cat:'automatai',page:'slots',color:'linear-gradient(135deg,#1a0000,#660000)'},
+  {name:'KENO',desc:'80 kamuolių loterija',icon:'🎱',badge:'',cat:'automatai',href:'/keno.html',color:'linear-gradient(135deg,#00141a,#003d4d)'},
+  {name:'KRIOKLIS',desc:'Kamuolys krinta per nagus — iki 999×',icon:'🔮',badge:'🎬 ANIMACIJA',cat:'automatai',href:'/plinko.html',color:'linear-gradient(135deg,#0d0033,#2d0099)'},
+  {name:'CRASH',desc:'Aviator stiliaus — išimkite laiku!',icon:'🚀',badge:'🔥 HOT',cat:'kripto',href:'/crash.html',color:'linear-gradient(135deg,#1a0a00,#663300)'},
+  {name:'MINES',desc:'5×5 lentelė — deimantai ar minos?',icon:'💣',badge:'⭐ POPULIARUS',cat:'kripto',href:'/mines.html',color:'linear-gradient(135deg,#001a00,#004d00)'},
+  {name:'LUCKY WHEEL',desc:'Sukite ratą — iki 100×',icon:'🎡',badge:'',cat:'kripto',href:'/wheel.html',color:'linear-gradient(135deg,#1a001a,#660066)'},
+  {name:'DICE / LIMBO / HI-LO',desc:'3 žaidimai viename',icon:'🎲',badge:'',cat:'kripto',href:'/dice.html',color:'linear-gradient(135deg,#001a1a,#004d4d)'},
+  {name:'SPORTAS',desc:'Futbolas, krepšinis ir daugiau',icon:'⚽',badge:'🔴 LIVE',cat:'sportas',page:'sports',color:'linear-gradient(135deg,#001a0a,#004d1f)'},
+  {name:'PIRAMIDĖ',desc:'Dropo žaidimas — iki 100×',icon:'🏺',badge:'',cat:'kripto',page:'pyramid',color:'linear-gradient(135deg,#1a1400,#4d3b00)'},
+];
+
 function App(){
   const [lang,setLang]=useLang();
   const t=lang;
@@ -4464,6 +4696,7 @@ function App(){
   const [lvUp,setLvUp]=useState(null);
   const [particles,setParticles]=useState([]);
   const [tokenBump,setTokenBump]=useState(false);
+  const [gameFilter,setGameFilter]=useState('visi');
   const missions = useMissions(user||{uid:'guest'});
   const aiInsight = useAIPersonalization(user);
   const [pendingReward,setPendingReward]=useState(null);
@@ -4489,103 +4722,158 @@ function App(){
   const nav=pg=>{ if(pg==='cashier'){window.open('/cashier.html','_self');return;}sfx.click();setPage(pg);if(pg!=='poker'){setRoomId(null);setGameState(null);}};
   const bumpTokens=amt=>{setTokenBump(true);setTimeout(()=>setTokenBump(false),500);setUser(u=>({...u,tokens:u.tokens+amt}));};
 
+  const doLogout=()=>{
+    const tok=localStorage.getItem('casino_session');
+    if(tok) fetch('/api/auth/logout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:tok})});
+    ['casino_session','casino_uid','casino_name','hrc_uid','hrc_name'].forEach(k=>localStorage.removeItem(k));
+    window.location.href='/login.html';
+  };
+
+  const SB_ITEMS=[
+    {id:'lobby',icon:'🏠',label:'Pagrindinis'},
+    {id:'__div1'},
+    {id:'__label1',label:'KAZINO'},
+    {id:'slots',icon:'🎰',label:'Automatai',badge:'HOT',badgeCls:'hot'},
+    {id:'blackjack',icon:'🃏',label:'Blackjack'},
+    {id:'roulette',icon:'⭕',label:'Ruletė',badge:'LIVE',badgeCls:'live'},
+    {id:'poker',icon:'♠️',label:'Pokeris',badge:'LIVE',badgeCls:'live'},
+    {id:'pyramid',icon:'🏺',label:'Piramidė'},
+    {id:'__div2'},
+    {id:'__label2',label:'ŽAIDIMAI'},
+    {id:'__link_crash',icon:'🚀',label:'Crash',href:'/crash.html',badge:'HOT',badgeCls:'hot'},
+    {id:'__link_mines',icon:'💣',label:'Mines',href:'/mines.html'},
+    {id:'__link_krioklis',icon:'🔮',label:'Krioklis',href:'/plinko.html',badge:'NAUJA',badgeCls:'new'},
+    {id:'__link_dice',icon:'🎲',label:'Dice / Limbo',href:'/dice.html'},
+    {id:'__link_wheel',icon:'🎡',label:'Lucky Wheel',href:'/wheel.html'},
+    {id:'__link_keno',icon:'🎱',label:'Keno',href:'/keno.html'},
+    {id:'__link_baccarat',icon:'🎴',label:'Baccarat',href:'/baccarat.html'},
+    {id:'__link_vp',icon:'🂡',label:'Video Poker',href:'/videopoker.html'},
+    {id:'__div3'},
+    {id:'__label3',label:'KITA'},
+    {id:'sports',icon:'⚽',label:'Sportas',badge:'LIVE',badgeCls:'live'},
+    {id:'leaderboard',icon:'🏆',label:'Lyderiai'},
+    {id:'stats',icon:'📊',label:'Statistika'},
+    {id:'cashier',icon:'💳',label:'Kasos'},
+  ];
+
   return(
-    <div style={{minHeight:'100vh',display:'flex',flexDirection:'column'}}>
-      <div className="header">
-        <div className="header-logo">⬡ HATHOR</div>
-        <nav className="nav-tabs">
-          {[{p:'lobby',l:'Lobby'},{p:'slots',l:t.slots},{p:'roulette',l:t.roulette},{p:'blackjack',l:t.bj},{p:'poker',l:t.poker},{p:'sports',l:t.sports},{p:'stats',l:t.stats},{p:'leaderboard',l:'🏆'}].map(x=>(
-            <button key={x.p} className={`btn btn-ghost btn-sm${page===x.p?' active':''}`} style={{letterSpacing:'1px',fontSize:11}} onClick={()=>nav(x.p)}>{x.l}</button>
-          ))}        </nav>
-        <div className="header-right">
+    <div className="app-shell">
+      {/* ── TOP BAR ── */}
+      <div className="topbar">
+        <div className="topbar-logo">⬡ HATHOR<span>ROYAL CASINO</span></div>
+        <div className="topbar-nav">
+          {[{p:'lobby',l:'🏠 Lobis'},{p:'sports',l:'⚽ Sportas'},{p:'stats',l:'📊 Statistika'},{p:'leaderboard',l:'🏆 Lyderiai'}].map(x=>(
+            <button key={x.p} className={`topbar-btn${page===x.p?' active':''}`} onClick={()=>nav(x.p)}>{x.l}</button>
+          ))}
+        </div>
+        <div className="topbar-right">
           <MusicBtn/>
-            <LangDrop lang={lang} setLang={setLang}/>
+          <LangDrop lang={lang} setLang={setLang}/>
           <LvPill xp={user.xp||0} levelInfo={lv} nextLevel={nextLv}/>
-          <div className={`token-chip${tokenBump?' bump':''}`}>🪙 {fmt(user.tokens)}</div>
-          <button className="btn btn-ghost btn-sm" onClick={()=>window.open("/cashier.html","_self")} style={{borderColor:"rgba(0,230,118,.3)",color:"#80ffbb"}}>💳 Cashier</button>
-          <div className="avatar" onClick={()=>setShowAvatar(true)}>{user.avatar?<img src={user.avatar} alt=""/>:'👤'}</div>
-          <button className="btn btn-ghost btn-sm" style={{borderColor:"rgba(255,61,113,.25)",color:"rgba(255,140,160,.7)",fontSize:10}} onClick={()=>{
-            const t=localStorage.getItem('casino_session');
-            if(t) fetch('/api/auth/logout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:t})});
-            ['casino_session','casino_uid','casino_name','hrc_uid','hrc_name'].forEach(k=>localStorage.removeItem(k));
-            window.location.href='/login.html';
-          }}>⏻ Išeiti</button>
+          <div className={`tb-balance${tokenBump?' bump':''}`}>
+            <div className="tb-bal-label">Balansas</div>
+            <div className="tb-bal-amount">🪙 {fmt(user.tokens)}</div>
+          </div>
+          <button className="tb-cashier" onClick={()=>window.open('/cashier.html','_self')}>💳 Kasos</button>
+          <div className="tb-user-btn" onClick={()=>setShowAvatar(true)}>{user.avatar?<img src={user.avatar} alt="" style={{width:'100%',height:'100%',borderRadius:10,objectFit:'cover'}}/>:'👤'}</div>
+          <button className="tb-logout" onClick={doLogout}>⏻</button>
         </div>
       </div>
-      <MobileNav page={page} nav={nav} t={t}/>
+
+      {/* ── BODY ── */}
+      <div className="app-body">
+        {/* ── SIDEBAR ── */}
+        <aside className="sidebar">
+          {SB_ITEMS.map((item,i)=>{
+            if(item.id.startsWith('__div')) return <div key={i} className="sb-divider"/>;
+            if(item.id.startsWith('__label')) return <div key={i} className="sb-section-label">{item.label}</div>;
+            if(item.href) return (
+              <a key={i} href={item.href} className={`sb-item`} style={{textDecoration:'none'}}>
+                <span className="sb-item-icon">{item.icon}</span>
+                <span>{item.label}</span>
+                {item.badge&&<span className={`sb-item-badge ${item.badgeCls||''}`}>{item.badge}</span>}
+              </a>
+            );
+            return (
+              <div key={i} className={`sb-item${page===item.id?' active':''}`} onClick={()=>nav(item.id)}>
+                <span className="sb-item-icon">{item.icon}</span>
+                <span>{item.label}</span>
+                {item.badge&&<span className={`sb-item-badge ${item.badgeCls||''}`}>{item.badge}</span>}
+              </div>
+            );
+          })}
+        </aside>
+
+        {/* ── MAIN ── */}
+        <main className="main-content">
 
       {page==='lobby'&&(
-        <div className="lobby">
-          <div className="lobby-hero">
-            <h2>{t.welcome}<br/>HATHOR</h2>
-            <div className="vip-divider"/>
-            <div className="hero-cards">
-              <div className="hero-card red" data-rank="A" style={{'--r':'-25deg'}}>♥</div>
-              <div className="hero-card black" data-rank="K" style={{'--r':'-12deg'}}>♠</div>
-              <div className="hero-card red" data-rank="Q" style={{'--r':'0deg'}}>♦</div>
-              <div className="hero-card black" data-rank="J" style={{'--r':'12deg'}}>♣</div>
-              <div className="hero-card red" data-rank="A" style={{'--r':'25deg'}}>♥</div>
+        <>
+          {/* Hero banner */}
+          <div className="hero-banner">
+            <div>
+              <div className="hero-greeting">Sveiki, <span>{user.name}</span> 👋</div>
+              <div className="hero-stats">
+                <div className="hero-stat"><div className="hero-stat-val">🪙 {fmt(user.tokens)}</div><div className="hero-stat-lbl">Balansas</div></div>
+                <div className="hero-stat"><div className="hero-stat-val">{lv.e} {lv.name}</div><div className="hero-stat-lbl">Lygis</div></div>
+                <div className="hero-stat"><div className="hero-stat-val">{fmt(user.xp||0)}</div><div className="hero-stat-lbl">XP</div></div>
+                <div className="hero-stat"><div className="hero-stat-val">{user.games_played||0}</div><div className="hero-stat-lbl">Žaidimai</div></div>
+              </div>
+              {aiInsight&&<div className="ai-insight">🤖 {aiInsight}</div>}
             </div>
-            <p style={{letterSpacing:"5px",fontSize:11,color:"rgba(232,224,208,.2)"}}>{t.subtitle}</p>
-            <div className="lobby-stats">
-              <div className="stat-chip">Balance <strong>🪙 {fmt(user.tokens)}</strong></div>
-              <div className="stat-chip">Level <strong>{lv.e} {lv.name}</strong></div>
-              <div className="stat-chip">XP <strong>{fmt(user.xp||0)}</strong></div>
-            </div>
-            {aiInsight&&<div className="ai-insight">{aiInsight}</div>}
-          </div>
-          <div className="games-grid">
-          {[
-            {p:'poker',icon:'♠',badge:'LIVE',bc:'badge-live'},
-            {p:'slots',icon:'🎰',badge:'HOT',bc:'badge-hot'},
-            {p:'roulette',icon:'🎡',badge:'LIVE',bc:'badge-live'},
-            {p:'blackjack',icon:'🃏',badge:'HOT',bc:'badge-hot'},
-            {p:'sports',icon:'⚽',badge:'LIVE',bc:'badge-live'},
-            {p:'pyramid',icon:'🏺',badge:'HOT',bc:'badge-hot'},
-            {p:'cashier',icon:'💳',badge:'',bc:''},
-            {p:'stats',icon:'📊',badge:'',bc:''},
-            {p:'leaderboard',icon:'🏆',badge:null,bc:''},
-          ].map(c=>(
-            <div className="game-card" key={c.p} onClick={()=>nav(c.p)}>
-              <div className="game-card-glow"/>
-              {c.badge&&<span className={`game-badge ${c.bc}`}>{c.badge}</span>}
-              <div className="game-icon-wrap"><span>{c.icon}</span></div>
-              <h3>{t.games[c.p]?t.games[c.p].title:c.p}</h3>
-              <p>{t.games[c.p]?t.games[c.p].desc:''}</p>
-            </div>
-          ))}
-          </div>
-
-          {/* ── NEW GAMES SECTION ── */}
-          <div style={{marginTop:40,marginBottom:8}}>
-            <div style={{fontFamily:'Orbitron,monospace',fontSize:11,letterSpacing:'3px',color:'rgba(232,224,208,.2)',marginBottom:16,display:'flex',alignItems:'center',gap:12}}>
-              <span>✦ NAUJI ŽAIDIMAI</span>
-              <div style={{flex:1,height:1,background:'rgba(255,255,255,.05)'}}/>
-            </div>
-            <div className="games-grid">
-              {[
-                {href:'/crash.html',icon:'🚀',title:'CRASH',desc:'Aviator stiliaus — išimkite iki katastrofos!',badge:'🔥 HOT'},
-                {href:'/mines.html',icon:'💣',title:'MINES',desc:'5×5 lentelė — deimantai ar minos?',badge:'⭐ POPULIARUS'},
-                {href:'/wheel.html',icon:'🎡',title:'LUCKY WHEEL',desc:'Sukite ratą — iki 100×',badge:''},
-                {href:'/dice.html',icon:'🎲',title:'DICE / LIMBO / HI-LO',desc:'3 žaidimai viename',badge:'✨ NAUJAS'},
-                {href:'/keno.html',icon:'🎱',title:'KENO',desc:'80 kamuolių loterija',badge:''},
-                {href:'/baccarat.html',icon:'🃏',title:'BACCARAT',desc:'Player, Banker arba Tie',badge:''},
-                {href:'/videopoker.html',icon:'🎴',title:'VIDEO POKER',desc:'Jacks or Better — iki 800×',badge:'✨ NAUJAS'},
-                {href:'/plinko.html',icon:'🔮',title:'KRIOKLIS',desc:'Kamuolys krinta per nagus — iki 999×!',badge:'🎬 ANIMACIJA'},
-              ].map((g,i)=>(
-                <a key={i} href={g.href} className="game-card" style={{textDecoration:'none',color:'inherit',display:'block'}}>
-                  <div className="game-card-glow"/>
-                  {g.badge&&<span className="game-badge badge-new">{g.badge}</span>}
-                  <div className="game-icon-wrap"><span>{g.icon}</span></div>
-                  <h3>{g.title}</h3>
-                  <p>{g.desc}</p>
-                </a>
-              ))}
+            <div className="hero-cards-deco">
+              <div className="hero-card red" data-rank="A" style={{'--r':'-18deg'}}>♥</div>
+              <div className="hero-card black" data-rank="K" style={{'--r':'0deg'}}>♠</div>
+              <div className="hero-card red" data-rank="Q" style={{'--r':'18deg'}}>♦</div>
             </div>
           </div>
 
-          <p style={{textAlign:'center',marginTop:32,fontSize:10,color:'rgba(232,224,208,.12)',letterSpacing:'3px'}}>{t.disclaimer}</p>
-        </div>
+          {/* Category chips */}
+          <div className="cat-chips">
+            {[
+              {id:'visi',l:'🎮 Visi žaidimai'},
+              {id:'stalai',l:'🃏 Stalai'},
+              {id:'automatai',l:'🎰 Automatai'},
+              {id:'kripto',l:'⚡ Kripto'},
+              {id:'sportas',l:'⚽ Sportas'},
+            ].map(c=>(
+              <button key={c.id} className={`cat-chip${gameFilter===c.id?' active':''}`} onClick={()=>setGameFilter(c.id)}>{c.l}</button>
+            ))}
+          </div>
+
+          {/* Section header */}
+          <div className="sec-hdr">
+            <div className="sec-hdr-title">ŽAIDIMAI</div>
+            <div className="sec-hdr-line"/>
+            <div className="sec-hdr-count">{ALL_GAMES.filter(g=>gameFilter==='visi'||g.cat===gameFilter).length} žaidimų</div>
+          </div>
+
+          {/* Games grid */}
+          <div className="games-pro">
+            {ALL_GAMES.filter(g=>gameFilter==='visi'||g.cat===gameFilter).map((g,i)=>{
+              const badgeCls=g.badge?.includes('LIVE')?'live':g.badge?.includes('HOT')||g.badge?.includes('🔥')?'hot':g.badge?.includes('NAU')||g.badge?.includes('✨')?'new':'anim';
+              const inner=(
+                <>
+                  <div className="gcard-bg-pro" style={{background:g.color}}/>
+                  <div className="gcard-shine"/>
+                  <div className="gcard-icon-pro">{g.icon}</div>
+                  <div className="gcard-overlay"/>
+                  {g.badge&&<span className={`gcard-badge-pro ${badgeCls}`}>{g.badge}</span>}
+                  <div className="gcard-play-btn">ŽAISTI</div>
+                  <div className="gcard-body">
+                    <div className="gcard-name-pro">{g.name}</div>
+                    <div className="gcard-desc-pro">{g.desc}</div>
+                  </div>
+                </>
+              );
+              return g.href
+                ? <a key={i} href={g.href} className="gcard-pro">{inner}</a>
+                : <div key={i} className="gcard-pro" onClick={()=>nav(g.page)}>{inner}</div>;
+            })}
+          </div>
+
+          <p style={{textAlign:'center',marginTop:40,fontSize:10,color:'rgba(232,224,208,.08)',letterSpacing:'3px'}}>{t.disclaimer}</p>
+        </>
       )}
 
       {page==='slots'&&<Slots user={user} setUser={setUser} t={t}/>}
@@ -4594,18 +4882,7 @@ function App(){
       {page==='leaderboard'&&<Leaderboard user={user}/>}
       {page==='pyramid'&&<PyramidDrop user={user} setUser={setUser}/>}
       {page==='stats'&&<StatsPage user={user}/>}
-      <JackpotTicker/>
-      <AICroupier user={user} currentPage={page} t={t}/>
-      <SocialWins/>
-      {user&&<SupportChat user={user}/>}
-      {user&&<MissionsPanel user={user} missions={missions}/>}
-      {pendingReward&&<AchievementPopup mission={pendingReward} onClaim={()=>{
-        setUser(u=>({...u,tokens:u.tokens+pendingReward.reward}));
-        sfx.win();
-        setPendingReward(null);
-      }}/>}
       {page==='sports'&&<SportsBetting user={user} setUser={setUser} t={t}/>}
-
       {page==='poker'&&(
         roomId&&gameState?(
           gameState.status==='waiting'
@@ -4616,6 +4893,19 @@ function App(){
         ):<PokerLobby user={user} onJoinRoom={id=>setRoomId(id)} onBack={()=>nav('lobby')}/>
       )}
 
+        </main>
+      </div>{/* end app-body */}
+
+      <JackpotTicker/>
+      <AICroupier user={user} currentPage={page} t={t}/>
+      <SocialWins/>
+      {user&&<SupportChat user={user}/>}
+      {user&&<MissionsPanel user={user} missions={missions}/>}
+      {pendingReward&&<AchievementPopup mission={pendingReward} onClaim={()=>{
+        setUser(u=>({...u,tokens:u.tokens+pendingReward.reward}));
+        sfx.win();
+        setPendingReward(null);
+      }}/>}
       {showAvatar&&<AvatarModal user={user} onClose={()=>setShowAvatar(false)} onUpdate={url=>setUser(u=>({...u,avatar:url}))}/>}
       {showBonus&&<DailyBonus onClose={()=>setShowBonus(false)} onClaim={amt=>bumpTokens(amt)} t={t}/>}
       {lvUp&&<div className="levelup-banner"><h3>{lvUp.e} LEVEL UP!</h3><p>You reached {lvUp.name}</p></div>}
