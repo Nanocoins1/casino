@@ -2982,8 +2982,6 @@ function WaitingRoom({state,user,roomId,onBack}){
 // ═══════════════════════════════════════════════════
 function SportsBetting({user,setUser,t=LANGS.en}){
   const SPORT_TABS=Object.entries(t.sportTabs||{}).map(([key,label])=>({key,label}));
-  const [apiKey,setApiKey]=useState(localStorage.getItem('odds_key')||'demo');
-  const [apiInp,setApiInp]=useState(localStorage.getItem('odds_key')||'');
   const [sport,setSport]=useState('soccer_epl');
   const [games,setGames]=useState([]);
   const [loading,setLoading]=useState(false);
@@ -2992,13 +2990,22 @@ function SportsBetting({user,setUser,t=LANGS.en}){
   const [myBets,setMyBets]=useState([]);
 
   useEffect(()=>{
-    if(!apiKey)return; setLoading(true);
-    fetch(apiKey?`/api/sports?apiKey=${apiKey}&sport=${sport}`:`/api/sports-demo?sport=${sport}`)
-      .then(r=>r.json()).then(d=>{setGames(Array.isArray(d)?d:[]);setLoading(false);})
-      .catch(()=>setLoading(false));
-  },[apiKey,sport]);
-
-  const saveKey=()=>{localStorage.setItem('odds_key',apiInp);setApiKey(apiInp);sfx.click();};
+    setLoading(true);
+    // Server uses ODDS_API_KEY env var automatically
+    fetch(`/api/sports?sport=${sport}`)
+      .then(r=>r.json()).then(d=>{
+        if(Array.isArray(d)&&d.length>0){setGames(d);}
+        else{
+          // Fallback to demo if API key not set or error
+          fetch(`/api/sports-demo?sport=${sport}`).then(r=>r.json()).then(d2=>setGames(Array.isArray(d2)?d2:[]));
+        }
+        setLoading(false);
+      })
+      .catch(()=>{
+        fetch(`/api/sports-demo?sport=${sport}`).then(r=>r.json()).then(d=>setGames(Array.isArray(d)?d:[]));
+        setLoading(false);
+      });
+  },[sport]);
   const addSlip=(g,pick,odd)=>{
     sfx.click();
     setSlip(s=>{
@@ -3038,17 +3045,14 @@ function SportsBetting({user,setUser,t=LANGS.en}){
   return(
     <div className="sports-scene">
       <div className="sports-hdr">
-        <h2>Sports Betting</h2>
-        <div className="api-row">
-          <input className="api-inp" value={apiInp} onChange={e=>setApiInp(e.target.value)} placeholder="the-odds-api.com key..." onKeyDown={e=>e.key==='Enter'&&saveKey()}/>
-          <button className="btn btn-ghost btn-sm" onClick={saveKey}>Load</button>
+        <h2>⚽ Sporto Lažybos</h2>
+        <div style={{display:'flex',alignItems:'center',gap:8,fontSize:11,color:'rgba(0,230,118,.7)'}}>
+          <span style={{width:7,height:7,borderRadius:'50%',background:'#00e676',display:'inline-block',animation:'pulse 1.5s infinite'}}/>
+          Gyvos rungtynės
         </div>
       </div>
-      {false?(
-        <div className="no-api-box"/>
-      ):(
-        <>
-          <div className="sport-tabs-row">{SPORT_TABS.map(t=><button key={t.key} className={`s-tab${sport===t.key?' active':''}`} onClick={()=>{sfx.click();setSport(t.key);}}>{t.label}</button>)}</div>
+      <>
+        <div className="sport-tabs-row">{SPORT_TABS.map(t=><button key={t.key} className={`s-tab${sport===t.key?' active':''}`} onClick={()=>{sfx.click();setSport(t.key);}}>{t.label}</button>)}</div>
           <div className="sports-body">
             <div className="match-list">
               {loading&&<div style={{textAlign:'center',padding:'48px',color:'rgba(232,224,208,.25)',fontSize:13,letterSpacing:'2px'}}>Loading matches...</div>}
@@ -3122,8 +3126,7 @@ function SportsBetting({user,setUser,t=LANGS.en}){
               )}
             </div>
           </div>
-        </>
-      )}
+      </>
     </div>
   );
 }
