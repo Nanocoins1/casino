@@ -5772,30 +5772,30 @@ function App(){
   };
 
   const SB_ITEMS=[
-    {id:'lobby',icon:'🏠',label:'Pagrindinis'},
+    {id:'lobby',icon:'🏠',label:t.lobby||'Lobby'},
     {id:'__div1'},
-    {id:'__label1',label:'KAZINO'},
-    {id:'slots',icon:'🎰',label:'Automatai',badge:'HOT',badgeCls:'hot'},
-    {id:'blackjack',icon:'🃏',label:'Blackjack'},
-    {id:'roulette',icon:'⭕',label:'Ruletė',badge:'LIVE',badgeCls:'live'},
-    {id:'poker',icon:'♠️',label:'Pokeris',badge:'LIVE',badgeCls:'live'},
-    {id:'pyramid',icon:'🏺',label:'Piramidė'},
+    {id:'__label1',label:'CASINO'},
+    {id:'slots',icon:'🎰',label:t.slots||'Slots',badge:'HOT',badgeCls:'hot'},
+    {id:'blackjack',icon:'🃏',label:t.bj||'Blackjack'},
+    {id:'roulette',icon:'⭕',label:t.roulette||'Roulette',badge:'LIVE',badgeCls:'live'},
+    {id:'poker',icon:'♠️',label:t.poker||'Poker',badge:'LIVE',badgeCls:'live'},
+    {id:'pyramid',icon:'🏺',label:'Pyramid Drop'},
     {id:'__div2'},
-    {id:'__label2',label:'ŽAIDIMAI'},
+    {id:'__label2',label:'GAMES'},
     {id:'__link_crash',icon:'🚀',label:'Crash',href:'/crash.html',badge:'HOT',badgeCls:'hot'},
     {id:'__link_mines',icon:'💣',label:'Mines',href:'/mines.html'},
-    {id:'__link_krioklis',icon:'🔮',label:'Krioklis',href:'/plinko.html',badge:'NAUJA',badgeCls:'new'},
+    {id:'__link_krioklis',icon:'🔮',label:'Krioklis',href:'/plinko.html',badge:'NEW',badgeCls:'new'},
     {id:'__link_dice',icon:'🎲',label:'Dice / Limbo',href:'/dice.html'},
     {id:'__link_wheel',icon:'🎡',label:'Lucky Wheel',href:'/wheel.html'},
     {id:'__link_keno',icon:'🎱',label:'Keno',href:'/keno.html'},
     {id:'__link_baccarat',icon:'🎴',label:'Baccarat',href:'/baccarat.html'},
     {id:'__link_vp',icon:'🂡',label:'Video Poker',href:'/videopoker.html'},
     {id:'__div3'},
-    {id:'__label3',label:'KITA'},
-    {id:'sports',icon:'⚽',label:'Sportas',badge:'LIVE',badgeCls:'live'},
-    {id:'leaderboard',icon:'🏆',label:'Lyderiai'},
-    {id:'stats',icon:'📊',label:'Statistika'},
-    {id:'cashier',icon:'💳',label:'Kasos'},
+    {id:'__label3',label:'MORE'},
+    {id:'sports',icon:'⚽',label:t.sports||'Sports',badge:'LIVE',badgeCls:'live'},
+    {id:'leaderboard',icon:'🏆',label:t.leaderboard||'Leaderboard'},
+    {id:'stats',icon:'📊',label:t.stats||'Stats'},
+    {id:'cashier',icon:'💳',label:t.cashier||'Cashier'},
   ];
 
   return(
@@ -5804,7 +5804,7 @@ function App(){
       <div className="topbar">
         <div className="topbar-logo">⬡ HATHOR<span>ROYAL CASINO</span></div>
         <div className="topbar-nav">
-          {[{p:'lobby',l:'🏠 Lobis'},{p:'sports',l:'⚽ Sportas'},{p:'stats',l:'📊 Statistika'},{p:'leaderboard',l:'🏆 Lyderiai'}].map(x=>(
+          {[{p:'lobby',l:'🏠 '+(t.lobby||'Lobby')},{p:'sports',l:'⚽ '+(t.sports||'Sports')},{p:'stats',l:'📊 '+(t.stats||'Stats')},{p:'leaderboard',l:'🏆 '+(t.leaderboard||'Leaders')}].map(x=>(
             <button key={x.p} className={`topbar-btn${page===x.p?' active':''}`} onClick={()=>nav(x.p)}>{x.l}</button>
           ))}
         </div>
@@ -5813,10 +5813,10 @@ function App(){
           <LangDrop lang={lang} setLang={setLang}/>
           <LvPill xp={user.xp||0} levelInfo={lv} nextLevel={nextLv}/>
           <div className={`tb-balance${tokenBump?' bump':''}`}>
-            <div className="tb-bal-label">Balansas</div>
+            <div className="tb-bal-label">{t.balance||'Balance'}</div>
             <div className="tb-bal-amount">🪙 {fmt(user.tokens)}</div>
           </div>
-          <button className="tb-cashier" onClick={()=>window.open('/cashier.html','_self')}>💳 Kasos</button>
+          <button className="tb-cashier" onClick={()=>window.open('/cashier.html','_self')}>💳 {t.cashier||'Cashier'}</button>
           <div className="tb-user-btn" onClick={()=>setShowAvatar(true)}>{user.avatar?<img src={user.avatar} alt="" style={{width:'100%',height:'100%',borderRadius:10,objectFit:'cover'}}/>:'👤'}</div>
           <button className="tb-logout" onClick={doLogout}>⏻</button>
         </div>
@@ -5854,12 +5854,12 @@ function App(){
           {/* Hero banner */}
           <div className="hero-banner">
             <div>
-              <div className="hero-greeting">Sveiki, <span>{user.name}</span> 👋</div>
+              <div className="hero-greeting">{t.welcome||'Welcome'}, <span>{user.name}</span> 👋</div>
               <div className="hero-stats">
-                <div className="hero-stat"><div className="hero-stat-val">🪙 {fmt(user.tokens)}</div><div className="hero-stat-lbl">Balansas</div></div>
-                <div className="hero-stat"><div className="hero-stat-val">{lv.e} {lv.name}</div><div className="hero-stat-lbl">Lygis</div></div>
+                <div className="hero-stat"><div className="hero-stat-val">🪙 {fmt(user.tokens)}</div><div className="hero-stat-lbl">{t.balance||'Balance'}</div></div>
+                <div className="hero-stat"><div className="hero-stat-val">{lv.e} {lv.name}</div><div className="hero-stat-lbl">{t.level||'Level'}</div></div>
                 <div className="hero-stat"><div className="hero-stat-val">{fmt(user.xp||0)}</div><div className="hero-stat-lbl">XP</div></div>
-                <div className="hero-stat"><div className="hero-stat-val">{user.games_played||0}</div><div className="hero-stat-lbl">Žaidimai</div></div>
+                <div className="hero-stat"><div className="hero-stat-val">{user.games_played||0}</div><div className="hero-stat-lbl">{t.stats||'Games'}</div></div>
               </div>
               {aiInsight&&<div className="ai-insight">🤖 {aiInsight}</div>}
             </div>
@@ -5873,11 +5873,11 @@ function App(){
           {/* Category chips */}
           <div className="cat-chips">
             {[
-              {id:'visi',l:'🎮 Visi žaidimai'},
-              {id:'stalai',l:'🃏 Stalai'},
-              {id:'automatai',l:'🎰 Automatai'},
-              {id:'kripto',l:'⚡ Kripto'},
-              {id:'sportas',l:'⚽ Sportas'},
+              {id:'visi',l:'🎮 '+( t.lobby||'All games')},
+              {id:'stalai',l:'🃏 '+(t.bj||'Tables')},
+              {id:'automatai',l:'🎰 '+(t.slots||'Slots')},
+              {id:'kripto',l:'⚡ Crypto'},
+              {id:'sportas',l:'⚽ '+(t.sports||'Sports')},
             ].map(c=>(
               <button key={c.id} className={`cat-chip${gameFilter===c.id?' active':''}`} onClick={()=>setGameFilter(c.id)}>{c.l}</button>
             ))}
