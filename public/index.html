@@ -2203,6 +2203,14 @@ body { color: #e8e2d4 !important; }
   100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
 }
 
+@keyframes cReelBlur {
+  0%   { transform:translateY(0);   filter:blur(0px) brightness(0.8); }
+  50%  { transform:translateY(-6px);filter:blur(2.5px) brightness(1.2); }
+  100% { transform:translateY(0);   filter:blur(0px) brightness(0.8); }
+}
+@keyframes cWinPulse { from{transform:scale(1)} to{transform:scale(1.07);filter:brightness(1.3)} }
+@keyframes winTextIn { from{transform:scale(0.7);opacity:0} to{transform:scale(1);opacity:1} }
+
 /* Stats chips more visible */
 .stat-chip {
   background: rgba(240,192,96,0.08) !important;
@@ -2783,6 +2791,211 @@ function AvatarModal({user,onClose,onUpdate}){
 // SLOTS — 4 machines, 5×3, 20 paylines
 // ═══════════════════════════════════════════════════
 // ═══════════════════════════════════════════════════
+// CLASSIC 5×3 MACHINES DATA
+// ═══════════════════════════════════════════════════
+const CLASSIC_MACHINES=[
+  {id:'classic',title:'🍒 Classic Fruits',subtitle:'5×3 · 20 Paylines',color:'#f0c060',
+   syms:['🍒','🍋','🍊','🍇','🔔','⭐','💎','7️⃣'],
+   pays:{'💎💎💎💎💎':200,'7️⃣7️⃣7️⃣7️⃣7️⃣':100,'⭐⭐⭐⭐⭐':50,'🔔🔔🔔🔔🔔':30,'5x':20,'4x':8,'3x':3}},
+  {id:'egypt',title:'🏺 Egyptian Gold',subtitle:'5×3 · 20 Paylines',color:'#d4a030',
+   syms:['🏺','🐍','🦅','💀','🔱','⚡','🌙','☀️'],
+   pays:{'☀️☀️☀️☀️☀️':200,'🌙🌙🌙🌙🌙':100,'⚡⚡⚡⚡⚡':50,'🔱🔱🔱🔱🔱':30,'5x':20,'4x':8,'3x':3}},
+  {id:'space',title:'🚀 Space Fortune',subtitle:'5×3 · 20 Paylines',color:'#88ddff',
+   syms:['🚀','🌌','🪐','⭐','💫','🌟','🛸','🌠'],
+   pays:{'🛸🛸🛸🛸🛸':200,'🌌🌌🌌🌌🌌':100,'🪐🪐🪐🪐🪐':50,'💫💫💫💫💫':30,'5x':20,'4x':8,'3x':3}},
+  {id:'vip',title:'💎 Diamond VIP',subtitle:'5×3 · 20 Paylines',color:'#cc88ff',
+   syms:['💎','💍','👑','🏆','🎩','🥂','🌹','✨'],
+   pays:{'💎💎💎💎💎':300,'👑👑👑👑👑':150,'🏆🏆🏆🏆🏆':80,'🎩🎩🎩🎩🎩':40,'5x':25,'4x':10,'3x':4}},
+];
+
+const CLASSIC_PAYLINES=[
+  [[0,0],[1,0],[2,0],[3,0],[4,0]],[[0,1],[1,1],[2,1],[3,1],[4,1]],[[0,2],[1,2],[2,2],[3,2],[4,2]],
+  [[0,0],[1,1],[2,2],[3,1],[4,0]],[[0,2],[1,1],[2,0],[3,1],[4,2]],
+  [[0,0],[1,0],[2,1],[3,0],[4,0]],[[0,2],[1,2],[2,1],[3,2],[4,2]],
+  [[0,1],[1,0],[2,0],[3,0],[4,1]],[[0,1],[1,2],[2,2],[3,2],[4,1]],
+  [[0,0],[1,1],[2,1],[3,1],[4,0]],[[0,2],[1,1],[2,1],[3,1],[4,2]],
+  [[0,1],[1,0],[2,1],[3,2],[4,1]],[[0,1],[1,2],[2,1],[3,0],[4,1]],
+  [[0,0],[1,0],[2,2],[3,0],[4,0]],[[0,2],[1,2],[2,0],[3,2],[4,2]],
+  [[0,1],[1,1],[2,0],[3,1],[4,1]],[[0,1],[1,1],[2,2],[3,1],[4,1]],
+  [[0,0],[1,2],[2,0],[3,2],[4,0]],[[0,2],[1,0],[2,2],[3,0],[4,2]],
+  [[0,0],[1,1],[2,2],[3,2],[4,2]],
+];
+function classicCheckWins(grid,machine){
+  const wins=[];
+  for(let li=0;li<CLASSIC_PAYLINES.length;li++){
+    const line=CLASSIC_PAYLINES[li];
+    const syms=line.map(([c,r])=>grid[c][r]);
+    const f=syms[0];let len=1;
+    for(let i=1;i<5;i++){if(syms[i]===f)len++;else break;}
+    if(len<3)continue;
+    const key5=syms.join(''),keyN=`${len}x`;
+    const mult=machine.pays[key5]||machine.pays[keyN]||0;
+    if(mult>0)wins.push({line:li,cells:line.slice(0,len),mult,len,sym:f,type:li<3?'h':li<7?'d':'v'});
+  }
+  return wins;
+}
+
+function ClassicSlot({user,setUser,forceMachine}){
+  const [mi,setMi]=useState(forceMachine!=null?forceMachine:0);
+  const machine=CLASSIC_MACHINES[mi];
+  const rnd=()=>Array.from({length:5},()=>Array.from({length:3},()=>machine.syms[Math.floor(Math.random()*machine.syms.length)]));
+  const [grid,setGrid]=useState(rnd);
+  const [anim,setAnim]=useState(rnd);
+  const [spinning,setSpinning]=useState(false);
+  const [bet,setBet]=useState(50);
+  const [result,setResult]=useState(null);
+  const [winCells,setWinCells]=useState([]);
+  const [winInfo,setWinInfo]=useState('');
+  const ivRef=useRef(null);
+
+  const getCls=(col,row)=>{
+    const w=winCells.find(c=>c.col===col&&c.row===row);
+    if(!w)return '';
+    return w.type==='h'?'classic-win-h':w.type==='d'?'classic-win-d':'classic-win-v';
+  };
+
+  const spin=()=>{
+    if(user.tokens<bet||spinning)return;
+    sfx.click();setResult(null);setWinCells([]);setWinInfo('');setSpinning(true);
+    setUser(u=>({...u,tokens:u.tokens-bet}));
+    const final=rnd();
+    ivRef.current=setInterval(()=>setAnim(rnd()),65);
+    [0,1,2,3,4].forEach(col=>setTimeout(()=>{
+      sfx.card();
+      setAnim(g=>{const n=g.map(x=>[...x]);n[col]=final[col];return n;});
+    },(col+1)*300));
+    setTimeout(()=>{
+      clearInterval(ivRef.current);setAnim(final);setGrid(final);setSpinning(false);
+      const wins=classicCheckWins(final,machine);
+      if(wins.length>0){
+        const totalMult=wins.reduce((a,w)=>a+w.mult,0);
+        const won=Math.floor(bet*totalMult);
+        setUser(u=>({...u,tokens:u.tokens+won}));
+        const cells=[];
+        wins.forEach(w=>w.cells.forEach(([col,row])=>{if(!cells.find(c=>c.col===col&&c.row===row))cells.push({col,row,type:w.type});}));
+        setWinCells(cells);
+        setWinInfo(wins.map(w=>`${w.sym}×${w.len} ×${w.mult}`).join('  ·  '));
+        setResult({txt:totalMult>=50?`🏆 JACKPOT! +${fmt(Math.floor(bet*totalMult))}`:totalMult>=15?`🌟 BIG WIN! +${fmt(Math.floor(bet*totalMult))}`:`✨ +${fmt(Math.floor(bet*totalMult))}`,win:true});
+        if(totalMult>=50)sfx.jackpot();else sfx.win();
+        socket.emit('addXP',{xp:20});
+      }else{
+        setResult({txt:'No win this time',win:false});sfx.lose();
+      }
+      socket.emit('saveTokens',{tokens:user.tokens-bet});
+    },1750);
+  };
+
+  const topPays=Object.entries(machine.pays).filter(([k])=>!k.endsWith('x')).slice(0,6);
+
+  return(
+    <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:14,width:'100%'}}>
+      {/* Machine selector */}
+      <div style={{display:'flex',gap:8,flexWrap:'wrap',justifyContent:'center'}}>
+        {CLASSIC_MACHINES.map((m,i)=>(
+          <button key={m.id}
+            style={{padding:'8px 18px',borderRadius:2,cursor:'pointer',fontSize:12,fontFamily:"'Cinzel',serif",
+              fontWeight:700,letterSpacing:'1px',transition:'all 0.2s',
+              border:`1px solid ${mi===i?m.color+'99':'rgba(201,168,76,0.18)'}`,
+              background:mi===i?`rgba(${parseInt(m.color.slice(1,3),16)},${parseInt(m.color.slice(3,5),16)},${parseInt(m.color.slice(5,7),16)},0.1)`:'rgba(201,168,76,0.03)',
+              color:mi===i?m.color:'rgba(201,168,76,0.45)',
+              boxShadow:mi===i?`0 0 14px ${m.color}28`:'none'}}
+            onClick={()=>{sfx.click();setMi(i);setResult(null);setWinCells([]);setWinInfo('');setGrid(()=>Array.from({length:5},()=>Array.from({length:3},()=>CLASSIC_MACHINES[i].syms[0])));setAnim(()=>Array.from({length:5},()=>Array.from({length:3},()=>CLASSIC_MACHINES[i].syms[0])));}}
+          >{m.title}</button>
+        ))}
+      </div>
+
+      {/* Cabinet */}
+      <div style={{width:700,background:'linear-gradient(180deg,#1c1608,#0e0c08,#050402)',
+        border:`2px solid ${machine.color}55`,borderRadius:3,overflow:'hidden',
+        boxShadow:`0 40px 100px rgba(0,0,0,0.97),0 0 0 1px ${machine.color}22`}}>
+        {/* Top */}
+        <div style={{padding:'14px 24px 12px',background:'linear-gradient(180deg,#2a1e04,#1a1305)',
+          borderBottom:`1px solid ${machine.color}44`,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+          <div>
+            <div style={{fontFamily:"'Cinzel',serif",fontSize:16,fontWeight:700,letterSpacing:'3px',color:machine.color}}>{machine.title}</div>
+            <div style={{fontFamily:"'Cinzel',serif",fontSize:8,letterSpacing:'3px',color:'rgba(201,168,76,0.4)',marginTop:2}}>{machine.subtitle}</div>
+          </div>
+          <div style={{fontFamily:"'DM Mono',monospace",fontSize:13,color:'rgba(201,168,76,0.4)'}}>🪙 <strong style={{color:machine.color}}>{fmt(user.tokens)}</strong></div>
+        </div>
+        {/* Reels */}
+        <div style={{padding:'14px 18px',background:'rgba(0,0,0,0.65)',borderBottom:`1px solid ${machine.color}22`,position:'relative'}}>
+          {/* Center payline */}
+          <div style={{position:'absolute',left:18,right:18,top:'calc(14px + 68px + 3px + 34px - 1px)',height:2,
+            background:`linear-gradient(90deg,transparent,${machine.color}55,transparent)`,pointerEvents:'none',zIndex:2}}/>
+          <div style={{display:'flex',gap:5}}>
+            {Array.from({length:5},(_,col)=>(
+              <div key={col} style={{flex:1,display:'flex',flexDirection:'column',gap:3}}>
+                {Array.from({length:3},(_,row)=>{
+                  const cls=getCls(col,row);
+                  const isW=cls==='classic-win-h'||cls==='classic-win-d'||cls==='classic-win-v';
+                  return(
+                    <div key={row} style={{height:68,borderRadius:2,display:'flex',alignItems:'center',justifyContent:'center',
+                      fontSize:32,position:'relative',overflow:'hidden',
+                      background:isW?`${machine.color}18`:'rgba(255,255,255,0.015)',
+                      border:`1px solid ${isW?machine.color+'88':'rgba(201,168,76,0.05)'}`,
+                      boxShadow:isW?`0 0 18px ${machine.color}55`:'none',
+                      animation:spinning?'cReelBlur 0.065s linear infinite':isW?'cWinPulse 0.45s ease infinite alternate':'none',
+                      transition:'background 0.15s,border-color 0.15s'}}>
+                      {anim[col]?.[row]}
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* Controls */}
+        <div style={{padding:'14px 18px',display:'flex',alignItems:'center',gap:12}}>
+          <div style={{flex:1}}>
+            <div style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:700,minHeight:22,
+              color:result?.win?machine.color:result?'rgba(201,168,76,0.25)':'transparent',
+              animation:result?.win?'winTextIn 0.4s ease':'none'}}>
+              {result?.txt||'—'}
+            </div>
+            <div style={{fontSize:10,color:'rgba(201,168,76,0.25)',letterSpacing:'1px',marginTop:3,fontFamily:"'Cinzel',serif"}}>
+              {winInfo||'20 PAYLINES · HORIZONTAL · DIAGONAL · V-SHAPE'}
+            </div>
+          </div>
+          <div style={{display:'flex',alignItems:'center',gap:6}}>
+            <button className="hslot-bet-btn" onClick={()=>setBet(b=>Math.max(10,b-10))}>−</button>
+            <div style={{fontFamily:"'DM Mono',monospace",fontSize:14,color:'var(--gold2)',minWidth:72,textAlign:'center'}}>🪙 {fmt(bet)}</div>
+            <button className="hslot-bet-btn" onClick={()=>setBet(b=>Math.min(user.tokens,b+10))}>+</button>
+          </div>
+          <div style={{display:'flex',gap:4}}>
+            {[50,100,250].map(v=>(
+              <button key={v} className="hslot-preset" onClick={()=>setBet(Math.min(v,user.tokens))}>{v}</button>
+            ))}
+          </div>
+          <button style={{padding:'0 28px',height:50,borderRadius:2,border:'none',cursor:'pointer',
+            fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700,letterSpacing:'2px',
+            background:`linear-gradient(180deg,#e8c060 0%,${machine.color} 50%,#a07828 100%)`,
+            color:'#060300',transition:'all 0.2s',opacity:spinning||user.tokens<bet?0.4:1,
+            boxShadow:`0 2px 0 rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,240,160,0.3),${spinning?'none':`0 0 20px ${machine.color}44`}`}}
+            onClick={spin} disabled={spinning||user.tokens<bet}>
+            {spinning?'…':'SPIN'}
+          </button>
+        </div>
+        {/* Paytable */}
+        <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:3,padding:'8px 18px',
+          borderTop:`1px solid rgba(201,168,76,0.08)`,background:'rgba(0,0,0,0.3)'}}>
+          {topPays.map(([k,v])=>(
+            <div key={k} style={{display:'flex',justifyContent:'space-between',padding:'4px 8px',
+              background:'rgba(201,168,76,0.03)',border:'1px solid rgba(201,168,76,0.07)',borderRadius:1,fontSize:10}}>
+              <span>{k.slice(0,5)}</span>
+              <span style={{color:machine.color,fontFamily:"'DM Mono',monospace",fontWeight:700}}>×{v}</span>
+            </div>
+          ))}
+          <div style={{display:'flex',justifyContent:'space-between',padding:'4px 8px',
+            background:'rgba(201,168,76,0.03)',border:'1px solid rgba(201,168,76,0.07)',borderRadius:1,fontSize:10}}>
+            <span>5 same</span><span style={{color:machine.color,fontFamily:"'DM Mono',monospace",fontWeight:700}}>×{machine.pays['5x']||20}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
 // HATHOR ROYAL — GRAND FORTUNE 7×7 SLOT MACHINE
 // ═══════════════════════════════════════════════════
 const HSLOT_SYMS=[
@@ -2842,7 +3055,7 @@ function HSlotSym({symId,winning}){
   );
 }
 
-function Slots({user,setUser,t=LANGS.en}){
+function GrandFortune({user,setUser}){
   const [reels,setReels]=useState(()=>Array.from({length:HSLOT_NR},hRandCol));
   const [spinR,setSpinR]=useState(Array(HSLOT_NR).fill(false));
   const [spinning,setSpinning]=useState(false);
@@ -3106,6 +3319,48 @@ function Slots({user,setUser,t=LANGS.en}){
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// SLOTS — TOP-LEVEL WRAPPER WITH MACHINE PICKER
+// ═══════════════════════════════════════════════════
+const SLOT_TABS=[
+  {id:'grand',    label:'⬡ Grand Fortune',  sub:'7×7 · Premium'},
+  {id:'classic',  label:'🍒 Classic Fruits', sub:'5×3 · Classic'},
+  {id:'egypt',    label:'🏺 Egyptian Gold',  sub:'5×3 · Egypt'},
+  {id:'space',    label:'🚀 Space Fortune',  sub:'5×3 · Space'},
+  {id:'vip',      label:'💎 Diamond VIP',    sub:'5×3 · VIP'},
+];
+function Slots({user,setUser,t=LANGS.en}){
+  const [tab,setTab]=useState('grand');
+  const classicIdx={classic:0,egypt:1,space:2,vip:3};
+  return(
+    <div style={{minHeight:'calc(100vh - 64px)',display:'flex',flexDirection:'column',alignItems:'center',
+      padding:'20px 16px',position:'relative',zIndex:1,
+      background:'radial-gradient(ellipse 110% 80% at 50% 60%,rgba(28,18,4,0.55),transparent)'}}>
+
+      {/* Tab picker */}
+      <div style={{display:'flex',gap:6,marginBottom:20,flexWrap:'wrap',justifyContent:'center'}}>
+        {SLOT_TABS.map(tb=>{
+          const active=tab===tb.id;
+          return(
+            <button key={tb.id} onClick={()=>{sfx.click();setTab(tb.id);}}
+              style={{display:'flex',flexDirection:'column',alignItems:'center',gap:2,
+                padding:'9px 18px',borderRadius:2,cursor:'pointer',transition:'all 0.2s',
+                fontFamily:"'Cinzel',serif",border:`1px solid ${active?'rgba(201,168,76,0.5)':'rgba(201,168,76,0.15)'}`,
+                background:active?'rgba(201,168,76,0.1)':'rgba(201,168,76,0.03)',
+                boxShadow:active?'0 0 18px rgba(201,168,76,0.18)':'none'}}>
+              <span style={{fontSize:12,fontWeight:700,letterSpacing:'1px',color:active?'#f0c060':'rgba(201,168,76,0.45)'}}>{tb.label}</span>
+              <span style={{fontSize:8,letterSpacing:'2px',color:active?'rgba(201,168,76,0.55)':'rgba(201,168,76,0.22)'}}>{tb.sub}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {tab==='grand' && <GrandFortune user={user} setUser={setUser}/>}
+      {tab!=='grand' && <ClassicSlot key={tab} user={user} setUser={setUser} forceMachine={classicIdx[tab]}/>}
     </div>
   );
 }
@@ -4225,8 +4480,8 @@ const LANGS = {
     addSelections:'Spauskite ant koeficientų', myBets:'MANO LAŽYBOS',
     sportTabs:{soccer_epl:'⚽ Anglija',soccer_spain_la_liga:'⚽ Ispanija',basketball_nba:'🏀 NBA',basketball_euroleague:'🏀 Eurolyga',tennis_atp_french_open:'🎾 Tenisas',icehockey_nhl:'🏒 NHL'},
     games:{
-      poker:{title:'Texas Hold’em',desc:'Daugiažaidis · AI botai · Pokalbiai · Iki 6 žaidėjų'},
-      slots:{title:'4 Lošimo Automatai',desc:'5×3 būgnai · 20 linijų · Klasika, Egiptas, Kosmosas, VIP'},
+      poker:{title:"Texas Hold’em",desc:’Daugiažaidis · AI botai · Pokalbiai · Iki 6 žaidėjų’},
+      slots:{title:’7 Lošimo Automatai’,desc:’7×7 būgnai · Klasika, Egiptas, Kosmosas, VIP ir daugiau’},
       roulette:{title:'Ruletė',desc:'Europos ratas · Skaičiai, spalvos, dešimtys'},
       blackjack:{title:'Blackjack',desc:'Nugalėk dalintuvą · Imti, Stoti, Dvigubinti'},
       sports:{title:'Sporto Lažybos',desc:'EPL, NBA, NHL, Tenisas · Tiesioginiai koeficientai'},
