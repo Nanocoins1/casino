@@ -3055,7 +3055,7 @@ function HSlotSym({symId,winning}){
   );
 }
 
-function GrandFortune({user,setUser}){
+function GrandFortune({user,setUser,t=LANGS.en}){
   const [reels,setReels]=useState(()=>Array.from({length:HSLOT_NR},hRandCol));
   const [spinR,setSpinR]=useState(Array(HSLOT_NR).fill(false));
   const [spinning,setSpinning]=useState(false);
@@ -3251,12 +3251,12 @@ function GrandFortune({user,setUser}){
           {/* Controls */}
           <div className="hslot-controls">
             <div className="hslot-info-block">
-              <div className="hslot-tiny-lbl">Balansas</div>
+              <div className="hslot-tiny-lbl">{t.balance||'Balance'}</div>
               <div className="hslot-big-val">🪙 {fmt(user.tokens)}</div>
             </div>
 
             <div className="hslot-bet-block">
-              <div className="hslot-tiny-lbl">Statymas</div>
+              <div className="hslot-tiny-lbl">{t.placeBet||'Bet'}</div>
               <div className="hslot-bet-row">
                 <button className="hslot-bet-btn" onClick={()=>setBet(b=>Math.max(10,b-10))}>−</button>
                 <div className="hslot-bet-val">🪙 {fmt(bet)}</div>
@@ -3274,7 +3274,7 @@ function GrandFortune({user,setUser}){
             </button>
 
             <div className="hslot-info-block" style={{alignItems:'flex-end'}}>
-              <div className="hslot-tiny-lbl">Laimėjimas</div>
+              <div className="hslot-tiny-lbl">{t.jackpot||'Win'}</div>
               <div className={`hslot-big-val hslot-win-val${winType?' vis':''}`}>🪙 {winType?fmt(winAmt):''}</div>
               <div className="hslot-win-tag">{winType?winLabels[winType]:''}</div>
             </div>
@@ -3359,7 +3359,7 @@ function Slots({user,setUser,t=LANGS.en}){
         })}
       </div>
 
-      {tab==='grand' && <GrandFortune user={user} setUser={setUser}/>}
+      {tab==='grand' && <GrandFortune user={user} setUser={setUser} t={t}/>}
       {tab!=='grand' && <ClassicSlot key={tab} user={user} setUser={setUser} forceMachine={classicIdx[tab]}/>}
     </div>
   );
@@ -4199,7 +4199,7 @@ function ViktorFace({speaking, loading}){
 
 function AICroupier({user,currentPage,t=LANGS.en}){
   const [open,setOpen]=useState(false);
-  const [msgs,setMsgs]=useState([{id:0,from:'viktor',text:"Sveiki, "+user.name+"! Aš esu Viktoras, jūsų asmeninis krupjė. Klauskite viską arba spauskite mikrofono mygtuką! 🎩"}]);
+  const [msgs,setMsgs]=useState([{id:0,from:'viktor',text:(t.viktor&&t.viktor.greeting)||"Welcome, "+user.name+"! I am Viktor, your personal croupier. Ask me anything! 🎩"}]);
   const [inp,setInp]=useState('');
   const [loading,setLoading]=useState(false);
   const [hasNew,setHasNew]=useState(false);
@@ -5192,11 +5192,11 @@ function getSupportReply(msg) {
   return SUPPORT_REPLIES.default;
 }
 
-function SupportChat({user}) {
+function SupportChat({user, t=LANGS.en}) {
   const [open, setOpen] = useState(false);
   const [hasNew, setHasNew] = useState(true);
   const [msgs, setMsgs] = useState([
-    {id:0, from:'support', text:'Sveiki! 👋 Aš esu HATHOR palaikymo komanda. Kaip galiu padėti?'}
+    {id:0, from:'support', text:'Hi! 👋 I am the HATHOR support team. How can I help?'}
   ]);
   const [inp, setInp] = useState('');
   const [typing, setTyping] = useState(false);
@@ -5226,7 +5226,7 @@ function SupportChat({user}) {
     }, 1000 + Math.random()*500);
   };
 
-  const QUICK = ['💰 Bonusas','🏆 Jackpotas','💳 Išmokėjimas','🎰 Žaidimai','🔐 Provably Fair'];
+  const QUICK = ['💰 Bonus','🏆 Jackpot','💳 Cashout','🎰 Games','🔐 Provably Fair'];
 
   return(
     <>
@@ -5709,26 +5709,29 @@ function GameThumb({id,color}){
   return <div className="gcard-thumb-inner" style={{background:color,width:'100%',height:'100%'}}/>;
 }
 
-const ALL_GAMES=[
-  {name:'POKERIS',desc:'Live multiplayer — iki 5 žaidėjų',icon:'♠️',thumb:'poker',badge:'🔴 LIVE',cat:'stalai',page:'poker',color:'linear-gradient(135deg,#1a0533,#3d1166)'},
-  {name:'BLACKJACK',desc:'21 — klasikinis kortų žaidimas',icon:'🃏',thumb:'blackjack',badge:'🔥 HOT',cat:'stalai',page:'blackjack',color:'linear-gradient(135deg,#0a2a14,#1a5c30)'},
-  {name:'RULETĖ',desc:'Europietiška ruletė su animacija',icon:'🎡',thumb:'roulette',badge:'🔴 LIVE',cat:'stalai',page:'roulette',color:'linear-gradient(135deg,#1a0a00,#5c2a00)'},
-  {name:'BACCARAT',desc:'Player, Banker arba Tie',icon:'🎴',thumb:'baccarat',badge:'',cat:'stalai',href:'/baccarat.html',color:'linear-gradient(135deg,#001a2e,#003d6b)'},
-  {name:'VIDEO POKER',desc:'Jacks or Better — iki 800×',icon:'🂡',thumb:'videopoker',badge:'✨ NAUJAS',cat:'stalai',href:'/videopoker.html',color:'linear-gradient(135deg,#1a1a00,#4d4d00)'},
-  {name:'AUTOMATAI',desc:'Slotas su laimėjimų linijomis',icon:'🎰',thumb:'slots',badge:'🔥 HOT',cat:'automatai',page:'slots',color:'linear-gradient(135deg,#1a0000,#660000)'},
-  {name:'KENO',desc:'80 kamuolių loterija',icon:'🎱',thumb:'keno',badge:'',cat:'automatai',href:'/keno.html',color:'linear-gradient(135deg,#00141a,#003d4d)'},
-  {name:'KRIOKLIS',desc:'Kamuolys krinta per nagus — iki 999×',icon:'🔮',thumb:'krioklis',badge:'🎬 ANIMACIJA',cat:'automatai',href:'/plinko.html',color:'linear-gradient(135deg,#0d0033,#2d0099)'},
-  {name:'CRASH',desc:'Aviator stiliaus — išimkite laiku!',icon:'🚀',thumb:'crash',badge:'🔥 HOT',cat:'kripto',href:'/crash.html',color:'linear-gradient(135deg,#1a0a00,#663300)'},
-  {name:'MINES',desc:'5×5 lentelė — deimantai ar minos?',icon:'💣',thumb:'mines',badge:'⭐ POPULIARUS',cat:'kripto',href:'/mines.html',color:'linear-gradient(135deg,#001a00,#004d00)'},
-  {name:'LUCKY WHEEL',desc:'Sukite ratą — iki 100×',icon:'🎡',thumb:'wheel',badge:'',cat:'kripto',href:'/wheel.html',color:'linear-gradient(135deg,#1a001a,#660066)'},
-  {name:'DICE / LIMBO / HI-LO',desc:'3 žaidimai viename',icon:'🎲',thumb:'dice',badge:'',cat:'kripto',href:'/dice.html',color:'linear-gradient(135deg,#001a1a,#004d4d)'},
-  {name:'SPORTAS',desc:'Futbolas, krepšinis ir daugiau',icon:'⚽',thumb:'sports',badge:'🔴 LIVE',cat:'sportas',page:'sports',color:'linear-gradient(135deg,#001a0a,#004d1f)'},
-  {name:'PIRAMIDĖ',desc:'Dropo žaidimas — iki 100×',icon:'🏺',thumb:'pyramid',badge:'',cat:'kripto',page:'pyramid',color:'linear-gradient(135deg,#1a1400,#4d3b00)'},
-];
+function getGames(t){
+  const g=t.games||{};
+  return[
+  {name:(g.poker&&g.poker.title)||'Poker',desc:(g.poker&&g.poker.desc)||'Live multiplayer',icon:'♠️',thumb:'poker',badge:'🔴 LIVE',cat:'stalai',page:'poker',color:'linear-gradient(135deg,#1a0533,#3d1166)'},
+  {name:(g.blackjack&&g.blackjack.title)||'Blackjack',desc:(g.blackjack&&g.blackjack.desc)||'Beat the dealer',icon:'🃏',thumb:'blackjack',badge:'🔥 HOT',cat:'stalai',page:'blackjack',color:'linear-gradient(135deg,#0a2a14,#1a5c30)'},
+  {name:(g.roulette&&g.roulette.title)||'Roulette',desc:(g.roulette&&g.roulette.desc)||'European wheel',icon:'🎡',thumb:'roulette',badge:'🔴 LIVE',cat:'stalai',page:'roulette',color:'linear-gradient(135deg,#1a0a00,#5c2a00)'},
+  {name:'Baccarat',desc:'Player, Banker or Tie',icon:'🎴',thumb:'baccarat',badge:'',cat:'stalai',href:'/baccarat.html',color:'linear-gradient(135deg,#001a2e,#003d6b)'},
+  {name:'Video Poker',desc:'Jacks or Better — up to 800×',icon:'🂡',thumb:'videopoker',badge:'✨ NEW',cat:'stalai',href:'/videopoker.html',color:'linear-gradient(135deg,#1a1a00,#4d4d00)'},
+  {name:(g.slots&&g.slots.title)||'Slots',desc:(g.slots&&g.slots.desc)||'Slot machines',icon:'🎰',thumb:'slots',badge:'🔥 HOT',cat:'automatai',page:'slots',color:'linear-gradient(135deg,#1a0000,#660000)'},
+  {name:'Keno',desc:'80 ball lottery',icon:'🎱',thumb:'keno',badge:'',cat:'automatai',href:'/keno.html',color:'linear-gradient(135deg,#00141a,#003d4d)'},
+  {name:'Krioklis',desc:'Ball drops through pegs — up to 999×',icon:'🔮',thumb:'krioklis',badge:'🎬 ANIM',cat:'automatai',href:'/plinko.html',color:'linear-gradient(135deg,#0d0033,#2d0099)'},
+  {name:'Crash',desc:'Aviator style — cash out in time!',icon:'🚀',thumb:'crash',badge:'🔥 HOT',cat:'kripto',href:'/crash.html',color:'linear-gradient(135deg,#1a0a00,#663300)'},
+  {name:'Mines',desc:'5×5 grid — diamonds or mines?',icon:'💣',thumb:'mines',badge:'⭐ POP',cat:'kripto',href:'/mines.html',color:'linear-gradient(135deg,#001a00,#004d00)'},
+  {name:'Lucky Wheel',desc:'Spin the wheel — up to 100×',icon:'🎡',thumb:'wheel',badge:'',cat:'kripto',href:'/wheel.html',color:'linear-gradient(135deg,#1a001a,#660066)'},
+  {name:'Dice / Limbo / Hi-Lo',desc:'3 games in one',icon:'🎲',thumb:'dice',badge:'',cat:'kripto',href:'/dice.html',color:'linear-gradient(135deg,#001a1a,#004d4d)'},
+  {name:(g.sports&&g.sports.title)||'Sports',desc:(g.sports&&g.sports.desc)||'Football, basketball & more',icon:'⚽',thumb:'sports',badge:'🔴 LIVE',cat:'sportas',page:'sports',color:'linear-gradient(135deg,#001a0a,#004d1f)'},
+  {name:(g.pyramid&&g.pyramid.title)||'Pyramid Drop',desc:(g.pyramid&&g.pyramid.desc)||'Drop game — up to 100×',icon:'🏺',thumb:'pyramid',badge:'',cat:'kripto',page:'pyramid',color:'linear-gradient(135deg,#1a1400,#4d3b00)'},
+];}
 
 function App(){
   const [lang,setLang]=useLang();
   const t=lang;
+  const ALL_GAMES=getGames(t);
   const [user,setUser]=useState(null);
   const [page,setPage]=useState('lobby');
   const [roomId,setRoomId]=useState(null);
@@ -5885,9 +5888,9 @@ function App(){
 
           {/* Section header */}
           <div className="sec-hdr">
-            <div className="sec-hdr-title">ŽAIDIMAI</div>
+            <div className="sec-hdr-title">GAMES</div>
             <div className="sec-hdr-line"/>
-            <div className="sec-hdr-count">{ALL_GAMES.filter(g=>gameFilter==='visi'||g.cat===gameFilter).length} žaidimų</div>
+            <div className="sec-hdr-count">{ALL_GAMES.filter(g=>gameFilter==='visi'||g.cat===gameFilter).length}</div>
           </div>
 
           {/* Games grid */}
@@ -5940,7 +5943,7 @@ function App(){
       <JackpotTicker/>
       <AICroupier user={user} currentPage={page} t={t}/>
       <SocialWins/>
-      {user&&<SupportChat user={user}/>}
+      {user&&<SupportChat user={user} t={t}/>}
       {user&&<MissionsPanel user={user} missions={missions}/>}
       {pendingReward&&<AchievementPopup mission={pendingReward} onClaim={()=>{
         setUser(u=>({...u,tokens:u.tokens+pendingReward.reward}));
