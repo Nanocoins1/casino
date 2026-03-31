@@ -548,7 +548,8 @@ const SPORTS_MAP = {
 };
 
 app.get('/api/sports', (req, res) => {
-  const apiKey = req.query.apiKey;
+  // Use server env var first (more secure), fallback to query param for backwards compat
+  const apiKey = process.env.ODDS_API_KEY || req.query.apiKey;
   const sport  = req.query.sport || 'soccer_epl';
   if (!apiKey) return res.status(400).json({ error: 'No API key' });
   fetchOdds(apiKey, sport, (err, data) => {
