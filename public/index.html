@@ -2970,7 +2970,7 @@ function ClassicSlot({user,setUser,forceMachine}){
             fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700,letterSpacing:'2px',
             background:`linear-gradient(180deg,#e8c060 0%,${machine.color} 50%,#a07828 100%)`,
             color:'#060300',transition:'all 0.2s',opacity:spinning||user.tokens<bet?0.4:1,
-            boxShadow:`0 2px 0 rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,240,160,0.3),${spinning?'none':`0 0 20px ${machine.color}44`}`}}
+            boxShadow:'0 2px 0 rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,240,160,0.3),'+(spinning?'none':'0 0 20px '+machine.color+'44')}}
             onClick={spin} disabled={spinning||user.tokens<bet}>
             {spinning?'…':'SPIN'}
           </button>
