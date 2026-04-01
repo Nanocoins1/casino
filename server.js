@@ -87,6 +87,22 @@ const adminAuth = (req, res, next) => {
   next();
 };
 
+// ── RTP Configuration (per-game house edge control) ──
+let rtpConfig = {
+  grand:      95,  // GrandFortune slots
+  classic:    92,  // Classic slots
+  plinko:     93,  // Krioklis / Plinko
+  wheel:      90,  // Laimės ratas
+  crash:      94,  // Crash
+  mines:      93,  // Mines
+  dice:       94,  // Dice
+  videopoker: 95,  // Video Poker
+  roulette:   97,  // Roulette
+  blackjack:  99,  // Blackjack
+  baccarat:   98,  // Baccarat
+  sports:     93,  // Sports betting
+};
+
 
 const getUser = uid => db.prepare('SELECT * FROM users WHERE uid=?').get(uid);
 const saveUser = u => db.prepare(`INSERT INTO users(uid,name,tokens,avatar,level,xp,total_won,games_played,last_bonus)
@@ -1752,5 +1768,20 @@ Be helpful, friendly and concise (2-3 sentences max). Never discuss real money g
   }
 });
 
+
+// ── RTP endpoints ──
+app.get('/api/rtp-config', (req,res) => {
+  res.json(rtpConfig);
+});
+
+app.post('/api/rtp-config', adminAuth, express.json(), (req,res) => {
+  const updates = req.body || {};
+  for(const [k,v] of Object.entries(updates)){
+    if(k in rtpConfig && typeof v==='number' && v>=50 && v<=99){
+      rtpConfig[k] = Math.round(v);
+    }
+  }
+  res.json({ok:true, rtpConfig});
+});
 
 server.listen(PORT,()=>console.log(`🎰 HATHOR Royal Casino v2 → http://localhost:${PORT}`));
