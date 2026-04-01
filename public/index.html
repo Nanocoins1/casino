@@ -7155,14 +7155,16 @@ function App(){
     return()=>socket.off('gameState').off('roomCreated').off('dailyBonusAvailable').off('levelUp').off('emojiReaction');
   },[]);
 
+  // keep casino_tokens in sync so external game pages see correct balance
+  // Must be BEFORE early return to obey Rules of Hooks
+  useEffect(()=>{if(user)localStorage.setItem('casino_tokens',String(user.tokens||0));},[user?user.tokens:null]);
+
   if(!user)return <Auth onLogin={d=>setUser(d)} t={t}/>;
 
   const lv=user.levelInfo||LEVELS[0];
   const nextLv=user.nextLevel||null;
   const nav=pg=>{ if(pg==='cashier'){window.open('/cashier.html','_self');return;}if(pg==='viktor'){setSbOpen(false);setViktorOpen(o=>!o);return;}if(pg==='support'){setSbOpen(false);setSupportOpen(o=>!o);return;}sfx.click();setPage(pg);setSbOpen(false);if(pg!=='poker'){setRoomId(null);setGameState(null);}};
-  const bumpTokens=amt=>{setTokenBump(true);setTimeout(()=>setTokenBump(false),500);setUser(u=>({...u,tokens:u.tokens+amt}));};
-  // keep casino_tokens in sync so external game pages see correct balance
-  useEffect(()=>{if(user)localStorage.setItem('casino_tokens',String(user.tokens||0));},[user&&user.tokens]);
+  const bumpTokens=amt=>{setTokenBump(true);setTimeout(()=>setTokenBump(false),500);setUser(u=>({...u,tokens:u.tokens+amt}));}
 
   const doLogout=()=>{
     const tok=localStorage.getItem('casino_session');
