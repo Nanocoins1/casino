@@ -2546,12 +2546,63 @@ body { color: #e8e2d4 !important; }
 /* ── AI insight in lobby ── */
 .ai-insight { display:inline-flex; align-items:flex-start; gap:8px; padding:8px 14px; background:rgba(124,58,237,.08); border:1px solid rgba(124,58,237,.18); border-radius:10px; font-size:11px; color:rgba(232,224,208,.55); line-height:1.5; margin-top:10px; }
 
+/* ── Lobby card entrance animation ── */
+@keyframes cardIn {
+  from { opacity:0; transform:translateY(22px) scale(0.96); }
+  to   { opacity:1; transform:translateY(0)    scale(1); }
+}
+.gcard-pro { animation:cardIn 0.42s cubic-bezier(0.22,1,0.36,1) both; }
+
+/* ── Hero stats count-up pulse ── */
+@keyframes statPop {
+  0%   { transform:scale(1); }
+  50%  { transform:scale(1.12); color:#f0c060; }
+  100% { transform:scale(1); }
+}
+.hero-stat-val { transition:all 0.3s; }
+.hero-stat-val.pop { animation:statPop 0.4s ease; }
+
+/* ── Leaderboard live pulse ── */
+@keyframes lbIn {
+  from { opacity:0; transform:translateX(-12px); }
+  to   { opacity:1; transform:translateX(0); }
+}
+.lb-row { animation:lbIn 0.35s ease both; }
+.lb-live-dot { width:7px; height:7px; border-radius:50%; background:#4cff88;
+  box-shadow:0 0 8px #4cff88; animation:pulse 1.4s ease infinite; display:inline-block; margin-right:6px; }
+
+/* ── Mobile sidebar overlay ── */
+.sb-overlay {
+  display:none; position:fixed; inset:0; z-index:149;
+  background:rgba(0,0,0,0.6); backdrop-filter:blur(2px);
+}
+.sb-overlay.show { display:block; }
+
+/* ── Hamburger button ── */
+.ham-btn {
+  display:none; flex-direction:column; justify-content:center; align-items:center;
+  gap:5px; width:38px; height:38px; background:rgba(201,168,76,.07);
+  border:1px solid rgba(201,168,76,.18); border-radius:8px; cursor:pointer;
+  flex-shrink:0; margin-right:10px; transition:all .2s;
+}
+.ham-btn:hover { background:rgba(201,168,76,.14); }
+.ham-btn span { display:block; width:18px; height:1.5px; background:rgba(201,168,76,.7); border-radius:2px; transition:all .3s; }
+.ham-btn.open span:nth-child(1) { transform:translateY(6.5px) rotate(45deg); }
+.ham-btn.open span:nth-child(2) { opacity:0; }
+.ham-btn.open span:nth-child(3) { transform:translateY(-6.5px) rotate(-45deg); }
+
 /* ── Mobile ── */
 @media(max-width:900px){
-  .sidebar { display:none; }
+  .ham-btn { display:flex; }
+  .sidebar {
+    position:fixed; top:62px; left:0; height:calc(100vh - 62px);
+    z-index:150; transform:translateX(-100%);
+    transition:transform 0.28s cubic-bezier(0.22,1,0.36,1);
+    box-shadow:4px 0 32px rgba(0,0,0,0.7);
+  }
+  .sidebar.open { transform:translateX(0); }
   .main-content { padding:16px; }
-  .topbar-nav { gap:0; }
-  .topbar-btn { padding:6px 10px; font-size:11px; }
+  .topbar-nav { display:none; }
   .tb-bal-amount { font-size:12px; }
   .hero-banner { padding:18px; }
   .hero-cards-deco { display:none; }
@@ -4844,15 +4895,27 @@ function SportsBetting({user,setUser,t=LANGS.en}){
 // ═══════════════════════════════════════════════════
 function Leaderboard({user}){
   const [board,setBoard]=useState([]);
-  useEffect(()=>{fetch('/leaderboard').then(r=>r.json()).then(setBoard).catch(()=>{});},[]);
+  const [live,setLive]=useState(false);
+  useEffect(()=>{
+    // initial fetch
+    fetch('/leaderboard').then(r=>r.json()).then(d=>{setBoard(d);setLive(true);}).catch(()=>{});
+    // real-time updates via socket
+    socket.emit('getLeaderboard');
+    socket.on('leaderboard',d=>{setBoard(d);setLive(true);});
+    return()=>{ socket.off('leaderboard'); };
+  },[]);
   const rc=i=>i===0?'r1':i===1?'r2':i===2?'r3':'';
   const rm=i=>i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1;
   return(
     <div className="lb-scene">
-      <h2>🏆 Leaderboard</h2>
+      <h2 style={{display:'flex',alignItems:'center',gap:10}}>
+        🏆 Leaderboard
+        {live&&<span className="lb-live-dot" title="Live"/>}
+        {live&&<span style={{fontSize:11,color:'#4cff88',fontWeight:400}}>LIVE</span>}
+      </h2>
       {board.length===0?<div style={{textAlign:'center',color:'rgba(232,224,208,.2)',padding:'40px'}}>No data yet</div>
         :board.map((p,i)=>(
-          <div className={`lb-row${i<3?' top3':''}`} key={i}>
+          <div className={`lb-row${i<3?' top3':''}`} key={i} style={{animationDelay:(i*0.06)+'s'}}>
             <div className={`lb-rank ${rc(i)}`}>{rm(i)}</div>
             <div className="lb-av">{p.avatar?<img src={p.avatar} alt=""/>:'👤'}</div>
             <div className="lb-name">{p.name}{p.name===user.name&&<span style={{fontSize:10,color:'var(--gold)',marginLeft:8}}>YOU</span>}</div>
@@ -6574,6 +6637,7 @@ function App(){
   const [showAvatar,setShowAvatar]=useState(false);
   const [showBonus,setShowBonus]=useState(false);
   const [lvUp,setLvUp]=useState(null);
+  const [sbOpen,setSbOpen]=useState(false);
   const [particles,setParticles]=useState([]);
   const [tokenBump,setTokenBump]=useState(false);
   const [gameFilter,setGameFilter]=useState('visi');
@@ -6599,7 +6663,7 @@ function App(){
 
   const lv=user.levelInfo||LEVELS[0];
   const nextLv=user.nextLevel||null;
-  const nav=pg=>{ if(pg==='cashier'){window.open('/cashier.html','_self');return;}sfx.click();setPage(pg);if(pg!=='poker'){setRoomId(null);setGameState(null);}};
+  const nav=pg=>{ if(pg==='cashier'){window.open('/cashier.html','_self');return;}sfx.click();setPage(pg);setSbOpen(false);if(pg!=='poker'){setRoomId(null);setGameState(null);}};
   const bumpTokens=amt=>{setTokenBump(true);setTimeout(()=>setTokenBump(false),500);setUser(u=>({...u,tokens:u.tokens+amt}));};
 
   const doLogout=()=>{
@@ -6641,6 +6705,9 @@ function App(){
     <div className="app-shell">
       {/* ── TOP BAR ── */}
       <div className="topbar">
+        <button className={'ham-btn'+(sbOpen?' open':'')} onClick={()=>setSbOpen(o=>!o)} aria-label="Menu">
+          <span/><span/><span/>
+        </button>
         <div className="topbar-logo">⬡ HATHOR<span>ROYAL CASINO</span></div>
         <div className="topbar-nav">
           {[{p:'lobby',l:'🏠 '+(t.lobby||'Lobby')},{p:'sports',l:'⚽ '+(t.sports||'Sports')},{p:'stats',l:'📊 '+(t.stats||'Stats')},{p:'leaderboard',l:'🏆 '+(t.leaderboard||'Leaders')}].map(x=>(
@@ -6663,8 +6730,10 @@ function App(){
 
       {/* ── BODY ── */}
       <div className="app-body">
+        {/* ── SIDEBAR OVERLAY ── */}
+        <div className={'sb-overlay'+(sbOpen?' show':'')} onClick={()=>setSbOpen(false)}/>
         {/* ── SIDEBAR ── */}
-        <aside className="sidebar">
+        <aside className={'sidebar'+(sbOpen?' open':'')}>
           {SB_ITEMS.map((item,i)=>{
             if(item.id.startsWith('__div')) return <div key={i} className="sb-divider"/>;
             if(item.id.startsWith('__label')) return <div key={i} className="sb-section-label">{item.label}</div>;
@@ -6746,9 +6815,10 @@ function App(){
                   </div>
                 </>
               );
+              const cardStyle={animationDelay:(i*0.055)+'s'};
               return g.href
-                ? <a key={i} href={g.href} className="gcard-pro">{inner}</a>
-                : <div key={i} className="gcard-pro" onClick={()=>nav(g.page)}>{inner}</div>;
+                ? <a key={i} href={g.href} className="gcard-pro" style={cardStyle}>{inner}</a>
+                : <div key={i} className="gcard-pro" style={cardStyle} onClick={()=>nav(g.page)}>{inner}</div>;
             })}
           </div>
 
