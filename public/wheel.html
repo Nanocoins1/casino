@@ -127,7 +127,7 @@ canvas#wheelCanvas{border-radius:50%;box-shadow:0 0 60px rgba(124,58,237,.3),0 0
 <div class="toast" id="toastEl"></div>
 <script>
 const uid = localStorage.getItem('casino_uid');
-if(!uid) localStorage.setItem('login_return', location.href); location.href = '/login.html';
+if(!uid){ localStorage.setItem('login_return', location.href); location.href = '/login.html'; }
 let tokens = parseInt(localStorage.getItem('casino_tokens')||'10000');
 let spinning = false;
 let mode = 'low';

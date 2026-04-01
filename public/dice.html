@@ -281,7 +281,7 @@ input[type=range]{position:absolute;width:100%;opacity:0;height:40px;cursor:poin
 <div class="toast" id="toastEl"></div>
 <script>
 const uid = localStorage.getItem('casino_uid');
-if(!uid) localStorage.setItem('login_return', location.href); location.href = '/login.html';
+if(!uid){ localStorage.setItem('login_return', location.href); location.href = '/login.html'; }
 let tokens = parseInt(localStorage.getItem('casino_tokens')||'10000');
 function fmt(n){return Number(n).toLocaleString();}
 function updateBal(){document.getElementById('bal').textContent=fmt(tokens);}
