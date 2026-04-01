@@ -138,6 +138,10 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
     <div class="tab" onclick="showTab('give',this)">🎁 Give Tokens</div>
     <div class="tab" onclick="showTab('promos',this)">🎫 Promo Codes</div>
     <div class="tab" onclick="showTab('rtp',this)">🎰 RTP Kontrolė</div>
+    <div class="tab" onclick="showTab('analytics',this)">📈 Analytics</div>
+    <div class="tab" onclick="showTab('tournaments',this)">🏆 Turnyrai</div>
+    <div class="tab" onclick="showTab('affiliates',this)">🔗 Affiliate</div>
+    <div class="tab" onclick="showTab('limits',this)">🛡️ Limitai</div>
   </div>
 
   <div class="content">
@@ -361,6 +365,86 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
       </div>
     </div>
 
+    <!-- ANALYTICS -->
+    <div class="section" id="sec-analytics">
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:20px;color:#e8e2d4;">📈 Analytics — Kazino statistika</h2>
+      <div id="analytics-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-bottom:24px;"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;">
+          <div style="font-weight:700;font-size:.85rem;margin-bottom:12px;color:#c9a84c;">🎮 Populiariausi žaidimai</div>
+          <div id="analytics-top-games"></div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;">
+          <div style="font-weight:700;font-size:.85rem;margin-bottom:12px;color:#c9a84c;">👑 Top žaidėjai (apyvarta)</div>
+          <div id="analytics-top-players"></div>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;">
+        <div style="font-weight:700;font-size:.85rem;margin-bottom:12px;color:#c9a84c;">📊 GGR per 7 dienas</div>
+        <div id="analytics-ggr-chart" style="display:flex;align-items:flex-end;gap:6px;height:80px;"></div>
+      </div>
+    </div>
+
+    <!-- TOURNAMENTS -->
+    <div class="section" id="sec-tournaments">
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:20px;color:#e8e2d4;">🏆 Turnyrai</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;">
+          <div style="font-weight:700;font-size:.85rem;margin-bottom:14px;color:#c9a84c;">➕ Sukurti turnyrą</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <input class="inp" id="t-name" placeholder="Turnyro pavadinimas" />
+            <select class="inp" id="t-game" style="background:#0e0c08;color:#e8e2d4;">
+              <option value="slots">🎰 Slots</option>
+              <option value="all">🎮 Visi žaidimai</option>
+              <option value="roulette">🎡 Ruletė</option>
+              <option value="blackjack">🃏 Blackjack</option>
+            </select>
+            <input class="inp" id="t-prize" type="number" placeholder="Prizų fondas (žetonai)" value="10000" />
+            <input class="inp" id="t-start" type="datetime-local" />
+            <input class="inp" id="t-end" type="datetime-local" />
+            <button class="btn btn-primary" onclick="createTournament()">🏆 Sukurti</button>
+            <div id="t-msg" style="font-size:.8rem;color:#2ecc71;display:none;"></div>
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;">
+          <div style="font-weight:700;font-size:.85rem;margin-bottom:14px;color:#c9a84c;">📋 Aktyvus turnyras</div>
+          <div id="active-tournament">Kraunama...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AFFILIATES -->
+    <div class="section" id="sec-affiliates">
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:20px;color:#e8e2d4;">🔗 Affiliate programa</h2>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;margin-bottom:16px;">
+        <div style="font-size:.82rem;color:#888;margin-bottom:10px;">Ieškoti žaidėjo affiliate kodo:</div>
+        <div style="display:flex;gap:10px;">
+          <input class="inp" id="aff-uid-inp" placeholder="UID arba vardas" style="flex:1;" />
+          <button class="btn btn-primary" onclick="loadAffiliate()">Ieškoti</button>
+        </div>
+      </div>
+      <div id="affiliate-result"></div>
+    </div>
+
+    <!-- LIMITS -->
+    <div class="section" id="sec-limits">
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:20px;color:#e8e2d4;">🛡️ Atsakingo lošimo limitai</h2>
+      <p style="color:#888;font-size:.82rem;margin-bottom:20px;">Ieškoti žaidėjo limitų, arba rankiniu būdu pašalinti saviišskyrimą.</p>
+      <div style="display:flex;gap:10px;margin-bottom:20px;">
+        <input class="inp" id="limits-uid-inp" placeholder="Žaidėjo UID" style="flex:1;" />
+        <button class="btn btn-primary" onclick="loadLimits()">Ieškoti</button>
+      </div>
+      <div id="limits-result"></div>
+      <div style="margin-top:24px;background:rgba(255,61,113,.06);border:1px solid rgba(255,61,113,.2);border-radius:12px;padding:16px;">
+        <div style="font-weight:700;font-size:.85rem;color:#ff3d71;margin-bottom:10px;">⚠️ Atšaukti saviišskyrimą (admin only)</div>
+        <div style="display:flex;gap:10px;">
+          <input class="inp" id="unselfexclude-uid" placeholder="Žaidėjo UID" style="flex:1;" />
+          <button class="btn" style="background:rgba(255,61,113,.2);border-color:rgba(255,61,113,.4);color:#ff3d71;" onclick="cancelSelfExclusion()">Atšaukti</button>
+        </div>
+        <div id="unselfexclude-msg" style="font-size:.8rem;margin-top:8px;display:none;"></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -443,6 +527,8 @@ function showTab(name, el) {
   if(name === 'pending') loadPendingBets();
   if(name === 'sports') loadSportsBets();
   if(name === 'rtp') loadRTP();
+  if(name === 'analytics') loadAnalytics();
+  if(name === 'tournaments') loadActiveTournament();
 }
 
 // ── API helpers ───────────────────────────────────
@@ -909,6 +995,149 @@ async function saveRTP(){
       setTimeout(function(){msg.style.display='none';},3000);
     }
   }catch(e){ alert('Klaida išsaugant RTP'); }
+}
+
+// ── Analytics ──────────────────────────────────────────────
+async function loadAnalytics(){
+  try{
+    const key = localStorage.getItem('admin_key')||sessionStorage.getItem('admin_key')||'';
+    const r = await fetch('/api/analytics',{headers:{'x-admin-key':key}});
+    const d = await r.json();
+
+    const grid = document.getElementById('analytics-grid');
+    const stats = [
+      {label:'Visi žaidėjai', val:d.totalPlayers, ico:'👥'},
+      {label:'Aktyvūs šiandien', val:d.activeTodayCount, ico:'🟢'},
+      {label:'Aktyvūs per savaitę', val:d.activeWeekCount, ico:'📅'},
+      {label:'Nauji (7d)', val:d.newPlayersWeek, ico:'🆕'},
+      {label:'GGR iš viso', val:fmt(d.ggr||0), ico:'💰'},
+      {label:'GGR šiandien', val:fmt(d.ggrToday||0), ico:'📈'},
+      {label:'GGR (7d)', val:fmt(d.ggrWeek||0), ico:'📊'},
+      {label:'Lažybos šiandien', val:d.betsToday||0, ico:'🎲'},
+    ];
+    grid.innerHTML = stats.map(s=>`
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;text-align:center;">
+        <div style="font-size:1.4rem;">${s.ico}</div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;color:#c9a84c;margin:4px 0;">${s.val}</div>
+        <div style="font-size:.7rem;color:#888;">${s.label}</div>
+      </div>`).join('');
+
+    const gamesEl = document.getElementById('analytics-top-games');
+    gamesEl.innerHTML = (d.topGames||[]).map(g=>`
+      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.8rem;">
+        <span>${g.game}</span><span style="color:#c9a84c;">${g.plays} lošimų</span>
+      </div>`).join('');
+
+    const playersEl = document.getElementById('analytics-top-players');
+    playersEl.innerHTML = (d.topPlayers||[]).map((p,i)=>`
+      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.8rem;">
+        <span>${i+1}. ${p.name}</span><span style="color:#c9a84c;">${fmt(p.volume)}</span>
+      </div>`).join('');
+
+    const chartEl = document.getElementById('analytics-ggr-chart');
+    const days = d.dailyGGR||[];
+    const maxG = Math.max(...days.map(x=>x.ggr), 1);
+    chartEl.innerHTML = days.map(x=>{
+      const h = Math.max(4, Math.round((x.ggr/maxG)*76));
+      const col = x.ggr>0?'#2ecc71':'#ff3d71';
+      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <div style="font-size:.6rem;color:#888;">${fmt(x.ggr)}</div>
+        <div style="width:100%;height:${h}px;background:${col};border-radius:3px 3px 0 0;opacity:.8;"></div>
+        <div style="font-size:.6rem;color:#666;">${x.day.slice(5)}</div>
+      </div>`;
+    }).join('');
+  }catch(e){ console.error('analytics error',e); }
+}
+
+// ── Tournaments ────────────────────────────────────────────
+async function loadActiveTournament(){
+  try{
+    const r = await fetch('/api/tournament/active');
+    const t = await r.json();
+    const el = document.getElementById('active-tournament');
+    if(!t){ el.innerHTML='<div style="color:#888;font-size:.85rem;">Nėra aktyvaus turnyro.</div>'; return; }
+    const lb = t.leaderboard||[];
+    el.innerHTML=`
+      <div style="font-weight:700;margin-bottom:8px;">${t.name}</div>
+      <div style="font-size:.75rem;color:#888;margin-bottom:12px;">Prizų fondas: ${fmt(t.prize_pool)} • Iki: ${new Date(t.ends_at).toLocaleString('lt-LT')}</div>
+      ${lb.slice(0,5).map((p,i)=>`
+        <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.8rem;">
+          <span>${['🥇','🥈','🥉','4.','5.'][i]} ${p.name}</span>
+          <span style="color:#c9a84c;">${fmt(p.score)} XP</span>
+        </div>`).join('')}
+      <button class="btn" style="margin-top:12px;width:100%;background:rgba(255,61,113,.15);border-color:rgba(255,61,113,.4);color:#ff3d71;font-size:.8rem;"
+        onclick="endTournament('${t.id}')">🏁 Baigti turnyrą ir išmokėti prizus</button>`;
+  }catch(e){}
+}
+async function createTournament(){
+  const key = localStorage.getItem('admin_key')||sessionStorage.getItem('admin_key')||'';
+  const name = document.getElementById('t-name').value;
+  const game = document.getElementById('t-game').value;
+  const prize = parseInt(document.getElementById('t-prize').value)||10000;
+  const starts = document.getElementById('t-start').value;
+  const ends = document.getElementById('t-end').value;
+  if(!name||!starts||!ends){alert('Užpildykite visus laukus!');return;}
+  const r = await fetch('/api/tournament/create',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':key},body:JSON.stringify({name,game,prize_pool:prize,starts_at:new Date(starts).toISOString(),ends_at:new Date(ends).toISOString()})});
+  const d = await r.json();
+  const msg = document.getElementById('t-msg');
+  msg.textContent = d.ok ? '✓ Turnyras sukurtas!' : 'Klaida!';
+  msg.style.display='block';
+  setTimeout(()=>{ msg.style.display='none'; loadActiveTournament(); },2000);
+}
+async function endTournament(id){
+  if(!confirm('Baigti turnyrą ir išmokėti prizus?')) return;
+  const key = localStorage.getItem('admin_key')||sessionStorage.getItem('admin_key')||'';
+  await fetch('/api/tournament/end',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':key},body:JSON.stringify({id})});
+  loadActiveTournament();
+}
+
+// ── Affiliates ─────────────────────────────────────────────
+async function loadAffiliate(){
+  const uid = document.getElementById('aff-uid-inp').value.trim();
+  if(!uid) return;
+  const r = await fetch('/api/affiliate/'+encodeURIComponent(uid));
+  const d = await r.json();
+  const el = document.getElementById('affiliate-result');
+  if(d.error){ el.innerHTML='<div style="color:#ff3d71;">Nerastas</div>'; return; }
+  el.innerHTML=`
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;">
+      <div style="display:flex;gap:20px;margin-bottom:14px;">
+        <div><div style="font-size:.7rem;color:#888;">Referral kodas</div><div style="font-family:monospace;font-size:1.1rem;color:#c9a84c;font-weight:700;">${d.ref_code}</div></div>
+        <div><div style="font-size:.7rem;color:#888;">Pritraukta</div><div style="font-size:1.1rem;font-weight:700;">${d.referred}</div></div>
+        <div><div style="font-size:.7rem;color:#888;">Uždirba</div><div style="font-size:1.1rem;font-weight:700;color:#2ecc71;">${fmt(d.earnings)}</div></div>
+      </div>
+      <div style="font-size:.78rem;color:#888;margin-bottom:8px;">Pritraukti žaidėjai:</div>
+      ${(d.referrals||[]).map(r=>`<div style="font-size:.8rem;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05);">${r.name} — ${r.created_at?r.created_at.slice(0,10):''}</div>`).join('')||'<div style="font-size:.8rem;color:#888;">Nėra</div>'}
+    </div>`;
+}
+
+// ── Gambling Limits ────────────────────────────────────────
+async function loadLimits(){
+  const uid = document.getElementById('limits-uid-inp').value.trim();
+  if(!uid) return;
+  const r = await fetch('/api/limits/'+encodeURIComponent(uid));
+  const d = await r.json();
+  const el = document.getElementById('limits-result');
+  el.innerHTML=`
+    <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+        <div><div style="font-size:.7rem;color:#888;">Dienos limitas</div><div style="font-size:1rem;font-weight:700;color:#c9a84c;">${d.daily_limit>0?fmt(d.daily_limit):'Nėra'}</div></div>
+        <div><div style="font-size:.7rem;color:#888;">Savaitės limitas</div><div style="font-size:1rem;font-weight:700;color:#c9a84c;">${d.weekly_limit>0?fmt(d.weekly_limit):'Nėra'}</div></div>
+        <div><div style="font-size:.7rem;color:#888;">Saviišskytas</div><div style="font-size:1rem;font-weight:700;color:${d.self_excluded?'#ff3d71':'#2ecc71'}">${d.self_excluded?'TAIP ⚠️':'Ne'}</div></div>
+      </div>
+      ${d.excluded_until?`<div style="margin-top:10px;font-size:.78rem;color:#ff3d71;">Iki: ${new Date(d.excluded_until).toLocaleString('lt-LT')}</div>`:''}
+    </div>`;
+}
+async function cancelSelfExclusion(){
+  const uid = document.getElementById('unselfexclude-uid').value.trim();
+  if(!uid) return;
+  const key = localStorage.getItem('admin_key')||sessionStorage.getItem('admin_key')||'';
+  const r = await fetch('/api/self-exclude/cancel',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':key},body:JSON.stringify({uid})});
+  const d = await r.json();
+  const msg = document.getElementById('unselfexclude-msg');
+  msg.textContent = d.ok?'✓ Saviišskymas atšauktas':'Klaida';
+  msg.style.color = d.ok?'#2ecc71':'#ff3d71';
+  msg.style.display='block';
 }
 </script>
 </body>
