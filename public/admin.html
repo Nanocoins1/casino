@@ -137,6 +137,7 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
     <div class="tab" onclick="showTab('sports',this)">⚽ Sportas</div>
     <div class="tab" onclick="showTab('give',this)">🎁 Give Tokens</div>
     <div class="tab" onclick="showTab('promos',this)">🎫 Promo Codes</div>
+    <div class="tab" onclick="showTab('rtp',this)">🎰 RTP Kontrolė</div>
   </div>
 
   <div class="content">
@@ -344,6 +345,22 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
       </div>
     </div>
 
+    <!-- RTP -->
+    <div class="section" id="sec-rtp">
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:20px;color:#e8e2d4;">
+        🎰 RTP Kontrolė — Kazino pelno reguliavimas
+      </h2>
+      <p style="color:#888;font-size:.82rem;margin-bottom:24px;">
+        RTP (Return to Player) — procentas nuo statymų, kurį žaidėjas vidutiniškai gauna atgal ilgalaikėje perspektyvoje.
+        Pvz. 95% RTP reiškia, kad kazino uždirba 5% nuo kiekvieno statymų eurų. Rekomendacija: 85–97%.
+      </p>
+      <div id="rtp-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;"></div>
+      <div style="margin-top:24px;display:flex;gap:12px;align-items:center;">
+        <button class="btn btn-primary" onclick="saveRTP()">💾 Išsaugoti RTP nustatymus</button>
+        <span id="rtp-save-msg" style="color:#2ecc71;font-size:.85rem;display:none;">✓ Išsaugota!</span>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -395,6 +412,7 @@ function login() {
         loadPlayers();
         loadPromos();
         loadKYCStats();
+        loadRTP();
       } else {
         document.getElementById('loginErr').textContent = '❌ Wrong password';
       }
@@ -424,6 +442,7 @@ function showTab(name, el) {
   if(name === 'bets') loadBets();
   if(name === 'pending') loadPendingBets();
   if(name === 'sports') loadSportsBets();
+  if(name === 'rtp') loadRTP();
 }
 
 // ── API helpers ───────────────────────────────────
@@ -827,6 +846,70 @@ setInterval(() => {
   const key = sessionStorage.getItem('admin_key');
   if(key) { loadOverview(); loadKYCStats(); }
 }, 30000);
+
+// ── RTP Management ──
+const RTP_GAMES = [
+  {key:'grand',      label:'🎰 GrandFortune Slots'},
+  {key:'classic',    label:'🎰 Classic Slots'},
+  {key:'roulette',   label:'🎡 Ruletė'},
+  {key:'blackjack',  label:'🃏 Blackjack'},
+  {key:'baccarat',   label:'🎴 Baccarat'},
+  {key:'plinko',     label:'🌊 Krioklis (Plinko)'},
+  {key:'wheel',      label:'🎡 Laimės Ratas'},
+  {key:'crash',      label:'🚀 Crash'},
+  {key:'mines',      label:'💣 Mines'},
+  {key:'dice',       label:'🎲 Dice'},
+  {key:'videopoker', label:'🃏 Video Poker'},
+  {key:'sports',     label:'⚽ Sportas'},
+];
+let _rtpValues = {};
+
+async function loadRTP(){
+  try{
+    const r = await fetch('/api/rtp-config');
+    _rtpValues = await r.json();
+  }catch(e){ _rtpValues={}; }
+  const grid = document.getElementById('rtp-grid');
+  if(!grid) return;
+  grid.innerHTML = RTP_GAMES.map(function(g){
+    const val = _rtpValues[g.key]||95;
+    const edge = 100-val;
+    return '<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;">'
+      + '<div style="font-weight:700;font-size:.9rem;margin-bottom:12px;">'+g.label+'</div>'
+      + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">'
+      + '<input type="range" min="50" max="99" value="'+val+'" oninput="rtpSlide(this,\''+g.key+'\')" style="flex:1;accent-color:#c9a84c;" id="rtp-range-'+g.key+'"/>'
+      + '<span id="rtp-val-'+g.key+'" style="font-family:monospace;font-weight:700;color:#c9a84c;min-width:38px;text-align:right;">'+val+'%</span>'
+      + '</div>'
+      + '<div id="rtp-edge-'+g.key+'" style="font-size:.75rem;color:#888;">Kazino kraštutinumas: '+edge+'%</div>'
+      + '</div>';
+  }).join('');
+}
+
+function rtpSlide(el, key){
+  const v = parseInt(el.value);
+  _rtpValues[key] = v;
+  const valEl = document.getElementById('rtp-val-'+key);
+  const edgeEl = document.getElementById('rtp-edge-'+key);
+  if(valEl) valEl.textContent = v+'%';
+  if(edgeEl) edgeEl.textContent = 'Kazino kraštutinumas: '+(100-v)+'%';
+}
+
+async function saveRTP(){
+  try{
+    const key = sessionStorage.getItem('admin_key');
+    const r = await fetch('/api/rtp-config',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-admin-key':key},
+      body: JSON.stringify(_rtpValues)
+    });
+    const d = await r.json();
+    if(d.ok){
+      const msg = document.getElementById('rtp-save-msg');
+      msg.style.display='inline';
+      setTimeout(function(){msg.style.display='none';},3000);
+    }
+  }catch(e){ alert('Klaida išsaugant RTP'); }
+}
 </script>
 </body>
 </html>

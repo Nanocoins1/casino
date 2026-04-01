@@ -129,6 +129,8 @@ canvas#wheelCanvas{border-radius:50%;box-shadow:0 0 60px rgba(124,58,237,.3),0 0
 const uid = localStorage.getItem('casino_uid');
 if(!uid){ localStorage.setItem('login_return', location.href); location.href = '/login.html'; }
 let tokens = parseInt(localStorage.getItem('casino_tokens')||'10000');
+let _wheelRTP = 90;
+fetch('/api/rtp-config').then(function(r){return r.json();}).then(function(d){_wheelRTP=d.wheel||90;}).catch(function(){});
 let spinning = false;
 let mode = 'low';
 let wins = 0, losses = 0;
@@ -273,7 +275,7 @@ function spin(){
       currentAngle=startAngle+totalAngle;
       drawWheel(currentAngle);
       // Result
-      const won=Math.floor(bet*seg.mult);
+      const won=Math.floor(bet*seg.mult*(_wheelRTP/100));
       tokens+=won;localStorage.setItem('casino_tokens',tokens);updateBal();
       if(won>bet){wins++;document.getElementById('stWin').textContent=wins;showToast(`🎉 ${seg.label} — +🪙${fmt(won-bet)}`,'win');}
       else if(won===0){losses++;document.getElementById('stLoss').textContent=losses;showToast(`😢 ${seg.label} — Prarasta 🪙${fmt(bet)}`,'loss');}

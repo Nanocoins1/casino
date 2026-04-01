@@ -3154,6 +3154,10 @@ body { color: #e8e2d4 !important; }
 </script>
 
 <script type="text/babel">
+// ── Global RTP config (fetched from server) ──
+var _RTP={grand:95,classic:92,roulette:97,blackjack:99,baccarat:98,sports:93};
+fetch('/api/rtp-config').then(function(r){return r.json();}).then(function(d){Object.assign(_RTP,d);}).catch(function(){});
+
 const {useState,useEffect,useRef,useCallback}=React;
 const socket=io();
 const fmt=n=>Number(n||0).toLocaleString();
@@ -3433,7 +3437,7 @@ function ClassicSlot({user,setUser,forceMachine}){
       const wins=classicCheckWins(final,machine);
       if(wins.length>0){
         const totalMult=wins.reduce((a,w)=>a+w.mult,0);
-        const won=Math.floor(bet*totalMult);
+        const won=Math.floor(bet*totalMult*(_RTP.classic||92)/100);
         setUser(u=>({...u,tokens:u.tokens+won}));
         const cells=[];
         wins.forEach(w=>w.cells.forEach(([col,row])=>{if(!cells.find(c=>c.col===col&&c.row===row))cells.push({col,row,type:w.type});}));
@@ -3744,7 +3748,8 @@ function GrandFortune({user,setUser,t=LANGS.en}){
           const wins=hCheckWins(finalRef.current);
           if(wins.length>0){
             const totalMult=wins.reduce((a,w)=>a+w.mult,0);
-            const won=Math.floor(betSnap*totalMult);
+            const rtpF=(_RTP.grand||95)/100;
+            const won=Math.floor(betSnap*totalMult*rtpF);
             setUser(u=>({...u,tokens:u.tokens+won}));
             setWinLines(wins);setWinAmt(won);
             const wt=totalMult>=500?'jackpot':totalMult>=100?'mega':totalMult>=30?'big':'small';

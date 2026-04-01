@@ -305,6 +305,8 @@ if (!uid) {
   location.href = '/login.html';
 }
 let balance = parseInt(localStorage.getItem('casino_tokens') || '10000');
+let _plinkoRTP = 93;
+fetch('/api/rtp-config').then(function(r){return r.json();}).then(function(d){_plinkoRTP=d.plinko||93;}).catch(function(){});
 
 // ─────────────────────────────────────────────────────────────────────
 //  SOCKET
@@ -945,7 +947,7 @@ function landBall(ball, bucketIdx) {
   shakeFrames = 12;
 
   const mult = MULTIPLIERS[riskMode][bucketIdx];
-  const win = Math.round(ball.bet * mult);
+  const win = Math.round(ball.bet * mult * (_plinkoRTP / 100));
   const profit = win - ball.bet;
   balance += profit;
   updateBalance();

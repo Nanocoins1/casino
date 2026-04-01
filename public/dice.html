@@ -283,6 +283,8 @@ input[type=range]{position:absolute;width:100%;opacity:0;height:40px;cursor:poin
 const uid = localStorage.getItem('casino_uid');
 if(!uid){ localStorage.setItem('login_return', location.href); location.href = '/login.html'; }
 let tokens = parseInt(localStorage.getItem('casino_tokens')||'10000');
+let _diceRTP = 94;
+fetch('/api/rtp-config').then(function(r){return r.json();}).then(function(d){_diceRTP=d.dice||94;}).catch(function(){});
 function fmt(n){return Number(n).toLocaleString();}
 function updateBal(){document.getElementById('bal').textContent=fmt(tokens);}
 let toastTimer;
@@ -345,7 +347,7 @@ function rollDice(){
   if(diceDir==='over'){chance=(100-target)/100;} else {chance=(target-1)/100;}
   mult=chance>0?parseFloat((0.97/chance).toFixed(2)):99;
   tokens-=bet;
-  if(won){const w=Math.floor(bet*mult);tokens+=w;showToast(`🎲 ${roll} — LAIMĖJOTE! ×${mult} → +🪙${fmt(w-bet)}`,'win');diceWins++;}
+  if(won){const w=Math.floor(bet*mult*(_diceRTP/100));tokens+=w;showToast(`🎲 ${roll} — LAIMĖJOTE! ×${mult} → +🪙${fmt(w-bet)}`,'win');diceWins++;}
   else{showToast(`🎲 ${roll} — Pralaimėjote 🪙${fmt(bet)}`,'loss');diceLosses++;}
   saveT();
   const el=document.getElementById('diceResult');
