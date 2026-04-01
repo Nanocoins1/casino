@@ -148,9 +148,12 @@ app.post('/upload-avatar', upload.single('avatar'), (req,res)=>{
   res.json({url});
 });
 
-app.get('/leaderboard',(req,res)=>{
+function getLeaderboardData(){
   const rows=db.prepare('SELECT uid,name,tokens,avatar,level,xp FROM users ORDER BY tokens DESC LIMIT 20').all();
-  res.json(rows.map((u,i)=>({rank:i+1,...u,levelInfo:getLvInfo(u.xp||0)})));
+  return rows.map((u,i)=>({rank:i+1,...u,levelInfo:getLvInfo(u.xp||0)}));
+}
+app.get('/leaderboard',(req,res)=>{
+  res.json(getLeaderboardData());
 });
 
 // ── In-memory ────────────────────────────────────────────
@@ -344,6 +347,12 @@ io.on('connection', socket=>{
     const kycRow=db.prepare('SELECT status FROM kyc WHERE uid=?').get(socket.uid);
     if(!kycRow||kycRow.status!=='approved'){socket.emit('kycRequired');return;}
     u.tokens=Math.max(0,tokens);saveUser(u);
+    // broadcast updated leaderboard to all connected clients
+    io.emit('leaderboard',getLeaderboardData());
+  });
+
+  socket.on('getLeaderboard',()=>{
+    socket.emit('leaderboard',getLeaderboardData());
   });
 
   socket.on('addXP',({xp,game})=>{
