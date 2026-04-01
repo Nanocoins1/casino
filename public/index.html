@@ -2631,9 +2631,19 @@ body { color: #e8e2d4 !important; }
   .tb-logout { display:none !important; }
   .tb-cashier { display:none !important; }
 }
+/* support + croupier in sidebar — hide floating buttons on ALL screens */
+.support-btn { display:none !important; }
+.croupier-btn { display:none !important; }
+
+/* ── Slots responsive scroll wrapper ── */
+.slots-scroll-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
 @media(max-width:900px){
-  .support-btn { display:none !important; }
-  .croupier-btn { display:none !important; }
+  .slots-scroll-wrap { padding-bottom: 8px; }
+  .hslot-scene { min-width: 940px; }
 }
 
 /* ═══════════════════════════════════════════════════
@@ -3227,6 +3237,10 @@ function Auth({onLogin,t=LANGS.en}){
         socket.once('registered',d=>{
           localStorage.setItem('hrc_uid',d.uid);
           localStorage.setItem('hrc_name',d.name);
+          // sync keys used by external game pages (wheel, crash, mines, dice, etc.)
+          localStorage.setItem('casino_uid',d.uid);
+          localStorage.setItem('casino_name',d.name||name);
+          localStorage.setItem('casino_tokens',String(d.tokens||10000));
           onLogin(d);
         });
       })
@@ -3875,7 +3889,7 @@ function Slots({user,setUser,t=LANGS.en}){
   const classicIdx={classic:0,egypt:1,space:2,vip:3};
   return(
     <div style={{minHeight:'calc(100vh - 64px)',display:'flex',flexDirection:'column',alignItems:'center',
-      padding:'20px 16px',position:'relative',zIndex:1,
+      padding:'20px 16px',position:'relative',zIndex:1,overflowX:'hidden',
       background:'radial-gradient(ellipse 110% 80% at 50% 60%,rgba(28,18,4,0.55),transparent)'}}>
 
       {/* Tab picker */}
@@ -3896,8 +3910,10 @@ function Slots({user,setUser,t=LANGS.en}){
         })}
       </div>
 
-      {tab==='grand' && <GrandFortune user={user} setUser={setUser} t={t}/>}
-      {tab!=='grand' && <ClassicSlot key={tab} user={user} setUser={setUser} forceMachine={classicIdx[tab]}/>}
+      <div className="slots-scroll-wrap">
+        {tab==='grand' && <GrandFortune user={user} setUser={setUser} t={t}/>}
+        {tab!=='grand' && <ClassicSlot key={tab} user={user} setUser={setUser} forceMachine={classicIdx[tab]}/>}
+      </div>
     </div>
   );
 }
@@ -7132,6 +7148,8 @@ function App(){
   const nextLv=user.nextLevel||null;
   const nav=pg=>{ if(pg==='cashier'){window.open('/cashier.html','_self');return;}if(pg==='viktor'){setSbOpen(false);setViktorOpen(o=>!o);return;}if(pg==='support'){setSbOpen(false);setSupportOpen(o=>!o);return;}sfx.click();setPage(pg);setSbOpen(false);if(pg!=='poker'){setRoomId(null);setGameState(null);}};
   const bumpTokens=amt=>{setTokenBump(true);setTimeout(()=>setTokenBump(false),500);setUser(u=>({...u,tokens:u.tokens+amt}));};
+  // keep casino_tokens in sync so external game pages see correct balance
+  useEffect(()=>{if(user)localStorage.setItem('casino_tokens',String(user.tokens||0));},[user&&user.tokens]);
 
   const doLogout=()=>{
     const tok=localStorage.getItem('casino_session');
