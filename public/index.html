@@ -1333,6 +1333,8 @@ body {
 .jackpot-ticker-val { font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 700; color: var(--gold); letter-spacing: 1px; transition: all .5s; }
 .jackpot-ticker-val.bump { animation: jackpotBump .4s ease; color: var(--gold2); }
 @keyframes jackpotBump { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
+.jackpot-ticker { transition: transform 0.45s cubic-bezier(0.22,1,0.36,1), opacity 0.45s ease; }
+.jackpot-ticker-hidden { transform: translateX(-50%) translateY(-110%) !important; opacity: 0 !important; pointer-events: none !important; }
 .jackpot-won-banner {
   position: fixed; inset: 0; z-index: 700; pointer-events: none;
   display: flex; align-items: center; justify-content: center;
@@ -2619,7 +2621,14 @@ body { color: #e8e2d4 !important; }
   .topbar { padding:0 10px !important; }
   .topbar-logo { font-size:11px !important; letter-spacing:2px !important; padding-right:8px !important; margin-right:8px !important; }
   .tb-bal-label { display:none !important; }
-  .tb-balance { padding:5px 8px !important; gap:5px !important; }
+  .tb-balance { padding:5px 8px !important; gap:4px !important; flex-shrink:0 !important; }
+  .tb-bal-amount { font-size:13px !important; white-space:nowrap !important; }
+  /* hide non-essential topbar items on very small screens */
+  .croupier-btn { display:none !important; }
+  .music-btn { display:none !important; }
+  .lvl-pill { display:none !important; }
+  .tb-logout { display:none !important; }
+  .tb-cashier { display:none !important; }
 }
 
 /* ═══════════════════════════════════════════════════
@@ -4309,38 +4318,41 @@ function PremiumPoker({user,setUser,t}){
       return doShowdown(g);
     }
 
-    // reset bets
+    // reset bets for new street
     g.players=g.players.map(p=>({...p,bet:0,acted:false}));
     g.curBet=0;
 
-    // find first active from dealer
+    // find first active (non-folded, non-allin) player
     const firstAct=nextActiveFrom(g.players,g.dealerIdx);
 
     if(g.phase==='preflop'){
       g.phase='flop';
       g.deck.shift(); // burn
       g.comm.push(g.deck.shift(),g.deck.shift(),g.deck.shift());
-      g.actIdx=firstAct;
       sfx.card();
       addChat('System','Flop dealt.',true,'#c9a84c');
     }else if(g.phase==='flop'){
       g.phase='turn';
       g.deck.shift(); // burn
       g.comm.push(g.deck.shift());
-      g.actIdx=firstAct;
       sfx.card();
       addChat('System','Turn dealt.',true,'#c9a84c');
     }else if(g.phase==='turn'){
       g.phase='river';
       g.deck.shift(); // burn
       g.comm.push(g.deck.shift());
-      g.actIdx=firstAct;
       sfx.card();
       addChat('System','River dealt.',true,'#c9a84c');
     }else if(g.phase==='river'){
       return doShowdown(g);
     }
 
+    // All remaining players are allin/folded — auto-deal remaining streets
+    if(firstAct===-1){
+      return nextPhase(g);
+    }
+
+    g.actIdx=firstAct;
     return g;
   }
 
@@ -5372,15 +5384,23 @@ function JackpotTicker(){
   const [amount,setAmount]=useState(50000);
   const [bump,setBump]=useState(false);
   const [winner,setWinner]=useState(null);
+  const [visible,setVisible]=useState(false);
+  const hideTimer=useRef(null);
+  function showBriefly(ms){
+    ms=ms||4000;
+    setVisible(true);
+    if(hideTimer.current)clearTimeout(hideTimer.current);
+    hideTimer.current=setTimeout(()=>setVisible(false),ms);
+  }
   useEffect(()=>{
-    fetch('/api/jackpot').then(r=>r.json()).then(d=>setAmount(d.amount)).catch(()=>{});
-    socket.on('jackpotUpdate',n=>{setAmount(n);setBump(true);setTimeout(()=>setBump(false),500);});
-    socket.on('jackpotWon',({name,amount})=>{setWinner({name,amount});setTimeout(()=>setWinner(null),6000);});
-    return()=>{socket.off('jackpotUpdate');socket.off('jackpotWon');};
+    fetch('/api/jackpot').then(r=>r.json()).then(d=>{setAmount(d.amount);showBriefly(3500);}).catch(()=>{});
+    socket.on('jackpotUpdate',n=>{setAmount(n);setBump(true);setTimeout(()=>setBump(false),500);showBriefly(4000);});
+    socket.on('jackpotWon',({name,amount:a})=>{setWinner({name,amount:a});setVisible(true);setTimeout(()=>setWinner(null),6000);});
+    return()=>{socket.off('jackpotUpdate');socket.off('jackpotWon');if(hideTimer.current)clearTimeout(hideTimer.current);};
   },[]);
   return(
     <>
-      <div className="jackpot-ticker">
+      <div className={'jackpot-ticker'+(visible?'':' jackpot-ticker-hidden')}>
         <span className="jackpot-ticker-label">🏆 Jackpot</span>
         <span className={`jackpot-ticker-val${bump?' bump':''}`}>🪙 {fmt(amount)}</span>
       </div>
@@ -5531,8 +5551,10 @@ function ViktorFace({speaking, loading}){
 }
 
 
-function AICroupier({user,currentPage,t=LANGS.en}){
-  const [open,setOpen]=useState(false);
+function AICroupier({user,currentPage,t=LANGS.en,open:openProp,onClose}){
+  const [openLocal,setOpenLocal]=useState(false);
+  const open=openProp!==undefined?openProp:openLocal;
+  const setOpen=(v)=>{setOpenLocal(v);if(!v&&onClose)onClose();};
   const [msgs,setMsgs]=useState([{id:0,from:'viktor',text:(t.viktor&&t.viktor.greeting)||"Welcome, "+user.name+"! I am Viktor, your personal croupier. Ask me anything! 🎩"}]);
   const [inp,setInp]=useState('');
   const [loading,setLoading]=useState(false);
@@ -6822,10 +6844,9 @@ function LangDrop({lang,setLang}){
   },[]);
   return(
     <div style={{position:'relative'}} ref={ref}>
-      <button onClick={()=>setOpen(o=>!o)} style={{display:'flex',alignItems:'center',gap:6,padding:'6px 10px',borderRadius:8,border:'1px solid rgba(240,192,96,0.25)',background:'rgba(4,4,10,0.6)',cursor:'pointer',color:'#e8e2d4',fontFamily:"Space Grotesk,sans-serif",fontSize:12,fontWeight:600}}>
-        <span style={{fontSize:16}}>{lang.flag}</span>
-        <span>{lang.name}</span>
-        <span style={{fontSize:9,opacity:0.5,marginLeft:2}}>{open?'▲':'▼'}</span>
+      <button onClick={()=>setOpen(o=>!o)} style={{display:'flex',alignItems:'center',gap:3,padding:'5px 8px',borderRadius:8,border:'1px solid rgba(240,192,96,0.25)',background:'rgba(4,4,10,0.6)',cursor:'pointer',color:'#e8e2d4',fontFamily:"Space Grotesk,sans-serif",fontSize:12,fontWeight:600}}>
+        <span style={{fontSize:18,lineHeight:1}}>{lang.flag}</span>
+        <span style={{fontSize:8,opacity:0.4,lineHeight:1}}>{open?'▲':'▼'}</span>
       </button>
       {open&&(
         <div style={{position:'absolute',top:'calc(100% + 6px)',right:0,zIndex:500,background:'rgba(8,8,18,0.98)',border:'1px solid rgba(240,192,96,0.2)',borderRadius:12,padding:6,minWidth:150,boxShadow:'0 8px 32px rgba(0,0,0,0.8)'}}>
@@ -7075,6 +7096,7 @@ function App(){
   const [showBonus,setShowBonus]=useState(false);
   const [lvUp,setLvUp]=useState(null);
   const [sbOpen,setSbOpen]=useState(false);
+  const [viktorOpen,setViktorOpen]=useState(false);
   const [particles,setParticles]=useState([]);
   const [tokenBump,setTokenBump]=useState(false);
   const [gameFilter,setGameFilter]=useState('visi');
@@ -7100,7 +7122,7 @@ function App(){
 
   const lv=user.levelInfo||LEVELS[0];
   const nextLv=user.nextLevel||null;
-  const nav=pg=>{ if(pg==='cashier'){window.open('/cashier.html','_self');return;}sfx.click();setPage(pg);setSbOpen(false);if(pg!=='poker'){setRoomId(null);setGameState(null);}};
+  const nav=pg=>{ if(pg==='cashier'){window.open('/cashier.html','_self');return;}if(pg==='viktor'){setSbOpen(false);setViktorOpen(o=>!o);return;}sfx.click();setPage(pg);setSbOpen(false);if(pg!=='poker'){setRoomId(null);setGameState(null);}};
   const bumpTokens=amt=>{setTokenBump(true);setTimeout(()=>setTokenBump(false),500);setUser(u=>({...u,tokens:u.tokens+amt}));};
 
   const doLogout=()=>{
@@ -7136,6 +7158,8 @@ function App(){
     {id:'leaderboard',icon:'🏆',label:t.leaderboard||'Leaderboard'},
     {id:'stats',icon:'📊',label:t.stats||'Stats'},
     {id:'cashier',icon:'💳',label:t.cashier||'Cashier'},
+    {id:'__div4'},
+    {id:'viktor',icon:'🎩',label:'Viktor AI',badge:'AI',badgeCls:'live'},
   ];
 
   return(
@@ -7285,7 +7309,7 @@ function App(){
       </div>{/* end app-body */}
 
       <JackpotTicker/>
-      <AICroupier user={user} currentPage={page} t={t}/>
+      <AICroupier user={user} currentPage={page} t={t} open={viktorOpen} onClose={()=>setViktorOpen(false)}/>
       <SocialWins/>
       {user&&<SupportChat user={user} t={t}/>}
       {user&&<MissionsPanel user={user} missions={missions}/>}
