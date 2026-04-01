@@ -9,6 +9,7 @@ const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const multer = require('multer');
 const fs = require('fs');
+const crypto = require('crypto');
 const Database = require('better-sqlite3');
 
 const app = express();
@@ -76,6 +77,70 @@ db.exec(`
     created_at TEXT DEFAULT (datetime('now')),
     reviewed_at TEXT
   );
+  CREATE TABLE IF NOT EXISTS settings (
+    key   TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS provably_fair (
+    round_id  TEXT PRIMARY KEY,
+    uid       TEXT NOT NULL,
+    game      TEXT NOT NULL,
+    server_seed TEXT NOT NULL,
+    server_hash TEXT NOT NULL,
+    client_seed TEXT,
+    nonce     INTEGER DEFAULT 0,
+    result    TEXT,
+    revealed  INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now'))
+  );
+  CREATE TABLE IF NOT EXISTS gambling_limits (
+    uid           TEXT PRIMARY KEY,
+    daily_limit   INTEGER DEFAULT 0,
+    weekly_limit  INTEGER DEFAULT 0,
+    self_excluded INTEGER DEFAULT 0,
+    excluded_until TEXT DEFAULT NULL,
+    updated_at    TEXT DEFAULT (datetime('now'))
+  );
+  CREATE TABLE IF NOT EXISTS bonuses (
+    id          TEXT PRIMARY KEY,
+    uid         TEXT NOT NULL,
+    type        TEXT NOT NULL,
+    amount      INTEGER DEFAULT 0,
+    wagering_req INTEGER DEFAULT 0,
+    wagered     INTEGER DEFAULT 0,
+    status      TEXT DEFAULT 'active',
+    expires_at  TEXT,
+    created_at  TEXT DEFAULT (datetime('now'))
+  );
+  CREATE TABLE IF NOT EXISTS tournaments (
+    id         TEXT PRIMARY KEY,
+    name       TEXT NOT NULL,
+    game       TEXT DEFAULT 'slots',
+    prize_pool INTEGER DEFAULT 10000,
+    starts_at  TEXT NOT NULL,
+    ends_at    TEXT NOT NULL,
+    status     TEXT DEFAULT 'upcoming'
+  );
+  CREATE TABLE IF NOT EXISTS tournament_scores (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    tournament_id TEXT NOT NULL,
+    uid           TEXT NOT NULL,
+    score         INTEGER DEFAULT 0,
+    updated_at    TEXT DEFAULT (datetime('now')),
+    UNIQUE(tournament_id, uid)
+  );
+  CREATE TABLE IF NOT EXISTS affiliates (
+    uid        TEXT PRIMARY KEY,
+    ref_code   TEXT UNIQUE NOT NULL,
+    referred   INTEGER DEFAULT 0,
+    earnings   INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now'))
+  );
+  CREATE TABLE IF NOT EXISTS referrals (
+    uid        TEXT PRIMARY KEY,
+    ref_by     TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now'))
+  );
 `);
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'hathor2026';
@@ -87,8 +152,121 @@ const adminAuth = (req, res, next) => {
   next();
 };
 
+// ── Settings helpers ──────────────────────────────────────
+const getSetting = key => { const r=db.prepare('SELECT value FROM settings WHERE key=?').get(key); return r?r.value:null; };
+const setSetting = (key,value) => db.prepare('INSERT INTO settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value').run(key,String(value));
+
+// ── Provably Fair ─────────────────────────────────────────
+function pfNewRound(uid, game) {
+  const serverSeed = crypto.randomBytes(32).toString('hex');
+  const serverHash = crypto.createHash('sha256').update(serverSeed).digest('hex');
+  const roundId = uuidv4();
+  db.prepare('INSERT INTO provably_fair(round_id,uid,game,server_seed,server_hash) VALUES(?,?,?,?,?)')
+    .run(roundId, uid, game, serverSeed, serverHash);
+  return { roundId, serverHash };
+}
+function pfReveal(roundId, clientSeed, nonce) {
+  const row = db.prepare('SELECT * FROM provably_fair WHERE round_id=?').get(roundId);
+  if(!row) return null;
+  const combined = row.server_seed + '-' + (clientSeed||'default') + '-' + (nonce||0);
+  const hash = crypto.createHmac('sha256', row.server_seed).update(combined).digest('hex');
+  const result = parseInt(hash.slice(0,8), 16) % 10000; // 0-9999
+  db.prepare('UPDATE provably_fair SET client_seed=?,nonce=?,result=?,revealed=1 WHERE round_id=?')
+    .run(clientSeed||'default', nonce||0, result, roundId);
+  return { roundId, serverSeed: row.server_seed, serverHash: row.server_hash, clientSeed: clientSeed||'default', nonce: nonce||0, result, hash };
+}
+
+// ── Gambling limits helpers ────────────────────────────────
+function getLimits(uid) {
+  return db.prepare('SELECT * FROM gambling_limits WHERE uid=?').get(uid)
+    || { uid, daily_limit:0, weekly_limit:0, self_excluded:0, excluded_until:null };
+}
+function checkLimits(uid, betAmount) {
+  const lim = getLimits(uid);
+  if(lim.self_excluded) {
+    if(lim.excluded_until && new Date(lim.excluded_until) < new Date()) {
+      db.prepare('UPDATE gambling_limits SET self_excluded=0,excluded_until=NULL WHERE uid=?').run(uid);
+    } else {
+      return { blocked: true, reason: 'self_excluded' };
+    }
+  }
+  if(lim.daily_limit > 0) {
+    const today = new Date().toISOString().split('T')[0];
+    const row = db.prepare("SELECT COALESCE(SUM(bet),0) as total FROM game_log WHERE uid=? AND ts>=?").get(uid, today+'T00:00:00');
+    if((row.total + betAmount) > lim.daily_limit) return { blocked: true, reason: 'daily_limit' };
+  }
+  if(lim.weekly_limit > 0) {
+    const weekAgo = new Date(Date.now()-7*24*60*60*1000).toISOString();
+    const row = db.prepare("SELECT COALESCE(SUM(bet),0) as total FROM game_log WHERE uid=? AND ts>=?").get(uid, weekAgo);
+    if((row.total + betAmount) > lim.weekly_limit) return { blocked: true, reason: 'weekly_limit' };
+  }
+  return { blocked: false };
+}
+
+// ── Bonus helpers ──────────────────────────────────────────
+function getActiveBonus(uid) {
+  return db.prepare("SELECT * FROM bonuses WHERE uid=? AND status='active' ORDER BY created_at ASC LIMIT 1").get(uid) || null;
+}
+function giveBonus(uid, type, amount, wageringMultiplier) {
+  const id = uuidv4();
+  const wagering_req = amount * (wageringMultiplier || 10);
+  const expires_at = new Date(Date.now() + 30*24*60*60*1000).toISOString();
+  db.prepare('INSERT INTO bonuses(id,uid,type,amount,wagering_req,wagered,status,expires_at) VALUES(?,?,?,?,?,0,?,?)')
+    .run(id, uid, type, amount, wagering_req, 'active', expires_at);
+  const u = getUser(uid);
+  if(u) { u.tokens += amount; saveUser(u); }
+  return { id, amount, wagering_req };
+}
+function updateWagering(uid, betAmount) {
+  const bonus = getActiveBonus(uid);
+  if(!bonus) return;
+  const newWagered = bonus.wagered + betAmount;
+  if(newWagered >= bonus.wagering_req) {
+    db.prepare("UPDATE bonuses SET wagered=?,status='completed' WHERE id=?").run(newWagered, bonus.id);
+  } else {
+    db.prepare('UPDATE bonuses SET wagered=? WHERE id=?').run(newWagered, bonus.id);
+  }
+}
+
+// ── Affiliate helpers ──────────────────────────────────────
+function getOrCreateAffiliate(uid) {
+  let aff = db.prepare('SELECT * FROM affiliates WHERE uid=?').get(uid);
+  if(!aff) {
+    const ref_code = crypto.randomBytes(4).toString('hex').toUpperCase();
+    db.prepare('INSERT OR IGNORE INTO affiliates(uid,ref_code) VALUES(?,?)').run(uid, ref_code);
+    aff = db.prepare('SELECT * FROM affiliates WHERE uid=?').get(uid);
+  }
+  return aff;
+}
+function processReferral(newUid, refCode) {
+  if(!refCode) return;
+  const aff = db.prepare('SELECT * FROM affiliates WHERE ref_code=?').get(refCode);
+  if(!aff || aff.uid === newUid) return;
+  db.prepare('INSERT OR IGNORE INTO referrals(uid,ref_by) VALUES(?,?)').run(newUid, aff.uid);
+  db.prepare('UPDATE affiliates SET referred=referred+1 WHERE uid=?').run(aff.uid);
+}
+
+// ── Tournament helpers ─────────────────────────────────────
+function getActiveTournament() {
+  const now = new Date().toISOString();
+  return db.prepare("SELECT * FROM tournaments WHERE status='active' AND starts_at<=? AND ends_at>=? LIMIT 1").get(now, now) || null;
+}
+function addTournamentScore(uid, game, score) {
+  const t = getActiveTournament();
+  if(!t) return;
+  if(t.game !== 'all' && t.game !== game) return;
+  db.prepare(`INSERT INTO tournament_scores(tournament_id,uid,score) VALUES(?,?,?)
+    ON CONFLICT(tournament_id,uid) DO UPDATE SET score=score+excluded.score,updated_at=datetime('now')`)
+    .run(t.id, uid, score);
+}
+function getTournamentLeaderboard(tournamentId) {
+  return db.prepare(`SELECT ts.uid, ts.score, u.name, u.avatar, u.level
+    FROM tournament_scores ts JOIN users u ON ts.uid=u.uid
+    WHERE ts.tournament_id=? ORDER BY ts.score DESC LIMIT 20`).all(tournamentId);
+}
+
 // ── RTP Configuration (per-game house edge control) ──
-let rtpConfig = {
+const RTP_DEFAULTS = {
   grand:      95,  // GrandFortune slots
   classic:    92,  // Classic slots
   plinko:     93,  // Krioklis / Plinko
@@ -102,6 +280,12 @@ let rtpConfig = {
   baccarat:   98,  // Baccarat
   sports:     93,  // Sports betting
 };
+// Load persisted RTP or use defaults
+let rtpConfig = {...RTP_DEFAULTS};
+try {
+  const saved = getSetting('rtp_config');
+  if(saved) rtpConfig = {...RTP_DEFAULTS, ...JSON.parse(saved)};
+} catch(e) { console.log('RTP config load error, using defaults'); }
 
 
 const getUser = uid => db.prepare('SELECT * FROM users WHERE uid=?').get(uid);
@@ -371,10 +555,19 @@ io.on('connection', socket=>{
     socket.emit('leaderboard',getLeaderboardData());
   });
 
-  socket.on('addXP',({xp,game})=>{
+  socket.on('addXP',({xp,game,bet})=>{
     const res=addXP(socket.uid,xp||10);
     const u=getUser(socket.uid);if(u){u.games_played=(u.games_played||0)+1;saveUser(u);}
-    if(res?.levelUp) socket.emit('levelUp',res.newLevel);
+    if(res&&res.levelUp) socket.emit('levelUp',res.newLevel);
+    // Update wagering progress if user has active bonus
+    if(bet) updateWagering(socket.uid, bet);
+    // Add to tournament score
+    if(xp) addTournamentScore(socket.uid, game||'slots', xp);
+    // Check welcome bonus eligibility (first game)
+    if(u && u.games_played===1){
+      const existing = db.prepare("SELECT id FROM bonuses WHERE uid=? AND type='welcome'").get(socket.uid);
+      if(!existing){ giveBonus(socket.uid,'welcome',5000,15); socket.emit('bonusAwarded',{type:'welcome',amount:5000,wagering_req:75000}); }
+    }
   });
 
   socket.on('chatMsg',({msg,roomId})=>{
@@ -879,7 +1072,6 @@ app.post('/admin/withdrawal-paid/:txId', adminAuth, express.json(), (req,res)=>{
 // ══════════════════════════════════════════════════════════
 // PROVABLY FAIR SYSTEM
 // ══════════════════════════════════════════════════════════
-const crypto = require('crypto');
 
 function generateServerSeed() {
   return crypto.randomBytes(32).toString('hex');
@@ -1781,7 +1973,161 @@ app.post('/api/rtp-config', adminAuth, express.json(), (req,res) => {
       rtpConfig[k] = Math.round(v);
     }
   }
+  setSetting('rtp_config', JSON.stringify(rtpConfig));
   res.json({ok:true, rtpConfig});
+});
+
+// ── Provably Fair endpoints ────────────────────────────────
+app.post('/api/pf/new', express.json(), (req,res) => {
+  const { uid, game } = req.body || {};
+  if(!uid || !game) return res.status(400).json({error:'Missing uid/game'});
+  const round = pfNewRound(uid, game);
+  res.json(round);
+});
+app.post('/api/pf/verify', express.json(), (req,res) => {
+  const { roundId, clientSeed, nonce } = req.body || {};
+  if(!roundId) return res.status(400).json({error:'Missing roundId'});
+  const result = pfReveal(roundId, clientSeed, nonce);
+  if(!result) return res.status(404).json({error:'Round not found'});
+  res.json(result);
+});
+app.get('/api/pf/history/:uid', (req,res) => {
+  const rows = db.prepare('SELECT round_id,game,server_hash,client_seed,nonce,result,revealed,created_at FROM provably_fair WHERE uid=? ORDER BY created_at DESC LIMIT 50').all(req.params.uid);
+  res.json(rows);
+});
+
+// ── Gambling limits endpoints ──────────────────────────────
+app.get('/api/limits/:uid', (req,res) => {
+  res.json(getLimits(req.params.uid));
+});
+app.post('/api/limits', express.json(), (req,res) => {
+  const { uid, daily_limit, weekly_limit } = req.body || {};
+  if(!uid) return res.status(400).json({error:'Missing uid'});
+  db.prepare(`INSERT INTO gambling_limits(uid,daily_limit,weekly_limit) VALUES(?,?,?)
+    ON CONFLICT(uid) DO UPDATE SET daily_limit=excluded.daily_limit,weekly_limit=excluded.weekly_limit,updated_at=datetime('now')`)
+    .run(uid, daily_limit||0, weekly_limit||0);
+  res.json({ok:true});
+});
+app.post('/api/self-exclude', express.json(), (req,res) => {
+  const { uid, days } = req.body || {};
+  if(!uid) return res.status(400).json({error:'Missing uid'});
+  const d = Math.min(Math.max(parseInt(days)||30, 1), 365);
+  const until = new Date(Date.now() + d*24*60*60*1000).toISOString();
+  db.prepare(`INSERT INTO gambling_limits(uid,self_excluded,excluded_until) VALUES(?,1,?)
+    ON CONFLICT(uid) DO UPDATE SET self_excluded=1,excluded_until=excluded.excluded_until,updated_at=datetime('now')`)
+    .run(uid, until);
+  res.json({ok:true, excluded_until: until});
+});
+app.post('/api/self-exclude/cancel', adminAuth, express.json(), (req,res) => {
+  const { uid } = req.body || {};
+  db.prepare("UPDATE gambling_limits SET self_excluded=0,excluded_until=NULL WHERE uid=?").run(uid);
+  res.json({ok:true});
+});
+
+// ── Bonus endpoints ────────────────────────────────────────
+app.get('/api/bonus/:uid', (req,res) => {
+  const bonuses = db.prepare("SELECT * FROM bonuses WHERE uid=? ORDER BY created_at DESC LIMIT 10").all(req.params.uid);
+  res.json(bonuses);
+});
+app.post('/api/bonus/give', adminAuth, express.json(), (req,res) => {
+  const { uid, type, amount, wagering } = req.body || {};
+  if(!uid || !amount) return res.status(400).json({error:'Missing fields'});
+  const result = giveBonus(uid, type||'manual', amount, wagering||10);
+  const sock = sockets[uid];
+  if(sock) sock.emit('bonusAwarded', { type: type||'manual', amount, wagering_req: result.wagering_req });
+  res.json({ok:true, ...result});
+});
+app.post('/api/bonus/welcome', express.json(), (req,res) => {
+  const { uid } = req.body || {};
+  if(!uid) return res.status(400).json({error:'Missing uid'});
+  const existing = db.prepare("SELECT id FROM bonuses WHERE uid=? AND type='welcome'").get(uid);
+  if(existing) return res.json({ok:false, reason:'already_claimed'});
+  const result = giveBonus(uid, 'welcome', 5000, 15);
+  res.json({ok:true, ...result});
+});
+
+// ── Affiliate endpoints ────────────────────────────────────
+app.get('/api/affiliate/:uid', (req,res) => {
+  const aff = getOrCreateAffiliate(req.params.uid);
+  const referrals = db.prepare('SELECT r.uid, u.name, u.created_at FROM referrals r JOIN users u ON r.uid=u.uid WHERE r.ref_by=?').all(req.params.uid);
+  res.json({...aff, referrals});
+});
+app.post('/api/affiliate/register', express.json(), (req,res) => {
+  const { uid, ref_code } = req.body || {};
+  if(uid && ref_code) processReferral(uid, ref_code);
+  res.json({ok:true});
+});
+
+// ── Tournament endpoints ───────────────────────────────────
+app.get('/api/tournament/active', (req,res) => {
+  const t = getActiveTournament();
+  if(!t) return res.json(null);
+  const leaderboard = getTournamentLeaderboard(t.id);
+  res.json({...t, leaderboard});
+});
+app.get('/api/tournament/leaderboard/:id', (req,res) => {
+  res.json(getTournamentLeaderboard(req.params.id));
+});
+app.post('/api/tournament/create', adminAuth, express.json(), (req,res) => {
+  const { name, game, prize_pool, starts_at, ends_at } = req.body || {};
+  if(!name || !starts_at || !ends_at) return res.status(400).json({error:'Missing fields'});
+  const id = uuidv4();
+  db.prepare("INSERT INTO tournaments(id,name,game,prize_pool,starts_at,ends_at,status) VALUES(?,?,?,?,?,?,'active')")
+    .run(id, name, game||'slots', prize_pool||10000, starts_at, ends_at);
+  res.json({ok:true, id});
+});
+app.post('/api/tournament/end', adminAuth, express.json(), (req,res) => {
+  const { id } = req.body || {};
+  db.prepare("UPDATE tournaments SET status='finished' WHERE id=?").run(id);
+  const leaderboard = getTournamentLeaderboard(id);
+  // Award prizes to top 3
+  const prizes = [0.5, 0.3, 0.2];
+  const t = db.prepare('SELECT * FROM tournaments WHERE id=?').get(id);
+  if(t) leaderboard.slice(0,3).forEach((p,i)=>{
+    const prize = Math.floor(t.prize_pool * prizes[i]);
+    const u = getUser(p.uid);
+    if(u){ u.tokens += prize; saveUser(u); }
+    const sock = sockets[p.uid];
+    if(sock) sock.emit('tournamentPrize', { place: i+1, prize, tournament: t.name });
+  });
+  res.json({ok:true, leaderboard});
+});
+
+// ── Analytics endpoints ────────────────────────────────────
+app.get('/api/analytics', adminAuth, (req,res) => {
+  const now = new Date();
+  const today = now.toISOString().split('T')[0];
+  const weekAgo = new Date(now - 7*24*60*60*1000).toISOString();
+  const monthAgo = new Date(now - 30*24*60*60*1000).toISOString();
+
+  const totalPlayers = db.prepare('SELECT COUNT(*) as c FROM users').get().c;
+  const activeTodayCount = db.prepare("SELECT COUNT(DISTINCT uid) as c FROM game_log WHERE ts>=?").get(today+'T00:00:00').c;
+  const activeWeekCount = db.prepare("SELECT COUNT(DISTINCT uid) as c FROM game_log WHERE ts>=?").get(weekAgo).c;
+
+  const ggr = db.prepare("SELECT COALESCE(SUM(bet-result),0) as ggr FROM game_log WHERE won=0 OR result < bet").get();
+  const ggrToday = db.prepare("SELECT COALESCE(SUM(bet-result),0) as ggr FROM game_log WHERE ts>=? AND (won=0 OR result<bet)").get(today+'T00:00:00');
+  const ggrWeek  = db.prepare("SELECT COALESCE(SUM(bet-result),0) as ggr FROM game_log WHERE ts>=? AND (won=0 OR result<bet)").get(weekAgo);
+
+  const totalBets = db.prepare('SELECT COUNT(*) as c, COALESCE(SUM(bet),0) as vol FROM game_log').get();
+  const betsToday = db.prepare("SELECT COUNT(*) as c, COALESCE(SUM(bet),0) as vol FROM game_log WHERE ts>=?").get(today+'T00:00:00');
+
+  const topGames = db.prepare("SELECT game, COUNT(*) as plays, COALESCE(SUM(bet),0) as volume FROM game_log GROUP BY game ORDER BY plays DESC LIMIT 10").all();
+  const topPlayers = db.prepare("SELECT uid, name, COALESCE(SUM(bet),0) as volume, COUNT(*) as plays FROM game_log g JOIN users u USING(uid) GROUP BY uid ORDER BY volume DESC LIMIT 10").all();
+
+  const newPlayersWeek = db.prepare("SELECT COUNT(*) as c FROM users WHERE created_at>=?").get(weekAgo).c;
+  const newPlayersMonth = db.prepare("SELECT COUNT(*) as c FROM users WHERE created_at>=?").get(monthAgo).c;
+
+  const dailyGGR = db.prepare(`SELECT date(ts) as day, COALESCE(SUM(bet-result),0) as ggr, COUNT(*) as bets
+    FROM game_log WHERE ts>=? GROUP BY date(ts) ORDER BY day ASC`).all(weekAgo);
+
+  res.json({
+    totalPlayers, activeTodayCount, activeWeekCount,
+    newPlayersWeek, newPlayersMonth,
+    ggr: ggr.ggr, ggrToday: ggrToday.ggr, ggrWeek: ggrWeek.ggr,
+    totalBets: totalBets.c, totalVolume: totalBets.vol,
+    betsToday: betsToday.c, volumeToday: betsToday.vol,
+    topGames, topPlayers, dailyGGR
+  });
 });
 
 server.listen(PORT,()=>console.log(`🎰 HATHOR Royal Casino v2 → http://localhost:${PORT}`));
