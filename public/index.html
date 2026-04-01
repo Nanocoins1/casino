@@ -2625,10 +2625,15 @@ body { color: #e8e2d4 !important; }
   .tb-bal-amount { font-size:13px !important; white-space:nowrap !important; }
   /* hide non-essential topbar items on very small screens */
   .croupier-btn { display:none !important; }
+  .support-btn { display:none !important; }
   .music-btn { display:none !important; }
   .lvl-pill { display:none !important; }
   .tb-logout { display:none !important; }
   .tb-cashier { display:none !important; }
+}
+@media(max-width:900px){
+  .support-btn { display:none !important; }
+  .croupier-btn { display:none !important; }
 }
 
 /* ═══════════════════════════════════════════════════
@@ -6548,8 +6553,10 @@ function getSupportReply(msg) {
   return SUPPORT_REPLIES.default;
 }
 
-function SupportChat({user, t=LANGS.en}) {
-  const [open, setOpen] = useState(false);
+function SupportChat({user, t=LANGS.en, open:openProp, onClose}) {
+  const [openLocal, setOpenLocal] = useState(false);
+  const open = openProp!==undefined ? openProp : openLocal;
+  const setOpen = (v)=>{ setOpenLocal(v); if(!v&&onClose) onClose(); };
   const [hasNew, setHasNew] = useState(true);
   const [msgs, setMsgs] = useState([
     {id:0, from:'support', text:'Hi! 👋 I am the HATHOR support team. How can I help?'}
@@ -7097,6 +7104,7 @@ function App(){
   const [lvUp,setLvUp]=useState(null);
   const [sbOpen,setSbOpen]=useState(false);
   const [viktorOpen,setViktorOpen]=useState(false);
+  const [supportOpen,setSupportOpen]=useState(false);
   const [particles,setParticles]=useState([]);
   const [tokenBump,setTokenBump]=useState(false);
   const [gameFilter,setGameFilter]=useState('visi');
@@ -7122,7 +7130,7 @@ function App(){
 
   const lv=user.levelInfo||LEVELS[0];
   const nextLv=user.nextLevel||null;
-  const nav=pg=>{ if(pg==='cashier'){window.open('/cashier.html','_self');return;}if(pg==='viktor'){setSbOpen(false);setViktorOpen(o=>!o);return;}sfx.click();setPage(pg);setSbOpen(false);if(pg!=='poker'){setRoomId(null);setGameState(null);}};
+  const nav=pg=>{ if(pg==='cashier'){window.open('/cashier.html','_self');return;}if(pg==='viktor'){setSbOpen(false);setViktorOpen(o=>!o);return;}if(pg==='support'){setSbOpen(false);setSupportOpen(o=>!o);return;}sfx.click();setPage(pg);setSbOpen(false);if(pg!=='poker'){setRoomId(null);setGameState(null);}};
   const bumpTokens=amt=>{setTokenBump(true);setTimeout(()=>setTokenBump(false),500);setUser(u=>({...u,tokens:u.tokens+amt}));};
 
   const doLogout=()=>{
@@ -7160,6 +7168,7 @@ function App(){
     {id:'cashier',icon:'💳',label:t.cashier||'Cashier'},
     {id:'__div4'},
     {id:'viktor',icon:'🎩',label:'Viktor AI',badge:'AI',badgeCls:'live'},
+    {id:'support',icon:'🎧',label:'Palaikymas',badge:'●',badgeCls:'live'},
   ];
 
   return(
@@ -7311,7 +7320,7 @@ function App(){
       <JackpotTicker/>
       <AICroupier user={user} currentPage={page} t={t} open={viktorOpen} onClose={()=>setViktorOpen(false)}/>
       <SocialWins/>
-      {user&&<SupportChat user={user} t={t}/>}
+      {user&&<SupportChat user={user} t={t} open={supportOpen} onClose={()=>setSupportOpen(false)}/>}
       {user&&<MissionsPanel user={user} missions={missions}/>}
       {pendingReward&&<AchievementPopup mission={pendingReward} onClaim={()=>{
         setUser(u=>({...u,tokens:u.tokens+pendingReward.reward}));
