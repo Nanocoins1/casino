@@ -2644,6 +2644,19 @@ body { color: #e8e2d4 !important; }
 @media(max-width:900px){
   .slots-scroll-wrap { padding-bottom: 8px; }
   .hslot-scene { min-width: 940px; }
+  /* Hide lever on mobile — spin button is enough */
+  .hslot-lever-side { display: none !important; }
+}
+@media(max-width:700px){
+  /* Scale GrandFortune machine to fit screen */
+  .hslot-machine { zoom: 0.6; transform-origin: top center; }
+  .hslot-scene { min-width: unset; }
+  /* Scale ClassicSlot cabinet */
+  .cs-cabinet { zoom: 0.6; transform-origin: top center; }
+}
+@media(max-width:430px){
+  .hslot-machine { zoom: 0.46; }
+  .cs-cabinet { zoom: 0.46; }
 }
 
 /* ═══════════════════════════════════════════════════
@@ -3456,7 +3469,7 @@ function ClassicSlot({user,setUser,forceMachine}){
       </div>
 
       {/* Cabinet */}
-      <div style={{width:700,background:'linear-gradient(180deg,#1c1608,#0e0c08,#050402)',
+      <div className="cs-cabinet" style={{width:700,background:'linear-gradient(180deg,#1c1608,#0e0c08,#050402)',
         border:`2px solid ${machine.color}55`,borderRadius:3,overflow:'hidden',
         boxShadow:`0 40px 100px rgba(0,0,0,0.97),0 0 0 1px ${machine.color}22`}}>
         {/* Top */}

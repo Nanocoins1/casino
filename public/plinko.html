@@ -193,6 +193,18 @@
     .main { flex-direction: column; align-items: center; padding: 14px; }
     .side-panel { width: 100%; max-width: 560px; }
   }
+
+  /* ── Mobile canvas scaling ── */
+  @media (max-width: 600px) {
+    .canvas-wrap { zoom: 0.65; }
+    .side-panel { max-width: 100%; }
+  }
+  @media (max-width: 430px) {
+    .canvas-wrap { zoom: 0.57; }
+  }
+  @media (max-width: 380px) {
+    .canvas-wrap { zoom: 0.5; }
+  }
 </style>
 </head>
 <body>
