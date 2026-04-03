@@ -3123,6 +3123,10 @@ body { color: #e8e2d4 !important; }
   .hero-stat-lbl { font-size: 8px !important; }
 }
 
+/* ── VIP Card ── */
+.vip-card { transition: box-shadow 0.3s ease; }
+.vip-card:hover { box-shadow: 0 8px 40px rgba(201,168,76,0.15) !important; }
+
 </style>
 </head>
 <body>
@@ -3185,16 +3189,103 @@ const fmt2=n=>Number(n||0).toFixed(2);
 
 // ── Levels ────────────────────────────────────────────────
 const LEVELS=[
-  {n:1,name:'Bronze',  xp:0,    e:'🥉'},
-  {n:2,name:'Silver',  xp:500,  e:'🥈'},
-  {n:3,name:'Gold',    xp:1500, e:'🥇'},
-  {n:4,name:'Platinum',xp:4000, e:'💎'},
-  {n:5,name:'Diamond', xp:10000,e:'👑'},
-  {n:6,name:'VIP',     xp:25000,e:'🌟'},
+  {n:1,name:'Bronze',   xp:0,     e:'🥉',color:'#cd7f32',cashback:0, xpMult:1.0,dailyBonus:500},
+  {n:2,name:'Silver',   xp:500,   e:'🥈',color:'#c0c0c0',cashback:1, xpMult:1.1,dailyBonus:750},
+  {n:3,name:'Gold',     xp:1500,  e:'🥇',color:'#ffd700',cashback:2, xpMult:1.25,dailyBonus:1000},
+  {n:4,name:'Platinum', xp:4000,  e:'💎',color:'#e5e4e2',cashback:3, xpMult:1.5,dailyBonus:1500},
+  {n:5,name:'Diamond',  xp:10000, e:'👑',color:'#b9f2ff',cashback:5, xpMult:2.0,dailyBonus:2000},
+  {n:6,name:'VIP Elite',xp:25000, e:'🌟',color:'#ffd680',cashback:8, xpMult:3.0,dailyBonus:3000},
 ];
 const getLv=xp=>{ let l=LEVELS[0]; for(const x of LEVELS){if(xp>=x.xp)l=x;} return l; };
 const getNextLv=xp=>LEVELS.find(l=>l.xp>xp)||null;
 const lvPct=(xp,lv,next)=>next?Math.min(100,Math.round((xp-lv.xp)/(next.xp-lv.xp)*100)):100;
+
+// ── VIP Card ──────────────────────────────────────────────
+function VIPCard({user,lv,nextLv,t}){
+  const xp=user?user.xp||0:0;
+  const pct=nextLv?Math.min(100,Math.round((xp-lv.xp)/(nextLv.xp-lv.xp)*100)):100;
+  const [cashbackInfo,setCashbackInfo]=React.useState(null);
+  const [claiming,setClaiming]=React.useState(false);
+
+  React.useEffect(function(){
+    if(!user) return;
+    fetch('/api/vip/'+user.uid).then(function(r){return r.json();}).then(function(d){
+      setCashbackInfo(d);
+    }).catch(function(){});
+  },[user&&user.uid]);
+
+  function claimCashback(){
+    if(!user||claiming) return;
+    setClaiming(true);
+    fetch('/api/vip/cashback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:user.uid})})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        setClaiming(false);
+        if(d.ok) setCashbackInfo(function(prev){return prev?{...prev,cashbackPending:0}:prev;});
+      }).catch(function(){setClaiming(false);});
+  }
+
+  return(
+    <div className="vip-card" style={{background:'linear-gradient(135deg, rgba(14,12,8,0.95) 0%, rgba(30,22,6,0.95) 100%)',border:'1px solid '+(lv.color||'#c9a84c')+'44',borderRadius:16,padding:20,position:'relative',overflow:'hidden'}}>
+      <div style={{position:'absolute',top:-40,right:-40,width:120,height:120,borderRadius:'50%',background:(lv.color||'#c9a84c')+'18',filter:'blur(30px)',pointerEvents:'none'}}/>
+      <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:16}}>
+        <div style={{width:52,height:52,borderRadius:'50%',background:'linear-gradient(135deg,'+(lv.color||'#c9a84c')+'33,'+(lv.color||'#c9a84c')+'11)',border:'2px solid '+(lv.color||'#c9a84c')+'66',display:'flex',alignItems:'center',justifyContent:'center',fontSize:24}}>
+          {lv.e}
+        </div>
+        <div>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:18,fontWeight:700,color:lv.color||'#c9a84c'}}>{lv.name}</div>
+          <div style={{fontSize:11,color:'rgba(201,168,76,0.5)',letterSpacing:2}}>VIP LYGIS {lv.n}</div>
+        </div>
+        <div style={{marginLeft:'auto',textAlign:'right'}}>
+          <div style={{fontFamily:"'DM Mono',monospace",fontSize:16,fontWeight:700,color:'#e8e2d4'}}>{fmt(xp)}</div>
+          <div style={{fontSize:10,color:'rgba(201,168,76,0.4)',letterSpacing:1}}>XP</div>
+        </div>
+      </div>
+      {nextLv&&(
+        <div style={{marginBottom:16}}>
+          <div style={{display:'flex',justifyContent:'space-between',fontSize:10,color:'rgba(201,168,76,0.5)',marginBottom:4}}>
+            <span>{lv.name}</span>
+            <span>{pct}% iki {nextLv.name}</span>
+          </div>
+          <div style={{height:6,background:'rgba(255,255,255,0.06)',borderRadius:3,overflow:'hidden'}}>
+            <div style={{height:'100%',width:pct+'%',background:'linear-gradient(90deg,'+(lv.color||'#c9a84c')+','+(nextLv.color||'#ffd680')+')',borderRadius:3,transition:'width 0.8s ease'}}/>
+          </div>
+          <div style={{fontSize:10,color:'rgba(201,168,76,0.4)',marginTop:4}}>Reikia dar {fmt((nextLv.xp-xp))} XP</div>
+        </div>
+      )}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8,marginBottom:16}}>
+        <div style={{background:'rgba(255,255,255,0.04)',borderRadius:8,padding:'8px 6px',textAlign:'center'}}>
+          <div style={{fontSize:16,marginBottom:2}}>{String.fromCodePoint(0x1F4B0)}</div>
+          <div style={{fontFamily:"'DM Mono',monospace",fontSize:12,color:'#c9a84c',fontWeight:700}}>{lv.cashback||0}%</div>
+          <div style={{fontSize:9,color:'rgba(201,168,76,0.4)',letterSpacing:1}}>CASHBACK</div>
+        </div>
+        <div style={{background:'rgba(255,255,255,0.04)',borderRadius:8,padding:'8px 6px',textAlign:'center'}}>
+          <div style={{fontSize:16,marginBottom:2}}>{String.fromCodePoint(0x26A1)}</div>
+          <div style={{fontFamily:"'DM Mono',monospace",fontSize:12,color:'#c9a84c',fontWeight:700}}>{lv.xpMult||1}x</div>
+          <div style={{fontSize:9,color:'rgba(201,168,76,0.4)',letterSpacing:1}}>XP MULT</div>
+        </div>
+        <div style={{background:'rgba(255,255,255,0.04)',borderRadius:8,padding:'8px 6px',textAlign:'center'}}>
+          <div style={{fontSize:16,marginBottom:2}}>{String.fromCodePoint(0x1F381)}</div>
+          <div style={{fontFamily:"'DM Mono',monospace",fontSize:12,color:'#c9a84c',fontWeight:700}}>{fmt(lv.dailyBonus||500)}</div>
+          <div style={{fontSize:9,color:'rgba(201,168,76,0.4)',letterSpacing:1}}>DIENOS BON.</div>
+        </div>
+      </div>
+      {cashbackInfo&&cashbackInfo.cashbackPending>0&&(
+        <button
+          onClick={claimCashback}
+          disabled={claiming}
+          style={{width:'100%',padding:'10px',background:'linear-gradient(90deg,rgba(201,168,76,0.2),rgba(201,168,76,0.1))',border:'1px solid rgba(201,168,76,0.4)',borderRadius:8,color:'#c9a84c',fontFamily:"'Cinzel',serif",fontSize:12,fontWeight:700,cursor:claiming?'not-allowed':'pointer',letterSpacing:1}}>
+          {claiming?'Gaunama...':('Gauti cashback: '+fmt(cashbackInfo.cashbackPending)+' zetonų')}
+        </button>
+      )}
+      {cashbackInfo&&cashbackInfo.cashbackPending===0&&lv.cashback>0&&(
+        <div style={{textAlign:'center',fontSize:11,color:'rgba(201,168,76,0.35)',padding:'8px 0'}}>
+          Cashback skaičiuojamas savaitgalį
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ── Card component ────────────────────────────────────────
 const RED_SUITS=new Set(['♥','♦']);
@@ -7205,6 +7296,7 @@ function App(){
     {id:'stats',icon:'📊',label:t.stats||'Stats'},
     {id:'cashier',icon:'💳',label:t.cashier||'Cashier'},
     {id:'__div4'},
+    {id:'vip',icon:'🌟',label:'VIP Programa',badge:'NEW',badgeCls:'new'},
     {id:'viktor',icon:'🎩',label:'Viktor AI',badge:'AI',badgeCls:'live'},
     {id:'support',icon:'🎧',label:'Palaikymas',badge:'●',badgeCls:'live'},
   ];
@@ -7342,6 +7434,33 @@ function App(){
       {page==='pyramid'&&<PyramidDrop user={user} setUser={setUser}/>}
       {page==='stats'&&<StatsPage user={user}/>}
       {page==='sports'&&<SportsBetting user={user} setUser={setUser} t={t}/>}
+      {page==='vip'&&(
+        <div style={{flex:1,padding:'24px 20px',maxWidth:600,margin:'0 auto',width:'100%'}}>
+          <div className="sec-hdr" style={{marginBottom:20}}>
+            <div className="sec-hdr-title">VIP PROGRAMA</div>
+            <div className="sec-hdr-line"/>
+          </div>
+          <VIPCard user={user} lv={lv} nextLv={nextLv} t={t}/>
+          <div style={{marginTop:20,background:'rgba(255,255,255,0.03)',border:'1px solid rgba(201,168,76,0.12)',borderRadius:14,padding:16}}>
+            <div style={{fontFamily:"'Cinzel',serif",fontSize:11,letterSpacing:3,color:'rgba(201,168,76,0.5)',marginBottom:14}}>VISI LYGIAI</div>
+            {LEVELS.map(function(l){
+              const isActive=lv.n===l.n;
+              const isPast=lv.n>l.n;
+              return(
+                <div key={l.n} style={{display:'flex',alignItems:'center',gap:12,padding:'10px 12px',borderRadius:10,marginBottom:6,background:isActive?'rgba(201,168,76,0.08)':'transparent',border:isActive?'1px solid rgba(201,168,76,0.25)':'1px solid transparent',opacity:isPast||isActive?1:0.45}}>
+                  <div style={{fontSize:22,width:32,textAlign:'center'}}>{l.e}</div>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:13,fontWeight:700,color:isActive?l.color||'#c9a84c':'#e8e2d4'}}>{l.name} {isActive&&'← Jūsų lygis'}</div>
+                    <div style={{fontSize:10,color:'rgba(201,168,76,0.4)'}}>{fmt(l.xp)} XP • {l.cashback}% cashback • {l.xpMult}x XP</div>
+                  </div>
+                  {isPast&&<span style={{fontSize:12,color:'#2ecc71'}}>✓</span>}
+                  {isActive&&<span style={{fontSize:10,background:'rgba(201,168,76,0.2)',color:'#c9a84c',padding:'2px 8px',borderRadius:20,fontWeight:700}}>AKTYVUS</span>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
       {page==='poker'&&(
         roomId&&gameState?(
           gameState.status==='waiting'
