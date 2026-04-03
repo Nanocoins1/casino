@@ -297,20 +297,43 @@ const saveUser = u => db.prepare(`INSERT INTO users(uid,name,tokens,avatar,level
 
 // ── Levels ───────────────────────────────────────────────
 const LEVELS=[
-  {level:1,name:'Bronze',  xpNeeded:0,    emoji:'🥉'},
-  {level:2,name:'Silver',  xpNeeded:500,  emoji:'🥈'},
-  {level:3,name:'Gold',    xpNeeded:1500, emoji:'🥇'},
-  {level:4,name:'Platinum',xpNeeded:4000, emoji:'💎'},
-  {level:5,name:'Diamond', xpNeeded:10000,emoji:'👑'},
-  {level:6,name:'VIP',     xpNeeded:25000,emoji:'🌟'},
+  {level:1,name:'Bronze',   xpNeeded:0,     emoji:'🥉',color:'#cd7f32',cashback:0,  xpMult:1.0, dailyBonus:500,  withdrawLimit:5000,  badge:''},
+  {level:2,name:'Silver',   xpNeeded:500,   emoji:'🥈',color:'#c0c0c0',cashback:1,  xpMult:1.1, dailyBonus:750,  withdrawLimit:10000, badge:'SILVER'},
+  {level:3,name:'Gold',     xpNeeded:1500,  emoji:'🥇',color:'#ffd700',cashback:2,  xpMult:1.25,dailyBonus:1000, withdrawLimit:25000, badge:'GOLD'},
+  {level:4,name:'Platinum', xpNeeded:4000,  emoji:'💎',color:'#e5e4e2',cashback:3,  xpMult:1.5, dailyBonus:1500, withdrawLimit:50000, badge:'PLAT'},
+  {level:5,name:'Diamond',  xpNeeded:10000, emoji:'👑',color:'#b9f2ff',cashback:5,  xpMult:2.0, dailyBonus:2000, withdrawLimit:100000,badge:'VIP'},
+  {level:6,name:'VIP Elite',xpNeeded:25000, emoji:'🌟',color:'#ffd680',cashback:8,  xpMult:3.0, dailyBonus:3000, withdrawLimit:999999,badge:'ELITE'},
 ];
 const getLvInfo = xp => { let l=LEVELS[0]; for(const x of LEVELS){if(xp>=x.xpNeeded)l=x;} return l; };
 const nextLvInfo = xp => LEVELS.find(l=>l.xpNeeded>xp)||null;
 
+// Process weekly cashback for a user
+function processCashback(uid) {
+  const u = getUser(uid); if(!u) return null;
+  const lv = getLvInfo(u.xp||0);
+  if(!lv.cashback || lv.cashback <= 0) return null;
+  // Calculate losses in last 7 days
+  const weekAgo = new Date(Date.now()-7*24*60*60*1000).toISOString();
+  const row = db.prepare(`SELECT COALESCE(SUM(CASE WHEN result < bet THEN bet-result ELSE 0 END),0) as losses
+    FROM game_log WHERE uid=? AND ts>=?`).get(uid, weekAgo);
+  const losses = row.losses || 0;
+  if(losses <= 0) return null;
+  const cashbackAmt = Math.floor(losses * lv.cashback / 100);
+  if(cashbackAmt <= 0) return null;
+  u.tokens += cashbackAmt;
+  saveUser(u);
+  // Log as bonus
+  const id = require('uuid').v4();
+  db.prepare('INSERT INTO bonuses(id,uid,type,amount,wagering_req,wagered,status,expires_at) VALUES(?,?,?,?,0,0,?,?)')
+    .run(id, uid, 'cashback', cashbackAmt, 'completed', new Date().toISOString());
+  return { cashbackAmt, level: lv.name };
+}
+
 function addXP(uid, xp) {
   const u = getUser(uid); if(!u) return null;
   const oldLv = getLvInfo(u.xp||0);
-  u.xp = (u.xp||0)+xp;
+  const mult = oldLv.xpMult || 1.0;
+  u.xp = (u.xp||0) + Math.round(xp * mult);
   u.level = getLvInfo(u.xp).level;
   saveUser(u);
   const newLv = getLvInfo(u.xp);
@@ -2128,6 +2151,38 @@ app.get('/api/analytics', adminAuth, (req,res) => {
     betsToday: betsToday.c, volumeToday: betsToday.vol,
     topGames, topPlayers, dailyGGR
   });
+});
+
+// ── VIP endpoints ──────────────────────────────────────────
+app.get('/api/vip/:uid', (req,res) => {
+  const u = getUser(req.params.uid);
+  if(!u) return res.status(404).json({error:'Not found'});
+  const lv = getLvInfo(u.xp||0);
+  const next = nextLvInfo(u.xp||0);
+  const pct = next ? Math.min(100, Math.round(((u.xp||0)-lv.xpNeeded)/(next.xpNeeded-lv.xpNeeded)*100)) : 100;
+  // Total wagered (for cashback calc)
+  const weekAgo = new Date(Date.now()-7*24*60*60*1000).toISOString();
+  const wagered = db.prepare("SELECT COALESCE(SUM(bet),0) as total FROM game_log WHERE uid=? AND ts>=?").get(req.params.uid, weekAgo);
+  const losses = db.prepare(`SELECT COALESCE(SUM(CASE WHEN result<bet THEN bet-result ELSE 0 END),0) as total FROM game_log WHERE uid=? AND ts>=?`).get(req.params.uid, weekAgo);
+  res.json({ level: lv, nextLevel: next, xp: u.xp||0, pct, weeklyWagered: wagered.total, weeklyLosses: losses.total, cashbackPending: Math.floor((losses.total||0)*lv.cashback/100) });
+});
+
+app.post('/api/vip/cashback', express.json(), (req,res) => {
+  const { uid } = req.body||{};
+  if(!uid) return res.status(400).json({error:'Missing uid'});
+  const result = processCashback(uid);
+  if(!result) return res.json({ok:false, reason:'No cashback available'});
+  const sock = sockets[uid];
+  if(sock) sock.emit('cashbackReceived', result);
+  res.json({ok:true, ...result});
+});
+
+// Admin: manually trigger cashback for all users
+app.post('/api/vip/cashback-all', adminAuth, (req,res) => {
+  const users = db.prepare('SELECT uid FROM users').all();
+  let processed = 0;
+  users.forEach(({uid}) => { if(processCashback(uid)) processed++; });
+  res.json({ok:true, processed});
 });
 
 server.listen(PORT,()=>console.log(`🎰 HATHOR Royal Casino v2 → http://localhost:${PORT}`));
