@@ -142,6 +142,7 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
     <div class="tab" onclick="showTab('tournaments',this)">🏆 Turnyrai</div>
     <div class="tab" onclick="showTab('affiliates',this)">🔗 Affiliate</div>
     <div class="tab" onclick="showTab('limits',this)">🛡️ Limitai</div>
+    <div class="tab" onclick="showTab('vip-admin',this)">🌟 VIP</div>
   </div>
 
   <div class="content">
@@ -445,6 +446,39 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
       </div>
     </div>
 
+    <!-- VIP ADMIN -->
+    <div class="section" id="sec-vip-admin">
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:20px;color:#e8e2d4;">🌟 VIP valdymas</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;">
+          <div style="font-weight:700;font-size:.85rem;margin-bottom:14px;color:#c9a84c;">💰 Išmokėti cashback visiems</div>
+          <p style="font-size:.8rem;color:#888;margin-bottom:14px;">Apskaičiuoja ir išmoka savaitinį cashback visiems žaidėjams pagal jų VIP lygį.</p>
+          <button class="btn btn-primary" onclick="runCashbackAll()">▶ Vykdyti cashback</button>
+          <div id="cashback-msg" style="margin-top:10px;font-size:.82rem;display:none;"></div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;">
+          <div style="font-weight:700;font-size:.85rem;margin-bottom:14px;color:#c9a84c;">🎁 Suteikti bonusą žaidėjui</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <input class="inp" id="bonus-uid" placeholder="Žaidėjo UID" />
+            <input class="inp" id="bonus-amount" type="number" placeholder="Suma (žetonai)" value="1000" />
+            <select class="inp" id="bonus-type" style="background:#0e0c08;color:#e8e2d4;">
+              <option value="manual">Manual</option>
+              <option value="reload">Reload</option>
+              <option value="cashback">Cashback</option>
+              <option value="vip_gift">VIP dovanėlė</option>
+            </select>
+            <input class="inp" id="bonus-wagering" type="number" placeholder="Wagering x (pvz. 10)" value="10" />
+            <button class="btn btn-primary" onclick="giveAdminBonus()">🎁 Suteikti</button>
+            <div id="bonus-give-msg" style="font-size:.8rem;display:none;"></div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;">
+        <div style="font-weight:700;font-size:.85rem;margin-bottom:12px;color:#c9a84c;">📊 VIP lygių paskirstymas</div>
+        <div id="vip-distribution"></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -529,6 +563,7 @@ function showTab(name, el) {
   if(name === 'rtp') loadRTP();
   if(name === 'analytics') loadAnalytics();
   if(name === 'tournaments') loadActiveTournament();
+  if(name === 'vip-admin') loadVIPDistribution();
 }
 
 // ── API helpers ───────────────────────────────────
@@ -1138,6 +1173,42 @@ async function cancelSelfExclusion(){
   msg.textContent = d.ok?'✓ Saviišskymas atšauktas':'Klaida';
   msg.style.color = d.ok?'#2ecc71':'#ff3d71';
   msg.style.display='block';
+}
+async function runCashbackAll(){
+  const key=localStorage.getItem('admin_key')||sessionStorage.getItem('admin_key')||'';
+  const r=await fetch('/api/vip/cashback-all',{method:'POST',headers:{'x-admin-key':key}});
+  const d=await r.json();
+  const msg=document.getElementById('cashback-msg');
+  msg.textContent=d.ok?'✓ Cashback išmokėtas '+d.processed+' žaidėjų':'Klaida!';
+  msg.style.color=d.ok?'#2ecc71':'#ff3d71';
+  msg.style.display='block';
+}
+async function giveAdminBonus(){
+  const key=localStorage.getItem('admin_key')||sessionStorage.getItem('admin_key')||'';
+  const uid=document.getElementById('bonus-uid').value.trim();
+  const amount=parseInt(document.getElementById('bonus-amount').value)||1000;
+  const type=document.getElementById('bonus-type').value;
+  const wagering=parseInt(document.getElementById('bonus-wagering').value)||10;
+  if(!uid){alert('Įveskite UID');return;}
+  const r=await fetch('/api/bonus/give',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':key},body:JSON.stringify({uid,amount,type,wagering})});
+  const d=await r.json();
+  const msg=document.getElementById('bonus-give-msg');
+  msg.textContent=d.ok?'✓ Bonusas suteiktas!':'Klaida: '+(d.error||'');
+  msg.style.color=d.ok?'#2ecc71':'#ff3d71';
+  msg.style.display='block';
+}
+async function loadVIPDistribution(){
+  try{
+    const key=localStorage.getItem('admin_key')||sessionStorage.getItem('admin_key')||'';
+    const r=await fetch('/api/analytics',{headers:{'x-admin-key':key}});
+    const d=await r.json();
+    const el=document.getElementById('vip-distribution');
+    if(!el) return;
+    const lvNames=['Bronze','Silver','Gold','Platinum','Diamond','VIP Elite'];
+    const lvEmojis=['🥉','🥈','🥇','💎','👑','🌟'];
+    var counts=lvNames.map(function(_,i){return {name:lvNames[i],emoji:lvEmojis[i],count:0};});
+    el.innerHTML='<div style="color:#888;font-size:.8rem;">Statistika atsiunčiama kartu su Analytics...</div>';
+  }catch(e){}
 }
 </script>
 </body>
