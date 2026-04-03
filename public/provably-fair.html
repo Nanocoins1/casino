@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Provably Fair — HATHOR Royal Casino</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  :root{--gold:#c9a84c;--gold2:#ffd680;--bg:#0a0806;--card:rgba(255,255,255,0.03);--border:rgba(201,168,76,0.15);--cream:#e8e2d4;--green:#2ecc71;--purple:#7b2fff;}
+  body{background:var(--bg);color:var(--cream);font-family:'Inter',sans-serif;font-size:15px;line-height:1.7;}
+  header{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,8,6,0.95);backdrop-filter:blur(10px);z-index:100;}
+  .logo{font-family:'Cinzel',serif;font-size:20px;font-weight:700;color:var(--gold);text-decoration:none;letter-spacing:2px;}
+  .back-link{color:var(--gold);text-decoration:none;font-size:13px;border:1px solid var(--border);padding:6px 14px;border-radius:8px;}
+  .container{max-width:860px;margin:0 auto;padding:48px 24px 80px;}
+  .page-title{font-family:'Cinzel',serif;font-size:28px;font-weight:700;color:var(--gold2);margin-bottom:8px;}
+  .page-sub{font-size:14px;color:rgba(232,226,212,0.6);margin-bottom:40px;}
+  h2{font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:var(--gold);margin:36px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  p{margin-bottom:12px;color:rgba(232,226,212,0.8);}
+  .how-it-works{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin:16px 0 32px;}
+  .step{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;position:relative;}
+  .step-num{font-family:'DM Mono',monospace;font-size:32px;font-weight:700;color:rgba(201,168,76,0.15);position:absolute;top:12px;right:14px;}
+  .step-icon{font-size:24px;margin-bottom:10px;}
+  .step-title{font-weight:600;font-size:13px;color:var(--gold);margin-bottom:6px;}
+  .step-desc{font-size:12px;color:rgba(232,226,212,0.6);}
+  .verify-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;margin:24px 0;}
+  .inp{width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;color:var(--cream);font-family:'DM Mono',monospace;font-size:12px;outline:none;margin-bottom:12px;}
+  .inp:focus{border-color:var(--gold);}
+  .btn{padding:12px 28px;border-radius:10px;border:none;cursor:pointer;font-family:'Cinzel',serif;font-size:13px;font-weight:700;letter-spacing:1px;background:linear-gradient(135deg,#c9a84c,#ffd680);color:#0a0806;transition:all .2s;width:100%;}
+  .btn:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(201,168,76,0.3);}
+  .result-box{display:none;background:rgba(46,204,113,0.06);border:1px solid rgba(46,204,113,0.25);border-radius:12px;padding:20px;margin-top:20px;}
+  .result-box.error{background:rgba(255,61,113,0.06);border-color:rgba(255,61,113,0.25);}
+  .result-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px;}
+  .result-row:last-child{border:none;}
+  .result-label{color:rgba(232,226,212,0.5);}
+  .result-val{font-family:'DM Mono',monospace;color:var(--cream);word-break:break-all;max-width:60%;text-align:right;}
+  .hash-display{font-family:'DM Mono',monospace;font-size:10px;background:rgba(0,0,0,0.3);padding:10px;border-radius:6px;word-break:break-all;color:var(--green);margin:8px 0;}
+  .history-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .history-table th{padding:10px 12px;text-align:left;font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:rgba(201,168,76,0.5);border-bottom:1px solid var(--border);}
+  .history-table td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.04);font-family:'DM Mono',monospace;font-size:11px;}
+  footer{text-align:center;padding:24px;border-top:1px solid var(--border);font-size:12px;color:rgba(201,168,76,0.3);}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="/">&#x2B21; HATHOR</a>
+  <a class="back-link" href="/">&#8592; Grįžti</a>
+</header>
+<div class="container">
+  <div class="page-title">Provably Fair</div>
+  <div class="page-sub">Kriptografinė žaidimų sąžiningumo sistema — patikrinkite kiekvieną lošimą patys</div>
+
+  <h2>Kaip tai veikia</h2>
+  <div class="how-it-works">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-icon">&#128273;</div>
+      <div class="step-title">Serverio seed</div>
+      <div class="step-desc">Prieš lošimą serveris sugeneruoja slaptą atsitiktinį skaičių ir pateikia tik jo SHA-256 hash.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-icon">&#127922;</div>
+      <div class="step-title">Kliento seed</div>
+      <div class="step-desc">Jūs pateikiate savo atsitiktinį skaičių (arba naudojamas automatinis). Abu seedai jungiami.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-icon">&#128290;</div>
+      <div class="step-title">Rezultatas</div>
+      <div class="step-desc">HMAC-SHA256 iš abiejų seedų nustato lošimo rezultatą. Niekas negali manipuliuoti šiuo procesu.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-icon">&#9989;</div>
+      <div class="step-title">Verifikacija</div>
+      <div class="step-desc">Po lošimo gausite serverio seed — galite patys patikrinti rezultatą naudodami bet kurį SHA-256 įrankį.</div>
+    </div>
+  </div>
+
+  <h2>Patikrinti lošimą</h2>
+  <div class="verify-card">
+    <label style="font-size:12px;color:rgba(232,226,212,0.5);display:block;margin-bottom:4px;">Round ID</label>
+    <input class="inp" id="v-round-id" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"/>
+    <label style="font-size:12px;color:rgba(232,226,212,0.5);display:block;margin-bottom:4px;">Kliento seed (neprivaloma)</label>
+    <input class="inp" id="v-client-seed" placeholder="Jūsų seed arba palikite tuščią"/>
+    <label style="font-size:12px;color:rgba(232,226,212,0.5);display:block;margin-bottom:4px;">Nonce</label>
+    <input class="inp" id="v-nonce" placeholder="0" value="0"/>
+    <button class="btn" onclick="verifyRound()">&#128269; Patikrinti</button>
+
+    <div class="result-box" id="verify-result">
+      <div style="font-family:'Cinzel',serif;font-size:13px;color:var(--green);margin-bottom:14px;">&#9989; Lošimas patvirtintas</div>
+      <div class="result-row"><span class="result-label">Round ID</span><span class="result-val" id="res-id"></span></div>
+      <div class="result-row"><span class="result-label">Žaidimas</span><span class="result-val" id="res-game"></span></div>
+      <div class="result-row"><span class="result-label">Serverio hash</span><span class="result-val" id="res-shash" style="font-size:10px;"></span></div>
+      <div class="result-row"><span class="result-label">Serverio seed</span><span class="result-val" id="res-sseed" style="font-size:10px;"></span></div>
+      <div class="result-row"><span class="result-label">Kliento seed</span><span class="result-val" id="res-cseed"></span></div>
+      <div class="result-row"><span class="result-label">Nonce</span><span class="result-val" id="res-nonce"></span></div>
+      <div class="result-row"><span class="result-label">Rezultatas (0-9999)</span><span class="result-val" id="res-result" style="color:var(--gold2);font-size:16px;font-weight:700;"></span></div>
+      <div style="margin-top:14px;font-size:11px;color:rgba(232,226,212,0.4);">Galite patikrinti patys: HMAC-SHA256(serverSeed, serverSeed+"-"+clientSeed+"-"+nonce)</div>
+    </div>
+    <div class="result-box error" id="verify-error">
+      <div style="color:#ff9999;" id="verify-error-msg"></div>
+    </div>
+  </div>
+
+  <h2>Jūsų lošimų istorija</h2>
+  <div id="history-section">
+    <div id="history-login" style="text-align:center;padding:32px;color:rgba(232,226,212,0.4);">Prisijunkite, kad matytumėte lošimų istoriją</div>
+    <div id="history-table-wrap" style="display:none;overflow-x:auto;">
+      <table class="history-table">
+        <thead><tr><th>Data</th><th>Žaidimas</th><th>Round ID</th><th>Hash</th><th>Atskleistas</th></tr></thead>
+        <tbody id="history-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <h2>Algoritmas (techniškai)</h2>
+  <p>Kiekvieno lošimo rezultatas apskaičiuojamas taip:</p>
+  <div class="hash-display">combined = serverSeed + "-" + clientSeed + "-" + nonce
+hash = HMAC-SHA256(key=serverSeed, data=combined)
+result = parseInt(hash[0..7], 16) % 10000  // 0-9999</div>
+  <p>Šį algoritmą galite patikrinti naudodami bet kurį programavimo aplinką arba internetinius HMAC-SHA256 įrankius.</p>
+</div>
+<footer>&#169; 2026 HATHOR Royal Casino · <a href="/terms.html" style="color:var(--gold);">T&amp;C</a> · <a href="/responsible.html" style="color:var(--gold);">Atsakingas lošimas</a></footer>
+
+<script>
+function verifyRound(){
+  var roundId=document.getElementById('v-round-id').value.trim();
+  var clientSeed=document.getElementById('v-client-seed').value.trim();
+  var nonce=parseInt(document.getElementById('v-nonce').value)||0;
+  document.getElementById('verify-result').style.display='none';
+  document.getElementById('verify-error').style.display='none';
+  if(!roundId){
+    document.getElementById('verify-error-msg').textContent='Įveskite Round ID';
+    document.getElementById('verify-error').style.display='block';
+    return;
+  }
+  fetch('/api/pf/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({roundId:roundId,clientSeed:clientSeed,nonce:nonce})})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.error){
+        document.getElementById('verify-error-msg').textContent=d.error;
+        document.getElementById('verify-error').style.display='block';
+        return;
+      }
+      document.getElementById('res-id').textContent=d.roundId;
+      document.getElementById('res-game').textContent=d.game||'—';
+      document.getElementById('res-shash').textContent=d.serverHash;
+      document.getElementById('res-sseed').textContent=d.serverSeed;
+      document.getElementById('res-cseed').textContent=d.clientSeed;
+      document.getElementById('res-nonce').textContent=d.nonce;
+      document.getElementById('res-result').textContent=d.result;
+      document.getElementById('verify-result').style.display='block';
+    })
+    .catch(function(){
+      document.getElementById('verify-error-msg').textContent='Tinklo klaida';
+      document.getElementById('verify-error').style.display='block';
+    });
+}
+
+var uid=localStorage.getItem('hrc_uid')||localStorage.getItem('casino_uid');
+if(uid){
+  document.getElementById('history-login').style.display='none';
+  document.getElementById('history-table-wrap').style.display='block';
+  fetch('/api/pf/history/'+uid)
+    .then(function(r){return r.json();})
+    .then(function(rows){
+      var tbody=document.getElementById('history-tbody');
+      if(!rows.length){
+        tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:rgba(232,226,212,0.3);padding:20px;">Nėra įrašų</td></tr>';
+        return;
+      }
+      tbody.innerHTML=rows.map(function(r){
+        var dateStr=r.created_at?r.created_at.slice(0,16):'';
+        var shortId=r.round_id.slice(0,8)+'...';
+        var shortHash=r.server_hash?r.server_hash.slice(0,12)+'...':'';
+        var revealedStr=r.revealed?'&#9989; Taip':'&#9203; Ne';
+        var revealedColor=r.revealed?'#2ecc71':'#888';
+        return '<tr><td style="color:rgba(232,226,212,0.5);">'+dateStr+'</td><td>'+r.game+'</td><td style="color:rgba(201,168,76,0.7);font-size:9px;">'+shortId+'</td><td style="font-size:9px;color:rgba(232,226,212,0.4);">'+shortHash+'</td><td style="color:'+revealedColor+'">'+revealedStr+'</td></tr>';
+      }).join('');
+    })
+    .catch(function(){});
+}
+</script>
+</body>
+</html>

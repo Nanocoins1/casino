@@ -136,6 +136,15 @@ const storage = multer.diskStorage({
   filename:(req,file,cb)=>cb(null,req.headers['x-user-id']+path.extname(file.originalname))
 });
 const upload = multer({storage,limits:{fileSize:2*1024*1024}});
+// ── Security headers ───────────────────────────────────────
+app.use(function(req,res,next){
+  res.setHeader('X-Content-Type-Options','nosniff');
+  res.setHeader('X-Frame-Options','DENY');
+  res.setHeader('X-XSS-Protection','1; mode=block');
+  res.setHeader('Referrer-Policy','strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy','geolocation=(), microphone=(), camera=()');
+  next();
+});
 app.use(express.static(path.join(__dirname,'public')));
 app.use(express.json());
 

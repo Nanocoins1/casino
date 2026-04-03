@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Atsakingas Lošimas — HATHOR Royal Casino</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  :root{--gold:#c9a84c;--gold2:#ffd680;--bg:#0a0806;--card:rgba(255,255,255,0.03);--border:rgba(201,168,76,0.15);--cream:#e8e2d4;--red:rgba(255,61,113,1);--green:#2ecc71;}
+  body{background:var(--bg);color:var(--cream);font-family:'Inter',sans-serif;font-size:15px;line-height:1.7;}
+  header{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,8,6,0.95);backdrop-filter:blur(10px);z-index:100;}
+  .logo{font-family:'Cinzel',serif;font-size:20px;font-weight:700;color:var(--gold);text-decoration:none;letter-spacing:2px;}
+  .back-link{color:var(--gold);text-decoration:none;font-size:13px;border:1px solid var(--border);padding:6px 14px;border-radius:8px;}
+  .container{max-width:860px;margin:0 auto;padding:48px 24px 80px;}
+  .page-title{font-family:'Cinzel',serif;font-size:28px;font-weight:700;color:var(--gold2);margin-bottom:8px;}
+  .page-sub{font-size:14px;color:rgba(232,226,212,0.6);margin-bottom:40px;}
+  h2{font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:var(--gold);margin:36px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  p{margin-bottom:12px;color:rgba(232,226,212,0.8);}
+  ul{margin:8px 0 12px 20px;color:rgba(232,226,212,0.8);}
+  li{margin-bottom:6px;}
+  .hero-warning{background:linear-gradient(135deg,rgba(255,61,113,0.08),rgba(255,61,113,0.04));border:1px solid rgba(255,61,113,0.25);border-radius:16px;padding:24px;margin-bottom:32px;display:flex;gap:20px;align-items:flex-start;}
+  .warn-icon{font-size:36px;flex-shrink:0;}
+  .warn-title{font-family:'Cinzel',serif;font-size:16px;color:#ff7096;margin-bottom:8px;}
+  .tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin:16px 0 32px;}
+  .tool-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;}
+  .tool-icon{font-size:28px;margin-bottom:10px;}
+  .tool-title{font-weight:600;font-size:14px;color:var(--gold);margin-bottom:6px;}
+  .tool-desc{font-size:12px;color:rgba(232,226,212,0.6);line-height:1.5;}
+  .quiz{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;margin:24px 0;}
+  .quiz-q{margin-bottom:12px;font-size:14px;color:rgba(232,226,212,0.85);}
+  .quiz-q label{display:flex;gap:8px;cursor:pointer;padding:4px 0;}
+  .quiz-q input{accent-color:var(--gold);}
+  .quiz-result{display:none;padding:14px;border-radius:10px;margin-top:16px;font-size:14px;}
+  .quiz-result.ok{background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.3);color:var(--green);}
+  .quiz-result.warn{background:rgba(255,61,113,0.08);border:1px solid rgba(255,61,113,0.3);color:#ff9999;}
+  .btn{display:inline-block;padding:10px 24px;border-radius:10px;border:none;cursor:pointer;font-family:'Cinzel',serif;font-size:13px;font-weight:700;letter-spacing:1px;transition:all .2s;}
+  .btn-primary{background:linear-gradient(135deg,#c9a84c,#ffd680);color:#0a0806;}
+  .btn-danger{background:rgba(255,61,113,0.15);border:1px solid rgba(255,61,113,0.4);color:#ff7096;width:100%;padding:14px;}
+  .btn-danger:hover{background:rgba(255,61,113,0.25);}
+  .inp{width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;color:var(--cream);font-size:14px;outline:none;margin-bottom:10px;}
+  .inp:focus{border-color:var(--gold);}
+  .orgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:16px 0;}
+  .org-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;}
+  .org-name{font-weight:600;font-size:13px;color:var(--gold);margin-bottom:4px;}
+  .org-url{font-size:11px;color:rgba(201,168,76,0.5);}
+  .selfexclude-form{background:rgba(255,61,113,0.04);border:1px solid rgba(255,61,113,0.2);border-radius:14px;padding:24px;margin-top:24px;}
+  .msg{padding:12px 16px;border-radius:8px;margin-top:12px;font-size:13px;display:none;}
+  .msg.ok{background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.3);color:var(--green);}
+  .msg.err{background:rgba(255,61,113,0.1);border:1px solid rgba(255,61,113,0.3);color:#ff9999;}
+  select.inp{cursor:pointer;}
+  footer{text-align:center;padding:24px;border-top:1px solid var(--border);font-size:12px;color:rgba(201,168,76,0.3);}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="/">&#x2B21; HATHOR</a>
+  <a class="back-link" href="/">&#8592; Grįžti</a>
+</header>
+<div class="container">
+  <div class="page-title">Atsakingas Lošimas</div>
+  <div class="page-sub">Mes rūpinamės jūsų gerove. Lošimas turi būti pramoginė veikla — ne finansinė strategija.</div>
+
+  <div class="hero-warning">
+    <div class="warn-icon">&#128737;&#65039;</div>
+    <div>
+      <div class="warn-title">Lošimas — tik pramogai</div>
+      <p style="font-size:13px;color:rgba(232,226,212,0.7);margin:0;">Niekada nelošite daugiau nei galite sau leisti prarasti. Lošimas negali būti pajamų šaltinis. Jei jaučiate, kad lošimas tampa problema — kreipkitės pagalbos.</p>
+    </div>
+  </div>
+
+  <h2>Mūsų įrankiai jūsų apsaugai</h2>
+  <div class="tools-grid">
+    <div class="tool-card">
+      <div class="tool-icon">&#128202;</div>
+      <div class="tool-title">Dienos limitas</div>
+      <div class="tool-desc">Nustatykite maksimalią statymų sumą per dieną. Pasiekus limitą — žaidimai automatiškai blokuojami.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon">&#128197;</div>
+      <div class="tool-title">Savaitės limitas</div>
+      <div class="tool-desc">Savaitinė statymų suma negali viršyti nustatytos ribos. Limitai įsigalioja iš karto.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon">&#9208;&#65039;</div>
+      <div class="tool-title">Pertrauka</div>
+      <div class="tool-desc">Galite laikinai sustabdyti paskyrą nuo 1 iki 30 dienų. Pertrauka pradeda galioti nedelsiant.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon">&#128683;</div>
+      <div class="tool-title">Saviišskyrimoas</div>
+      <div class="tool-desc">Visiškas prieigos prie paskyros užblokavimas nuo 30 dienų iki 1 metų. Negalima atšaukti anksčiau laiko.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon">&#9200;</div>
+      <div class="tool-title">Realybės patikra</div>
+      <div class="tool-desc">Kas 30/60/90 minučių gausite pranešimą kiek laiko ir pinigų praleido lošdami.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon">&#128200;</div>
+      <div class="tool-title">Lošimų istorija</div>
+      <div class="tool-desc">Visada galite peržiūrėti savo lošimų istoriją ir išleistas sumas paskyroje.</div>
+    </div>
+  </div>
+
+  <h2>Ar lošimas tapo problema? — Savitikrinimas</h2>
+  <div class="quiz">
+    <p style="margin-bottom:16px;font-size:13px;color:rgba(232,226,212,0.6);">Atsakykite į šiuos klausimus sąžiningai:</p>
+    <div class="quiz-q"><label><input type="checkbox" id="q1"/> Lošiu daugiau nei planavau?</label></div>
+    <div class="quiz-q"><label><input type="checkbox" id="q2"/> Bandau susigrąžinti prarasti pinigus toliau lošdamas?</label></div>
+    <div class="quiz-q"><label><input type="checkbox" id="q3"/> Meluoju artimiesiems apie lošimą?</label></div>
+    <div class="quiz-q"><label><input type="checkbox" id="q4"/> Lošimas daro įtaką mano darbui ar santykiams?</label></div>
+    <div class="quiz-q"><label><input type="checkbox" id="q5"/> Negaliu sustoti kai norėčiau?</label></div>
+    <div class="quiz-q"><label><input type="checkbox" id="q6"/> Naudoju lėšas, skirtas būtiniausioms išlaidoms?</label></div>
+    <button class="btn btn-primary" onclick="checkQuiz()" style="margin-top:12px;">Patikrinti</button>
+    <div class="quiz-result ok" id="quiz-ok">&#9989; Puiku! Atrodo, kad lošimas jums nekelia problemų. Tačiau visada būkite budrus ir laikykitės nustatytų limitų.</div>
+    <div class="quiz-result warn" id="quiz-warn">&#9888;&#65039; Jūsų atsakymai rodo galimą problemą. Rekomenduojame kreiptis pagalbos arba pasinaudoti saviišskyrimu. Jūs nesate vieni — pagalba prieinama.</div>
+  </div>
+
+  <h2>Pagalbos organizacijos</h2>
+  <div class="orgs">
+    <div class="org-card"><div class="tool-icon">&#127473;&#127481;</div><div class="org-name">Anoniminiai Lošėjai Lietuva</div><div class="org-url">al-lietuva.lt</div></div>
+    <div class="org-card"><div class="tool-icon">&#127757;</div><div class="org-name">GamCare</div><div class="org-url">gamcare.org.uk</div></div>
+    <div class="org-card"><div class="tool-icon">&#127757;</div><div class="org-name">Gamblers Anonymous</div><div class="org-url">gamblersanonymous.org</div></div>
+    <div class="org-card"><div class="tool-icon">&#127757;</div><div class="org-name">BeGambleAware</div><div class="org-url">begambleaware.org</div></div>
+    <div class="org-card"><div class="tool-icon">&#127757;</div><div class="org-name">GamStop (UK)</div><div class="org-url">gamstop.co.uk</div></div>
+    <div class="org-card"><div class="tool-icon">&#128222;</div><div class="org-name">Pagalbos linija LT</div><div class="org-url">Tel: 8 800 28 888</div></div>
+  </div>
+
+  <h2>Saviišskyrimoas</h2>
+  <p>Nusprendėte sustoti? Mes jums padėsime. Saviišskyrimoas blokuoja prieigą prie paskyros nustatytam laikotarpiui.</p>
+
+  <div class="selfexclude-form" id="selfexclude-section">
+    <div id="login-required" style="text-align:center;padding:20px;display:none;">
+      <div style="font-size:32px;margin-bottom:12px;">&#128272;</div>
+      <p style="color:rgba(232,226,212,0.6);">Prisijunkite prie paskyros, kad galėtumėte nustatyti saviišskyrimą.</p>
+      <a href="/" class="btn btn-primary" style="text-decoration:none;display:inline-block;margin-top:12px;">Prisijungti</a>
+    </div>
+    <div id="selfexclude-form-inner">
+      <div style="font-family:'Cinzel',serif;font-size:14px;color:#ff7096;margin-bottom:16px;">&#9888;&#65039; Saviišskyrimoas yra neatšaukiamas iki nurodyto termino pabaigos</div>
+      <label style="font-size:13px;color:rgba(232,226,212,0.7);display:block;margin-bottom:6px;">Saviišskyriomo laikotarpis:</label>
+      <select class="inp" id="exclude-days">
+        <option value="30">30 dienų</option>
+        <option value="90">90 dienų</option>
+        <option value="180">6 mėnesiai</option>
+        <option value="365">1 metai</option>
+      </select>
+      <label style="font-size:13px;color:rgba(232,226,212,0.7);display:block;margin-bottom:6px;">Patvirtinkite — įveskite žodį "SUSTOTI":</label>
+      <input class="inp" id="exclude-confirm" placeholder="SUSTOTI" autocomplete="off"/>
+      <button class="btn btn-danger" onclick="submitSelfExclusion()">&#128683; Vykdyti saviišskyrimą</button>
+      <div class="msg ok" id="exclude-ok">&#9989; Saviišskyrimoas įjungtas. Paskyra užblokuota. Pasveikame jūsų sprendimą.</div>
+      <div class="msg err" id="exclude-err"></div>
+    </div>
+  </div>
+</div>
+
+<footer>&#169; 2026 HATHOR Royal Casino · <a href="/terms.html" style="color:var(--gold);">T&amp;C</a> · <a href="/privacy.html" style="color:var(--gold);">Privatumo politika</a> · Lošimas nuo 18 metų</footer>
+
+<script>
+function checkQuiz(){
+  var qs=['q1','q2','q3','q4','q5','q6'];
+  var checked=qs.filter(function(q){return document.getElementById(q).checked;}).length;
+  document.getElementById('quiz-ok').style.display=checked<=1?'block':'none';
+  document.getElementById('quiz-warn').style.display=checked>=2?'block':'none';
+}
+
+function submitSelfExclusion(){
+  var uid=localStorage.getItem('hrc_uid')||localStorage.getItem('casino_uid');
+  if(!uid){alert('Prisijunkite prie paskyros!');return;}
+  var confirmVal=document.getElementById('exclude-confirm').value.trim();
+  if(confirmVal!=='SUSTOTI'){
+    document.getElementById('exclude-err').textContent='Įveskite žodį SUSTOTI';
+    document.getElementById('exclude-err').style.display='block';
+    return;
+  }
+  var days=parseInt(document.getElementById('exclude-days').value)||30;
+  fetch('/api/self-exclude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:uid,days:days})})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.ok){
+        document.getElementById('exclude-ok').style.display='block';
+        document.getElementById('selfexclude-form-inner').style.opacity='0.4';
+        document.getElementById('selfexclude-form-inner').style.pointerEvents='none';
+        setTimeout(function(){localStorage.clear();window.location.href='/';},3000);
+      }
+    })
+    .catch(function(){
+      document.getElementById('exclude-err').textContent='Klaida. Bandykite dar kartą.';
+      document.getElementById('exclude-err').style.display='block';
+    });
+}
+
+var uid=localStorage.getItem('hrc_uid')||localStorage.getItem('casino_uid');
+if(!uid){
+  document.getElementById('login-required').style.display='block';
+  document.getElementById('selfexclude-form-inner').style.display='none';
+}
+</script>
+</body>
+</html>
