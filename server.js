@@ -598,7 +598,7 @@ io.on('connection', socket=>{
     // Check welcome bonus eligibility (first game)
     if(u && u.games_played===1){
       const existing = db.prepare("SELECT id FROM bonuses WHERE uid=? AND type='welcome'").get(socket.uid);
-      if(!existing){ giveBonus(socket.uid,'welcome',5000,15); socket.emit('bonusAwarded',{type:'welcome',amount:5000,wagering_req:75000}); }
+      if(!existing){ giveBonus(socket.uid,'welcome',5000,15); sendPushToUser(socket.uid, '🎁 Sveikinamasis bonusas!', 'Gavote 5,000 žetonų. Pradėkite žaisti!', '/'); socket.emit('bonusAwarded',{type:'welcome',amount:5000,wagering_req:75000}); }
     }
   });
 
@@ -2120,7 +2120,7 @@ app.post('/api/tournament/end', adminAuth, express.json(), (req,res) => {
     const u = getUser(p.uid);
     if(u){ u.tokens += prize; saveUser(u); }
     const sock = sockets[p.uid];
-    if(sock) sock.emit('tournamentPrize', { place: i+1, prize, tournament: t.name });
+    if(sock) { sendPushToUser(p.uid, '🏆 Turnyro prizas!', 'Laimėjote ' + prize + ' žetonų! ' + t.name + ' turnyras.', '/'); sock.emit('tournamentPrize', { place: i+1, prize, tournament: t.name }); }
   });
   res.json({ok:true, leaderboard});
 });
@@ -2192,6 +2192,92 @@ app.post('/api/vip/cashback-all', adminAuth, (req,res) => {
   let processed = 0;
   users.forEach(({uid}) => { if(processCashback(uid)) processed++; });
   res.json({ok:true, processed});
+});
+
+// ── OneSignal Push Notifications ──────────────────────────
+const OS_APP_ID = process.env.ONESIGNAL_APP_ID || '';
+const OS_REST_KEY = process.env.ONESIGNAL_REST_API_KEY || '';
+
+async function sendPushNotification(filters, title, message, url) {
+  if(!OS_APP_ID || !OS_REST_KEY) {
+    console.log('[Push DEMO]', title, '-', message);
+    return { demo: true };
+  }
+  try {
+    const r = await fetch('https://onesignal.com/api/v1/notifications', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Basic ' + OS_REST_KEY
+      },
+      body: JSON.stringify({
+        app_id: OS_APP_ID,
+        filters: filters || [{ field: 'last_session', relation: '>', hours: '-1' }],
+        headings: { en: title },
+        contents: { en: message },
+        url: url || '/',
+        chrome_web_icon: '/favicon.ico'
+      })
+    });
+    return await r.json();
+  } catch(e) {
+    console.error('Push notification error:', e.message);
+    return { error: e.message };
+  }
+}
+
+// Send push to specific user by external_user_id
+async function sendPushToUser(uid, title, message, url) {
+  if(!OS_APP_ID || !OS_REST_KEY) {
+    console.log('[Push DEMO -> ' + uid + ']', title, '-', message);
+    return { demo: true };
+  }
+  return sendPushNotification(
+    [{ field: 'tag', key: 'uid', relation: '=', value: uid }],
+    title, message, url
+  );
+}
+
+// Push status endpoint
+app.get('/api/push/status', (req,res) => {
+  res.json({
+    enabled: !!(OS_APP_ID && OS_REST_KEY),
+    appId: OS_APP_ID || null,
+    demo: !(OS_APP_ID && OS_REST_KEY)
+  });
+});
+
+// Admin: send broadcast notification
+app.post('/api/push/broadcast', adminAuth, express.json(), async (req,res) => {
+  const { title, message, url } = req.body || {};
+  if(!title || !message) return res.status(400).json({ error: 'Missing title or message' });
+  const result = await sendPushNotification(null, title, message, url || '/');
+  res.json({ ok: true, result, demo: !(OS_APP_ID && OS_REST_KEY) });
+});
+
+// Admin: send to specific user
+app.post('/api/push/user', adminAuth, express.json(), async (req,res) => {
+  const { uid, title, message, url } = req.body || {};
+  if(!uid || !title || !message) return res.status(400).json({ error: 'Missing fields' });
+  const result = await sendPushToUser(uid, title, message, url || '/');
+  res.json({ ok: true, result, demo: !(OS_APP_ID && OS_REST_KEY) });
+});
+
+// Register push subscription (store uid tag in OneSignal)
+app.post('/api/push/register', express.json(), async (req,res) => {
+  const { uid, playerId } = req.body || {};
+  if(!uid || !playerId) return res.json({ ok: false });
+  if(!OS_APP_ID || !OS_REST_KEY) return res.json({ ok: true, demo: true });
+  try {
+    await fetch('https://onesignal.com/api/v1/players/' + playerId, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Basic ' + OS_REST_KEY },
+      body: JSON.stringify({ app_id: OS_APP_ID, tags: { uid } })
+    });
+    res.json({ ok: true });
+  } catch(e) {
+    res.json({ ok: false, error: e.message });
+  }
 });
 
 server.listen(PORT,()=>console.log(`🎰 HATHOR Royal Casino v2 → http://localhost:${PORT}`));
