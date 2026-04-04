@@ -3128,6 +3128,26 @@ body { color: #e8e2d4 !important; }
 .vip-card:hover { box-shadow: 0 8px 40px rgba(201,168,76,0.15) !important; }
 
 </style>
+  <!-- OneSignal Push (activates automatically when ONESIGNAL_APP_ID is set) -->
+  <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    fetch('/api/push/status').then(function(r){return r.json();}).then(function(d){
+      if(d.enabled && d.appId){
+        var s=document.createElement('script');
+        s.src='https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';
+        s.defer=true;
+        document.head.appendChild(s);
+        window.OneSignalDeferred.push(function(OneSignal){
+          OneSignal.init({appId:d.appId});
+          var uid=localStorage.getItem('hrc_uid');
+          if(uid){
+            OneSignal.login(uid);
+            fetch('/api/push/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:uid,playerId:uid})});
+          }
+        });
+      }
+    }).catch(function(){});
+  </script>
 </head>
 <body>
 <div class="mesh-bg"></div>
