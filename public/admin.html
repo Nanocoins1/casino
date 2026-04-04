@@ -143,6 +143,7 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
     <div class="tab" onclick="showTab('affiliates',this)">🔗 Affiliate</div>
     <div class="tab" onclick="showTab('limits',this)">🛡️ Limitai</div>
     <div class="tab" onclick="showTab('vip-admin',this)">🌟 VIP</div>
+    <div class="tab" onclick="showTab('push',this)">🔔 Push</div>
   </div>
 
   <div class="content">
@@ -479,6 +480,43 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
       </div>
     </div>
 
+    <!-- PUSH NOTIFICATIONS -->
+    <div class="section" id="sec-push">
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:8px;color:#e8e2d4;">🔔 Push Notifikacijos</h2>
+      <div id="push-status-bar" style="margin-bottom:20px;padding:10px 16px;border-radius:8px;font-size:.82rem;"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;">
+          <div style="font-weight:700;font-size:.85rem;margin-bottom:14px;color:#c9a84c;">📢 Siųsti visiems žaidėjams</div>
+          <input class="inp" id="push-title" placeholder="Antraštė" />
+          <input class="inp" id="push-msg" placeholder="Žinutės tekstas" />
+          <input class="inp" id="push-url" placeholder="Nuoroda (pvz. /)" value="/" />
+          <button class="btn btn-primary" onclick="sendBroadcast()">📤 Siųsti visiems</button>
+          <div id="push-broadcast-msg" style="font-size:.8rem;margin-top:8px;display:none;"></div>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;">
+          <div style="font-weight:700;font-size:.85rem;margin-bottom:14px;color:#c9a84c;">👤 Siųsti konkrečiam žaidėjui</div>
+          <input class="inp" id="push-uid" placeholder="Žaidėjo UID" />
+          <input class="inp" id="push-user-title" placeholder="Antraštė" />
+          <input class="inp" id="push-user-msg" placeholder="Žinutės tekstas" />
+          <button class="btn btn-primary" onclick="sendUserPush()">📤 Siųsti</button>
+          <div id="push-user-msg-result" style="font-size:.8rem;margin-top:8px;display:none;"></div>
+        </div>
+      </div>
+      <div style="margin-top:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;">
+        <div style="font-weight:700;font-size:.85rem;margin-bottom:10px;color:#c9a84c;">⚙️ Kaip aktyvuoti (OneSignal)</div>
+        <ol style="font-size:.8rem;color:#888;line-height:2;margin-left:16px;">
+          <li>Registruokitės: <a href="https://onesignal.com" target="_blank" style="color:#c9a84c;">onesignal.com</a></li>
+          <li>Sukurkite naują App → Web Push → įveskite savo domeno adresą</li>
+          <li>Nukopijuokite <strong>App ID</strong> ir <strong>REST API Key</strong></li>
+          <li>Railway → Settings → Variables → pridėkite:<br/>
+            <code style="background:rgba(0,0,0,.3);padding:2px 6px;border-radius:4px;">ONESIGNAL_APP_ID=xxxx</code><br/>
+            <code style="background:rgba(0,0,0,.3);padding:2px 6px;border-radius:4px;">ONESIGNAL_REST_API_KEY=xxxx</code>
+          </li>
+          <li>Redeploy → push notifikacijos iš karto veikia!</li>
+        </ol>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -564,6 +602,7 @@ function showTab(name, el) {
   if(name === 'analytics') loadAnalytics();
   if(name === 'tournaments') loadActiveTournament();
   if(name === 'vip-admin') loadVIPDistribution();
+  if(name === 'push') loadPushStatus();
 }
 
 // ── API helpers ───────────────────────────────────
@@ -1209,6 +1248,51 @@ async function loadVIPDistribution(){
     var counts=lvNames.map(function(_,i){return {name:lvNames[i],emoji:lvEmojis[i],count:0};});
     el.innerHTML='<div style="color:#888;font-size:.8rem;">Statistika atsiunčiama kartu su Analytics...</div>';
   }catch(e){}
+}
+async function loadPushStatus(){
+  try{
+    const r=await fetch('/api/push/status');
+    const d=await r.json();
+    const bar=document.getElementById('push-status-bar');
+    if(!bar) return;
+    if(d.enabled){
+      bar.style.background='rgba(46,204,113,0.1)';
+      bar.style.border='1px solid rgba(46,204,113,0.3)';
+      bar.style.color='#2ecc71';
+      bar.textContent='✅ Push notifikacijos aktyvios (OneSignal prijungtas)';
+    } else {
+      bar.style.background='rgba(255,165,0,0.08)';
+      bar.style.border='1px solid rgba(255,165,0,0.25)';
+      bar.style.color='#ffaa00';
+      bar.textContent='⚠️ Demo režimas — pridėkite ONESIGNAL_APP_ID ir ONESIGNAL_REST_API_KEY Railway kintamuosiuose';
+    }
+  }catch(e){}
+}
+async function sendBroadcast(){
+  const key=localStorage.getItem('admin_key')||sessionStorage.getItem('admin_key')||'';
+  const title=document.getElementById('push-title').value.trim();
+  const message=document.getElementById('push-msg').value.trim();
+  const url=document.getElementById('push-url').value.trim()||'/';
+  if(!title||!message){alert('Užpildykite antraštę ir tekstą');return;}
+  const r=await fetch('/api/push/broadcast',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':key},body:JSON.stringify({title,message,url})});
+  const d=await r.json();
+  const msg=document.getElementById('push-broadcast-msg');
+  msg.textContent=d.ok?(d.demo?'✓ Išsiųsta (demo režimas — žaidėjai negavo)':'✓ Išsiųsta visiems žaidėjams!'):'Klaida';
+  msg.style.color=d.ok?'#2ecc71':'#ff3d71';
+  msg.style.display='block';
+}
+async function sendUserPush(){
+  const key=localStorage.getItem('admin_key')||sessionStorage.getItem('admin_key')||'';
+  const uid=document.getElementById('push-uid').value.trim();
+  const title=document.getElementById('push-user-title').value.trim();
+  const message=document.getElementById('push-user-msg').value.trim();
+  if(!uid||!title||!message){alert('Užpildykite visus laukus');return;}
+  const r=await fetch('/api/push/user',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':key},body:JSON.stringify({uid,title,message})});
+  const d=await r.json();
+  const msg=document.getElementById('push-user-msg-result');
+  msg.textContent=d.ok?(d.demo?'✓ Išsiųsta (demo)':'✓ Žaidėjui išsiųsta!'):'Klaida';
+  msg.style.color=d.ok?'#2ecc71':'#ff3d71';
+  msg.style.display='block';
 }
 </script>
 </body>
