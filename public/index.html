@@ -3201,6 +3201,28 @@ const getNextLv=xp=>LEVELS.find(l=>l.xp>xp)||null;
 const lvPct=(xp,lv,next)=>next?Math.min(100,Math.round((xp-lv.xp)/(next.xp-lv.xp)*100)):100;
 
 // ── VIP Card ──────────────────────────────────────────────
+function CookieBanner(){
+  const [show,setShow]=useState(function(){return !localStorage.getItem('cookies_accepted');});
+  if(!show) return null;
+  return(
+    <div style={{position:'fixed',bottom:0,left:0,right:0,background:'rgba(14,12,8,0.97)',borderTop:'1px solid rgba(201,168,76,0.2)',padding:'14px 20px',display:'flex',alignItems:'center',gap:16,zIndex:9998,flexWrap:'wrap'}}>
+      <div style={{flex:1,fontSize:12,color:'rgba(232,226,212,0.7)',minWidth:200}}>
+        Naudojame slapukus geriausiai patirčiai. Tesdami naudojimasi sutinkate su{' '}
+        <a href="/privacy.html" style={{color:'#c9a84c'}}>privatumo politika</a>.
+      </div>
+      <div style={{display:'flex',gap:8}}>
+        <button onClick={function(){localStorage.setItem('cookies_accepted','1');setShow(false);}}
+          style={{padding:'8px 18px',background:'linear-gradient(135deg,#c9a84c,#ffd680)',border:'none',borderRadius:8,fontFamily:"'Cinzel',serif",fontSize:11,fontWeight:700,color:'#0a0806',cursor:'pointer'}}>
+          Sutinku
+        </button>
+        <button onClick={function(){setShow(false);}}
+          style={{padding:'8px 14px',background:'transparent',border:'1px solid rgba(201,168,76,0.3)',borderRadius:8,fontSize:11,color:'rgba(201,168,76,0.6)',cursor:'pointer'}}>
+          Atmesti
+        </button>
+      </div>
+    </div>
+  );
+}
 function VIPCard({user,lv,nextLv,t}){
   const xp=user?user.xp||0:0;
   const pct=nextLv?Math.min(100,Math.round((xp-lv.xp)/(nextLv.xp-lv.xp)*100)):100;
@@ -7228,6 +7250,7 @@ function App(){
   const [showBonus,setShowBonus]=useState(false);
   const [lvUp,setLvUp]=useState(null);
   const [sbOpen,setSbOpen]=useState(false);
+  const [ageVerified,setAgeVerified]=useState(function(){return !!localStorage.getItem('age_verified');});
   const [viktorOpen,setViktorOpen]=useState(false);
   const [supportOpen,setSupportOpen]=useState(false);
   const [particles,setParticles]=useState([]);
@@ -7302,6 +7325,27 @@ function App(){
   ];
 
   return(
+    <div>
+    {!ageVerified&&(
+      <div style={{position:'fixed',inset:0,background:'rgba(10,8,6,0.98)',zIndex:99999,display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:20,padding:24,textAlign:'center'}}>
+        <div style={{fontFamily:"'Cinzel',serif",fontSize:32,color:'#c9a84c',letterSpacing:4}}>HATHOR</div>
+        <div style={{fontSize:64}}>18+</div>
+        <div style={{fontFamily:"'Cinzel',serif",fontSize:18,color:'#e8e2d4'}}>Sveiki atvyke i HATHOR Royal Casino</div>
+        <div style={{maxWidth:340,color:'rgba(232,226,212,0.7)',fontSize:14,lineHeight:1.6}}>Sioje svetaineje pateikiamas losimų turinys skirtas tik suaugusiems (18+). Ar jums yra 18 metu ar daugiau?</div>
+        <div style={{display:'flex',gap:12,marginTop:8}}>
+          <button
+            onClick={function(){localStorage.setItem('age_verified','1');setAgeVerified(true);}}
+            style={{padding:'14px 28px',background:'linear-gradient(135deg,#c9a84c,#ffd680)',border:'none',borderRadius:10,fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700,color:'#0a0806',cursor:'pointer',letterSpacing:1}}>
+            Taip, man 18+
+          </button>
+          <button
+            onClick={function(){window.location.href='https://www.google.com';}}
+            style={{padding:'14px 28px',background:'rgba(255,61,113,0.15)',border:'1px solid rgba(255,61,113,0.35)',borderRadius:10,fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700,color:'#ff7096',cursor:'pointer',letterSpacing:1}}>
+            Ne, esu jaunesnis
+          </button>
+        </div>
+      </div>
+    )}
     <div className="app-shell">
       {/* ── TOP BAR ── */}
       <div className="topbar">
@@ -7488,6 +7532,21 @@ function App(){
       {showBonus&&<DailyBonus onClose={()=>setShowBonus(false)} onClaim={amt=>bumpTokens(amt)} t={t}/>}
       {lvUp&&<div className="levelup-banner"><h3>{lvUp.e} LEVEL UP!</h3><p>You reached {lvUp.name}</p></div>}
       {page!=='poker'&&<EmojiParticles particles={particles}/>}
+      <div style={{borderTop:'1px solid rgba(201,168,76,0.08)',padding:'12px 20px',display:'flex',flexWrap:'wrap',gap:10,justifyContent:'center',fontSize:11}}>
+        <a href="/terms.html" style={{color:'rgba(201,168,76,0.4)',textDecoration:'none'}}>Taisykles ir Salygos</a>
+        <span style={{color:'rgba(201,168,76,0.15)'}}>·</span>
+        <a href="/privacy.html" style={{color:'rgba(201,168,76,0.4)',textDecoration:'none'}}>Privatumo Politika</a>
+        <span style={{color:'rgba(201,168,76,0.15)'}}>·</span>
+        <a href="/responsible.html" style={{color:'rgba(201,168,76,0.4)',textDecoration:'none'}}>Atsakingas Losimas</a>
+        <span style={{color:'rgba(201,168,76,0.15)'}}>·</span>
+        <a href="/provably-fair.html" style={{color:'rgba(201,168,76,0.4)',textDecoration:'none'}}>Provably Fair</a>
+        <span style={{color:'rgba(201,168,76,0.15)'}}>·</span>
+        <a href="/aml.html" style={{color:'rgba(201,168,76,0.4)',textDecoration:'none'}}>AML</a>
+        <span style={{color:'rgba(201,168,76,0.15)'}}>·</span>
+        <span style={{color:'rgba(201,168,76,0.25)'}}>18+</span>
+      </div>
+      <CookieBanner/>
+    </div>
     </div>
   );
 }

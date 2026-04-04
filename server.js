@@ -366,14 +366,6 @@ app.use(function(req,res,next){
   res.setHeader('X-XSS-Protection','1; mode=block');
   res.setHeader('Referrer-Policy','strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy','geolocation=(), microphone=(), camera=()');
-  res.setHeader('Content-Security-Policy',
-    "default-src 'self'; "+
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.socket.io https://fonts.googleapis.com; "+
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "+
-    "font-src 'self' https://fonts.gstatic.com; "+
-    "img-src 'self' data: blob:; "+
-    "connect-src 'self' wss: ws:;"
-  );
   next();
 });
 app.use(express.static(path.join(__dirname,'public')));
