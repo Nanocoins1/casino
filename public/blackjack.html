@@ -337,6 +337,7 @@ function deal(){
   if(playing) return;
   betAmt = parseInt(document.getElementById('betInp').value) || 100;
   if(betAmt < 10) return;
+  if(betAmt > 50000){ betAmt = 50000; document.getElementById('betInp').value = 50000; }
   if(betAmt > tokens){ showToast('Nepakanka žetonų', 'loss'); return; }
 
   if(deck.length < 52) buildDeck();
@@ -451,6 +452,7 @@ function endRound(outcome){
     msg = '-🪙' + fmt(betAmt);
   }
 
+  won = Math.min(won, 500000);
   tokens += won;
   localStorage.setItem('casino_tokens', tokens);
   updateBal();

@@ -235,6 +235,7 @@ function handleMain(){if(!playing)startGame();else cashout();}
 function startGame(){
   betAmt=parseInt(document.getElementById('betInp').value)||100;
   if(betAmt<10)return;
+  if(betAmt>50000){betAmt=50000;document.getElementById('betInp').value=50000;}
   if(betAmt>tokens){showToast('Nepakanka zetonų','loss');return;}
   if(mines>=TOTAL){showToast('Per daug minu!','loss');return;}
   tokens-=betAmt;
@@ -314,11 +315,12 @@ function updateProb(){
   else fill.style.background='var(--green)';
 }
 
+var MAX_WIN=500000;
 function cashout(){
   if(!playing)return;
   playing=false;
   var m=getMult(revealedSafe.length,mines);
-  var won=Math.floor(betAmt*m);
+  var won=Math.min(Math.floor(betAmt*m),MAX_WIN);
   tokens+=won;
   localStorage.setItem('casino_tokens',tokens);
   updateBal();

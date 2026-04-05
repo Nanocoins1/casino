@@ -601,10 +601,11 @@ function updateSess(){
   el.className='sb-v '+(sess.profit>=0?'pos':'neg');
 }
 
+var MAX_WIN=500000;
 function cashoutBet(b,lbl){
   if(!b.placed||b.cashedOut||state!==ST.FLY)return;
   b.cashedOut=true;b.mult=mult;
-  var won=Math.floor(b.amount*mult);
+  var won=Math.min(Math.floor(b.amount*mult),MAX_WIN);
   tokens+=won;
   var profit=won-b.amount;
   sess.wins++;sess.profit+=profit;
@@ -748,6 +749,7 @@ function handleBetA(){
     if(bA.pending){bA.pending=0;updateBtns();return;}
     var amt=parseInt(document.getElementById('amtA').value)||100;
     if(amt<10)return;
+    if(amt>50000){amt=50000;document.getElementById('amtA').value=50000;}
     if(amt>tokens){showToast('Nepakanka zetonų','loss');return;}
     bA.pending=amt;updateBtns();
   }
@@ -759,6 +761,7 @@ function handleBetB(){
     if(bB.pending){bB.pending=0;updateBtns();return;}
     var amt=parseInt(document.getElementById('amtB').value)||200;
     if(amt<10)return;
+    if(amt>50000){amt=50000;document.getElementById('amtB').value=50000;}
     if(amt>tokens){showToast('Nepakanka zetonų','loss');return;}
     bB.pending=amt;updateBtns();
   }

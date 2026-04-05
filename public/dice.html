@@ -10,6 +10,7 @@
 :root{--bg:#04040a;--gold:#f0c060;--gold2:#ffd980;--green:#00e676;--red:#ff3d71;--neon:#00e5ff;--cream:#e8e0d0;--border:rgba(255,255,255,0.08);--glass:rgba(255,255,255,0.04);}
 html,body{height:100%;overflow:hidden;}
 body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cream);display:flex;flex-direction:column;}
+@media(max-width:750px){html,body{height:auto;overflow:auto;}body{overflow:visible;}}
 .header{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(4,4,10,.98);border-bottom:1px solid var(--border);flex-shrink:0;}
 .game-title{font-family:'Orbitron',monospace;font-size:16px;font-weight:900;letter-spacing:2px;}
 .balance{font-family:'DM Mono',monospace;font-size:14px;color:var(--gold);}
@@ -31,7 +32,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 
 /* ─── DICE ─── */
 .dice-layout{flex:1;display:grid;grid-template-columns:1fr 280px;overflow:hidden;}
-@media(max-width:680px){.dice-layout{grid-template-columns:1fr;grid-template-rows:1fr auto;}}
+@media(max-width:750px){.dice-layout{grid-template-columns:1fr;grid-template-rows:auto auto;overflow:visible;}}
 .dice-area{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#060610;padding:24px;gap:28px;}
 
 .result-num{font-family:'Orbitron',monospace;font-size:80px;font-weight:900;transition:all .3s;text-shadow:0 0 40px currentColor;}
@@ -63,7 +64,7 @@ input[type=range]{position:absolute;width:100%;opacity:0;height:40px;cursor:poin
 
 /* Side panel shared */
 .side-panel{background:rgba(8,8,18,.95);border-left:1px solid var(--border);padding:20px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;}
-@media(max-width:680px){.side-panel{border-left:none;border-top:1px solid var(--border);padding:14px 16px;}}
+@media(max-width:750px){.side-panel{border-left:none;border-top:1px solid var(--border);padding:12px 14px;max-height:45vh;overflow-y:auto;}}
 .panel-title{font-family:'Orbitron',monospace;font-size:12px;color:rgba(232,224,208,.3);letter-spacing:2px;}
 .bet-label{font-size:10px;letter-spacing:2px;color:rgba(232,224,208,.3);text-transform:uppercase;margin-bottom:6px;}
 .bet-inp{width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid var(--border);border-radius:9px;color:var(--gold);font-family:'DM Mono',monospace;font-size:15px;font-weight:700;outline:none;transition:border-color .2s;}
@@ -127,6 +128,38 @@ input[type=range]{position:absolute;width:100%;opacity:0;height:40px;cursor:poin
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .toast.win{background:rgba(0,230,118,.2);border:1px solid rgba(0,230,118,.4);color:var(--green);}
 .toast.loss{background:rgba(255,61,113,.2);border:1px solid rgba(255,61,113,.3);color:#ff8ca0;}
+
+/* ── Mobile full fix ── */
+@media(max-width:750px){
+  .main{overflow:visible;height:auto;}
+  .games-wrap{overflow:visible;height:auto;}
+  .game-section.active{display:flex;flex-direction:column;height:auto;}
+  .dice-area{min-height:180px;padding:14px;gap:16px;}
+  .result-num{font-size:52px;}
+  .slider-wrap{max-width:100%;}
+  .target-val{font-size:22px;}
+  .info-chips{gap:6px;}
+  .chip{padding:6px 10px;}
+  .chip-v{font-size:12px;}
+  .limbo-area{min-height:180px;padding:14px;gap:14px;}
+  .limbo-val{font-size:48px;}
+  .limbo-rocket{font-size:34px;}
+  .hilo-area{min-height:180px;padding:14px;gap:12px;}
+  .hilo-card{width:70px;height:100px;font-size:26px;}
+  .hilo-btn{padding:9px 16px;font-size:11px;}
+  .header{height:44px;padding:0 12px;}
+  .game-title{font-size:13px;}
+  .balance{font-size:12px;}
+  .back-btn{padding:5px 10px;font-size:10px;}
+  .gtab{padding:9px 6px;font-size:11px;}
+  .panel-title{font-size:11px;}
+  .bet-inp{font-size:13px;padding:8px 10px;}
+  .bq{font-size:9px;padding:4px;}
+  .roll-btn{font-size:12px;padding:11px;}
+  .stat-v{font-size:12px;}
+  .stat-l{font-size:8px;}
+  .limbo-target-inp{font-size:14px;width:80px;}
+}
 </style>
 </head>
 <body>
