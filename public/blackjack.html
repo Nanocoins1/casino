@@ -25,7 +25,10 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 .back-btn:hover{color:var(--cream);}
 
 .main{flex:1;display:grid;grid-template-columns:1fr 290px;overflow:hidden;}
-@media(max-width:720px){.main{grid-template-columns:1fr;grid-template-rows:1fr auto;}}
+@media(max-width:720px){
+  html,body{height:auto;overflow:auto;}
+  .main{grid-template-columns:1fr;grid-template-rows:auto auto;overflow:visible;}
+}
 
 /* Table */
 .table-area{background:radial-gradient(ellipse at center,#0f3318 0%,#071a0c 70%,#030d06 100%);
@@ -80,7 +83,21 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 /* Right panel */
 .bet-panel{background:rgba(7,7,16,.97);border-left:1px solid var(--border);padding:18px;
   display:flex;flex-direction:column;gap:12px;overflow-y:auto;}
-@media(max-width:720px){.bet-panel{border-left:none;border-top:1px solid var(--border);padding:12px;max-height:50vh;}}
+@media(max-width:720px){
+  .bet-panel{border-left:none;border-top:1px solid var(--border);padding:10px 12px;max-height:45vh;overflow-y:auto;}
+  .table-area{padding:12px;min-height:200px;}
+  .card{width:46px;height:68px;font-size:12px;}
+  .card .suit-center{font-size:20px;}
+  .score-badge{font-size:17px;}
+  .bet-inp{padding:7px 10px;font-size:13px;}
+  .qb{padding:4px 2px;font-size:9px;}
+  .chip{width:38px;height:38px;font-size:10px;}
+  .act-btn{padding:9px;font-size:11px;}
+  .btn-deal{padding:11px;font-size:12px;}
+  .stats-grid{gap:4px;}
+  .sb{padding:6px 4px;}
+  .sb-v{font-size:11px;}
+}
 
 .panel-title{font-family:'Orbitron',monospace;font-size:11px;color:rgba(232,224,208,.3);letter-spacing:2px;}
 .inp-lbl{font-size:10px;letter-spacing:2px;color:rgba(232,224,208,.3);margin-bottom:5px;}

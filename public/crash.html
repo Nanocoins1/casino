@@ -26,9 +26,12 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 .back-btn:hover{color:var(--cream);}
 
 .main{flex:1;display:grid;grid-template-columns:1fr 310px;overflow:hidden;}
-@media(max-width:750px){.main{grid-template-columns:1fr;grid-template-rows:1fr auto;}}
+@media(max-width:750px){
+  html,body{height:auto;overflow:auto;}
+  .main{grid-template-columns:1fr;grid-template-rows:auto auto;overflow:visible;}
+}
 
-.canvas-area{position:relative;background:#020209;overflow:hidden;}
+.canvas-area{position:relative;background:#020209;overflow:hidden;min-height:220px;}
 #gc{position:absolute;inset:0;width:100%;height:100%;}
 
 .hist-bar{position:absolute;top:10px;left:10px;right:10px;display:flex;gap:4px;flex-wrap:nowrap;overflow:hidden;pointer-events:none;z-index:5;}
@@ -67,7 +70,20 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 .wf-ov.flash{animation:wfAnim 1.3s ease-out forwards;}
 
 .bet-panel{background:rgba(7,7,16,.97);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
-@media(max-width:750px){.bet-panel{border-left:none;border-top:1px solid var(--border);max-height:54vh;}}
+@media(max-width:750px){
+  .bet-panel{border-left:none;border-top:1px solid var(--border);max-height:45vh;overflow:hidden;}
+  .canvas-area{min-height:220px;height:220px;}
+  #gc{position:absolute;inset:0;width:100%;height:100%;}
+  .mult-big{font-size:56px!important;}
+  .pinner{padding:8px 10px;gap:7px;}
+  .amt-inp{padding:7px 10px;font-size:13px;}
+  .qb{padding:4px 2px;font-size:9px;}
+  .bet-btn{padding:11px;font-size:12px;}
+  .tab{font-size:10px;padding:9px 0;}
+  .ab-section,.sess-bar{padding:6px 10px;}
+  .sess-grid{gap:4px;}
+  .sb-v{font-size:11px;}
+}
 
 .tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
 .tab{flex:1;padding:11px 0;text-align:center;font-family:'Orbitron',monospace;font-size:11px;
@@ -155,9 +171,9 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 .toast.info{background:rgba(240,192,96,.15);border:1px solid rgba(240,192,96,.3);color:var(--gold);}
 
 @media(max-width:750px){
-  .ab-section,.sess-bar{padding:8px 12px;}
-  .pinner{padding:10px 12px;gap:8px;}
-  .stats-tab{padding:10px 12px;}
+  .ab-section,.sess-bar{padding:6px 10px;}
+  .pinner{padding:8px 10px;gap:7px;}
+  .stats-tab{padding:8px 10px;}
 }
 </style>
 </head>
