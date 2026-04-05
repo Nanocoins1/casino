@@ -517,7 +517,7 @@ function guess(dir){
   renderHistStrip();
 
   if(correct){
-    mult = parseFloat(Math.min(mult * stepMult, 500).toFixed(2));
+    mult = parseFloat(Math.min(mult * stepMult, 1000).toFixed(2));
     stats.streak++;
     if(stats.streak > stats.best) stats.best = stats.streak;
     document.getElementById('cashoutBtn').disabled = false;
