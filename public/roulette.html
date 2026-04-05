@@ -473,9 +473,12 @@ function buildTable(){
 }
 
 // ── Bet management ────────────────────────────────────────────
+var MAX_TOTAL_BET = 50000;
 function placeBet(key, name, type, nums, payout){
   if(spinning) return;
   if(chipSize > tokens){ showToast('Nepakanka žetonų','loss'); return; }
+  var curTotal = 0; for(var kk in bets) curTotal += bets[kk].amount;
+  if(curTotal + chipSize > MAX_TOTAL_BET){ showToast('Maks. statymas 50 000','loss'); return; }
   if(!bets[key]){ bets[key] = {name:String(name), type:type, numbers:nums, amount:0, payout:payout}; }
   bets[key].amount += chipSize;
   tokens -= chipSize;
@@ -593,6 +596,7 @@ function onSpinEnd(winNum){
     }
   }
 
+  totalWon = Math.min(totalWon, 500000);
   tokens += totalWon;
   localStorage.setItem('casino_tokens', tokens);
   updateBal();

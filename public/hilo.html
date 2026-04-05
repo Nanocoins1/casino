@@ -450,6 +450,7 @@ function updateMult(){
 function startRound(){
   betAmt = parseInt(document.getElementById('betInp').value)||100;
   if(betAmt < 10) return;
+  if(betAmt > 50000){ betAmt = 50000; document.getElementById('betInp').value = 50000; }
   if(betAmt > tokens){ showToast('Nepakanka žetonų','loss'); return; }
 
   if(deck.length < 10) buildDeck();
@@ -516,7 +517,7 @@ function guess(dir){
   renderHistStrip();
 
   if(correct){
-    mult = parseFloat((mult * stepMult).toFixed(2));
+    mult = parseFloat(Math.min(mult * stepMult, 500).toFixed(2));
     stats.streak++;
     if(stats.streak > stats.best) stats.best = stats.streak;
     document.getElementById('cashoutBtn').disabled = false;
@@ -549,10 +550,11 @@ function guess(dir){
 }
 
 // ── Cashout ───────────────────────────────────────────────────
+var MAX_WIN = 500000;
 function cashout(){
   if(!playing) return;
   playing = false;
-  var won = Math.floor(betAmt * mult);
+  var won = Math.min(Math.floor(betAmt * mult), MAX_WIN);
   tokens += won;
   localStorage.setItem('casino_tokens', tokens);
   updateBal();
