@@ -103,6 +103,29 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
 .modal{width:380px;padding:36px;background:rgba(8,8,18,.97);border:1px solid rgba(240,192,96,.2);border-radius:18px;box-shadow:0 0 60px rgba(0,0,0,.8);}
 .modal h3{font-family:'Orbitron',monospace;font-size:20px;color:var(--gold);margin-bottom:6px;}
 .modal p{font-size:12px;color:rgba(232,224,208,.35);margin-bottom:20px;}
+
+/* Player detail modal */
+.player-modal{width:min(700px,95vw);max-height:85vh;overflow-y:auto;padding:32px;background:rgba(8,8,18,.98);border:1px solid rgba(240,192,96,.2);border-radius:18px;box-shadow:0 0 80px rgba(0,0,0,.9);}
+.pm-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.pm-name{font-family:'Orbitron',monospace;font-size:22px;color:var(--gold);}
+.pm-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+.pm-stat{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;}
+.pm-stat .v{font-family:'DM Mono',monospace;font-size:18px;color:var(--neon);font-weight:700;}
+.pm-stat .l{font-size:9px;letter-spacing:2px;color:rgba(232,224,208,.3);margin-top:4px;text-transform:uppercase;}
+.pm-bets-title{font-size:11px;letter-spacing:2px;color:rgba(232,224,208,.3);text-transform:uppercase;margin-bottom:10px;}
+.pm-bet-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,.02);margin-bottom:4px;font-size:12px;}
+.pm-bet-row.won{border-left:2px solid var(--green);}
+.pm-bet-row.lost{border-left:2px solid var(--red);}
+.pm-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);}
+
+/* Overview today grid */
+.today-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+.today-box{padding:16px;background:rgba(0,229,255,.04);border:1px solid rgba(0,229,255,.12);border-radius:10px;text-align:center;}
+.today-box .v{font-family:'DM Mono',monospace;font-size:20px;color:var(--neon);font-weight:700;}
+.today-box .l{font-size:9px;letter-spacing:2px;color:rgba(0,229,255,.4);margin-top:4px;text-transform:uppercase;}
+.today-box.profit .v{color:var(--green);}
+.today-box.profit{background:rgba(0,230,118,.04);border-color:rgba(0,230,118,.12);}
+.banned-badge{display:inline-block;padding:1px 7px;border-radius:8px;background:rgba(255,61,113,.2);color:var(--red);font-size:10px;font-weight:700;margin-left:6px;}
 </style>
 </head>
 <body>
@@ -151,17 +174,38 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
     <!-- OVERVIEW -->
     <div class="section active" id="sec-overview">
       <div class="overview-grid" id="overviewGrid">
-        <div class="stat-box"><div class="ico">👥</div><div class="val" id="ov-players">—</div><div class="lbl">Total Players</div></div>
-        <div class="stat-box"><div class="ico">🪙</div><div class="val" id="ov-tokens">—</div><div class="lbl">Tokens in Circulation</div></div>
-        <div class="stat-box"><div class="ico">🏆</div><div class="val" id="ov-jackpot">—</div><div class="lbl">Current Jackpot</div></div>
-        <div class="stat-box"><div class="ico">🌟</div><div class="val" id="ov-richest">—</div><div class="lbl">Richest Player</div></div>
+        <div class="stat-box"><div class="ico">👥</div><div class="val" id="ov-players">—</div><div class="lbl">Viso žaidėjų</div></div>
+        <div class="stat-box"><div class="ico">🪙</div><div class="val" id="ov-tokens">—</div><div class="lbl">Žetonai cirkuliacijoje</div></div>
+        <div class="stat-box"><div class="ico">🏆</div><div class="val" id="ov-jackpot">—</div><div class="lbl">Jackpot</div></div>
+        <div class="stat-box"><div class="ico">🌟</div><div class="val" id="ov-richest">—</div><div class="lbl">Turtingiausias</div></div>
       </div>
+
       <div class="card">
-        <h3>Quick Actions</h3>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-          <button class="btn btn-success" onclick="showTab('give',document.querySelectorAll('.tab')[2])">🎁 Give Tokens to Player</button>
-          <button class="btn btn-info" onclick="showTab('promos',document.querySelectorAll('.tab')[3])">🎫 Create Promo Code</button>
-          <button class="btn btn-ghost" onclick="loadOverview()">🔄 Refresh Stats</button>
+        <h3>📅 Šiandien</h3>
+        <div class="today-grid">
+          <div class="today-box"><div class="v" id="td-active">—</div><div class="l">Aktyvūs žaidėjai</div></div>
+          <div class="today-box"><div class="v" id="td-bets">—</div><div class="l">Statymų skaičius</div></div>
+          <div class="today-box"><div class="v" id="td-new">—</div><div class="l">Nauji žaidėjai</div></div>
+          <div class="today-box"><div class="v" id="td-wagered">—</div><div class="l">Pastatyta žetonų</div></div>
+          <div class="today-box"><div class="v" id="td-paidout">—</div><div class="l">Išmokėta žetonų</div></div>
+          <div class="today-box profit"><div class="v" id="td-profit">—</div><div class="l">Kazino pelnas</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>⚡ Greiti veiksmai</h3>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+          <button class="btn btn-success" onclick="showTab('give',document.querySelectorAll('.tab')[6])">🎁 Give Tokens</button>
+          <button class="btn btn-info" onclick="showTab('promos',document.querySelectorAll('.tab')[7])">🎫 Promo Code</button>
+          <button class="btn btn-ghost" onclick="loadOverview()">🔄 Refresh</button>
+        </div>
+        <div>
+          <label class="card-label">📢 Broadcast žinutė visiems žaidėjams (live chat)</label>
+          <div style="display:flex;gap:8px;margin-top:6px;">
+            <input class="inp-sm" id="broadcastInp" placeholder="Pvz: Kazino techninė pertrauka 22:00..." style="flex:1;"/>
+            <button class="btn btn-primary" onclick="sendChatBroadcast()">Siųsti 📢</button>
+          </div>
+          <div id="broadcastResult" style="font-size:12px;margin-top:6px;"></div>
         </div>
       </div>
     </div>
@@ -270,18 +314,25 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
     <!-- PLAYERS -->
     <div class="section" id="sec-players">
       <div class="card">
-        <h3>All Players</h3>
-        <div style="display:flex;gap:10px;margin-bottom:16px;">
-          <input class="inp-sm" id="searchInp" placeholder="Search by name..." oninput="filterPlayers()" style="flex:1;"/>
-          <button class="btn btn-ghost btn-sm" onclick="loadPlayers()">🔄 Refresh</button>
+        <h3>👥 Žaidėjai</h3>
+        <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+          <input class="inp-sm" id="searchInp" placeholder="Ieškoti pagal vardą..." oninput="filterPlayers()" style="flex:1;min-width:180px;"/>
+          <select class="inp-sm" id="playerSort" onchange="sortPlayers()" style="width:160px;">
+            <option value="tokens">Rūšiuoti: Žetonai ↓</option>
+            <option value="games">Rūšiuoti: Žaidimai ↓</option>
+            <option value="wagered">Rūšiuoti: Pastatyta ↓</option>
+            <option value="joined">Rūšiuoti: Naujausi</option>
+            <option value="active">Rūšiuoti: Aktyvūs</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" onclick="loadPlayers()">🔄</button>
         </div>
         <div class="table-wrap">
           <table>
             <thead><tr>
-              <th>#</th><th>Name</th><th>Tokens</th><th>Level</th><th>XP</th><th>Games</th><th>Joined</th><th>Actions</th>
+              <th>#</th><th>Vardas</th><th>Žetonai</th><th>Lygis</th><th>Žaidimai</th><th>Pastatyta</th><th>Pask. aktyvus</th><th>Veiksmai</th>
             </tr></thead>
             <tbody id="playersBody">
-              <tr><td colspan="8" style="text-align:center;padding:32px;color:rgba(232,224,208,.2);">Loading...</td></tr>
+              <tr><td colspan="8" style="text-align:center;padding:32px;color:rgba(232,224,208,.2);">Kraunama...</td></tr>
             </tbody>
           </table>
         </div>
@@ -533,6 +584,30 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
   </div>
 </div>
 
+<!-- Player detail modal -->
+<div class="modal-overlay" id="playerModal" style="display:none;" onclick="if(event.target===this)closePlayerModal()">
+  <div class="player-modal">
+    <div class="pm-header">
+      <div>
+        <div class="pm-name" id="pm-name">—</div>
+        <div style="font-size:11px;color:rgba(232,224,208,.3);margin-top:4px;" id="pm-meta">—</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="closePlayerModal()">✕ Uždaryti</button>
+    </div>
+    <div class="pm-stats">
+      <div class="pm-stat"><div class="v" id="pm-tokens">—</div><div class="l">Žetonai</div></div>
+      <div class="pm-stat"><div class="v" id="pm-games">—</div><div class="l">Žaidimai</div></div>
+      <div class="pm-stat"><div class="v" id="pm-wagered">—</div><div class="l">Pastatyta</div></div>
+      <div class="pm-stat"><div class="v" id="pm-won">—</div><div class="l">Laimėta</div></div>
+      <div class="pm-stat"><div class="v" id="pm-profit">—</div><div class="l">Pelnas kazinui</div></div>
+      <div class="pm-stat"><div class="v" id="pm-level">—</div><div class="l">Lygis</div></div>
+    </div>
+    <div class="pm-bets-title">Paskutiniai 30 statymų</div>
+    <div id="pm-bets-list" style="max-height:260px;overflow-y:auto;"></div>
+    <div class="pm-actions" id="pm-actions"></div>
+  </div>
+</div>
+
 <!-- Gift modal -->
 <div class="modal-overlay" id="giftModal" style="display:none;">
   <div class="modal">
@@ -614,12 +689,22 @@ const api = (url, opts={}) => fetch(url, {
 // ── Overview ──────────────────────────────────────
 function loadOverview() {
   api('/admin/overview').then(d => {
-    document.getElementById('ov-players').textContent = fmt(d.totalPlayers);
+    document.getElementById('ov-players').textContent = fmt(d.totalPlayers) + (d.bannedPlayers ? ' ('+d.bannedPlayers+' užbl.)' : '');
     document.getElementById('ov-tokens').textContent = fmt(d.totalTokens);
     document.getElementById('ov-jackpot').textContent = '🪙 '+fmt(d.jackpot);
     document.getElementById('ov-richest').textContent = d.richest ? d.richest.name : '—';
+    if(d.today) {
+      document.getElementById('td-active').textContent = d.today.active;
+      document.getElementById('td-bets').textContent = fmt(d.today.bets);
+      document.getElementById('td-new').textContent = '+'+d.today.newPlayers;
+      document.getElementById('td-wagered').textContent = fmt(d.today.wagered);
+      document.getElementById('td-paidout').textContent = fmt(d.today.paidOut);
+      const profit = d.today.houseProfit;
+      const el = document.getElementById('td-profit');
+      el.textContent = (profit >= 0 ? '+' : '') + fmt(profit);
+      el.style.color = profit >= 0 ? 'var(--green)' : 'var(--red)';
+    }
   }).catch(() => {});
-  // Refresh pending bets badge
   api('/admin/pending-bets').then(rows => {
     const badge = document.getElementById('pendingBadge');
     if(rows.length > 0) { badge.style.display='inline'; badge.textContent=rows.length; }
@@ -627,44 +712,142 @@ function loadOverview() {
   }).catch(()=>{});
 }
 
+function sendChatBroadcast() {
+  const msg = document.getElementById('broadcastInp').value.trim();
+  if(!msg) return;
+  api('/admin/broadcast', {method:'POST', body:JSON.stringify({msg})}).then(d => {
+    const el = document.getElementById('broadcastResult');
+    if(d.ok) {
+      el.innerHTML = '<span style="color:var(--green)">✅ Žinutė išsiųsta visiems live chat!</span>';
+      document.getElementById('broadcastInp').value = '';
+      setTimeout(() => el.innerHTML = '', 4000);
+    }
+  }).catch(() => {});
+}
+
 // ── Players ───────────────────────────────────────
 function loadPlayers() {
   api('/admin/players').then(players => {
     allPlayers = players;
-    renderPlayers(players);
+    applyPlayersView();
   });
 }
 
-function filterPlayers() {
+function filterPlayers() { applyPlayersView(); }
+function sortPlayers() { applyPlayersView(); }
+
+function applyPlayersView() {
   const q = document.getElementById('searchInp').value.toLowerCase();
-  renderPlayers(allPlayers.filter(p => p.name.toLowerCase().includes(q)));
+  const sort = document.getElementById('playerSort').value;
+  let list = allPlayers.filter(p => !q || p.name.toLowerCase().includes(q));
+  if(sort === 'tokens') list.sort((a,b) => (b.tokens||0)-(a.tokens||0));
+  else if(sort === 'games') list.sort((a,b) => (b.games_played||0)-(a.games_played||0));
+  else if(sort === 'wagered') list.sort((a,b) => (b.total_wagered||0)-(a.total_wagered||0));
+  else if(sort === 'joined') list.sort((a,b) => (b.created_at||'') > (a.created_at||'') ? 1 : -1);
+  else if(sort === 'active') list.sort((a,b) => (b.last_active||'') > (a.last_active||'') ? 1 : -1);
+  renderPlayers(list);
 }
 
 const LEVEL_NAMES = ['','🥉 Bronze','🥈 Silver','🥇 Gold','💎 Platinum','👑 Diamond','🌟 VIP'];
 
 function renderPlayers(players) {
   const body = document.getElementById('playersBody');
-  if(!players.length) { body.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px;color:rgba(232,224,208,.2);">No players found</td></tr>'; return; }
+  if(!players.length) { body.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px;color:rgba(232,224,208,.2);">Žaidėjų nerasta</td></tr>'; return; }
   body.innerHTML = players.map((p,i) => `
-    <tr>
+    <tr style="${p.banned ? 'opacity:.5;' : ''}">
       <td class="mono" style="color:rgba(232,224,208,.3)">${i+1}</td>
-      <td><strong>${escHtml(p.name)}</strong></td>
+      <td>
+        <span style="cursor:pointer;font-weight:700;text-decoration:underline;text-decoration-color:rgba(240,192,96,.3);"
+          onclick="openPlayerModal('${p.uid}')">${escHtml(p.name)}</span>
+        ${p.banned ? '<span class="banned-badge">BANNED</span>' : ''}
+      </td>
       <td class="mono gold">🪙 ${fmt(p.tokens)}</td>
-      <td>${LEVEL_NAMES[p.level]||p.level}</td>
-      <td class="mono">${fmt(p.xp)}</td>
+      <td style="font-size:12px;">${LEVEL_NAMES[p.level]||p.level}</td>
       <td class="mono">${p.games_played||0}</td>
-      <td class="mono" style="font-size:11px;color:rgba(232,224,208,.35)">${(p.created_at||'').slice(0,10)}</td>
+      <td class="mono" style="color:rgba(232,224,208,.5);">${fmt(p.total_wagered||0)}</td>
+      <td class="mono" style="font-size:10px;color:rgba(232,224,208,.3);">${(p.last_active||'').slice(0,16).replace('T',' ')||'—'}</td>
       <td><div class="actions-cell">
         <button class="btn btn-success btn-sm" onclick="openGift('${p.uid}','${escHtml(p.name)}')">🎁</button>
-        <button class="btn btn-ghost btn-sm" onclick="copyUid('${p.uid}')">📋 UID</button>
-        <button class="btn btn-danger btn-sm" onclick="deletePlayer('${p.uid}','${escHtml(p.name)}')">🗑️</button>
+        ${p.banned
+          ? `<button class="btn btn-info btn-sm" onclick="unbanPlayer('${p.uid}','${escHtml(p.name)}')">✅ Unban</button>`
+          : `<button class="btn btn-danger btn-sm" onclick="banPlayer('${p.uid}','${escHtml(p.name)}')">🚫 Ban</button>`
+        }
+        <button class="btn btn-ghost btn-sm" onclick="deletePlayer('${p.uid}','${escHtml(p.name)}')">🗑️</button>
       </div></td>
     </tr>
   `).join('');
 }
 
 function copyUid(uid) {
-  navigator.clipboard.writeText(uid).then(() => toast('UID copied!','ok'));
+  navigator.clipboard.writeText(uid).then(() => toast('UID nukopijuotas!','ok'));
+}
+
+// ── Ban / Unban ───────────────────────────────────
+function banPlayer(uid, name) {
+  if(!confirm('Užblokuoti žaidėją "'+name+'"? Jis negalės prisijungti.')) return;
+  api('/admin/ban/'+uid, {method:'POST'}).then(d => {
+    if(d.ok) { toast('🚫 '+name+' užblokuotas','ok'); loadPlayers(); }
+  });
+}
+function unbanPlayer(uid, name) {
+  api('/admin/unban/'+uid, {method:'POST'}).then(d => {
+    if(d.ok) { toast('✅ '+name+' atblokuotas','ok'); loadPlayers(); }
+  });
+}
+
+// ── Player detail modal ───────────────────────────
+function openPlayerModal(uid) {
+  document.getElementById('playerModal').style.display = 'flex';
+  document.getElementById('pm-name').textContent = '⏳ Kraunama...';
+  document.getElementById('pm-bets-list').innerHTML = '';
+  document.getElementById('pm-actions').innerHTML = '';
+  api('/admin/player/'+uid).then(d => {
+    const p = d.user;
+    document.getElementById('pm-name').innerHTML = escHtml(p.name) + (p.banned ? ' <span class="banned-badge">BANNED</span>' : '');
+    document.getElementById('pm-meta').textContent = 'UID: '+p.uid + (d.email ? '  •  '+d.email : '') + '  •  KYC: '+(d.kycStatus||'unverified') + '  •  Prisijungė: '+(p.created_at||'').slice(0,10);
+    document.getElementById('pm-tokens').textContent = '🪙 '+fmt(p.tokens);
+    document.getElementById('pm-games').textContent = p.games_played||0;
+    document.getElementById('pm-level').textContent = LEVEL_NAMES[p.level]||p.level;
+    const wagered = d.stats?.wagered||0;
+    const wonTotal = d.stats?.won_total||0;
+    document.getElementById('pm-wagered').textContent = fmt(wagered);
+    document.getElementById('pm-won').textContent = fmt(wonTotal);
+    const profit = wagered - wonTotal;
+    const profEl = document.getElementById('pm-profit');
+    profEl.textContent = (profit>=0?'+':'')+fmt(profit);
+    profEl.style.color = profit>=0 ? 'var(--green)' : 'var(--red)';
+
+    // Recent bets
+    const bl = document.getElementById('pm-bets-list');
+    if(!d.recentBets || !d.recentBets.length) {
+      bl.innerHTML = '<div style="color:rgba(232,224,208,.25);font-size:12px;padding:8px;">Statymų istorija tuščia</div>';
+    } else {
+      bl.innerHTML = d.recentBets.map(b => `
+        <div class="pm-bet-row ${b.won ? 'won' : 'lost'}">
+          <span style="min-width:80px;font-size:10px;color:rgba(232,224,208,.35);">${(b.ts||'').slice(0,16).replace('T',' ')}</span>
+          <span style="min-width:70px;color:rgba(232,224,208,.6);font-size:11px;">${escHtml(b.game||'')}</span>
+          <span class="mono" style="min-width:60px;">🪙${fmt(b.bet)}</span>
+          <span class="mono" style="color:${b.won?'var(--green)':'var(--red)'};">${b.won ? '+'+fmt(b.result) : '-'+fmt(b.bet)}</span>
+        </div>
+      `).join('');
+    }
+
+    // Actions
+    document.getElementById('pm-actions').innerHTML = `
+      <button class="btn btn-success btn-sm" onclick="openGift('${p.uid}','${escHtml(p.name)}');closePlayerModal()">🎁 Dovanoti žetonus</button>
+      ${p.banned
+        ? `<button class="btn btn-info btn-sm" onclick="unbanPlayer('${p.uid}','${escHtml(p.name)}');closePlayerModal()">✅ Atblokuoti</button>`
+        : `<button class="btn btn-danger btn-sm" onclick="banPlayer('${p.uid}','${escHtml(p.name)}');closePlayerModal()">🚫 Užblokuoti</button>`
+      }
+      <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('${p.uid}').then(()=>toast('UID nukopijuotas','ok'))">📋 Kopijuoti UID</button>
+      <button class="btn btn-danger btn-sm" onclick="if(confirm('Ištrinti žaidėją?')){api('/admin/player/${p.uid}',{method:'DELETE'}).then(()=>{toast('Žaidėjas ištrintas','ok');closePlayerModal();loadPlayers();loadOverview();})}">🗑️ Ištrinti</button>
+    `;
+  }).catch(() => {
+    document.getElementById('pm-name').textContent = '❌ Nepavyko įkelti';
+  });
+}
+function closePlayerModal() {
+  document.getElementById('playerModal').style.display = 'none';
 }
 
 function deletePlayer(uid, name) {

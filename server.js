@@ -1279,9 +1279,52 @@ app.post('/api/pf/blackjack', express.json(), (req,res)=>{
 
 // ── ADMIN PANEL ──────────────────────────────────────────
 // Get all players
+// Ensure banned column exists (migration safe)
+try { db.exec('ALTER TABLE users ADD COLUMN banned INTEGER DEFAULT 0'); } catch(e){}
+
 app.get('/admin/players', adminAuth, (req,res)=>{
-  const players = db.prepare('SELECT uid, name, tokens, level, xp, games_played, total_won, created_at FROM users ORDER BY tokens DESC').all();
+  const players = db.prepare(`
+    SELECT u.uid, u.name, u.tokens, u.level, u.xp, u.games_played, u.total_won, u.created_at, u.banned,
+      (SELECT MAX(ts) FROM game_log WHERE uid=u.uid) as last_active,
+      (SELECT SUM(bet) FROM game_log WHERE uid=u.uid) as total_wagered,
+      (SELECT COUNT(*) FROM game_log WHERE uid=u.uid) as bet_count
+    FROM users u ORDER BY u.tokens DESC
+  `).all();
   res.json(players);
+});
+
+// Player detail
+app.get('/admin/player/:uid', adminAuth, (req,res)=>{
+  const uid = req.params.uid;
+  const user = db.prepare('SELECT * FROM users WHERE uid=?').get(uid);
+  if(!user) return res.status(404).json({error:'Not found'});
+  const recentBets = db.prepare('SELECT * FROM game_log WHERE uid=? ORDER BY ts DESC LIMIT 30').all(uid);
+  const stats = db.prepare('SELECT COUNT(*) as cnt, SUM(bet) as wagered, SUM(CASE WHEN won=1 THEN result ELSE 0 END) as won_total FROM game_log WHERE uid=?').get(uid);
+  const kycRow = db.prepare('SELECT status FROM kyc WHERE uid=?').get(uid);
+  const authRow = db.prepare('SELECT email FROM auth WHERE uid=?').get(uid);
+  res.json({user, recentBets, stats, kycStatus: kycRow?.status||'unverified', email: authRow?.email||null});
+});
+
+// Ban / unban
+app.post('/admin/ban/:uid', adminAuth, (req,res)=>{
+  db.prepare('UPDATE users SET banned=1 WHERE uid=?').run(req.params.uid);
+  // Kick active sessions
+  db.prepare('DELETE FROM sessions WHERE uid=?').run(req.params.uid);
+  const u = db.prepare('SELECT name FROM users WHERE uid=?').get(req.params.uid);
+  res.json({ok:true, name: u?.name});
+});
+app.post('/admin/unban/:uid', adminAuth, (req,res)=>{
+  db.prepare('UPDATE users SET banned=0 WHERE uid=?').run(req.params.uid);
+  const u = db.prepare('SELECT name FROM users WHERE uid=?').get(req.params.uid);
+  res.json({ok:true, name: u?.name});
+});
+
+// Broadcast to global chat
+app.post('/admin/broadcast', adminAuth, express.json(), (req,res)=>{
+  const {msg} = req.body;
+  if(!msg) return res.status(400).json({error:'No message'});
+  io.emit('globalChat', {uid:'__admin', name:'🛡️ HATHOR Admin', msg, levelEmoji:'👑', time:Date.now()});
+  res.json({ok:true});
 });
 
 // Give tokens to player
@@ -1366,10 +1409,26 @@ app.delete('/admin/player/:uid', adminAuth, (req,res)=>{
 // Stats overview
 app.get('/admin/overview', adminAuth, (req,res)=>{
   const totalPlayers = db.prepare('SELECT COUNT(*) as c FROM users').get().c;
+  const bannedPlayers = db.prepare('SELECT COUNT(*) as c FROM users WHERE banned=1').get().c;
   const totalTokens = db.prepare('SELECT SUM(tokens) as s FROM users').get().s||0;
   const richest = db.prepare('SELECT name,tokens FROM users ORDER BY tokens DESC LIMIT 1').get();
   const newest = db.prepare('SELECT name,created_at FROM users ORDER BY created_at DESC LIMIT 1').get();
-  res.json({totalPlayers, totalTokens, richest, newest, jackpot: getJackpot()});
+  const todayStr = new Date().toISOString().slice(0,10);
+  const todayBets = db.prepare("SELECT COUNT(*) as c, SUM(bet) as wagered, SUM(CASE WHEN won=1 THEN result ELSE 0 END) as paid_out FROM game_log WHERE ts >= ?").get(todayStr+'T00:00:00');
+  const activeToday = db.prepare("SELECT COUNT(DISTINCT uid) as c FROM game_log WHERE ts >= ?").get(todayStr+'T00:00:00');
+  const newToday = db.prepare("SELECT COUNT(*) as c FROM users WHERE created_at >= ?").get(todayStr+'T00:00:00');
+  const houseProfit = (todayBets.wagered||0) - (todayBets.paid_out||0);
+  res.json({
+    totalPlayers, bannedPlayers, totalTokens, richest, newest, jackpot: getJackpot(),
+    today: {
+      bets: todayBets.c||0,
+      wagered: todayBets.wagered||0,
+      paidOut: todayBets.paid_out||0,
+      houseProfit,
+      active: activeToday.c||0,
+      newPlayers: newToday.c||0
+    }
+  });
 });
 
 
@@ -1441,6 +1500,7 @@ app.post('/api/auth/login', express.json(), async (req, res) => {
     if(hash !== authRow.password_hash) return res.status(401).json({error:'Neteisingas el. paštas arba slaptažodis'});
     const user = getUser(authRow.uid);
     if(!user) return res.status(404).json({error:'Paskyra nerasta'});
+    if(user.banned) return res.status(403).json({error:'Ši paskyra užblokuota. Susisiekite su palaikymo tarnyba.'});
     const token = makeSession(authRow.uid);
     const kycRow = db.prepare('SELECT status FROM kyc WHERE uid=?').get(authRow.uid);
     res.json({ok:true, token, uid:authRow.uid, user:{
