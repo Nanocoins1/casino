@@ -345,5 +345,6 @@ buildGrid();
 var defaultMax=getMult(TOTAL-mines,mines);
 document.getElementById('multSub').textContent='Max: x'+defaultMax.toFixed(2)+' su 1 mina';
 </script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
 </body>
 </html>

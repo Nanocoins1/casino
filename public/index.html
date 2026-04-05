@@ -7763,5 +7763,144 @@ function App(){
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
 </script>
+
+<script>
+// ── Service Worker Registration ──────────────────────────────
+if('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js').then(function(reg) {
+      console.log('[PWA] SW registered, scope:', reg.scope);
+      // Check for updates every 60 minutes
+      setInterval(function(){ reg.update(); }, 3600000);
+    }).catch(function(err) {
+      console.log('[PWA] SW registration failed:', err);
+    });
+  });
+}
+
+// ── Install Prompt ────────────────────────────────────────────
+var pwaPrompt = null;
+var pwaInstalled = localStorage.getItem('pwa_installed') === '1';
+
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  pwaPrompt = e;
+  if(!pwaInstalled) {
+    setTimeout(showInstallBanner, 8000); // show after 8s
+  }
+});
+
+window.addEventListener('appinstalled', function() {
+  localStorage.setItem('pwa_installed', '1');
+  pwaInstalled = true;
+  hideInstallBanner();
+  console.log('[PWA] App installed!');
+});
+
+function showInstallBanner() {
+  if(document.getElementById('pwa-banner')) return;
+  var banner = document.createElement('div');
+  banner.id = 'pwa-banner';
+  banner.innerHTML = [
+    '<div style="display:flex;align-items:center;gap:12px;flex:1;">',
+      '<div style="font-size:28px;flex-shrink:0;">🎰</div>',
+      '<div>',
+        '<div style="font-family:\'Orbitron\',monospace;font-size:12px;font-weight:900;color:#f0c060;letter-spacing:1px;">ĮDIEGTI HATHOR</div>',
+        '<div style="font-size:11px;color:rgba(232,224,208,.5);margin-top:2px;">Kaip app telefone — greičiau, patogiau</div>',
+      '</div>',
+    '</div>',
+    '<div style="display:flex;gap:8px;flex-shrink:0;">',
+      '<button onclick="doInstallPWA()" style="padding:8px 16px;border-radius:8px;border:none;',
+        'background:linear-gradient(135deg,#c9a84c,#f0c060);color:#060400;',
+        'font-family:\'Orbitron\',monospace;font-size:11px;font-weight:900;cursor:pointer;">ĮDIEGTI</button>',
+      '<button onclick="hideInstallBanner()" style="padding:8px 12px;border-radius:8px;',
+        'border:1px solid rgba(255,255,255,.1);background:transparent;',
+        'color:rgba(232,224,208,.4);font-size:11px;cursor:pointer;">✕</button>',
+    '</div>'
+  ].join('');
+  banner.style.cssText = [
+    'position:fixed;bottom:0;left:0;right:0;z-index:9999;',
+    'background:rgba(6,6,18,.97);border-top:1px solid rgba(240,192,96,.2);',
+    'padding:14px 18px;display:flex;align-items:center;gap:12px;',
+    'box-shadow:0 -8px 32px rgba(0,0,0,.6);',
+    'animation:pwaSlideUp .35s cubic-bezier(.34,1.56,.64,1);'
+  ].join('');
+
+  // Add keyframe if not exists
+  if(!document.getElementById('pwa-style')) {
+    var st = document.createElement('style');
+    st.id = 'pwa-style';
+    st.textContent = '@keyframes pwaSlideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}';
+    document.head.appendChild(st);
+  }
+  document.body.appendChild(banner);
+}
+
+function hideInstallBanner() {
+  var b = document.getElementById('pwa-banner');
+  if(b) {
+    b.style.transform = 'translateY(100%)';
+    b.style.transition = 'transform .3s ease-in';
+    setTimeout(function(){ if(b.parentNode) b.parentNode.removeChild(b); }, 300);
+  }
+  localStorage.setItem('pwa_install_dismissed', Date.now());
+}
+
+function doInstallPWA() {
+  if(!pwaPrompt) return;
+  pwaPrompt.prompt();
+  pwaPrompt.userChoice.then(function(result) {
+    if(result.outcome === 'accepted') {
+      localStorage.setItem('pwa_installed', '1');
+      hideInstallBanner();
+    }
+    pwaPrompt = null;
+  });
+}
+
+// iOS Safari: show manual instructions (no beforeinstallprompt on iOS)
+function isIOS() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+}
+function isInStandaloneMode() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+}
+
+if(isIOS() && !isInStandaloneMode() && !pwaInstalled) {
+  setTimeout(function() {
+    if(document.getElementById('pwa-banner')) return;
+    var dismissed = localStorage.getItem('pwa_install_dismissed');
+    if(dismissed && Date.now() - parseInt(dismissed) < 86400000 * 3) return; // 3 days
+    var banner = document.createElement('div');
+    banner.id = 'pwa-banner';
+    banner.innerHTML = [
+      '<div style="display:flex;align-items:center;gap:12px;flex:1;">',
+        '<div style="font-size:24px;flex-shrink:0;">📲</div>',
+        '<div>',
+          '<div style="font-family:\'Orbitron\',monospace;font-size:11px;font-weight:900;color:#f0c060;">ĮDIEGTI iPhone/iPad</div>',
+          '<div style="font-size:11px;color:rgba(232,224,208,.5);margin-top:2px;">Spustelėkite <strong style="color:#f0c060;">⎙ Bendrinti</strong> → <strong style="color:#f0c060;">Pridėti prie pagrindinio ekrano</strong></div>',
+        '</div>',
+      '</div>',
+      '<button onclick="hideInstallBanner()" style="padding:8px 12px;border-radius:8px;',
+        'border:1px solid rgba(255,255,255,.1);background:transparent;',
+        'color:rgba(232,224,208,.4);font-size:14px;cursor:pointer;flex-shrink:0;">✕</button>'
+    ].join('');
+    banner.style.cssText = [
+      'position:fixed;bottom:0;left:0;right:0;z-index:9999;',
+      'background:rgba(6,6,18,.97);border-top:1px solid rgba(240,192,96,.2);',
+      'padding:14px 18px;display:flex;align-items:center;gap:12px;',
+      'box-shadow:0 -8px 32px rgba(0,0,0,.6);',
+      'animation:pwaSlideUp .35s cubic-bezier(.34,1.56,.64,1);'
+    ].join('');
+    if(!document.getElementById('pwa-style')) {
+      var st = document.createElement('style');
+      st.id = 'pwa-style';
+      st.textContent = '@keyframes pwaSlideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}';
+      document.head.appendChild(st);
+    }
+    document.body.appendChild(banner);
+  }, 10000);
+}
+</script>
 </body>
 </html>
