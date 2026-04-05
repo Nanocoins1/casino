@@ -1896,14 +1896,26 @@ body { color: #e8e2d4 !important; }
 .achievement-popup .ach-reward { font-family:'DM Mono',monospace; font-size:18px; color:var(--green); margin-top:8px; }
 
 /* ── Global Live Chat ── */
-.gchat-fab{position:fixed;bottom:90px;right:24px;width:50px;height:50px;border-radius:50%;
+.gchat-wrap{position:fixed;bottom:90px;right:24px;z-index:450;}
+.gchat-fab{width:50px;height:50px;border-radius:50%;
   background:linear-gradient(135deg,#1a0a40,#3d1f90);border:2px solid rgba(124,58,237,0.4);
-  display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:450;
-  box-shadow:0 4px 18px rgba(124,58,237,0.35);transition:all .2s;font-size:22px;}
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  box-shadow:0 4px 18px rgba(124,58,237,0.35);transition:all .2s;font-size:22px;position:relative;}
 .gchat-fab:hover{transform:scale(1.1);box-shadow:0 6px 24px rgba(124,58,237,0.5);}
 .gchat-fab-badge{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;
   font-size:9px;font-weight:900;min-width:16px;height:16px;border-radius:8px;
   display:flex;align-items:center;justify-content:center;padding:0 3px;}
+.gchat-hide-btn{position:absolute;top:-6px;left:-6px;width:18px;height:18px;border-radius:50%;
+  background:rgba(40,40,60,0.95);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);
+  font-size:9px;display:none;align-items:center;justify-content:center;cursor:pointer;
+  transition:all .15s;line-height:1;}
+.gchat-fab:hover .gchat-hide-btn{display:flex;}
+.gchat-hide-btn:hover{background:rgba(255,61,113,0.7);color:#fff;border-color:var(--red);}
+.gchat-restore{position:fixed;bottom:90px;right:24px;z-index:450;
+  padding:5px 10px;border-radius:20px;background:rgba(30,20,60,0.75);
+  border:1px solid rgba(124,58,237,0.3);color:rgba(232,224,208,0.35);
+  font-size:10px;cursor:pointer;transition:all .2s;letter-spacing:1px;}
+.gchat-restore:hover{color:rgba(232,224,208,0.8);background:rgba(61,31,144,0.5);}
 
 .gchat-panel{position:fixed;bottom:150px;right:24px;width:320px;height:440px;
   background:rgba(6,6,18,.97);border:1px solid rgba(124,58,237,0.3);border-radius:16px;
@@ -7002,10 +7014,22 @@ function AchievementPopup({mission, onClaim}) {
 // ═══════════════════════════════════════════════════
 function GlobalChat({user}) {
   const [open,setOpen]=React.useState(false);
+  const [hidden,setHidden]=React.useState(function(){ return localStorage.getItem('chat_hidden')==='1'; });
   const [msgs,setMsgs]=React.useState([]);
   const [inp,setInp]=React.useState('');
   const [unread,setUnread]=React.useState(0);
   const [online,setOnline]=React.useState(1+Math.floor(Math.random()*18+5));
+
+  function hideChat(e){
+    e.stopPropagation();
+    setHidden(true);
+    setOpen(false);
+    localStorage.setItem('chat_hidden','1');
+  }
+  function restoreChat(){
+    setHidden(false);
+    localStorage.removeItem('chat_hidden');
+  }
   const msgsEndRef=React.useRef(null);
   const BOT_NAMES=['Raimis','Viktor','Elena','Carlos','Marta','Aleksas','Yuki','Max'];
   const BOT_MSGS=['Sėkmės visiems! 🍀','Kas šiandien laimi? 😄','10x crash!! 🚀','Dievai!! Pralaimėjau 5k...','gg wp','Bandome Blackjack','kiek max laimi krioklyje?','GG! +2500 🪙'];
@@ -7066,14 +7090,20 @@ function GlobalChat({user}) {
 
   return(
     <React.Fragment>
+      {/* Hidden — show restore link */}
+      {hidden&&<div className="gchat-restore" onClick={restoreChat}>💬 chat</div>}
+
       {/* FAB button */}
-      <div className="gchat-fab" onClick={()=>setOpen(o=>!o)}>
-        💬
-        {unread>0&&!open&&<div className="gchat-fab-badge">{unread>9?'9+':unread}</div>}
-      </div>
+      {!hidden&&<div className="gchat-wrap">
+        <div className="gchat-fab" onClick={()=>setOpen(o=>!o)}>
+          💬
+          {unread>0&&!open&&<div className="gchat-fab-badge">{unread>9?'9+':unread}</div>}
+          <div className="gchat-hide-btn" onClick={hideChat} title="Slėpti chat">✕</div>
+        </div>
+      </div>}
 
       {/* Chat panel */}
-      <div className={'gchat-panel'+(open?' open':'')}>
+      {!hidden&&<div className={'gchat-panel'+(open?' open':'')}>
         <div className="gchat-hdr">
           <div>
             <div className="gchat-title">💬 LIVE CHAT</div>
@@ -7124,7 +7154,7 @@ function GlobalChat({user}) {
             </div>
           )}
         </div>
-      </div>
+      </div>}
     </React.Fragment>
   );
 }
