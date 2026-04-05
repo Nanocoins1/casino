@@ -455,5 +455,6 @@ function showTab(name, el) {
   if(name==='history') loadHistory();
 }
 </script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
 </body>
 </html>
