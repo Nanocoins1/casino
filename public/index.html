@@ -1895,6 +1895,63 @@ body { color: #e8e2d4 !important; }
 .achievement-popup p { font-size:11px; color:rgba(232,224,208,.4); margin-top:4px; letter-spacing:1px; }
 .achievement-popup .ach-reward { font-family:'DM Mono',monospace; font-size:18px; color:var(--green); margin-top:8px; }
 
+/* ── Global Live Chat ── */
+.gchat-fab{position:fixed;bottom:90px;right:24px;width:50px;height:50px;border-radius:50%;
+  background:linear-gradient(135deg,#1a0a40,#3d1f90);border:2px solid rgba(124,58,237,0.4);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:450;
+  box-shadow:0 4px 18px rgba(124,58,237,0.35);transition:all .2s;font-size:22px;}
+.gchat-fab:hover{transform:scale(1.1);box-shadow:0 6px 24px rgba(124,58,237,0.5);}
+.gchat-fab-badge{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;
+  font-size:9px;font-weight:900;min-width:16px;height:16px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;padding:0 3px;}
+
+.gchat-panel{position:fixed;bottom:150px;right:24px;width:320px;height:440px;
+  background:rgba(6,6,18,.97);border:1px solid rgba(124,58,237,0.3);border-radius:16px;
+  display:flex;flex-direction:column;z-index:449;box-shadow:0 16px 48px rgba(0,0,0,.7);
+  transform:translateY(20px) scale(.95);opacity:0;pointer-events:none;
+  transition:all .25s cubic-bezier(.34,1.56,.64,1);}
+.gchat-panel.open{transform:translateY(0) scale(1);opacity:1;pointer-events:all;}
+@media(max-width:480px){.gchat-panel{width:calc(100vw - 16px);right:8px;bottom:80px;}}
+
+.gchat-hdr{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;
+  align-items:center;justify-content:space-between;flex-shrink:0;}
+.gchat-title{font-family:'Orbitron',monospace;font-size:12px;font-weight:900;letter-spacing:1px;
+  color:rgba(232,224,208,.8);}
+.gchat-online{font-size:10px;color:rgba(0,230,118,.6);display:flex;align-items:center;gap:4px;}
+.gchat-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:gcPulse 1.5s infinite;}
+@keyframes gcPulse{0%,100%{opacity:1}50%{opacity:.3}}
+.gchat-close{cursor:pointer;color:rgba(232,224,208,.3);font-size:18px;line-height:1;transition:color .15s;}
+.gchat-close:hover{color:var(--cream);}
+
+.gchat-msgs{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:5px;}
+.gchat-msgs::-webkit-scrollbar{width:3px;}
+.gchat-msgs::-webkit-scrollbar-thumb{background:rgba(124,58,237,.4);border-radius:2px;}
+
+.gchat-msg{display:flex;gap:7px;align-items:flex-start;}
+.gchat-avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#3d1f90,#7c3aed);
+  display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+.gchat-bubble{flex:1;min-width:0;}
+.gchat-meta{display:flex;align-items:center;gap:5px;margin-bottom:2px;}
+.gchat-name{font-size:11px;font-weight:700;color:var(--gold);}
+.gchat-lv{font-size:11px;}
+.gchat-time{font-size:9px;color:rgba(232,224,208,.2);}
+.gchat-text{font-size:12px;color:rgba(232,224,208,.7);line-height:1.45;word-break:break-word;}
+.gchat-system{font-size:10px;color:rgba(0,229,255,.35);text-align:center;padding:3px 0;font-style:italic;}
+.gchat-rain{background:rgba(240,192,96,.08);border:1px solid rgba(240,192,96,.2);border-radius:8px;
+  padding:6px 10px;font-size:11px;color:var(--gold);text-align:center;}
+
+.gchat-inp-row{padding:10px 12px;border-top:1px solid rgba(255,255,255,.06);display:flex;gap:7px;flex-shrink:0;}
+.gchat-inp{flex:1;padding:8px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.08);
+  border-radius:8px;color:var(--cream);font-family:'Space Grotesk',sans-serif;font-size:12px;outline:none;}
+.gchat-inp:focus{border-color:rgba(124,58,237,.4);}
+.gchat-send{padding:8px 12px;border-radius:8px;border:none;background:rgba(124,58,237,.7);
+  color:#fff;cursor:pointer;font-size:14px;transition:background .15s;flex-shrink:0;}
+.gchat-send:hover{background:rgba(124,58,237,1);}
+
+.gchat-emojis{padding:6px 12px;display:flex;gap:5px;border-bottom:1px solid rgba(255,255,255,.04);}
+.gchat-emo{font-size:18px;cursor:pointer;transition:transform .15s;padding:2px;}
+.gchat-emo:hover{transform:scale(1.3);}
+
 /* ── Social win toast ── */
 .social-win {
   position: fixed; bottom: 90px; left: 24px; z-index: 400;
@@ -6910,6 +6967,138 @@ function AchievementPopup({mission, onClaim}) {
 }
 
 // ═══════════════════════════════════════════════════
+// GLOBAL LIVE CHAT
+// ═══════════════════════════════════════════════════
+function GlobalChat({user}) {
+  const [open,setOpen]=React.useState(false);
+  const [msgs,setMsgs]=React.useState([]);
+  const [inp,setInp]=React.useState('');
+  const [unread,setUnread]=React.useState(0);
+  const [online,setOnline]=React.useState(1+Math.floor(Math.random()*18+5));
+  const msgsEndRef=React.useRef(null);
+  const BOT_NAMES=['Raimis','Viktor','Elena','Carlos','Marta','Aleksas','Yuki','Max'];
+  const BOT_MSGS=['Sėkmės visiems! 🍀','Kas šiandien laimi? 😄','10x crash!! 🚀','Dievai!! Pralaimėjau 5k...','gg wp','Bandome Blackjack','kiek max laimi krioklyje?','GG! +2500 🪙'];
+  const QUICK_EMOJIS=['🔥','💰','🚀','💎','🎰','👑','😂','🍀'];
+
+  React.useEffect(()=>{
+    // System welcome
+    setMsgs([{id:0,system:true,text:'Sveiki atvykę į HATHOR lobį! Kalbėkitės su kitais žaidėjais 💬'}]);
+
+    // Listen for real chat
+    socket.on('globalChat',(entry)=>{
+      const newMsg={id:Date.now()+Math.random(),uid:entry.uid,name:entry.name,
+        text:entry.msg,lv:entry.levelEmoji||'🥉',time:fmtTime(entry.time)};
+      setMsgs(m=>[...m.slice(-79),newMsg]);
+      if(!open) setUnread(u=>u+1);
+    });
+
+    // Simulate bot activity
+    const simBot=()=>{
+      const name=BOT_NAMES[Math.floor(Math.random()*BOT_NAMES.length)];
+      const text=BOT_MSGS[Math.floor(Math.random()*BOT_MSGS.length)];
+      const botMsg={id:Date.now()+Math.random(),name,text,lv:['🥉','🥈','🥇'][Math.floor(Math.random()*3)],time:fmtTime(Date.now()),bot:true};
+      setMsgs(m=>[...m.slice(-79),botMsg]);
+      if(!open) setUnread(u=>u+1);
+      // Fluctuate online count
+      setOnline(n=>Math.max(8,Math.min(40,n+(Math.random()>0.5?1:-1))));
+    };
+    const t=setInterval(simBot,12000+Math.random()*20000);
+    const t2=setTimeout(simBot,5000);
+
+    return()=>{ socket.off('globalChat'); clearInterval(t); clearTimeout(t2); };
+  },[]);
+
+  React.useEffect(()=>{
+    if(open){
+      setUnread(0);
+      setTimeout(()=>{ if(msgsEndRef.current) msgsEndRef.current.scrollIntoView({behavior:'smooth'}); },100);
+    }
+  },[open,msgs]);
+
+  function fmtTime(ts){
+    const d=new Date(ts);
+    return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');
+  }
+
+  function sendMsg(){
+    if(!inp.trim()||!user) return;
+    socket.emit('chatMsg',{msg:inp.trim(),roomId:null});
+    setInp('');
+  }
+
+  function sendEmoji(e){
+    if(!user) return;
+    socket.emit('chatMsg',{msg:e,roomId:null});
+  }
+
+  function handleKey(e){ if(e.key==='Enter') sendMsg(); }
+
+  return(
+    <React.Fragment>
+      {/* FAB button */}
+      <div className="gchat-fab" onClick={()=>setOpen(o=>!o)}>
+        💬
+        {unread>0&&!open&&<div className="gchat-fab-badge">{unread>9?'9+':unread}</div>}
+      </div>
+
+      {/* Chat panel */}
+      <div className={'gchat-panel'+(open?' open':'')}>
+        <div className="gchat-hdr">
+          <div>
+            <div className="gchat-title">💬 LIVE CHAT</div>
+          </div>
+          <div className="gchat-online">
+            <div className="gchat-dot"></div>
+            {online} online
+          </div>
+          <div className="gchat-close" onClick={()=>setOpen(false)}>✕</div>
+        </div>
+
+        <div className="gchat-emojis">
+          {QUICK_EMOJIS.map(function(e){
+            return <span key={e} className="gchat-emo" onClick={function(){sendEmoji(e);}}>{e}</span>;
+          })}
+        </div>
+
+        <div className="gchat-msgs">
+          {msgs.map(function(m){
+            if(m.system) return <div key={m.id} className="gchat-system">{m.text}</div>;
+            return(
+              <div key={m.id} className="gchat-msg">
+                <div className="gchat-avatar">{m.lv}</div>
+                <div className="gchat-bubble">
+                  <div className="gchat-meta">
+                    <span className="gchat-name" style={m.uid&&user&&m.uid===user.uid?{color:'var(--neon)'}:{}}>{m.name}</span>
+                    <span className="gchat-lv">{m.lv}</span>
+                    <span className="gchat-time">{m.time}</span>
+                  </div>
+                  <div className="gchat-text">{m.text}</div>
+                </div>
+              </div>
+            );
+          })}
+          <div ref={msgsEndRef}/>
+        </div>
+
+        <div className="gchat-inp-row">
+          {user ? (
+            <React.Fragment>
+              <input className="gchat-inp" value={inp} onChange={function(e){setInp(e.target.value);}}
+                onKeyDown={handleKey} placeholder="Parašykite žinutę..." maxLength={200}/>
+              <button className="gchat-send" onClick={sendMsg}>➤</button>
+            </React.Fragment>
+          ) : (
+            <div style={{flex:1,fontSize:11,color:'rgba(232,224,208,.3)',textAlign:'center',padding:'8px 0'}}>
+              Prisijunkite norėdami rašyti...
+            </div>
+          )}
+        </div>
+      </div>
+    </React.Fragment>
+  );
+}
+
+// ═══════════════════════════════════════════════════
 // SOCIAL WINS
 // ═══════════════════════════════════════════════════
 function SocialWins() {
@@ -7541,6 +7730,7 @@ function App(){
       <JackpotTicker/>
       <AICroupier user={user} currentPage={page} t={t} open={viktorOpen} onClose={()=>setViktorOpen(false)}/>
       <SocialWins/>
+      <GlobalChat user={user}/>
       {user&&<SupportChat user={user} t={t} open={supportOpen} onClose={()=>setSupportOpen(false)}/>}
       {user&&<MissionsPanel user={user} missions={missions}/>}
       {pendingReward&&<AchievementPopup mission={pendingReward} onClaim={()=>{
