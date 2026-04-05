@@ -17,6 +17,7 @@
 }
 html,body{height:100%;overflow:hidden;}
 body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cream);display:flex;flex-direction:column;}
+@media(max-width:750px){html,body{height:auto;overflow:auto;}body{overflow:visible;}}
 
 /* ── Header ── */
 .header{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;
@@ -33,7 +34,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 
 /* ── Main layout ── */
 .main{flex:1;display:grid;grid-template-columns:1fr 300px;overflow:hidden;}
-@media(max-width:900px){.main{grid-template-columns:1fr;grid-template-rows:1fr auto;}}
+@media(max-width:900px){.main{grid-template-columns:1fr;grid-template-rows:auto auto;overflow:visible;height:auto;}}
 
 /* ── Table area ── */
 .table-area{display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -214,12 +215,47 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 
 /* ── Mobile panel ── */
 @media(max-width:900px){
-  .right-panel{border-left:none;border-top:1px solid var(--border);max-height:300px;overflow-y:auto;}
+  .right-panel{border-left:none;border-top:1px solid var(--border);overflow-y:auto;}
   .table-area{padding:12px;}
   .felt-table{padding:12px;}
   .card{width:44px;height:63px;}
   .card-rank-top,.card-rank-bot{font-size:11px;}
   .card-center-suit{font-size:20px;}
+}
+@media(max-width:750px){
+  html,body{height:auto;overflow:auto;}
+  body{overflow:visible;}
+  .main{overflow:visible;height:auto;}
+  .table-area{min-height:180px;overflow:visible;}
+  .right-panel{max-height:45vh;overflow-y:auto;}
+  .felt-table{padding:10px;}
+  .hands-row{gap:6px;}
+  .card{width:38px;height:54px;}
+  .card-rank-top,.card-rank-bot{font-size:10px;}
+  .card-center-suit{font-size:16px;}
+  .hand-score{font-size:16px;}
+  .bet-areas-row{gap:6px;}
+  .bet-area{padding:7px 4px;min-height:44px;}
+  .bet-area-name{font-size:8px;}
+  .bet-area-odds{font-size:9px;}
+  .bet-type-tabs{gap:3px;}
+  .btt{font-size:9px;padding:6px 3px;}
+  .amount-input{font-size:13px;padding:6px 8px;}
+  .quick-btns{gap:3px;}
+  .qbtn{font-size:9px;padding:5px 2px;}
+  .deal-btn{font-size:12px;padding:11px;}
+  .panel-section{padding:10px 12px;}
+  .panel-title{font-size:8px;}
+  .history-pills{gap:3px;}
+  .history-pill{width:22px;height:22px;font-size:9px;}
+  .stats-grid{gap:4px;}
+  .stat-val{font-size:13px;}
+  .stat-label{font-size:7px;}
+  .header{height:44px;padding:0 12px;}
+  .game-title{font-size:14px;letter-spacing:1px;}
+  .balance-val{font-size:13px;}
+  .back-btn{padding:5px 10px;font-size:10px;}
+  .status-msg{font-size:11px;}
 }
 
 /* Scrollbar */
