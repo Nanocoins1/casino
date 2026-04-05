@@ -465,11 +465,20 @@ function showToast(msg,type){
   },2800);
 }
 
+var _CRASH_RTP=0.97;
+(function(){
+  try{
+    fetch('/api/rtp-config').then(function(r){return r.json();}).then(function(d){
+      if(d&&d.crash){_CRASH_RTP=d.crash/100;}
+    }).catch(function(){});
+  }catch(e){}
+})();
+
 function genCrash(){
-  if(Math.random()<0.04)return 1.00;
   var r=Math.random();
-  if(r<0.001)r=0.001;
-  return Math.min(Math.max(1.01,0.97/(1-r)),500);
+  if(r<0.0001)r=0.0001;
+  if(r>0.9999)r=0.9999;
+  return Math.min(Math.max(1.01,_CRASH_RTP/(1-r)),500);
 }
 
 function genHash(){
@@ -592,6 +601,8 @@ function cashoutBet(b,lbl){
 }
 
 function startWait(){
+  clearInterval(flyInt);flyInt=null;
+  clearTimeout(waitTmo);waitTmo=null;
   state=ST.WAIT;mult=1.0;gPts=[];trail=[];explo=[];
   bA.placed=bA.cashedOut=false;bB.placed=bB.cashedOut=false;
   roundId++;currentHash=genHash();
@@ -627,6 +638,7 @@ function startWait(){
 }
 
 function startFly(){
+  clearInterval(flyInt);flyInt=null;
   if(state!==ST.WAIT)return;
   state=ST.FLY;crashPt=genCrash();mult=1.0;gPts=[1.0];elapsed=0;
   updateBtns();
@@ -660,6 +672,8 @@ function startFly(){
 }
 
 function doCrash(){
+  if(state===ST.CRASH)return;
+  clearInterval(flyInt);flyInt=null;
   state=ST.CRASH;
 
   if(gPts.length>=1){
@@ -700,6 +714,14 @@ function doCrash(){
       document.getElementById('abToggle').checked=false;
     }
   }
+
+  var _wdRound=roundId;
+  setTimeout(function(){
+    if(state===ST.CRASH&&roundId===_wdRound){
+      console.warn('[Crash] watchdog kick — restarting');
+      startWait();
+    }
+  },9000);
 
   setTimeout(startWait,3500);
 }
