@@ -17,7 +17,10 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 .back-btn{padding:6px 14px;border-radius:7px;border:1px solid var(--border);background:var(--glass);color:rgba(232,224,208,.5);font-size:11px;cursor:pointer;text-decoration:none;transition:all .2s;}
 .back-btn:hover{color:var(--cream);}
 .main{flex:1;display:grid;grid-template-columns:1fr 290px;overflow:hidden;}
-@media(max-width:700px){.main{grid-template-columns:1fr;grid-template-rows:1fr auto;}}
+@media(max-width:700px){
+  html,body{height:auto;overflow:auto;}
+  .main{grid-template-columns:1fr;grid-template-rows:auto auto;overflow:visible;}
+}
 .game-area{display:flex;align-items:center;justify-content:center;background:#060610;padding:16px;overflow:auto;}
 .grid-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;}
 .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:min(380px,85vw);}
@@ -44,7 +47,21 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 .prob-track{height:6px;border-radius:3px;background:rgba(255,255,255,.07);}
 .prob-fill{height:100%;border-radius:3px;transition:width .3s;background:var(--green);}
 .bet-panel{background:rgba(8,8,18,.96);border-left:1px solid var(--border);padding:18px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;}
-@media(max-width:700px){.bet-panel{border-left:none;border-top:1px solid var(--border);padding:12px 14px;}}
+@media(max-width:700px){
+  .bet-panel{border-left:none;border-top:1px solid var(--border);padding:10px 12px;max-height:48vh;overflow-y:auto;}
+  .game-area{padding:10px;min-height:220px;}
+  .mult-val{font-size:28px!important;}
+  .cell{font-size:20px;}
+  .panel-title{font-size:10px;}
+  .inp-lbl{font-size:9px;}
+  .bet-inp{padding:7px 10px;font-size:13px;}
+  .qb{padding:4px 2px;font-size:9px;}
+  .mine-opt{padding:5px 3px;font-size:10px;}
+  .stat-box{padding:7px 5px;}
+  .sv{font-size:12px;}
+  .sl{font-size:8px;}
+  .main-btn{padding:11px;font-size:12px;}
+}
 .panel-title{font-family:'Orbitron',monospace;font-size:12px;color:rgba(232,224,208,.3);letter-spacing:2px;}
 .inp-lbl{font-size:10px;letter-spacing:2px;color:rgba(232,224,208,.3);text-transform:uppercase;margin-bottom:5px;}
 .bet-inp{width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid var(--border);border-radius:9px;color:var(--gold);font-family:'DM Mono',monospace;font-size:15px;font-weight:700;outline:none;transition:border-color .2s;}
