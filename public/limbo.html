@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>HATHOR — Limbo</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#04040a;--gold:#f0c060;--gold2:#ffd980;--green:#00e676;--red:#ff3d71;
+  --neon:#00e5ff;--cream:#e8e0d0;--border:rgba(255,255,255,0.08);--glass:rgba(255,255,255,0.04);
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cream);}
+::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-thumb{background:#8a6020;border-radius:2px;}
+
+.hdr{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;
+  background:rgba(4,4,10,.98);border-bottom:1px solid var(--border);flex-shrink:0;}
+.logo{font-family:'Orbitron',monospace;font-size:14px;font-weight:900;letter-spacing:3px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;background-clip:text;text-decoration:none;}
+.bal-row{font-family:'DM Mono',monospace;font-size:14px;color:var(--gold);display:flex;align-items:center;gap:6px;}
+.back-btn{padding:6px 14px;border-radius:7px;border:1px solid var(--border);background:var(--glass);
+  color:rgba(232,224,208,.5);font-size:11px;cursor:pointer;text-decoration:none;transition:all .2s;}
+.back-btn:hover{color:var(--cream);}
+
+.main{display:flex;flex:1;height:calc(100vh - 52px);overflow:hidden;}
+
+/* Left: game area */
+.game-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;background:#020209;overflow:hidden;padding:24px;}
+
+/* Animated BG */
+.bg-anim{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+.bg-anim span{position:absolute;width:2px;height:2px;background:var(--neon);border-radius:50%;
+  animation:bgFloat linear infinite;opacity:0;}
+@keyframes bgFloat{0%{transform:translateY(100vh);opacity:0;}10%{opacity:.6;}90%{opacity:.2;}100%{transform:translateY(-10vh);opacity:0;}}
+
+/* Big multiplier display */
+.mult-wrap{text-align:center;position:relative;z-index:2;}
+.mult-val{font-family:'Orbitron',monospace;font-size:clamp(72px,14vw,140px);font-weight:900;
+  line-height:1;transition:color .15s;text-shadow:0 0 60px currentColor;}
+.mult-val.idle{color:rgba(200,190,170,.2);}
+.mult-val.rolling{color:var(--neon);}
+.mult-val.win{color:var(--green);animation:winPulse .4s ease-out;}
+.mult-val.lose{color:var(--red);animation:losePulse .3s ease-out;}
+@keyframes winPulse{0%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes losePulse{0%{transform:scale(.92)}100%{transform:scale(1)}}
+
+.result-badge{font-family:'Orbitron',monospace;font-size:18px;font-weight:900;letter-spacing:3px;
+  margin-top:12px;height:28px;transition:all .3s;}
+.result-badge.win{color:var(--green);}
+.result-badge.lose{color:var(--red);}
+
+/* Target vs Result row */
+.target-row{display:flex;align-items:center;gap:20px;margin-top:20px;font-family:'DM Mono',monospace;font-size:13px;color:rgba(232,224,208,.35);}
+.target-box{padding:6px 14px;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid var(--border);text-align:center;}
+.target-box .lbl{font-size:9px;letter-spacing:2px;margin-bottom:3px;}
+.target-box .val{font-size:18px;font-weight:700;color:var(--cream);}
+
+/* Win/lose flash */
+.flash-ov{position:absolute;inset:0;pointer-events:none;opacity:0;z-index:3;}
+.flash-ov.win-flash{background:rgba(0,230,118,.08);animation:flashAnim .5s ease-out forwards;}
+.flash-ov.lose-flash{background:rgba(255,61,113,.08);animation:flashAnim .4s ease-out forwards;}
+@keyframes flashAnim{0%{opacity:1}100%{opacity:0}}
+
+/* History bar */
+.hist-bar{position:absolute;bottom:14px;left:0;right:0;display:flex;justify-content:center;gap:5px;padding:0 16px;z-index:2;}
+.hp{padding:3px 10px;border-radius:14px;font-family:'DM Mono',monospace;font-size:10px;font-weight:700;}
+.hp-win{background:rgba(0,230,118,.15);color:var(--green);}
+.hp-lose{background:rgba(255,61,113,.13);color:var(--red);}
+
+/* Right: bet panel */
+.bet-panel{width:300px;background:rgba(7,7,16,.97);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;}
+.pinner{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px;}
+
+.inp-lbl{font-size:10px;letter-spacing:2px;color:rgba(232,224,208,.3);text-transform:uppercase;margin-bottom:5px;}
+.amt-inp{width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid var(--border);
+  border-radius:9px;color:var(--gold);font-family:'DM Mono',monospace;font-size:15px;font-weight:700;outline:none;transition:border-color .2s;}
+.amt-inp:focus{border-color:rgba(240,192,96,.4);}
+.qgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:5px;}
+.qb{padding:6px;border-radius:6px;border:1px solid var(--border);background:var(--glass);
+  color:rgba(232,224,208,.5);font-size:10px;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;}
+.qb:hover{border-color:rgba(240,192,96,.3);color:var(--gold);}
+
+/* Target multiplier */
+.target-section{background:rgba(0,229,255,.04);border:1px solid rgba(0,229,255,.12);border-radius:10px;padding:14px;}
+.target-inp{width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,229,255,.2);
+  border-radius:9px;color:var(--neon);font-family:'Orbitron',monospace;font-size:18px;font-weight:700;outline:none;text-align:center;}
+.target-inp:focus{border-color:rgba(0,229,255,.5);}
+.target-presets{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:8px;}
+.tp{padding:6px;border-radius:6px;border:1px solid rgba(0,229,255,.15);background:rgba(0,229,255,.04);
+  color:rgba(0,229,255,.5);font-size:11px;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;}
+.tp:hover,.tp.on{border-color:var(--neon);color:var(--neon);background:rgba(0,229,255,.1);}
+
+/* Slider */
+.slider-wrap{margin-top:8px;}
+input[type=range]{width:100%;-webkit-appearance:none;height:4px;background:rgba(0,229,255,.15);
+  border-radius:2px;outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;
+  border-radius:50%;background:var(--neon);cursor:pointer;box-shadow:0 0 8px var(--neon);}
+
+.win-chance{font-size:11px;color:rgba(0,229,255,.5);text-align:center;margin-top:6px;font-family:'DM Mono',monospace;}
+
+/* Spin btn */
+.spin-btn{margin:0 16px 12px;padding:14px;border-radius:10px;border:none;cursor:pointer;font-family:'Orbitron',monospace;
+  font-size:13px;font-weight:900;letter-spacing:2px;background:linear-gradient(135deg,var(--neon),#0099cc);
+  color:#000;transition:all .2s;}
+.spin-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,229,255,.4);}
+.spin-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+
+/* Auto bet */
+.auto-row{display:flex;align-items:center;gap:8px;}
+.sw{position:relative;width:38px;height:20px;cursor:pointer;flex-shrink:0;}
+.sw input{opacity:0;width:0;height:0;}
+.sw-t{position:absolute;inset:0;border-radius:10px;background:rgba(255,255,255,.1);transition:.25s;}
+.sw input:checked~.sw-t{background:rgba(0,229,255,.4);}
+.sw-k{position:absolute;height:14px;width:14px;left:3px;bottom:3px;border-radius:50%;background:rgba(232,224,208,.4);transition:.25s;}
+.sw input:checked~.sw-k{transform:translateX(18px);background:var(--neon);}
+.auto-sel{flex:1;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:7px;
+  color:rgba(232,224,208,.6);font-size:12px;padding:5px 8px;outline:none;}
+.auto-ctr{font-family:'DM Mono',monospace;font-size:11px;color:var(--neon);text-align:center;
+  padding:4px 0;display:none;}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.sb{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;}
+.sb .sv{font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:var(--gold);}
+.sb .sl{font-size:9px;letter-spacing:1px;color:rgba(232,224,208,.25);text-transform:uppercase;margin-top:3px;}
+.sv.pos{color:var(--green)!important;} .sv.neg{color:var(--red)!important;}
+
+/* Toast */
+.toast-area{position:fixed;top:70px;right:20px;display:flex;flex-direction:column;gap:6px;z-index:999;pointer-events:none;}
+.toast{padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;
+  background:rgba(8,8,18,.97);border:1px solid rgba(255,255,255,.1);
+  animation:toastIn .25s ease,toastOut .3s ease 2.5s forwards;max-width:260px;}
+.toast.win{border-color:rgba(0,230,118,.4);color:var(--green);}
+.toast.loss{border-color:rgba(255,61,113,.4);color:#ff8ca0;}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes toastOut{to{opacity:0;transform:translateX(20px)}}
+
+/* Mobile */
+@media(max-width:650px){
+  html,body{height:auto;overflow:auto;}
+  .main{flex-direction:column;height:auto;overflow:visible;}
+  .game-area{min-height:52vw;padding:16px 10px;}
+  .mult-val{font-size:clamp(52px,18vw,90px);}
+  .bet-panel{width:100%;border-left:none;border-top:1px solid var(--border);max-height:50vh;overflow-y:auto;}
+  .hist-bar{flex-wrap:wrap;justify-content:center;}
+}
+</style>
+</head>
+<body>
+
+<div style="display:flex;flex-direction:column;height:100vh;" id="wrap">
+
+<div class="hdr">
+  <a class="logo" href="/">⬡ HATHOR</a>
+  <span style="font-family:'Orbitron',monospace;font-size:15px;font-weight:900;letter-spacing:2px;color:var(--neon);">LIMBO</span>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="bal-row">🪙 <span id="balEl">10000</span></div>
+    <a class="back-btn" href="/">← Atgal</a>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- Game area -->
+  <div class="game-area" id="gameArea">
+    <div class="bg-anim" id="bgAnim"></div>
+    <div class="flash-ov" id="flashOv"></div>
+
+    <div class="mult-wrap">
+      <div class="mult-val idle" id="multVal">1.00<span style="font-size:.45em">x</span></div>
+      <div class="result-badge" id="resultBadge">&nbsp;</div>
+      <div class="target-row">
+        <div class="target-box">
+          <div class="lbl">Taikinys</div>
+          <div class="val" id="tgtDisp">2.00x</div>
+        </div>
+        <div style="color:rgba(232,224,208,.15);font-size:20px;">→</div>
+        <div class="target-box">
+          <div class="lbl">Laimi jei ≥</div>
+          <div class="val" id="tgtDisp2">2.00x</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div class="hist-bar" id="histBar"></div>
+  </div>
+
+  <!-- Bet panel -->
+  <div class="bet-panel">
+    <div class="pinner">
+
+      <!-- Bet amount -->
+      <div>
+        <div class="inp-lbl">Statymo suma</div>
+        <input class="amt-inp" id="betInp" type="number" value="100" min="10" max="50000"/>
+        <div class="qgrid">
+          <button class="qb" onclick="qset(50)">50</button>
+          <button class="qb" onclick="qset(100)">100</button>
+          <button class="qb" onclick="qset(500)">500</button>
+          <button class="qb" onclick="qset(1000)">1K</button>
+          <button class="qb" onclick="qhalf()">½</button>
+          <button class="qb" onclick="qdbl()">×2</button>
+        </div>
+      </div>
+
+      <!-- Target multiplier -->
+      <div class="target-section">
+        <div class="inp-lbl">Tikslinis koeficientas</div>
+        <input class="target-inp" id="targetInp" type="number" value="2.00" min="1.01" max="100" step="0.01" oninput="onTargetChange()"/>
+        <div class="target-presets">
+          <button class="tp" onclick="setTarget(1.5)">1.5x</button>
+          <button class="tp on" onclick="setTarget(2)">2x</button>
+          <button class="tp" onclick="setTarget(3)">3x</button>
+          <button class="tp" onclick="setTarget(5)">5x</button>
+          <button class="tp" onclick="setTarget(10)">10x</button>
+          <button class="tp" onclick="setTarget(25)">25x</button>
+        </div>
+        <div class="slider-wrap">
+          <input type="range" id="targetSlider" min="1.01" max="50" step="0.01" value="2" oninput="onSliderChange()"/>
+        </div>
+        <div class="win-chance">Laimėjimo tikimybė: <span id="winChance">48.5%</span></div>
+      </div>
+
+      <!-- Auto bet -->
+      <div>
+        <div class="inp-lbl">Auto statymas</div>
+        <div class="auto-row">
+          <label class="sw"><input type="checkbox" id="autoTog" onchange="onAutoToggle()"/><span class="sw-t"></span><span class="sw-k"></span></label>
+          <select class="auto-sel" id="autoSel">
+            <option value="10">10 kartų</option>
+            <option value="25">25 kartų</option>
+            <option value="50">50 kartų</option>
+            <option value="100">100 kartų</option>
+            <option value="999">∞ Begaliniai</option>
+          </select>
+        </div>
+        <div class="auto-ctr" id="autoCtr"></div>
+      </div>
+
+      <!-- Stats -->
+      <div>
+        <div class="inp-lbl">Sesijos statistika</div>
+        <div class="stats-grid">
+          <div class="sb"><div class="sv" id="stBets">0</div><div class="sl">Statymų</div></div>
+          <div class="sb"><div class="sv" id="stWins">0</div><div class="sl">Laimėjimų</div></div>
+          <div class="sb"><div class="sv" id="stProfit">0</div><div class="sl">Pelnas</div></div>
+        </div>
+      </div>
+
+      <!-- Payout info -->
+      <div style="background:rgba(0,229,255,.03);border:1px solid rgba(0,229,255,.08);border-radius:9px;padding:12px;">
+        <div class="inp-lbl" style="margin-bottom:8px;">Kaip žaisti</div>
+        <div style="font-size:11px;color:rgba(232,224,208,.4);line-height:1.8;">
+          Nustatyk tikslą (pvz. <span style="color:var(--neon);">3.00x</span>)<br/>
+          Jei atsitiktinis skaičius ≥ taikiniui — laimi!<br/>
+          Daugiau rizikos = mažesnė tikimybė = didesnis koeficientas
+        </div>
+      </div>
+
+    </div>
+
+    <button class="spin-btn" id="spinBtn" onclick="doSpin()">▶ STATYTI</button>
+  </div>
+</div>
+</div>
+
+<div class="toast-area" id="toastArea"></div>
+
+<script>
+var tokens = parseInt(localStorage.getItem('casino_tokens')||'10000');
+var sess = {bets:0, wins:0, profit:0};
+var target = 2.0;
+var spinning = false;
+var autoOn = false;
+var autoLeft = 0;
+var autoTimer = null;
+var hist = [];
+var MAX_WIN = 500000;
+var MAX_BET = 50000;
+
+function fmt(n){ return Number(n||0).toLocaleString(); }
+
+function updateBal(){
+  document.getElementById('balEl').textContent = fmt(tokens);
+}
+
+function saveTokens(){
+  localStorage.setItem('casino_tokens', String(tokens));
+}
+
+// Build animated background particles
+function buildBg(){
+  var bg = document.getElementById('bgAnim');
+  for(var i=0;i<30;i++){
+    var s = document.createElement('span');
+    s.style.left = Math.random()*100+'%';
+    s.style.animationDuration = (4+Math.random()*8)+'s';
+    s.style.animationDelay = (-Math.random()*8)+'s';
+    bg.appendChild(s);
+  }
+}
+
+function onTargetChange(){
+  var v = parseFloat(document.getElementById('targetInp').value)||2.0;
+  v = Math.max(1.01, Math.min(100, v));
+  target = v;
+  document.getElementById('targetSlider').value = Math.min(v,50);
+  updateTargetUI();
+}
+
+function onSliderChange(){
+  var v = parseFloat(document.getElementById('targetSlider').value)||2.0;
+  target = parseFloat(v.toFixed(2));
+  document.getElementById('targetInp').value = target.toFixed(2);
+  updateTargetUI();
+}
+
+function setTarget(v){
+  target = v;
+  document.getElementById('targetInp').value = v.toFixed(2);
+  document.getElementById('targetSlider').value = Math.min(v,50);
+  document.querySelectorAll('.tp').forEach(function(b){
+    b.classList.toggle('on', parseFloat(b.textContent) === v);
+  });
+  updateTargetUI();
+}
+
+function updateTargetUI(){
+  var chance = Math.min(99.9, (0.97/target)*100);
+  if(chance < 0.1) chance = 0.1;
+  document.getElementById('winChance').textContent = chance.toFixed(1)+'%';
+  document.getElementById('tgtDisp').textContent = target.toFixed(2)+'x';
+  document.getElementById('tgtDisp2').textContent = target.toFixed(2)+'x';
+}
+
+function genResult(){
+  var r = Math.random();
+  if(r < 0.0001) r = 0.0001;
+  if(r > 0.9999) r = 0.9999;
+  return Math.min(Math.max(1.01, 0.97/(1-r)), 1000);
+}
+
+function doSpin(){
+  if(spinning) return;
+  var bet = parseInt(document.getElementById('betInp').value)||100;
+  if(bet < 10){ showToast('Min. statymas: 10','loss'); return; }
+  if(bet > MAX_BET){ bet = MAX_BET; document.getElementById('betInp').value = MAX_BET; }
+  if(bet > tokens){ showToast('Nepakanka žetonų!','loss'); stopAuto(); return; }
+
+  spinning = true;
+  tokens -= bet;
+  saveTokens();
+  updateBal();
+
+  var result = genResult();
+  var won = result >= target;
+  var payout = won ? Math.min(Math.floor(bet * target), MAX_WIN) : 0;
+
+  // Animate number rolling up to result
+  var multEl = document.getElementById('multVal');
+  multEl.className = 'mult-val rolling';
+  multEl.innerHTML = '1.00<span style="font-size:.45em">x</span>';
+  document.getElementById('resultBadge').className = 'result-badge';
+  document.getElementById('resultBadge').innerHTML = '&nbsp;';
+
+  var start = 1.0;
+  var end = parseFloat(result.toFixed(2));
+  var steps = 20;
+  var stepN = 0;
+  var interval = setInterval(function(){
+    stepN++;
+    var progress = stepN/steps;
+    var eased = Math.pow(progress, 0.4);
+    var cur = start + (end-start)*eased;
+    multEl.innerHTML = cur.toFixed(2)+'<span style="font-size:.45em">x</span>';
+    if(stepN >= steps){
+      clearInterval(interval);
+      multEl.innerHTML = end.toFixed(2)+'<span style="font-size:.45em">x</span>';
+      showResult(won, payout, bet, end);
+    }
+  }, 800/steps);
+}
+
+function showResult(won, payout, bet, result){
+  var multEl = document.getElementById('multVal');
+  var badge = document.getElementById('resultBadge');
+  var flash = document.getElementById('flashOv');
+
+  if(won){
+    tokens += payout;
+    saveTokens();
+    updateBal();
+    multEl.className = 'mult-val win';
+    badge.className = 'result-badge win';
+    badge.textContent = 'LAIMĖJOTE! +🪙'+fmt(payout-bet);
+    flash.className = 'flash-ov win-flash';
+    showToast('+🪙'+fmt(payout-bet)+' ('+target.toFixed(2)+'x)','win');
+    sess.wins++;
+    sess.profit += payout-bet;
+  } else {
+    multEl.className = 'mult-val lose';
+    badge.className = 'result-badge lose';
+    badge.textContent = 'PRALAIMĖTA -🪙'+fmt(bet);
+    flash.className = 'flash-ov lose-flash';
+    showToast('-🪙'+fmt(bet),'loss');
+    sess.profit -= bet;
+  }
+
+  // Force reflow for animation restart
+  void flash.offsetWidth;
+
+  sess.bets++;
+  updateStats();
+  addHist(result, won);
+  logGame(bet, payout);
+
+  spinning = false;
+
+  if(autoOn && autoLeft > 0){
+    autoLeft--;
+    updateAutoCtr();
+    if(autoLeft <= 0){ stopAuto(); return; }
+    autoTimer = setTimeout(doSpin, 600);
+  }
+}
+
+function addHist(result, won){
+  hist.unshift({result:result, won:won});
+  if(hist.length > 15) hist.pop();
+  renderHist();
+}
+
+function renderHist(){
+  var bar = document.getElementById('histBar');
+  bar.innerHTML = '';
+  for(var i=0;i<hist.length;i++){
+    var h = hist[i];
+    var d = document.createElement('span');
+    d.className = 'hp '+(h.won?'hp-win':'hp-lose');
+    d.textContent = h.result.toFixed(2)+'x';
+    bar.appendChild(d);
+  }
+}
+
+function updateStats(){
+  document.getElementById('stBets').textContent = sess.bets;
+  document.getElementById('stWins').textContent = sess.wins;
+  var pEl = document.getElementById('stProfit');
+  pEl.textContent = (sess.profit>=0?'+':'')+fmt(sess.profit);
+  pEl.className = 'sv '+(sess.profit>=0?'pos':'neg');
+}
+
+function onAutoToggle(){
+  if(document.getElementById('autoTog').checked){
+    autoLeft = parseInt(document.getElementById('autoSel').value)||10;
+    autoOn = true;
+    updateAutoCtr();
+    doSpin();
+  } else {
+    stopAuto();
+  }
+}
+
+function stopAuto(){
+  autoOn = false;
+  autoLeft = 0;
+  clearTimeout(autoTimer);
+  document.getElementById('autoTog').checked = false;
+  document.getElementById('autoCtr').style.display = 'none';
+}
+
+function updateAutoCtr(){
+  var el = document.getElementById('autoCtr');
+  if(autoLeft >= 999){ el.style.display='block'; el.textContent='∞ begaliniai'; }
+  else if(autoLeft > 0){ el.style.display='block'; el.textContent=autoLeft+' liko'; }
+  else { el.style.display='none'; }
+}
+
+function qset(n){ document.getElementById('betInp').value = Math.min(n, tokens); }
+function qhalf(){ var el=document.getElementById('betInp'); el.value=Math.max(10,Math.floor(parseInt(el.value||10)/2)); }
+function qdbl(){ var el=document.getElementById('betInp'); el.value=Math.min(MAX_BET,Math.min(tokens,parseInt(el.value||10)*2)); }
+
+function showToast(msg, type){
+  var area = document.getElementById('toastArea');
+  var t = document.createElement('div');
+  t.className = 'toast '+(type==='win'?'win':'loss');
+  t.textContent = msg;
+  area.appendChild(t);
+  setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 3000);
+}
+
+function logGame(bet, result){
+  var uid = localStorage.getItem('casino_uid')||'';
+  if(!uid) return;
+  fetch('/api/log-game',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({uid:uid,game:'limbo',bet:bet,result:result,won:result>0})}).catch(function(){});
+}
+
+// Init
+buildBg();
+updateBal();
+updateTargetUI();
+</script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
+</body>
+</html>

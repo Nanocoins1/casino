@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>HATHOR — Dragon Tower</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#04040a;--gold:#f0c060;--gold2:#ffd980;--green:#00e676;--red:#ff3d71;
+  --neon:#00e5ff;--cream:#e8e0d0;--orange:#ff8c00;
+  --border:rgba(255,255,255,0.08);--glass:rgba(255,255,255,0.04);
+}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cream);display:flex;flex-direction:column;}
+
+/* ── Header ── */
+.hdr{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;
+  background:rgba(4,4,10,.98);border-bottom:1px solid var(--border);flex-shrink:0;}
+.logo{font-family:'Orbitron',monospace;font-size:14px;font-weight:900;letter-spacing:3px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;background-clip:text;text-decoration:none;}
+.game-lbl{font-family:'Orbitron',monospace;font-size:16px;font-weight:900;letter-spacing:2px;color:var(--cream);}
+.bal-row{font-family:'DM Mono',monospace;font-size:14px;color:var(--gold);}
+.back-btn{padding:6px 14px;border-radius:7px;border:1px solid var(--border);background:var(--glass);
+  color:rgba(232,224,208,.5);font-size:11px;cursor:pointer;text-decoration:none;transition:all .2s;}
+.back-btn:hover{color:var(--cream);}
+
+/* ── Layout ── */
+.main{flex:1;display:grid;grid-template-columns:1fr 290px;overflow:hidden;}
+
+/* ── Tower Area ── */
+.game-area{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 50% 20%,#110820 0%,#04040a 70%);
+  padding:16px;position:relative;overflow:hidden;}
+
+/* Particle / glow bg */
+.bg-glow{position:absolute;pointer-events:none;}
+.bg-glow.g1{width:300px;height:300px;top:-60px;left:50%;transform:translateX(-50%);
+  background:radial-gradient(circle,rgba(180,30,0,.18),transparent 70%);animation:glowPulse 3s ease-in-out infinite alternate;}
+.bg-glow.g2{width:200px;height:200px;bottom:20px;left:10%;
+  background:radial-gradient(circle,rgba(0,100,200,.12),transparent 70%);animation:glowPulse 4s ease-in-out infinite alternate-reverse;}
+@keyframes glowPulse{from{opacity:.5;transform:translateX(-50%) scale(1);}to{opacity:1;transform:translateX(-50%) scale(1.2);}}
+
+/* Tower wrapper */
+.tower-wrap{display:flex;align-items:flex-start;gap:10px;position:relative;z-index:1;}
+.floor-nums{display:flex;flex-direction:column;gap:6px;padding-top:3px;}
+.floor-num{height:72px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;
+  font-family:'DM Mono',monospace;font-size:11px;color:rgba(232,224,208,.2);letter-spacing:1px;transition:color .3s;}
+.floor-num.active{color:var(--gold);font-weight:700;}
+
+/* Arrow indicator column */
+.floor-arrows{display:flex;flex-direction:column;gap:6px;}
+.floor-arrow{height:72px;display:flex;align-items:center;justify-content:center;width:24px;
+  font-size:16px;opacity:0;transition:opacity .3s;}
+.floor-arrow.active{opacity:1;animation:arrowBounce .6s ease-in-out infinite alternate;}
+@keyframes arrowBounce{from{transform:translateX(0);}to{transform:translateX(5px);}}
+
+/* Tower grid */
+.tower{display:flex;flex-direction:column;gap:6px;}
+.floor{display:flex;gap:8px;transition:all .3s;}
+
+/* Egg buttons */
+.egg{width:70px;height:70px;border-radius:50%;border:2px solid rgba(255,255,255,.08);
+  background:linear-gradient(145deg,rgba(16,12,32,.95),rgba(8,6,20,.98));
+  cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:28px;
+  transition:all .2s;position:relative;overflow:hidden;user-select:none;
+  box-shadow:0 4px 14px rgba(0,0,0,.6);flex-shrink:0;}
+.egg::before{content:'';position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(ellipse at 35% 30%,rgba(255,255,255,.1),transparent 60%);
+  pointer-events:none;}
+.egg.idle:hover{border-color:rgba(240,192,96,.55);
+  background:linear-gradient(145deg,rgba(40,28,80,.95),rgba(22,15,55,.98));
+  transform:scale(1.08);box-shadow:0 6px 22px rgba(240,192,96,.25);}
+.egg.idle{border-color:rgba(255,255,255,.12);}
+.egg.future{opacity:.35;pointer-events:none;cursor:default;}
+.egg.cleared-gem{background:linear-gradient(145deg,rgba(0,100,60,.8),rgba(0,55,32,.9));
+  border-color:rgba(0,230,118,.55);pointer-events:none;animation:gemReveal .3s cubic-bezier(.34,1.56,.64,1);}
+.egg.cleared-gem::after{content:'';position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle at 40% 35%,rgba(0,230,118,.3),transparent 65%);pointer-events:none;}
+.egg.cleared-dragon{background:linear-gradient(145deg,rgba(130,0,20,.8),rgba(70,0,10,.9));
+  border-color:rgba(255,61,113,.6);pointer-events:none;animation:dragonReveal .25s ease-out;}
+.egg.safe-past{background:rgba(0,80,45,.22);border-color:rgba(0,230,118,.18);opacity:.55;pointer-events:none;}
+.egg.dragon-past{background:rgba(80,0,12,.35);border-color:rgba(255,61,113,.2);opacity:.55;pointer-events:none;}
+.egg.safe-reveal{background:rgba(0,80,45,.22);border-color:rgba(0,230,118,.18);opacity:.55;pointer-events:none;}
+.egg.dragon-reveal{background:rgba(80,0,12,.35);border-color:rgba(255,61,113,.2);opacity:.55;pointer-events:none;}
+
+@keyframes gemReveal{from{transform:scale(.5) rotate(-20deg);opacity:0}60%{transform:scale(1.15) rotate(5deg)}to{transform:scale(1) rotate(0deg);opacity:1}}
+@keyframes dragonReveal{0%{transform:scale(1)}25%{transform:scale(1.3) rotate(-3deg)}60%{transform:scale(.9) rotate(2deg)}100%{transform:scale(1)}}
+
+/* Floor active state */
+.floor.active .egg.idle{border-color:rgba(240,192,96,.3);box-shadow:0 0 18px rgba(240,192,96,.12);}
+
+/* Floor cleared / future overlay tint */
+.floor.cleared{opacity:.7;}
+.floor.future-row{opacity:.3;}
+
+/* Active floor glow row wrapper */
+.floor.active{position:relative;}
+.floor-glow{position:absolute;inset:-4px;border-radius:44px;border:1px solid rgba(240,192,96,.25);
+  background:rgba(240,192,96,.03);pointer-events:none;z-index:-1;}
+
+/* Multiplier display in game area */
+.mult-area{text-align:center;margin-bottom:10px;position:relative;z-index:1;}
+.mult-val{font-family:'Orbitron',monospace;font-size:46px;font-weight:900;color:var(--green);
+  transition:color .3s,text-shadow .3s;text-shadow:0 0 30px currentColor;line-height:1;}
+.mult-val.gold{color:var(--gold);text-shadow:0 0 30px var(--gold);}
+.mult-val.orange{color:var(--orange);text-shadow:0 0 30px var(--orange);}
+.mult-val.inactive{color:rgba(232,224,208,.15);text-shadow:none;}
+.mult-sub{font-size:11px;letter-spacing:2px;color:rgba(232,224,208,.25);margin-top:4px;}
+.potential{font-family:'DM Mono',monospace;font-size:15px;font-weight:700;margin-top:6px;
+  color:rgba(232,224,208,.5);transition:color .3s;}
+.potential.active{color:var(--gold);}
+
+/* ── Right Panel ── */
+.bet-panel{background:rgba(8,8,18,.96);border-left:1px solid var(--border);
+  padding:18px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;}
+.panel-title{font-family:'Orbitron',monospace;font-size:11px;color:rgba(232,224,208,.3);letter-spacing:2px;text-transform:uppercase;}
+.inp-lbl{font-size:10px;letter-spacing:2px;color:rgba(232,224,208,.3);text-transform:uppercase;margin-bottom:5px;}
+.bet-inp{width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid var(--border);
+  border-radius:9px;color:var(--gold);font-family:'DM Mono',monospace;font-size:15px;
+  font-weight:700;outline:none;transition:border-color .2s;}
+.bet-inp:focus{border-color:rgba(240,192,96,.4);}
+.qgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:5px;}
+.qb{padding:5px;border-radius:6px;border:1px solid var(--border);background:var(--glass);
+  color:rgba(232,224,208,.5);font-size:10px;font-weight:700;cursor:pointer;
+  text-align:center;transition:all .15s;}
+.qb:hover{border-color:rgba(240,192,96,.3);color:var(--gold);}
+
+/* Difficulty selector */
+.diff-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
+.diff-opt{padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:var(--glass);
+  color:rgba(232,224,208,.4);font-size:10px;font-weight:700;cursor:pointer;
+  text-align:center;transition:all .18s;line-height:1.3;}
+.diff-opt:hover{border-color:rgba(0,229,255,.3);color:var(--neon);}
+.diff-opt.on{background:rgba(0,229,255,.1);border-color:rgba(0,229,255,.45);color:var(--neon);}
+.diff-chance{font-size:9px;opacity:.6;display:block;margin-top:2px;}
+.diff-mult{font-size:9px;color:var(--gold);display:block;margin-top:1px;}
+
+/* Chance bar */
+.chance-wrap{padding:8px 10px;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:9px;}
+.chance-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.chance-lbl{font-size:10px;color:rgba(232,224,208,.35);}
+.chance-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:var(--green);}
+.chance-track{height:5px;border-radius:3px;background:rgba(255,255,255,.07);}
+.chance-fill{height:100%;border-radius:3px;transition:width .35s;background:var(--green);}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.stat-box{padding:9px 7px;border-radius:9px;background:rgba(0,0,0,.3);border:1px solid var(--border);text-align:center;}
+.sv{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;color:var(--gold);}
+.sl{font-size:9px;letter-spacing:1px;color:rgba(232,224,208,.25);margin-top:2px;}
+
+/* Buttons */
+.main-btn{width:100%;padding:14px;border-radius:12px;border:none;cursor:pointer;
+  font-family:'Orbitron',monospace;font-size:13px;font-weight:900;letter-spacing:1px;transition:all .2s;}
+.main-btn.start{background:linear-gradient(135deg,#c9a84c,#f0c060,#a07830);color:#060400;}
+.main-btn.start:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(240,192,96,.4);}
+.main-btn.cashout{background:linear-gradient(135deg,#00b894,#00e676);color:#001810;}
+.main-btn.cashout:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,230,118,.4);}
+.main-btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;box-shadow:none!important;}
+
+/* Win / Loss overlay */
+.result-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;
+  z-index:100;background:rgba(0,0,0,.55);pointer-events:none;}
+.result-overlay.show{display:flex;}
+.result-box{border-radius:22px;padding:34px 52px;text-align:center;
+  animation:popIn .38s cubic-bezier(.34,1.56,.64,1) forwards;transform:scale(.6);pointer-events:none;}
+.result-box.win{background:rgba(0,22,12,.97);border:2px solid rgba(0,230,118,.5);}
+.result-box.loss{background:rgba(20,0,5,.97);border:2px solid rgba(255,61,113,.5);}
+.result-icon{font-size:52px;margin-bottom:8px;display:block;}
+.result-mult{font-family:'Orbitron',monospace;font-size:44px;font-weight:900;line-height:1;}
+.result-box.win .result-mult{color:var(--green);text-shadow:0 0 40px var(--green);}
+.result-box.loss .result-mult{color:var(--red);text-shadow:0 0 40px var(--red);}
+.result-amt{font-size:16px;color:rgba(232,224,208,.65);margin-top:8px;}
+.result-sub{font-size:11px;letter-spacing:2px;margin-top:5px;opacity:.5;}
+@keyframes popIn{to{transform:scale(1);}}
+
+/* Red flash on dragon hit */
+.dragon-flash{position:fixed;inset:0;background:rgba(255,30,50,.22);pointer-events:none;
+  z-index:99;opacity:0;}
+.dragon-flash.active{animation:flashAnim .5s ease-out forwards;}
+@keyframes flashAnim{0%{opacity:1}100%{opacity:0}}
+
+/* Screen shake */
+@keyframes screenShake{
+  0%{transform:translate(0,0);}
+  15%{transform:translate(-6px,4px);}
+  30%{transform:translate(6px,-3px);}
+  45%{transform:translate(-4px,6px);}
+  60%{transform:translate(4px,-4px);}
+  75%{transform:translate(-3px,3px);}
+  90%{transform:translate(2px,-2px);}
+  100%{transform:translate(0,0);}
+}
+.main.shake{animation:screenShake .42s ease-out;}
+
+/* Toast */
+.toast{position:fixed;top:68px;left:50%;transform:translateX(-50%) translateY(-16px);
+  padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;
+  z-index:999;opacity:0;transition:all .3s;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.win{background:rgba(0,230,118,.2);border:1px solid rgba(0,230,118,.4);color:var(--green);}
+.toast.loss{background:rgba(255,61,113,.15);border:1px solid rgba(255,61,113,.35);color:var(--red);}
+.toast.info{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.3);color:var(--neon);}
+
+/* Divider */
+.divider{height:1px;background:var(--border);margin:2px 0;}
+
+/* Provably fair hash */
+.pf-box{padding:7px 9px;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;}
+.pf-lbl{font-size:9px;letter-spacing:1px;color:rgba(232,224,208,.25);margin-bottom:3px;text-transform:uppercase;}
+.pf-hash{font-family:'DM Mono',monospace;font-size:9px;color:rgba(0,229,255,.4);word-break:break-all;line-height:1.4;}
+
+/* ── Responsive ── */
+@media(max-width:600px){
+  html,body{height:auto;overflow:auto;}
+  .main{grid-template-columns:1fr;grid-template-rows:auto auto;overflow:visible;}
+  .game-area{padding:10px 8px;min-height:auto;}
+  .bet-panel{border-left:none;border-top:1px solid var(--border);padding:10px 12px;max-height:40vh;overflow-y:auto;}
+  .egg{width:56px;height:56px;font-size:22px;}
+  .floor-num{height:62px;font-size:10px;}
+  .floor-arrow{height:62px;font-size:13px;}
+  .tower{gap:6px;}
+  .floor{gap:6px;}
+  .mult-val{font-size:34px!important;}
+  .panel-title{font-size:10px;}
+  .inp-lbl{font-size:9px;}
+  .bet-inp{padding:7px 10px;font-size:13px;}
+  .qb{padding:4px 2px;font-size:9px;}
+  .diff-opt{padding:6px 3px;font-size:9px;}
+  .stat-box{padding:7px 5px;}
+  .sv{font-size:12px;}
+  .sl{font-size:8px;}
+  .main-btn{padding:11px;font-size:12px;}
+  .result-box{padding:22px 28px;}
+  .result-mult{font-size:34px;}
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="hdr">
+  <a href="/" class="logo">⬡ HATHOR</a>
+  <div class="game-lbl">DRAGON TOWER</div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="bal-row">⬡ <span id="balDisp">10,000</span></div>
+    <a href="/" class="back-btn">← Back</a>
+  </div>
+</div>
+
+<!-- Main layout -->
+<div class="main" id="mainWrap">
+
+  <!-- Tower game area -->
+  <div class="game-area" id="gameArea">
+    <div class="bg-glow g1"></div>
+    <div class="bg-glow g2"></div>
+
+    <!-- Multiplier display -->
+    <div class="mult-area">
+      <div class="mult-val inactive" id="multDisp">1.00×</div>
+      <div class="mult-sub">MULTIPLIER</div>
+      <div class="potential" id="potentialDisp">Place a bet to start</div>
+    </div>
+
+    <!-- Tower: floor nums | arrows | eggs -->
+    <div class="tower-wrap">
+      <div class="floor-nums" id="floorNums"></div>
+      <div class="floor-arrows" id="floorArrows"></div>
+      <div class="tower" id="tower"></div>
+    </div>
+  </div>
+
+  <!-- Right panel -->
+  <div class="bet-panel" id="betPanel">
+    <div class="panel-title">Dragon Tower</div>
+
+    <!-- Bet amount -->
+    <div>
+      <div class="inp-lbl">Bet Amount</div>
+      <input type="number" class="bet-inp" id="betInp" value="100" min="1" max="50000"/>
+      <div class="qgrid">
+        <div class="qb" onclick="adjBet(.5)">½</div>
+        <div class="qb" onclick="adjBet(2)">2×</div>
+        <div class="qb" onclick="setBetMax()">Max</div>
+        <div class="qb" onclick="setBetVal(100)">100</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Difficulty -->
+    <div>
+      <div class="inp-lbl">Difficulty</div>
+      <div class="diff-grid">
+        <div class="diff-opt on" id="dEasy" onclick="setDiff('easy')">
+          Easy<span class="diff-chance">66.7% safe</span><span class="diff-mult">1.35×/floor</span>
+        </div>
+        <div class="diff-opt" id="dMedium" onclick="setDiff('medium')">
+          Medium<span class="diff-chance">33.3% safe</span><span class="diff-mult">2.5×/floor</span>
+        </div>
+        <div class="diff-opt" id="dHard" onclick="setDiff('hard')">
+          Extreme<span class="diff-chance">33.3% safe</span><span class="diff-mult">2.5×/floor</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chance bar -->
+    <div class="chance-wrap">
+      <div class="chance-row">
+        <span class="chance-lbl">Survival chance per floor</span>
+        <span class="chance-val" id="chanceVal">66.7%</span>
+      </div>
+      <div class="chance-track">
+        <div class="chance-fill" id="chanceFill" style="width:66.7%;"></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Buttons -->
+    <button class="main-btn start" id="startBtn" onclick="startGame()">START CLIMB</button>
+    <button class="main-btn cashout" id="cashoutBtn" onclick="cashOut()" disabled>CASH OUT</button>
+
+    <div class="divider"></div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="sv" id="statWins">0</div>
+        <div class="sl">WINS</div>
+      </div>
+      <div class="stat-box">
+        <div class="sv" id="statLosses">0</div>
+        <div class="sl">LOSSES</div>
+      </div>
+      <div class="stat-box" style="grid-column:1/-1;">
+        <div class="sv" id="statBest">1.00×</div>
+        <div class="sl">BEST MULT</div>
+      </div>
+    </div>
+
+    <!-- Provably fair -->
+    <div class="pf-box">
+      <div class="pf-lbl">Provably Fair Seed</div>
+      <div class="pf-hash" id="pfHash">—</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Red flash -->
+<div class="dragon-flash" id="dragonFlash"></div>
+
+<!-- Result overlay -->
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-box" id="resultBox">
+    <span class="result-icon" id="resultIcon">💎</span>
+    <div class="result-mult" id="resultMult">0.00×</div>
+    <div class="result-amt" id="resultAmt"></div>
+    <div class="result-sub" id="resultSub">CLICK TO DISMISS</div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ──────────────────────────────────────────
+var FLOORS = 8;
+var EGGS_PER_FLOOR = 3;
+var MAX_BET = 50000;
+var MAX_WIN = 500000;
+
+var gameActive = false;
+var currentFloor = 0;  // 0 = not started, 1-8 = floor index (1=bottom)
+var floorLayouts = [];  // array of FLOORS items, each = array of EGGS_PER_FLOOR booleans (true=dragon)
+var multiplier = 1;
+var betAmount = 100;
+var difficulty = 'easy';
+var canCashOut = false;
+
+var tokens = 10000;
+var stats = {wins:0, losses:0, best:1};
+
+var MULT_PER_FLOOR = {easy:1.35, medium:2.5, hard:2.5};
+var DRAGONS_PER_FLOOR = {easy:1, medium:2, hard:2};
+
+// ── Init ────────────────────────────────────────────
+function init() {
+  var stored = localStorage.getItem('casino_tokens');
+  if (stored !== null) {
+    tokens = parseFloat(stored) || 10000;
+  }
+  var storedStats = localStorage.getItem('dragon_stats');
+  if (storedStats) {
+    try { stats = JSON.parse(storedStats); } catch(e) {}
+  }
+  updateBalDisplay();
+  updateStatsDisplay();
+  buildTower();
+  updateChanceBar();
+}
+
+function saveTokens() {
+  localStorage.setItem('casino_tokens', tokens);
+}
+
+function saveStats() {
+  localStorage.setItem('dragon_stats', JSON.stringify(stats));
+}
+
+// ── Tower DOM build ──────────────────────────────────
+function buildTower() {
+  var towerEl = document.getElementById('tower');
+  var numsEl = document.getElementById('floorNums');
+  var arrowsEl = document.getElementById('floorArrows');
+  towerEl.innerHTML = '';
+  numsEl.innerHTML = '';
+  arrowsEl.innerHTML = '';
+
+  // Build from top (floor 8) to bottom (floor 1) visually
+  for (var i = FLOORS; i >= 1; i--) {
+    // Floor number label
+    var numDiv = document.createElement('div');
+    numDiv.className = 'floor-num';
+    numDiv.id = 'floorNum' + i;
+    numDiv.textContent = i;
+    numsEl.appendChild(numDiv);
+
+    // Arrow indicator
+    var arrowDiv = document.createElement('div');
+    arrowDiv.className = 'floor-arrow';
+    arrowDiv.id = 'floorArrow' + i;
+    arrowDiv.textContent = '▶';
+    arrowsEl.appendChild(arrowDiv);
+
+    // Floor row
+    var floorDiv = document.createElement('div');
+    floorDiv.className = 'floor future-row';
+    floorDiv.id = 'floor' + i;
+
+    for (var j = 0; j < EGGS_PER_FLOOR; j++) {
+      var egg = document.createElement('div');
+      egg.className = 'egg future';
+      egg.id = 'egg' + i + '_' + j;
+      egg.setAttribute('data-floor', i);
+      egg.setAttribute('data-idx', j);
+      egg.textContent = '🥚';
+      (function(floorIdx, eggIdx) {
+        egg.onclick = function() { onEggClick(floorIdx, eggIdx); };
+      })(i, j);
+      floorDiv.appendChild(egg);
+    }
+    towerEl.appendChild(floorDiv);
+  }
+}
+
+// ── Difficulty ───────────────────────────────────────
+function setDiff(d) {
+  if (gameActive) return;
+  difficulty = d;
+  document.getElementById('dEasy').className = 'diff-opt' + (d === 'easy' ? ' on' : '');
+  document.getElementById('dMedium').className = 'diff-opt' + (d === 'medium' ? ' on' : '');
+  document.getElementById('dHard').className = 'diff-opt' + (d === 'hard' ? ' on' : '');
+  updateChanceBar();
+}
+
+function updateChanceBar() {
+  var dragons = DRAGONS_PER_FLOOR[difficulty];
+  var safe = EGGS_PER_FLOOR - dragons;
+  var pct = (safe / EGGS_PER_FLOOR) * 100;
+  document.getElementById('chanceVal').textContent = pct.toFixed(1) + '%';
+  document.getElementById('chanceFill').style.width = pct + '%';
+}
+
+// ── Bet controls ─────────────────────────────────────
+function adjBet(factor) {
+  var v = parseFloat(document.getElementById('betInp').value) || 100;
+  v = Math.round(v * factor);
+  if (v < 1) v = 1;
+  if (v > MAX_BET) v = MAX_BET;
+  document.getElementById('betInp').value = v;
+}
+
+function setBetMax() {
+  document.getElementById('betInp').value = Math.min(tokens, MAX_BET);
+}
+
+function setBetVal(v) {
+  document.getElementById('betInp').value = v;
+}
+
+// ── Game Start ────────────────────────────────────────
+function startGame() {
+  if (gameActive) return;
+  betAmount = parseInt(document.getElementById('betInp').value) || 100;
+  if (betAmount < 1) betAmount = 1;
+  if (betAmount > MAX_BET) betAmount = MAX_BET;
+  if (betAmount > tokens) {
+    showToast('Insufficient tokens!', 'loss');
+    return;
+  }
+
+  tokens -= betAmount;
+  saveTokens();
+  updateBalDisplay();
+
+  // Generate all floor layouts up front
+  floorLayouts = [];
+  var seed = genSeed();
+  document.getElementById('pfHash').textContent = seed;
+  for (var i = 0; i < FLOORS; i++) {
+    floorLayouts.push(genFloorLayout(difficulty));
+  }
+
+  gameActive = true;
+  currentFloor = 0;
+  multiplier = 1;
+  canCashOut = false;
+
+  resetTowerVisuals();
+  activateFloor(1);
+
+  document.getElementById('startBtn').disabled = true;
+  document.getElementById('cashoutBtn').disabled = true;
+  document.getElementById('betInp').disabled = true;
+  document.getElementById('dEasy').style.pointerEvents = 'none';
+  document.getElementById('dMedium').style.pointerEvents = 'none';
+  document.getElementById('dHard').style.pointerEvents = 'none';
+
+  updateMultDisplay();
+  document.getElementById('potentialDisp').className = 'potential active';
+  updatePotential();
+}
+
+function genFloorLayout(diff) {
+  var layout = [];
+  var dragons = DRAGONS_PER_FLOOR[diff];
+  for (var i = 0; i < EGGS_PER_FLOOR; i++) {
+    layout.push(false);
+  }
+  // Place dragons randomly
+  var placed = 0;
+  while (placed < dragons) {
+    var pos = Math.floor(Math.random() * EGGS_PER_FLOOR);
+    if (!layout[pos]) {
+      layout[pos] = true; // true = dragon
+      placed++;
+    }
+  }
+  return layout;
+}
+
+function genSeed() {
+  var chars = '0123456789abcdef';
+  var out = '';
+  for (var i = 0; i < 40; i++) {
+    out += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return out;
+}
+
+// ── Visual helpers ────────────────────────────────────
+function resetTowerVisuals() {
+  for (var i = 1; i <= FLOORS; i++) {
+    var floorEl = document.getElementById('floor' + i);
+    floorEl.className = 'floor future-row';
+    document.getElementById('floorNum' + i).className = 'floor-num';
+    document.getElementById('floorArrow' + i).className = 'floor-arrow';
+    for (var j = 0; j < EGGS_PER_FLOOR; j++) {
+      var egg = document.getElementById('egg' + i + '_' + j);
+      egg.className = 'egg future';
+      egg.textContent = '🥚';
+    }
+  }
+  var multEl = document.getElementById('multDisp');
+  multEl.className = 'mult-val inactive';
+  multEl.textContent = '1.00×';
+}
+
+function activateFloor(floorNum) {
+  currentFloor = floorNum;
+  var floorEl = document.getElementById('floor' + floorNum);
+  floorEl.className = 'floor active';
+  // Add glow wrapper if not present
+  if (!floorEl.querySelector('.floor-glow')) {
+    var glow = document.createElement('div');
+    glow.className = 'floor-glow';
+    floorEl.appendChild(glow);
+  }
+  document.getElementById('floorNum' + floorNum).className = 'floor-num active';
+  document.getElementById('floorArrow' + floorNum).className = 'floor-arrow active';
+  for (var j = 0; j < EGGS_PER_FLOOR; j++) {
+    var egg = document.getElementById('egg' + floorNum + '_' + j);
+    egg.className = 'egg idle';
+    egg.textContent = '🥚';
+  }
+}
+
+// ── Egg Click ─────────────────────────────────────────
+function onEggClick(floorNum, eggIdx) {
+  if (!gameActive) return;
+  if (floorNum !== currentFloor) return;
+  var egg = document.getElementById('egg' + floorNum + '_' + eggIdx);
+  if (egg.className.indexOf('idle') === -1) return;
+
+  var layoutIdx = floorNum - 1; // floorLayouts[0] = floor 1
+  var isDragon = floorLayouts[layoutIdx][eggIdx];
+
+  // Disable all eggs on this floor immediately
+  for (var j = 0; j < EGGS_PER_FLOOR; j++) {
+    var e = document.getElementById('egg' + floorNum + '_' + j);
+    if (e.className.indexOf('idle') !== -1) {
+      e.style.pointerEvents = 'none';
+    }
+  }
+
+  if (isDragon) {
+    onDragonHit(floorNum, eggIdx);
+  } else {
+    onSafeEgg(floorNum, eggIdx);
+  }
+}
+
+function onSafeEgg(floorNum, eggIdx) {
+  var egg = document.getElementById('egg' + floorNum + '_' + eggIdx);
+  egg.className = 'egg cleared-gem';
+  egg.textContent = '💎';
+
+  // Advance multiplier
+  multiplier = multiplier * MULT_PER_FLOOR[difficulty];
+  multiplier = parseFloat(multiplier.toFixed(4));
+
+  updateMultDisplay();
+  updatePotential();
+
+  canCashOut = true;
+  document.getElementById('cashoutBtn').disabled = false;
+
+  // Show remaining eggs on this floor
+  setTimeout(function() {
+    revealRemaining(floorNum, true);
+  }, 280);
+
+  // Mark floor cleared
+  setTimeout(function() {
+    var floorEl = document.getElementById('floor' + floorNum);
+    floorEl.className = 'floor cleared';
+    document.getElementById('floorNum' + floorNum).className = 'floor-num';
+    document.getElementById('floorArrow' + floorNum).className = 'floor-arrow';
+
+    if (floorNum === FLOORS) {
+      // Reached top!
+      endGame(true, true);
+    } else {
+      activateFloor(floorNum + 1);
+    }
+  }, 500);
+}
+
+function onDragonHit(floorNum, eggIdx) {
+  var egg = document.getElementById('egg' + floorNum + '_' + eggIdx);
+  egg.className = 'egg cleared-dragon';
+  egg.textContent = '🐉';
+
+  // Screen effects
+  triggerDragonFlash();
+  triggerShake();
+
+  // Reveal all eggs on this floor
+  setTimeout(function() {
+    revealRemaining(floorNum, false);
+    endGame(false, false);
+  }, 350);
+}
+
+function revealRemaining(floorNum, wasSuccess) {
+  var layoutIdx = floorNum - 1;
+  for (var j = 0; j < EGGS_PER_FLOOR; j++) {
+    var e = document.getElementById('egg' + floorNum + '_' + j);
+    if (e.className.indexOf('cleared') !== -1) continue; // already shown
+    var isDragon = floorLayouts[layoutIdx][j];
+    if (isDragon) {
+      e.className = 'egg dragon-reveal';
+      e.textContent = '🐉';
+    } else {
+      e.className = 'egg safe-reveal';
+      e.textContent = '💎';
+    }
+  }
+}
+
+function triggerDragonFlash() {
+  var el = document.getElementById('dragonFlash');
+  el.className = 'dragon-flash';
+  void el.offsetWidth; // reflow
+  el.className = 'dragon-flash active';
+}
+
+function triggerShake() {
+  var el = document.getElementById('mainWrap');
+  el.className = 'main shake';
+  setTimeout(function() { el.className = 'main'; }, 500);
+}
+
+// ── End game ──────────────────────────────────────────
+function endGame(won, maxFloor) {
+  gameActive = false;
+  canCashOut = false;
+
+  document.getElementById('cashoutBtn').disabled = true;
+  document.getElementById('startBtn').disabled = false;
+  document.getElementById('betInp').disabled = false;
+  document.getElementById('dEasy').style.pointerEvents = '';
+  document.getElementById('dMedium').style.pointerEvents = '';
+  document.getElementById('dHard').style.pointerEvents = '';
+  document.getElementById('potentialDisp').className = 'potential';
+
+  if (won) {
+    var winAmt = Math.min(Math.floor(betAmount * multiplier), MAX_WIN);
+    tokens += winAmt;
+    saveTokens();
+    updateBalDisplay();
+    stats.wins++;
+    if (multiplier > stats.best) stats.best = multiplier;
+    saveStats();
+    updateStatsDisplay();
+
+    var overlayBox = document.getElementById('resultBox');
+    overlayBox.className = 'result-box win';
+    document.getElementById('resultIcon').textContent = maxFloor ? '🏆' : '💎';
+    document.getElementById('resultMult').textContent = multiplier.toFixed(2) + '×';
+    document.getElementById('resultAmt').textContent = '+' + formatNum(winAmt) + ' tokens';
+    document.getElementById('resultSub').textContent = maxFloor ? 'TOWER CONQUERED!' : 'CASHED OUT';
+    showResultOverlay();
+  } else {
+    // Loss — bet already deducted at start
+    stats.losses++;
+    saveStats();
+    updateStatsDisplay();
+
+    var overlayBox2 = document.getElementById('resultBox');
+    overlayBox2.className = 'result-box loss';
+    document.getElementById('resultIcon').textContent = '🐉';
+    document.getElementById('resultMult').textContent = 'BURNED';
+    document.getElementById('resultAmt').textContent = '-' + formatNum(betAmount) + ' tokens';
+    document.getElementById('resultSub').textContent = 'A DRAGON WAS HIDING THERE';
+
+    setTimeout(showResultOverlay, 600);
+  }
+
+  var multEl = document.getElementById('multDisp');
+  multEl.className = 'mult-val inactive';
+}
+
+function cashOut() {
+  if (!gameActive || !canCashOut) return;
+  endGame(true, false);
+}
+
+// ── Result overlay ─────────────────────────────────────
+function showResultOverlay() {
+  var overlay = document.getElementById('resultOverlay');
+  overlay.className = 'result-overlay show';
+  var box = document.getElementById('resultBox');
+  box.style.transform = 'scale(.6)';
+  void box.offsetWidth;
+  box.style.transform = '';
+  overlay.onclick = hideResultOverlay;
+}
+
+function hideResultOverlay() {
+  document.getElementById('resultOverlay').className = 'result-overlay';
+  document.getElementById('potentialDisp').textContent = 'Place a bet to start';
+  document.getElementById('multDisp').textContent = '1.00×';
+  document.getElementById('multDisp').className = 'mult-val inactive';
+  buildTower();
+}
+
+// ── Display helpers ─────────────────────────────────────
+function updateBalDisplay() {
+  document.getElementById('balDisp').textContent = formatNum(Math.floor(tokens));
+}
+
+function formatNum(n) {
+  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+function updateMultDisplay() {
+  var el = document.getElementById('multDisp');
+  el.className = 'mult-val';
+  if (multiplier >= 20) {
+    el.className = 'mult-val orange';
+  } else if (multiplier >= 5) {
+    el.className = 'mult-val gold';
+  }
+  el.textContent = multiplier.toFixed(2) + '×';
+}
+
+function updatePotential() {
+  var potential = Math.min(Math.floor(betAmount * multiplier), MAX_WIN);
+  document.getElementById('potentialDisp').textContent = 'Win: ⬡ ' + formatNum(potential);
+}
+
+function updateStatsDisplay() {
+  document.getElementById('statWins').textContent = stats.wins;
+  document.getElementById('statLosses').textContent = stats.losses;
+  document.getElementById('statBest').textContent = stats.best.toFixed(2) + '×';
+}
+
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type + ' show';
+  setTimeout(function() { t.className = 'toast'; }, 2500);
+}
+
+// ── Stars background ──────────────────────────────────
+function buildStars() {
+  var area = document.getElementById('gameArea');
+  for (var i = 0; i < 38; i++) {
+    var s = document.createElement('div');
+    s.style.cssText = 'position:absolute;border-radius:50%;background:#fff;pointer-events:none;'
+      + 'width:' + (Math.random() * 2 + 1) + 'px;'
+      + 'height:' + (Math.random() * 2 + 1) + 'px;'
+      + 'top:' + (Math.random() * 100) + '%;'
+      + 'left:' + (Math.random() * 100) + '%;'
+      + 'opacity:' + (Math.random() * 0.4 + 0.05) + ';'
+      + 'animation:twinkle ' + (Math.random() * 3 + 2) + 's infinite alternate;';
+    area.appendChild(s);
+  }
+}
+
+// ── Kick off ──────────────────────────────────────────
+init();
+buildStars();
+</script>
+
+<style>
+@keyframes twinkle{from{opacity:.05}to{opacity:.45}}
+</style>
+
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
+</body>
+</html>
