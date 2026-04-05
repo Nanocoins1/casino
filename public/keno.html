@@ -572,10 +572,59 @@
     .win-amount { font-size: 36px; }
   }
 
-  @media (max-width: 480px) {
+  @media (max-width: 750px) {
+    html, body { height: auto; overflow: auto; }
+    body { overflow-x: hidden; }
+    .main {
+      flex-direction: column;
+      padding: 10px;
+      gap: 12px;
+      overflow-x: hidden;
+    }
+    .grid-area { min-height: 180px; }
     .keno-grid { gap: 4px; }
     .keno-cell { font-size: 11px; border-radius: 5px; }
-    .header-title { font-size: 20px; }
+    .side-panel {
+      width: 100%;
+      max-height: 45vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .panel-card { padding: 12px; }
+    .panel-title { font-size: 10px; }
+    .bet-input { font-size: 16px; padding: 6px 10px; }
+    .quick-bets { gap: 4px; }
+    .quick-btn { font-size: 12px; padding: 6px; }
+    .draw-btn { font-size: 14px; padding: 11px; }
+    .pick-stat-val { font-size: 18px; }
+    .pick-stat-lbl { font-size: 10px; }
+    .stat-val { font-size: 16px; }
+    .stat-lbl { font-size: 9px; }
+    .payout-table { font-size: 11px; }
+    .payout-table th { font-size: 9px; padding: 3px 4px; }
+    .payout-table td { padding: 3px 4px; }
+    header { height: 50px; padding: 0 12px; }
+    .header-title { font-size: 18px; }
+    .back-btn { font-size: 13px; padding: 6px 10px; }
+    .balance-amount { font-size: 15px; }
+    .balance-label { font-size: 10px; }
+    .balance-display { padding: 6px 10px; }
+    .grid-header { flex-wrap: wrap; gap: 6px; }
+    .picks-count { font-size: 18px; }
+    .picks-label, .picks-max { font-size: 12px; }
+    .clear-btn { font-size: 11px; padding: 5px 10px; }
+    .win-amount { font-size: 30px; }
+    .win-label { font-size: 11px; }
+    .win-hits, .win-loss { font-size: 13px; }
+    .play-again-btn { font-size: 14px; padding: 10px 22px; }
+  }
+
+  @media (max-width: 480px) {
+    .keno-grid { gap: 3px; }
+    .keno-cell { font-size: 10px; border-radius: 4px; }
+    .header-title { font-size: 16px; }
   }
 
   /* Number 0 padding for grid */
