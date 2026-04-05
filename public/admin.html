@@ -767,12 +767,13 @@ function renderPlayers(players) {
       <td class="mono" style="color:rgba(232,224,208,.5);">${fmt(p.total_wagered||0)}</td>
       <td class="mono" style="font-size:10px;color:rgba(232,224,208,.3);">${(p.last_active||'').slice(0,16).replace('T',' ')||'—'}</td>
       <td><div class="actions-cell">
-        <button class="btn btn-success btn-sm" onclick="openGift('${p.uid}','${escHtml(p.name)}')">🎁</button>
+        <button class="btn btn-success btn-sm" onclick="openGift('${p.uid}','${escHtml(p.name)}')">🎁 Žetonai</button>
         ${p.banned
           ? `<button class="btn btn-info btn-sm" onclick="unbanPlayer('${p.uid}','${escHtml(p.name)}')">✅ Unban</button>`
           : `<button class="btn btn-danger btn-sm" onclick="banPlayer('${p.uid}','${escHtml(p.name)}')">🚫 Ban</button>`
         }
-        <button class="btn btn-ghost btn-sm" onclick="deletePlayer('${p.uid}','${escHtml(p.name)}')">🗑️</button>
+        <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('${p.uid}').then(()=>toast('UID nukopijuotas!','ok'))">📋</button>
+        <button class="btn btn-danger btn-sm" onclick="deletePlayer('${p.uid}','${escHtml(p.name)}')">🗑️</button>
       </div></td>
     </tr>
   `).join('');
