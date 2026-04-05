@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>HATHOR — HiLo</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#04040a;--gold:#f0c060;--gold2:#ffd980;--green:#00e676;--red:#ff3d71;
+  --neon:#00e5ff;--cream:#e8e0d0;--border:rgba(255,255,255,0.08);--glass:rgba(255,255,255,0.04);
+  --card-bg:#fdf8ef;--card-red:#cc2222;--card-blk:#0a0a18;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cream);display:flex;flex-direction:column;}
+
+.hdr{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;
+  background:rgba(4,4,10,.98);border-bottom:1px solid var(--border);flex-shrink:0;}
+.logo{font-family:'Orbitron',monospace;font-size:14px;font-weight:900;letter-spacing:3px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;background-clip:text;}
+.game-lbl{font-family:'Orbitron',monospace;font-size:16px;font-weight:900;letter-spacing:2px;}
+.bal-row{font-family:'DM Mono',monospace;font-size:14px;color:var(--gold);}
+.back-btn{padding:6px 14px;border-radius:7px;border:1px solid var(--border);background:var(--glass);
+  color:rgba(232,224,208,.5);font-size:11px;cursor:pointer;text-decoration:none;transition:all .2s;}
+.back-btn:hover{color:var(--cream);}
+
+.main{flex:1;display:grid;grid-template-columns:1fr 290px;overflow:hidden;}
+@media(max-width:680px){.main{grid-template-columns:1fr;grid-template-rows:1fr auto;}}
+
+/* Game area */
+.game-area{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at center,#0d0d22 0%,#04040a 100%);
+  padding:20px;gap:24px;position:relative;overflow:hidden;}
+
+/* Stars bg */
+.stars{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--d) infinite alternate;}
+@keyframes twinkle{from{opacity:var(--a0)}to{opacity:var(--a1)}}
+
+/* Card deck area */
+.deck-area{display:flex;align-items:center;justify-content:center;gap:20px;position:relative;}
+
+/* Card */
+.card{width:90px;height:130px;border-radius:12px;position:relative;perspective:600px;}
+.card-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.4,0,.2,1);}
+.card.flip .card-inner{transform:rotateY(180deg);}
+.card-front,.card-back{position:absolute;inset:0;border-radius:12px;backface-visibility:hidden;
+  display:flex;flex-direction:column;justify-content:space-between;padding:8px 10px;}
+.card-front{background:var(--card-bg);box-shadow:0 8px 24px rgba(0,0,0,.7),0 2px 4px rgba(0,0,0,.5);}
+.card-back{background:linear-gradient(135deg,#1a0840,#2d1260);
+  box-shadow:0 8px 24px rgba(0,0,0,.7);transform:rotateY(180deg);
+  align-items:center;justify-content:center;}
+.card-back::after{content:'★';font-size:48px;color:rgba(240,192,96,.15);}
+.card-rank{font-size:18px;font-weight:900;line-height:1;}
+.card-suit{font-size:42px;text-align:center;line-height:1;}
+.card-rank-bot{font-size:18px;font-weight:900;line-height:1;align-self:flex-end;transform:rotate(180deg);}
+.card.red .card-rank,.card.red .card-suit,.card.red .card-rank-bot{color:var(--card-red);}
+.card.blk .card-rank,.card.blk .card-suit,.card.blk .card-rank-bot{color:var(--card-blk);}
+
+/* Card reveal animation */
+@keyframes cardAppear{from{transform:translateY(-40px) scale(.7);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.card.appear{animation:cardAppear .35s cubic-bezier(.34,1.46,.64,1);}
+
+/* History cards strip */
+.hist-strip{display:flex;gap:5px;overflow-x:auto;max-width:400px;padding:4px;}
+.hist-strip::-webkit-scrollbar{height:3px;}
+.hist-strip::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);}
+.hcard{width:36px;height:52px;border-radius:6px;background:var(--card-bg);
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+  flex-shrink:0;font-size:11px;font-weight:700;gap:1px;padding:3px;}
+.hcard.red{color:var(--card-red);}
+.hcard.blk{color:var(--card-blk);}
+.hcard-suit{font-size:16px;line-height:1;}
+.hcard-rank{font-size:10px;line-height:1;}
+
+/* Multiplier + streak */
+.mult-area{text-align:center;}
+.mult-num{font-family:'Orbitron',monospace;font-size:52px;font-weight:900;color:var(--green);
+  text-shadow:0 0 30px currentColor;line-height:1;transition:all .2s;}
+.mult-num.high{color:var(--gold);}
+.mult-num.mega{color:#ff9900;text-shadow:0 0 40px #ff9900;}
+.mult-num.inactive{color:rgba(232,224,208,.18);text-shadow:none;}
+.mult-sub{font-size:11px;letter-spacing:2px;color:rgba(232,224,208,.3);margin-top:6px;}
+.streak-row{display:flex;gap:5px;justify-content:center;margin-top:8px;}
+.streak-dot{width:10px;height:10px;border-radius:50%;transition:all .2s;}
+.streak-dot.on{background:var(--green);box-shadow:0 0 8px var(--green);}
+.streak-dot.off{background:rgba(255,255,255,.1);}
+
+/* Choice buttons */
+.choice-row{display:flex;gap:12px;width:100%;max-width:380px;}
+.choice-btn{flex:1;padding:18px 10px;border-radius:14px;border:none;cursor:pointer;
+  font-family:'Orbitron',monospace;font-size:13px;font-weight:900;letter-spacing:1px;
+  transition:all .22s;display:flex;flex-direction:column;align-items:center;gap:6px;
+  position:relative;overflow:hidden;}
+.choice-btn::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .2s;}
+.choice-btn:hover::before{opacity:1;}
+.choice-btn:disabled{opacity:.3;cursor:not-allowed;}
+.btn-hi{background:linear-gradient(135deg,#003080,#0060ff);color:#fff;}
+.btn-hi::before{background:linear-gradient(135deg,#0040a0,#0080ff);}
+.btn-hi:hover:not(:disabled){transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,96,255,.45);}
+.btn-lo{background:linear-gradient(135deg,#800020,#ff0040);color:#fff;}
+.btn-lo::before{background:linear-gradient(135deg,#a00030,#ff2050);}
+.btn-lo:hover:not(:disabled){transform:translateY(-3px);box-shadow:0 10px 30px rgba(255,0,64,.45);}
+.btn-same{background:linear-gradient(135deg,#304000,#88cc00);color:#1a2200;}
+.btn-same:hover:not(:disabled){transform:translateY(-3px);box-shadow:0 10px 30px rgba(136,204,0,.35);}
+.choice-icon{font-size:28px;}
+.choice-label{font-size:10px;opacity:.8;}
+.choice-odds{font-family:'DM Mono',monospace;font-size:12px;opacity:.75;margin-top:2px;}
+
+/* Right panel */
+.bet-panel{background:rgba(7,7,16,.97);border-left:1px solid var(--border);padding:18px;
+  display:flex;flex-direction:column;gap:12px;overflow-y:auto;}
+@media(max-width:680px){.bet-panel{border-left:none;border-top:1px solid var(--border);padding:12px;max-height:48vh;}}
+
+.panel-title{font-family:'Orbitron',monospace;font-size:11px;color:rgba(232,224,208,.3);letter-spacing:2px;}
+.inp-lbl{font-size:10px;letter-spacing:2px;color:rgba(232,224,208,.3);margin-bottom:5px;}
+.bet-inp{width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid var(--border);
+  border-radius:9px;color:var(--gold);font-family:'DM Mono',monospace;font-size:15px;font-weight:700;outline:none;}
+.bet-inp:focus{border-color:rgba(240,192,96,.4);}
+.qgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:5px;}
+.qb{padding:5px;border-radius:6px;border:1px solid var(--border);background:var(--glass);
+  color:rgba(232,224,208,.5);font-size:10px;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;}
+.qb:hover{border-color:rgba(240,192,96,.3);color:var(--gold);}
+
+.deal-btn{width:100%;padding:13px;border-radius:11px;border:none;cursor:pointer;
+  font-family:'Orbitron',monospace;font-size:13px;font-weight:900;letter-spacing:1px;
+  background:linear-gradient(135deg,#c9a84c,#f0c060,#a07830);color:#060400;transition:all .2s;}
+.deal-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(240,192,96,.4);}
+.deal-btn:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none;}
+
+.cashout-btn{width:100%;padding:13px;border-radius:11px;border:none;cursor:pointer;
+  font-family:'Orbitron',monospace;font-size:13px;font-weight:900;letter-spacing:1px;
+  background:linear-gradient(135deg,#00b894,#00e676);color:#001810;transition:all .2s;}
+.cashout-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,230,118,.4);}
+.cashout-btn:disabled{opacity:.35;cursor:not-allowed;}
+
+.sep{height:1px;background:var(--border);}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.sb{padding:9px 6px;border-radius:8px;background:rgba(0,0,0,.3);border:1px solid var(--border);text-align:center;}
+.sb-v{font-family:'DM Mono',monospace;font-size:13px;font-weight:700;}
+.sb-l{font-size:9px;letter-spacing:1px;color:rgba(232,224,208,.25);margin-top:2px;}
+.sb-v.pos{color:var(--green);}
+.sb-v.neg{color:var(--red);}
+
+/* Current potential */
+.pot-box{padding:10px 12px;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.15);
+  border-radius:9px;display:flex;justify-content:space-between;align-items:center;}
+.pot-lbl{font-size:11px;color:rgba(232,224,208,.4);}
+.pot-val{font-family:'DM Mono',monospace;font-size:15px;font-weight:700;color:var(--green);}
+
+/* Info box */
+.info-box{padding:9px 11px;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:8px;}
+.info-box p{font-size:10px;color:rgba(232,224,208,.28);line-height:1.7;}
+
+/* Result flash */
+.result-flash{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  pointer-events:none;z-index:10;}
+.result-flash-txt{font-family:'Orbitron',monospace;font-size:42px;font-weight:900;
+  opacity:0;transform:scale(.5);transition:all .2s cubic-bezier(.34,1.56,.64,1);}
+.result-flash-txt.show{opacity:1;transform:scale(1);}
+.result-flash-txt.correct{color:var(--green);text-shadow:0 0 30px var(--green);}
+.result-flash-txt.wrong{color:var(--red);text-shadow:0 0 30px var(--red);}
+
+/* Toast */
+.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-18px);
+  padding:11px 22px;border-radius:11px;font-size:13px;font-weight:600;z-index:999;
+  opacity:0;transition:all .3s;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.win{background:rgba(0,230,118,.2);border:1px solid rgba(0,230,118,.4);color:var(--green);}
+.toast.loss{background:rgba(255,61,113,.2);border:1px solid rgba(255,61,113,.3);color:#ff8ca0;}
+.toast.info{background:rgba(240,192,96,.15);border:1px solid rgba(240,192,96,.3);color:var(--gold);}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <a class="back-btn" href="/">&#8592; Lobby</a>
+  <div class="game-lbl">&#128200; HI-LO</div>
+  <div class="bal-row">&#129689; <span id="balEl">&#8212;</span></div>
+</div>
+
+<div class="main">
+  <div class="game-area" id="gameArea">
+    <!-- Stars -->
+    <div class="stars" id="starsEl"></div>
+
+    <!-- History strip -->
+    <div class="hist-strip" id="histStrip"></div>
+
+    <!-- Deck area -->
+    <div class="deck-area">
+      <!-- Previous card (revealed) -->
+      <div class="card" id="prevCard" style="display:none;">
+        <div class="card-inner">
+          <div class="card-front">
+            <span class="card-rank" id="prevRank"></span>
+            <span class="card-suit" id="prevSuit"></span>
+            <span class="card-rank-bot" id="prevRankBot"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Arrow -->
+      <div id="arrowEl" style="font-size:32px;color:rgba(232,224,208,.2);display:none;">&#8594;</div>
+
+      <!-- Current card -->
+      <div class="card flip" id="currCard">
+        <div class="card-inner">
+          <div class="card-front">
+            <span class="card-rank" id="currRank"></span>
+            <span class="card-suit" id="currSuit"></span>
+            <span class="card-rank-bot" id="currRankBot"></span>
+          </div>
+          <div class="card-back"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Multiplier -->
+    <div class="mult-area">
+      <div class="mult-num inactive" id="multEl">1.00&#215;</div>
+      <div class="mult-sub" id="multSub">PRADĖKITE ŽAISTI</div>
+      <div class="streak-row" id="streakRow"></div>
+    </div>
+
+    <!-- Choice buttons -->
+    <div class="choice-row" id="choiceRow">
+      <button class="choice-btn btn-hi" id="btnHi" onclick="guess('hi')" disabled>
+        <span class="choice-icon">&#9650;</span>
+        <span>AUKŠTESNIS</span>
+        <span class="choice-odds" id="oddsHi">&#8212;</span>
+      </button>
+      <button class="choice-btn btn-same" id="btnSame" onclick="guess('same')" disabled>
+        <span class="choice-icon">&#9866;</span>
+        <span>LYGUS</span>
+        <span class="choice-odds" id="oddsSame">&#8212;</span>
+      </button>
+      <button class="choice-btn btn-lo" id="btnLo" onclick="guess('lo')" disabled>
+        <span class="choice-icon">&#9660;</span>
+        <span>ŽEMESNIS</span>
+        <span class="choice-odds" id="oddsLo">&#8212;</span>
+      </button>
+    </div>
+
+    <!-- Result flash overlay -->
+    <div class="result-flash">
+      <div class="result-flash-txt" id="flashTxt"></div>
+    </div>
+  </div>
+
+  <!-- Right panel -->
+  <div class="bet-panel">
+    <div class="panel-title">&#128200; HI-LO</div>
+
+    <div>
+      <div class="inp-lbl">Statymų suma</div>
+      <input class="bet-inp" id="betInp" type="number" value="100" min="10"/>
+      <div class="qgrid">
+        <button class="qb" onclick="qadd(50)">+50</button>
+        <button class="qb" onclick="qadd(100)">+100</button>
+        <button class="qb" onclick="qhalf()">1/2</button>
+        <button class="qb" onclick="qdbl()">x2</button>
+        <button class="qb" onclick="qset(100)">100</button>
+        <button class="qb" onclick="qset(500)">500</button>
+        <button class="qb" onclick="qset(1000)">1K</button>
+        <button class="qb" onclick="qset(tokens)">MAX</button>
+      </div>
+    </div>
+
+    <button class="deal-btn" id="dealBtn" onclick="startRound()">DALINTI KORTĄ</button>
+
+    <div class="pot-box" id="potBox" style="display:none;">
+      <span class="pot-lbl">Išimti dabar:</span>
+      <span class="pot-val" id="potEl">&#129689; 0</span>
+    </div>
+
+    <button class="cashout-btn" id="cashoutBtn" onclick="cashout()" style="display:none;" disabled>
+      IŠIMTI
+    </button>
+
+    <div class="sep"></div>
+
+    <div class="stats-grid">
+      <div class="sb"><div class="sb-v pos" id="stW">0</div><div class="sb-l">LAIMĖTA</div></div>
+      <div class="sb"><div class="sb-v neg" id="stL">0</div><div class="sb-l">PRARASTA</div></div>
+      <div class="sb"><div class="sb-v" id="stStr">0</div><div class="sb-l">SERIJA</div></div>
+      <div class="sb"><div class="sb-v" id="stBest">0</div><div class="sb-l">GERIAUSIA</div></div>
+    </div>
+
+    <div class="sep"></div>
+
+    <div class="info-box">
+      <p>
+        &#9650; Aukštesnis — kita korta didesnė vertė<br/>
+        &#9660; Žemesnis — kita korta mažesnė vertė<br/>
+        &#9866; Lygus — ta pati vertė (didelė išmoka!)<br/>
+        Kuo daugiau iš eilės — tuo didesnis koeficientas
+      </p>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toastEl"></div>
+
+<script>
+var uid = localStorage.getItem('casino_uid');
+if(!uid){ localStorage.setItem('login_return', location.href); location.href='/login.html'; }
+
+var tokens = parseInt(localStorage.getItem('casino_tokens')||'10000');
+var stats = {w:0,l:0,streak:0,best:0};
+var playing = false;
+var betAmt = 100;
+var mult = 1.0;
+var currentCard = null;
+var cardHistory = [];
+
+var SUITS = ['&#9824;','&#9829;','&#9830;','&#9827;'];
+var SUIT_NAMES = ['spades','hearts','diamonds','clubs'];
+var RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+var RANK_VALS = {A:1,2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,10:10,J:11,Q:12,K:13};
+
+function isRed(suit){ return suit==='&#9829;'||suit==='&#9830;'; }
+function fmt(n){ return Number(n).toLocaleString(); }
+function updateBal(){ document.getElementById('balEl').textContent = fmt(tokens); }
+
+// ── Stars ─────────────────────────────────────────────────────
+function initStars(){
+  var el = document.getElementById('starsEl');
+  el.innerHTML = '';
+  for(var i=0;i<80;i++){
+    var s = document.createElement('div');
+    s.className = 'star';
+    var sz = Math.random()*1.8+0.4;
+    s.style.cssText = 'width:'+sz+'px;height:'+sz+'px;top:'+Math.random()*100+'%;left:'+Math.random()*100+'%;'
+      +'--a0:'+( Math.random()*0.3+0.1)+';--a1:'+(Math.random()*0.6+0.3)+';--d:'+(Math.random()*3+1.5)+'s;';
+    el.appendChild(s);
+  }
+}
+
+// ── Deck ──────────────────────────────────────────────────────
+var deck = [];
+function buildDeck(){
+  deck = [];
+  for(var s=0;s<4;s++){
+    for(var r=0;r<13;r++){
+      deck.push({rank:RANKS[r], suit:SUITS[s], val:r+1});
+    }
+  }
+  // shuffle
+  for(var i=deck.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1)); var t=deck[i]; deck[i]=deck[j]; deck[j]=t;
+  }
+}
+
+function drawCard(){ if(deck.length<5) buildDeck(); return deck.pop(); }
+
+// ── Odds calculation ──────────────────────────────────────────
+function calcOdds(val){
+  // How many cards are hi / lo / same in remaining 51 cards
+  // Simplified: based on value position 1-13
+  var hiCount = 13 - val;        // cards strictly higher
+  var loCount = val - 1;         // cards strictly lower
+  var sameCount = 3;             // 3 other cards with same value
+
+  var total = 51;
+  var hiPct = hiCount * 4 / total;
+  var loPct = loCount * 4 / total;
+  var samePct = sameCount / total;
+
+  // Multiplier = 0.97 / probability (house edge 3%)
+  var hiMult = hiPct > 0 ? Math.max(1.05, 0.97 / hiPct) : 99;
+  var loMult = loPct > 0 ? Math.max(1.05, 0.97 / loPct) : 99;
+  var sameMult = samePct > 0 ? Math.max(5, 0.97 / samePct) : 12;
+
+  return {
+    hi: parseFloat(hiMult.toFixed(2)),
+    lo: parseFloat(loMult.toFixed(2)),
+    same: parseFloat(sameMult.toFixed(2)),
+    hiPct: hiPct,
+    loPct: loPct
+  };
+}
+
+// ── Render card ───────────────────────────────────────────────
+function renderCard(elPrefix, card, faceUp){
+  var cardEl = document.getElementById(elPrefix+'Card');
+  cardEl.style.display = 'block';
+  cardEl.className = 'card appear ' + (isRed(card.suit)?'red':'blk');
+  if(!faceUp){ cardEl.classList.add('flip'); } else { cardEl.classList.remove('flip'); }
+  document.getElementById(elPrefix+'Rank').innerHTML = card.rank + card.suit;
+  document.getElementById(elPrefix+'Suit').innerHTML = card.suit;
+  document.getElementById(elPrefix+'RankBot').innerHTML = card.rank + card.suit;
+}
+
+// ── Update odds display ───────────────────────────────────────
+function updateOdds(){
+  if(!currentCard) return;
+  var o = calcOdds(currentCard.val);
+  document.getElementById('oddsHi').textContent = 'x'+o.hi.toFixed(2);
+  document.getElementById('oddsLo').textContent = 'x'+o.lo.toFixed(2);
+  document.getElementById('oddsSame').textContent = 'x'+o.same.toFixed(2);
+}
+
+// ── Streak dots ───────────────────────────────────────────────
+function updateStreak(){
+  var row = document.getElementById('streakRow');
+  row.innerHTML = '';
+  var max = 8;
+  for(var i=0;i<max;i++){
+    var d = document.createElement('div');
+    d.className = 'streak-dot '+(i < stats.streak ? 'on' : 'off');
+    row.appendChild(d);
+  }
+}
+
+// ── Multiplier display ────────────────────────────────────────
+function updateMult(){
+  var el = document.getElementById('multEl');
+  el.textContent = mult.toFixed(2)+'x';
+  el.className = 'mult-num';
+  if(mult >= 10) el.classList.add('mega');
+  else if(mult >= 3) el.classList.add('high');
+  // else green default
+
+  if(playing){
+    var pot = Math.floor(betAmt * mult);
+    document.getElementById('potEl').textContent = '&#129689; '+fmt(pot);
+    document.getElementById('cashoutBtn').textContent = 'IŠIMTI &#129689;'+fmt(pot);
+  }
+}
+
+// ── Start round ───────────────────────────────────────────────
+function startRound(){
+  betAmt = parseInt(document.getElementById('betInp').value)||100;
+  if(betAmt < 10) return;
+  if(betAmt > tokens){ showToast('Nepakanka žetonų','loss'); return; }
+
+  if(deck.length < 10) buildDeck();
+
+  tokens -= betAmt;
+  localStorage.setItem('casino_tokens', tokens);
+  updateBal();
+
+  playing = true;
+  mult = 1.0;
+  cardHistory = [];
+
+  currentCard = drawCard();
+  renderCard('curr', currentCard, true);
+  document.getElementById('prevCard').style.display = 'none';
+  document.getElementById('arrowEl').style.display = 'none';
+
+  document.getElementById('dealBtn').disabled = true;
+  document.getElementById('btnHi').disabled = false;
+  document.getElementById('btnSame').disabled = false;
+  document.getElementById('btnLo').disabled = false;
+  document.getElementById('cashoutBtn').style.display = 'block';
+  document.getElementById('cashoutBtn').disabled = true; // can't cashout before first guess
+  document.getElementById('potBox').style.display = 'flex';
+
+  document.getElementById('multEl').className = 'mult-num';
+  document.getElementById('multSub').textContent = 'ŠI KORTA — AUKŠTESNĖ AR ŽEMESNĖ?';
+
+  updateOdds();
+  updateMult();
+  updateStreak();
+  renderHistStrip();
+}
+
+// ── Guess ─────────────────────────────────────────────────────
+function guess(dir){
+  if(!playing || !currentCard) return;
+
+  var prevCard = currentCard;
+  var nextCard = drawCard();
+  var o = calcOdds(prevCard.val);
+
+  var correct = false;
+  var stepMult = 1.0;
+
+  if(dir === 'hi'){
+    correct = nextCard.val > prevCard.val;
+    stepMult = o.hi;
+  } else if(dir === 'lo'){
+    correct = nextCard.val < prevCard.val;
+    stepMult = o.lo;
+  } else { // same
+    correct = nextCard.val === prevCard.val;
+    stepMult = o.same;
+  }
+
+  // Move current -> prev, reveal next as current
+  renderCard('prev', prevCard, true);
+  document.getElementById('arrowEl').style.display = 'block';
+
+  currentCard = nextCard;
+  renderCard('curr', currentCard, true);
+  cardHistory.push({card:prevCard, guess:dir, correct:correct});
+  renderHistStrip();
+
+  if(correct){
+    mult = parseFloat((mult * stepMult).toFixed(2));
+    stats.streak++;
+    if(stats.streak > stats.best) stats.best = stats.streak;
+    document.getElementById('cashoutBtn').disabled = false;
+    updateMult();
+    updateOdds();
+    updateStreak();
+    showFlash('TEISINGAI!', 'correct');
+    document.getElementById('multSub').textContent = 'TEISINGAI! TĘSK ARBA IŠIMK';
+    updateStats();
+  } else {
+    // Wrong
+    stats.streak = 0;
+    playing = false;
+    document.getElementById('btnHi').disabled = true;
+    document.getElementById('btnSame').disabled = true;
+    document.getElementById('btnLo').disabled = true;
+    document.getElementById('cashoutBtn').style.display = 'none';
+    document.getElementById('potBox').style.display = 'none';
+    document.getElementById('dealBtn').disabled = false;
+    document.getElementById('multEl').className = 'mult-num inactive';
+    document.getElementById('multEl').textContent = '1.00x';
+    document.getElementById('multSub').textContent = 'NETEISINGA — PRALAIMĖTA';
+    stats.l++;
+    showFlash('NETEISINGA!', 'wrong');
+    showToast('Neteisinga! Pralaimėta &#129689;'+fmt(betAmt),'loss');
+    logGame(betAmt, 0);
+    updateStreak();
+    updateStats();
+  }
+}
+
+// ── Cashout ───────────────────────────────────────────────────
+function cashout(){
+  if(!playing) return;
+  playing = false;
+  var won = Math.floor(betAmt * mult);
+  tokens += won;
+  localStorage.setItem('casino_tokens', tokens);
+  updateBal();
+  stats.w++;
+  stats.streak = 0;
+  document.getElementById('btnHi').disabled = true;
+  document.getElementById('btnSame').disabled = true;
+  document.getElementById('btnLo').disabled = true;
+  document.getElementById('cashoutBtn').style.display = 'none';
+  document.getElementById('potBox').style.display = 'none';
+  document.getElementById('dealBtn').disabled = false;
+  document.getElementById('multSub').textContent = 'LAIMĖJOTE! +&#129689;'+fmt(won);
+  showToast('x'+mult.toFixed(2)+' &#129689;+'+fmt(won-betAmt),'win');
+  logGame(betAmt, won);
+  updateStreak();
+  updateStats();
+}
+
+// ── History strip ─────────────────────────────────────────────
+function renderHistStrip(){
+  var el = document.getElementById('histStrip');
+  el.innerHTML = '';
+  var show = cardHistory.slice(-10);
+  for(var i=0;i<show.length;i++){
+    var h = show[i];
+    var c = h.card;
+    var div = document.createElement('div');
+    div.className = 'hcard '+(isRed(c.suit)?'red':'blk');
+    div.style.border = '2px solid '+(h.correct?'rgba(0,230,118,.5)':'rgba(255,61,113,.5)');
+    div.innerHTML = '<span class="hcard-suit">'+c.suit+'</span><span class="hcard-rank">'+c.rank+'</span>';
+    el.appendChild(div);
+  }
+  el.scrollLeft = el.scrollWidth;
+}
+
+// ── Flash animation ───────────────────────────────────────────
+var flashTimer;
+function showFlash(txt, cls){
+  var el = document.getElementById('flashTxt');
+  el.textContent = txt;
+  el.className = 'result-flash-txt show '+cls;
+  clearTimeout(flashTimer);
+  flashTimer = setTimeout(function(){
+    el.classList.remove('show');
+  }, 900);
+}
+
+// ── Stats ─────────────────────────────────────────────────────
+function updateStats(){
+  document.getElementById('stW').textContent = stats.w;
+  document.getElementById('stL').textContent = stats.l;
+  document.getElementById('stStr').textContent = stats.streak;
+  document.getElementById('stBest').textContent = stats.best;
+}
+
+// ── Quick bet ─────────────────────────────────────────────────
+function qadd(n){ var el=document.getElementById('betInp'); el.value=Math.max(10,parseInt(el.value||0)+n); }
+function qhalf(){ var el=document.getElementById('betInp'); el.value=Math.max(10,Math.floor(parseInt(el.value||10)/2)); }
+function qdbl(){ var el=document.getElementById('betInp'); el.value=Math.min(tokens,parseInt(el.value||10)*2); }
+function qset(v){ document.getElementById('betInp').value=v; }
+
+// ── Toast ─────────────────────────────────────────────────────
+var toastTmr;
+function showToast(msg,type){
+  var el=document.getElementById('toastEl');
+  el.innerHTML=msg; el.className='toast '+type+' show';
+  clearTimeout(toastTmr); toastTmr=setTimeout(function(){el.classList.remove('show');},2600);
+}
+
+// ── Log ───────────────────────────────────────────────────────
+function logGame(bet,result){
+  fetch('/api/log-game',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({uid:uid,game:'hilo',bet:bet,result:result,won:result>bet})}).catch(function(){});
+}
+
+// ── Init ──────────────────────────────────────────────────────
+buildDeck();
+initStars();
+updateBal();
+updateStats();
+updateStreak();
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(function(){});
+</script>
+</body>
+</html>

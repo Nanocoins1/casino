@@ -5613,37 +5613,68 @@ function JackpotTicker(){
   const [amount,setAmount]=useState(50000);
   const [bump,setBump]=useState(false);
   const [winner,setWinner]=useState(null);
-  const [visible,setVisible]=useState(false);
-  const hideTimer=useRef(null);
-  function showBriefly(ms){
-    ms=ms||4000;
-    setVisible(true);
-    if(hideTimer.current)clearTimeout(hideTimer.current);
-    hideTimer.current=setTimeout(()=>setVisible(false),ms);
+  const [visible,setVisible]=useState(true);
+  const [displayAmt,setDisplayAmt]=useState(50000);
+  const animRef=useRef(null);
+
+  // Smooth counter animation
+  function animateTo(target){
+    if(animRef.current) clearInterval(animRef.current);
+    var current=0;
+    setDisplayAmt(function(prev){ current=prev; return prev; });
+    var steps=30;
+    var step=0;
+    animRef.current=setInterval(function(){
+      step++;
+      var progress=step/steps;
+      var eased=1-Math.pow(1-progress,3);
+      setDisplayAmt(Math.floor(current+(target-current)*eased));
+      if(step>=steps){ clearInterval(animRef.current); setDisplayAmt(target); }
+    },16);
   }
+
   useEffect(()=>{
-    fetch('/api/jackpot').then(r=>r.json()).then(d=>{setAmount(d.amount);showBriefly(3500);}).catch(()=>{});
-    socket.on('jackpotUpdate',n=>{setAmount(n);setBump(true);setTimeout(()=>setBump(false),500);showBriefly(4000);});
-    socket.on('jackpotWon',({name,amount:a})=>{setWinner({name,amount:a});setVisible(true);setTimeout(()=>setWinner(null),6000);});
-    return()=>{socket.off('jackpotUpdate');socket.off('jackpotWon');if(hideTimer.current)clearTimeout(hideTimer.current);};
+    fetch('/api/jackpot').then(function(r){return r.json();}).then(function(d){
+      setAmount(d.amount); setDisplayAmt(d.amount);
+    }).catch(function(){});
+
+    socket.on('jackpotUpdate',function(n){
+      setAmount(n);
+      setBump(true);
+      animateTo(n);
+      setTimeout(function(){setBump(false);},600);
+    });
+    socket.on('jackpotWon',function(data){
+      setWinner({name:data.name,amount:data.amount});
+      setTimeout(function(){setWinner(null);},7000);
+    });
+    return function(){
+      socket.off('jackpotUpdate'); socket.off('jackpotWon');
+      if(animRef.current) clearInterval(animRef.current);
+    };
   },[]);
+
   return(
-    <>
-      <div className={'jackpot-ticker'+(visible?'':' jackpot-ticker-hidden')}>
-        <span className="jackpot-ticker-label">🏆 Jackpot</span>
-        <span className={`jackpot-ticker-val${bump?' bump':''}`}>🪙 {fmt(amount)}</span>
+    <React.Fragment>
+      <div className={'jackpot-ticker'+(visible?'':' jackpot-ticker-hidden')} style={{pointerEvents:'auto',cursor:'pointer'}}
+        onClick={function(){setVisible(function(v){return !v;});}}>
+        <span style={{fontSize:16}}>🏆</span>
+        <span className="jackpot-ticker-label">JACKPOT</span>
+        <span className={`jackpot-ticker-val${bump?' bump':''}`}>🪙 {fmt(displayAmt)}</span>
+        <span style={{fontSize:9,color:'rgba(232,224,208,.2)',marginLeft:4,letterSpacing:1}}>+1% kiekvieno statymo</span>
       </div>
       {winner&&(
         <div className="jackpot-won-banner">
           <div className="jackpot-won-card">
             <div style={{fontSize:64,marginBottom:8}}>🏆</div>
             <h2>JACKPOT!</h2>
-            <div className="amount">{fmt(winner.amount)}</div>
-            <p>{winner.name} HIT THE JACKPOT!</p>
+            <div className="amount">🪙 {fmt(winner.amount)}</div>
+            <p style={{marginTop:12}}>{winner.name} LAIMĖJO JACKPOT!</p>
+            <p style={{marginTop:6,fontSize:11,color:'rgba(232,224,208,.3)'}}>Sveikiname!</p>
           </div>
         </div>
       )}
-    </>
+    </React.Fragment>
   );
 }
 
@@ -7441,8 +7472,9 @@ function getGames(t){
   {name:'Krioklis',desc:'Ball drops through pegs — up to 999×',icon:'🔮',thumb:'krioklis',badge:'🎬 ANIM',cat:'automatai',href:'/plinko.html',color:'linear-gradient(135deg,#0d0033,#2d0099)'},
   {name:'Crash',desc:'Aviator style — cash out in time!',icon:'🚀',thumb:'crash',badge:'🔥 HOT',cat:'kripto',href:'/crash.html',color:'linear-gradient(135deg,#1a0a00,#663300)'},
   {name:'Mines',desc:'5×5 grid — diamonds or mines?',icon:'💣',thumb:'mines',badge:'⭐ POP',cat:'kripto',href:'/mines.html',color:'linear-gradient(135deg,#001a00,#004d00)'},
+  {name:'HiLo',desc:'Aukštesnis ar žemesnis? — serija x koef.',icon:'📈',thumb:'dice',badge:'✨ NEW',cat:'kripto',href:'/hilo.html',color:'linear-gradient(135deg,#001428,#002860)'},
   {name:'Lucky Wheel',desc:'Spin the wheel — up to 100×',icon:'🎡',thumb:'wheel',badge:'',cat:'kripto',href:'/wheel.html',color:'linear-gradient(135deg,#1a001a,#660066)'},
-  {name:'Dice / Limbo / Hi-Lo',desc:'3 games in one',icon:'🎲',thumb:'dice',badge:'',cat:'kripto',href:'/dice.html',color:'linear-gradient(135deg,#001a1a,#004d4d)'},
+  {name:'Dice / Limbo',desc:'3 games in one',icon:'🎲',thumb:'dice',badge:'',cat:'kripto',href:'/dice.html',color:'linear-gradient(135deg,#001a1a,#004d4d)'},
   {name:(g.sports&&g.sports.title)||'Sports',desc:(g.sports&&g.sports.desc)||'Football, basketball & more',icon:'⚽',thumb:'sports',badge:'🔴 LIVE',cat:'sportas',page:'sports',color:'linear-gradient(135deg,#001a0a,#004d1f)'},
   {name:(g.pyramid&&g.pyramid.title)||'Pyramid Drop',desc:(g.pyramid&&g.pyramid.desc)||'Drop game — up to 100×',icon:'🏺',thumb:'pyramid',badge:'',cat:'kripto',page:'pyramid',color:'linear-gradient(135deg,#1a1400,#4d3b00)'},
 ];}
@@ -7515,6 +7547,7 @@ function App(){
     {id:'__label2',label:'GAMES'},
     {id:'__link_crash',icon:'🚀',label:'Crash',href:'/crash.html',badge:'HOT',badgeCls:'hot'},
     {id:'__link_mines',icon:'💣',label:'Mines',href:'/mines.html'},
+    {id:'__link_hilo',icon:'📈',label:'HiLo',href:'/hilo.html',badge:'NEW',badgeCls:'new'},
     {id:'__link_krioklis',icon:'🔮',label:'Krioklis',href:'/plinko.html',badge:'NEW',badgeCls:'new'},
     {id:'__link_dice',icon:'🎲',label:'Dice / Limbo',href:'/dice.html'},
     {id:'__link_wheel',icon:'🎡',label:'Lucky Wheel',href:'/wheel.html'},
