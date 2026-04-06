@@ -6104,6 +6104,7 @@ const LANGS = {
       slotsClassic:{title:'Classic Slots',desc:'3 reels · 7 symbols · up to 47.5×'},
       dice:{title:'Dice / Limbo',desc:'3 games in one'},
     },
+    footer:{terms:'Terms & Conditions',privacy:'Privacy Policy',responsible:'Responsible Gambling',provably:'Provably Fair'},
     viktor:{greeting:'Welcome! I am Viktor, your personal croupier. Ask me anything!'},
     disclaimer:'VIRTUAL TOKENS ONLY · ENTERTAINMENT ONLY · NO REAL MONEY',
   },
@@ -6148,6 +6149,7 @@ const LANGS = {
       slotsClassic:{title:'Klasikiniai Automatai',desc:'3 ritiniai · 7 simboliai · iki 47.5×'},
       dice:{title:'Kauliukai / Limbo',desc:'3 žaidimai viename'},
     },
+    footer:{terms:'Taisyklės ir Sąlygos',privacy:'Privatumo Politika',responsible:'Atsakingas Lošimas',provably:'Provably Fair'},
     viktor:{greeting:'Sveiki! Aš esu Viktoras, jūsų asmeninis krupjė. Klauskite viską!'},
     disclaimer:'TIK VIRTUALŪS ŽETONAI · TIK PRAMOGA · BE REALIŲ PINIGŲ',
   },
@@ -6192,6 +6194,7 @@ const LANGS = {
       slotsClassic:{title:'Классические Слоты',desc:'3 барабана · 7 символов · до 47.5×'},
       dice:{title:'Кости / Лимбо',desc:'3 игры в одной'},
     },
+    footer:{terms:'Правила и Условия',privacy:'Политика конфиденциальности',responsible:'Ответственная игра',provably:'Provably Fair'},
     viktor:{greeting:'Добро пожаловать! Я Виктор, ваш личный крупье. Спрашивайте всё!'},
     disclaimer:'ТОЛЬКО ВИРТУАЛЬНЫЕ ЖЕТОНЫ · ТОЛЬКО РАЗВЛЕЧЕНИЕ · БЕЗ РЕАЛЬНЫХ ДЕНЕГ',
   },
@@ -6236,6 +6239,7 @@ const LANGS = {
       slotsClassic:{title:'Klassische Slots',desc:'3 Walzen · 7 Symbole · bis zu 47.5×'},
       dice:{title:'Würfel / Limbo',desc:'3 Spiele in einem'},
     },
+    footer:{terms:'AGB & Bedingungen',privacy:'Datenschutzerklärung',responsible:'Verantwortungsvolles Spielen',provably:'Provably Fair'},
     viktor:{greeting:'Willkommen! Ich bin Viktor, Ihr persönlicher Croupier. Fragen Sie alles!'},
     disclaimer:'NUR VIRTUELLE CHIPS · NUR UNTERHALTUNG · KEIN ECHTES GELD',
   },
@@ -6281,6 +6285,7 @@ const LANGS = {
       slotsClassic:{title:'Klasyczne Sloty',desc:'3 bębny · 7 symboli · do 47.5×'},
       dice:{title:'Kości / Limbo',desc:'3 gry w jednym'},
     },
+    footer:{terms:'Regulamin',privacy:'Polityka prywatności',responsible:'Odpowiedzialny hazard',provably:'Provably Fair'},
     viktor:{greeting:'Witaj! Jestem Viktor, Twój osobisty krupier. Zapytaj mnie o cokolwiek!'},
     disclaimer:'TYLKO WIRTUALNE ŻETONY · TYLKO ROZRYWKA · BEZ PRAWDZIWYCH PIENIĘDZY',
   },
@@ -6325,6 +6330,7 @@ const LANGS = {
       slotsClassic:{title:'Machines à Sous Classiques',desc:'3 rouleaux · 7 symboles · jusqu\'à 47.5×'},
       dice:{title:'Dés / Limbo',desc:'3 jeux en un'},
     },
+    footer:{terms:'Conditions Générales',privacy:'Politique de confidentialité',responsible:'Jeu responsable',provably:'Provably Fair'},
     viktor:{greeting:'Bienvenue! Je suis Viktor, votre croupier personnel. Posez-moi vos questions!'},
     disclaimer:'JETONS VIRTUELS UNIQUEMENT · DIVERTISSEMENT UNIQUEMENT · SANS ARGENT RÉEL',
   },
@@ -6369,6 +6375,7 @@ const LANGS = {
       slotsClassic:{title:'Klasik Slotlar',desc:"3 makara · 7 sembol · 47.5×'e kadar"},
       dice:{title:'Zar / Limbo',desc:'Bir arada 3 oyun'},
     },
+    footer:{terms:'Şartlar ve Koşullar',privacy:'Gizlilik Politikası',responsible:'Sorumlu Kumar',provably:'Provably Fair'},
     viktor:{greeting:'Hoş geldiniz! Ben Viktor, kişisel krupiyenizim. Her şeyi sorabilirsiniz!'},
     disclaimer:'SADECE SANAL JETONLAR · SADECE EĞLENCE · GERÇEK PARA YOK',
   },
@@ -6413,6 +6420,7 @@ const LANGS = {
       slotsClassic:{title:'ماكينات كلاسيكية',desc:'3 بكرات · 7 رموز · حتى 47.5×'},
       dice:{title:'نرد / ليمبو',desc:'3 ألعاب في واحدة'},
     },
+    footer:{terms:'الشروط والأحكام',privacy:'سياسة الخصوصية',responsible:'المقامرة المسؤولة',provably:'Provably Fair'},
     viktor:{greeting:'مرحباً! أنا فيكتور، كروبييرك الشخصي. اسألني عن أي شيء!'},
     disclaimer:'رموز افتراضية فقط · للترفيه فقط · لا أموال حقيقية',
   },
@@ -6457,6 +6465,7 @@ const LANGS = {
       slotsClassic:{title:'经典老虎机',desc:'3滚轴 · 7符号 · 最高47.5×'},
       dice:{title:'骰子 / 边缘',desc:'三合一游戏'},
     },
+    footer:{terms:'条款和条件',privacy:'隐私政策',responsible:'负责任博彩',provably:'Provably Fair'},
     viktor:{greeting:'欢迎！我是维克托，您的专属荷官。有任何问题请随时问我！'},
     disclaimer:'仅限虚拟代币 · 仅供娱乐 · 无真实金钱',
   },
@@ -7938,13 +7947,13 @@ function App(){
       {lvUp&&<div className="levelup-banner"><h3>{lvUp.e} LEVEL UP!</h3><p>You reached {lvUp.name}</p></div>}
       {page!=='poker'&&<EmojiParticles particles={particles}/>}
       <div style={{borderTop:'1px solid rgba(201,168,76,0.08)',padding:'12px 20px',display:'flex',flexWrap:'wrap',gap:10,justifyContent:'center',fontSize:11}}>
-        <a href="/terms.html" style={{color:'rgba(201,168,76,0.4)',textDecoration:'none'}}>Taisykles ir Salygos</a>
+        <a href="/terms.html" style={{color:'rgba(201,168,76,0.4)',textDecoration:'none'}}>{(t.footer&&t.footer.terms)||'Terms & Conditions'}</a>
         <span style={{color:'rgba(201,168,76,0.15)'}}>·</span>
-        <a href="/privacy.html" style={{color:'rgba(201,168,76,0.4)',textDecoration:'none'}}>Privatumo Politika</a>
+        <a href="/privacy.html" style={{color:'rgba(201,168,76,0.4)',textDecoration:'none'}}>{(t.footer&&t.footer.privacy)||'Privacy Policy'}</a>
         <span style={{color:'rgba(201,168,76,0.15)'}}>·</span>
-        <a href="/responsible.html" style={{color:'rgba(201,168,76,0.4)',textDecoration:'none'}}>Atsakingas Losimas</a>
+        <a href="/responsible.html" style={{color:'rgba(201,168,76,0.4)',textDecoration:'none'}}>{(t.footer&&t.footer.responsible)||'Responsible Gambling'}</a>
         <span style={{color:'rgba(201,168,76,0.15)'}}>·</span>
-        <a href="/provably-fair.html" style={{color:'rgba(201,168,76,0.4)',textDecoration:'none'}}>Provably Fair</a>
+        <a href="/provably-fair.html" style={{color:'rgba(201,168,76,0.4)',textDecoration:'none'}}>{(t.footer&&t.footer.provably)||'Provably Fair'}</a>
         <span style={{color:'rgba(201,168,76,0.15)'}}>·</span>
         <a href="/aml.html" style={{color:'rgba(201,168,76,0.4)',textDecoration:'none'}}>AML</a>
         <span style={{color:'rgba(201,168,76,0.15)'}}>·</span>
