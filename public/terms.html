@@ -1,121 +1,448 @@
 <!DOCTYPE html>
-<html lang="lt">
+<html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Taisyklės ir Sąlygos — HATHOR Royal Casino</title>
+<title>Terms &amp; Conditions — HATHOR Royal Casino</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
   *{box-sizing:border-box;margin:0;padding:0;}
   :root{--gold:#c9a84c;--gold2:#ffd680;--bg:#0a0806;--card:rgba(255,255,255,0.03);--border:rgba(201,168,76,0.15);--cream:#e8e2d4;}
   body{background:var(--bg);color:var(--cream);font-family:'Inter',sans-serif;font-size:15px;line-height:1.7;}
-  header{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,8,6,0.95);backdrop-filter:blur(10px);z-index:100;}
-  .logo{font-family:'Cinzel',serif;font-size:20px;font-weight:700;color:var(--gold);text-decoration:none;letter-spacing:2px;}
-  .back-link{color:var(--gold);text-decoration:none;font-size:13px;border:1px solid var(--border);padding:6px 14px;border-radius:8px;transition:all .2s;}
-  .back-link:hover{background:rgba(201,168,76,0.1);}
+  header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,8,6,0.97);backdrop-filter:blur(10px);z-index:100;gap:12px;flex-wrap:wrap;}
+  .logo{font-family:'Cinzel',serif;font-size:18px;font-weight:700;color:var(--gold);text-decoration:none;letter-spacing:2px;white-space:nowrap;}
+  .back-link{color:var(--gold);text-decoration:none;font-size:12px;border:1px solid var(--border);padding:5px 12px;border-radius:8px;white-space:nowrap;}
+  .lang-bar{display:flex;gap:5px;align-items:center;flex-wrap:wrap;}
+  .lang-btn{background:none;border:1px solid rgba(201,168,76,0.2);border-radius:6px;color:rgba(232,226,212,0.5);font-size:11px;padding:4px 7px;cursor:pointer;transition:all .2s;}
+  .lang-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,0.08);}
+  .lang-btn:hover{color:var(--cream);}
   .container{max-width:820px;margin:0 auto;padding:48px 24px 80px;}
   .page-title{font-family:'Cinzel',serif;font-size:28px;font-weight:700;color:var(--gold2);margin-bottom:8px;}
-  .page-sub{font-size:13px;color:rgba(201,168,76,0.5);margin-bottom:40px;letter-spacing:1px;}
-  h2{font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:var(--gold);margin:36px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  .updated{font-size:12px;color:rgba(201,168,76,0.4);margin-bottom:32px;}
+  h2{font-family:'Cinzel',serif;font-size:15px;font-weight:700;color:var(--gold);margin:32px 0 10px;padding-bottom:8px;border-bottom:1px solid var(--border);}
   p{margin-bottom:12px;color:rgba(232,226,212,0.8);}
   ul{margin:8px 0 12px 20px;color:rgba(232,226,212,0.8);}
   li{margin-bottom:6px;}
   .highlight-box{background:rgba(255,61,113,0.06);border:1px solid rgba(255,61,113,0.2);border-radius:10px;padding:16px;margin:20px 0;color:#ff9999;}
   .info-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin:16px 0;}
-  .updated{font-size:12px;color:rgba(201,168,76,0.4);margin-bottom:40px;}
   footer{text-align:center;padding:24px;border-top:1px solid var(--border);font-size:12px;color:rgba(201,168,76,0.3);}
 </style>
 </head>
 <body>
 <header>
   <a class="logo" href="/">&#x2B21; HATHOR</a>
-  <a class="back-link" href="/">&#8592; Grįžti</a>
+  <div class="lang-bar" id="langBar"></div>
+  <a class="back-link" href="/" id="backLink" data-i18n="backLink">&#8592; Back</a>
 </header>
 <div class="container">
-  <div class="page-title">Taisyklės ir Sąlygos</div>
-  <div class="updated">Paskutinį kartą atnaujinta: 2026 m. sausio 1 d.</div>
-
-  <div class="highlight-box">
-    &#9888;&#65039; <strong>Svarbu:</strong> Naudodamiesi HATHOR Royal Casino paslaugomis jūs patvirtinate, kad esate vyresni nei 18 metų ir kad lošimas jūsų jurisdikcijoje yra legalus.
-  </div>
-
-  <h2>1. Bendrosios nuostatos</h2>
-  <p>HATHOR Royal Casino („Kazino", „mes", „mūsų") teikia internetinio lošimo paslaugas. Šios taisyklės ir sąlygos („Sutartis") reguliuoja jūsų naudojimąsi mūsų platforma.</p>
-  <p>Naudodamiesi mūsų paslaugomis jūs sutinkate su šiomis sąlygomis. Jei nesutinkate — prašome nesinaudoti mūsų paslaugomis.</p>
-
-  <h2>2. Tinkamumo reikalavimai</h2>
+  <div class="page-title" data-i18n="pageTitle">Terms and Conditions</div>
+  <div class="updated" data-i18n="updated">Last updated: January 1, 2026</div>
+  <div class="highlight-box" data-i18n-html="warning">&#9888;&#65039; <strong>Important:</strong> By using HATHOR Royal Casino you confirm you are over 18 and that gambling is legal in your jurisdiction.</div>
+  <h2 data-i18n="h1">1. General Provisions</h2>
+  <p data-i18n="p1a"></p>
+  <p data-i18n="p1b"></p>
+  <h2 data-i18n="h2">2. Eligibility Requirements</h2>
   <ul>
-    <li>Turite būti <strong>ne jaunesni nei 18 metų</strong></li>
-    <li>Lošimas turi būti legalus jūsų gyvenamojoje šalyje</li>
-    <li>Draudžiama turėti daugiau nei vieną paskyrą</li>
-    <li>Draudžiama naudotis paslaugomis Jungtinėse Amerikos Valstijose, Jungtinėje Karalystėje, Prancūzijoje, Ispanijoje ir kitose jurisdikcijose, kuriose internetinis lošimas yra draudžiamas</li>
+    <li data-i18n-html="li_18"></li>
+    <li data-i18n="li_legal"></li>
+    <li data-i18n="li_one"></li>
+    <li data-i18n="li_restricted"></li>
   </ul>
-
-  <h2>3. Paskyra ir registracija</h2>
-  <p>Registruodamiesi jūs privalote pateikti teisingą informaciją. Kazino pasilieka teisę reikalauti tapatybės patvirtinimo (KYC) bet kuriuo metu.</p>
+  <h2 data-i18n="h3">3. Account and Registration</h2>
+  <p data-i18n="p3"></p>
   <ul>
-    <li>Vienas asmuo — viena paskyra</li>
-    <li>Paskyros negalima perduoti ar parduoti</li>
-    <li>Esate atsakingi už savo prisijungimo duomenų saugumą</li>
-    <li>Privalote nedelsiant pranešti apie neteisėtą prieigą prie jūsų paskyros</li>
+    <li data-i18n="li_one_acc"></li>
+    <li data-i18n="li_no_transfer"></li>
+    <li data-i18n="li_security"></li>
+    <li data-i18n="li_report"></li>
   </ul>
-
-  <h2>4. Lėšų įnešimas ir išėmimas</h2>
-  <p>Visos transakcijos vykdomos kriptovaliuta. Minimalus įnešimas — 10 USDT ekvivalentas. Išėmimai apdorojami per 24-72 valandas po KYC patvirtinimo.</p>
-  <div class="info-box">
-    <strong>Svarbu dėl bonusų:</strong> Prieš išimant laimėjimus gautus su bonusu, privaloma įvykdyti lošimo reikalavimus (wagering requirement). Detalesnė informacija pateikta Bonusų skyriuje.
-  </div>
-
-  <h2>5. Bonusai ir akcijos</h2>
+  <h2 data-i18n="h4">4. Deposits and Withdrawals</h2>
+  <p data-i18n="p4"></p>
+  <div class="info-box" data-i18n-html="bonus_note"></div>
+  <h2 data-i18n="h5">5. Bonuses and Promotions</h2>
   <ul>
-    <li>Sveikinamasis bonusas skiriamas tik naujiems žaidėjams</li>
-    <li>Bonusams taikomi lošimo reikalavimai (x10–x30)</li>
-    <li>Kazino pasilieka teisę keisti ar atšaukti akcijas</li>
-    <li>Piktnaudžiavimas bonusų sistema užtrauks paskyros blokavimą</li>
+    <li data-i18n="li_welcome"></li>
+    <li data-i18n="li_wagering"></li>
+    <li data-i18n="li_change"></li>
+    <li data-i18n="li_abuse"></li>
   </ul>
-
-  <h2>6. Atsakingas lošimas</h2>
-  <p>Mes rimtai žiūrime į atsakingą lošimą. Teikiame šias priemones:</p>
+  <h2 data-i18n="h6">6. Responsible Gambling</h2>
+  <p data-i18n="p6"></p>
   <ul>
-    <li>Dienos ir savaitės statymų limitai</li>
-    <li>Saviišskyrimoas (1–365 dienos)</li>
-    <li>Realybės patikros pranešimai</li>
-    <li>Nuorodos į pagalbos organizacijas</li>
+    <li data-i18n="li_limits"></li>
+    <li data-i18n="li_exclude"></li>
+    <li data-i18n="li_reality"></li>
+    <li data-i18n="li_help"></li>
   </ul>
-  <p>Daugiau informacijos: <a href="/responsible.html" style="color:var(--gold);">Atsakingo lošimo puslapis</a></p>
-
-  <h2>7. Draudžiama veikla</h2>
+  <p>&#8594; <a href="/responsible.html" style="color:var(--gold)" data-i18n="responsibleLink">Responsible Gambling page</a></p>
+  <h2 data-i18n="h7">7. Prohibited Activities</h2>
   <ul>
-    <li>Sukčiavimas, koluzija ar bet kokios žaidimo sistemos manipuliacijos</li>
-    <li>Pinigų plovimas ar kita neteisėta finansinė veikla</li>
-    <li>Programinės įrangos klaidų išnaudojimas</li>
-    <li>Automatizuotų botų ar programų naudojimas</li>
-    <li>Kelių paskyrų turėjimas</li>
+    <li data-i18n="li_fraud"></li>
+    <li data-i18n="li_money"></li>
+    <li data-i18n="li_exploit"></li>
+    <li data-i18n="li_bots"></li>
+    <li data-i18n="li_multi"></li>
   </ul>
-
-  <h2>8. Provably Fair</h2>
-  <p>Mūsų žaidimai naudoja kriptografinį Provably Fair algoritmą, kuris garantuoja žaidimų sąžiningumą. Kiekvienas lošimas gali būti patikrintas nepriklausomai.</p>
-  <p><a href="/provably-fair.html" style="color:var(--gold);">Sužinoti daugiau apie Provably Fair &#8594;</a></p>
-
-  <h2>9. Intelektinė nuosavybė</h2>
-  <p>Visos platformos teisės priklauso HATHOR Royal Casino. Draudžiama kopijuoti, platinti ar modifikuoti mūsų turinį be rašytinio leidimo.</p>
-
-  <h2>10. Atsakomybės apribojimas</h2>
-  <p>Kazino neatsako už nuostolius dėl techninių gedimų, interneto ryšio problemų ar force majeure aplinkybių. Lošimas yra pramoginė veikla — nesistenkite kompensuoti nuostolių toliau lošdami.</p>
-
-  <h2>11. Ginčų sprendimas</h2>
-  <p>Ginčai sprendžiami per mūsų palaikymo tarnybą. Jei ginčas neišsprendžiamas per 30 dienų, jis perduodamas nepriklausomai arbitražo institucijai.</p>
-
-  <h2>12. Taisyklių keitimai</h2>
-  <p>Mes pasiliekame teisę keisti šias taisykles bet kuriuo metu. Apie svarbius pakeitimus pranešime el. paštu. Tolesnė paskyros naudojimas reiškia sutikimą su naujomis taisyklėmis.</p>
-
-  <h2>13. Kontaktai</h2>
-  <div class="info-box">
-    El. paštas: support@hathor.casino<br/>
-    Palaikymas: <a href="/" style="color:var(--gold);">Live Chat</a> (svetainėje)<br/>
-    Atsakymo laikas: 24–48 val.
-  </div>
+  <h2 data-i18n="h8">8. Provably Fair</h2>
+  <p data-i18n="p8a"></p>
+  <p><a href="/provably-fair.html" style="color:var(--gold)" data-i18n="provablyLink">Learn more about Provably Fair &#8594;</a></p>
+  <h2 data-i18n="h9">9. Intellectual Property</h2>
+  <p data-i18n="p9"></p>
+  <h2 data-i18n="h10">10. Limitation of Liability</h2>
+  <p data-i18n="p10"></p>
+  <h2 data-i18n="h11">11. Dispute Resolution</h2>
+  <p data-i18n="p11"></p>
+  <h2 data-i18n="h12">12. Changes to Terms</h2>
+  <p data-i18n="p12"></p>
+  <h2 data-i18n="h13">13. Contact</h2>
+  <div class="info-box" data-i18n-html="contact_html"></div>
 </div>
-<footer>&#169; 2026 HATHOR Royal Casino. Visi lošimai vykdomi sąžiningai pagal Provably Fair sistemą.</footer>
+<footer data-i18n="footer">&#169; 2026 HATHOR Royal Casino.</footer>
+<script>
+const TERMS_LANGS = {
+  en: {
+    pageTitle: 'Terms and Conditions',
+    backLink: '\u2190 Back',
+    updated: 'Last updated: January 1, 2026',
+    warning: '\u26a0\ufe0f <strong>Important:</strong> By using HATHOR Royal Casino you confirm you are over 18 and that gambling is legal in your jurisdiction.',
+    h1: '1. General Provisions',
+    p1a: 'HATHOR Royal Casino (\u201cCasino\u201d, \u201cwe\u201d, \u201cour\u201d) provides online gambling services. These Terms and Conditions (\u201cAgreement\u201d) govern your use of our platform.',
+    p1b: 'By using our services you agree to these terms. If you disagree \u2014 please do not use our services.',
+    h2: '2. Eligibility Requirements',
+    li_18: 'You must be <strong>at least 18 years old</strong>',
+    li_legal: 'Gambling must be legal in your country of residence',
+    li_one: 'Having more than one account is prohibited',
+    li_restricted: 'Use is prohibited in the United States, United Kingdom, France, Spain and other jurisdictions where online gambling is banned',
+    h3: '3. Account and Registration',
+    p3: 'By registering you must provide accurate information. The Casino reserves the right to require identity verification (KYC) at any time.',
+    li_one_acc: 'One person \u2014 one account',
+    li_no_transfer: 'Accounts cannot be transferred or sold',
+    li_security: 'You are responsible for keeping your login credentials secure',
+    li_report: 'You must immediately report any unauthorized access to your account',
+    h4: '4. Deposits and Withdrawals',
+    p4: 'All transactions are processed in cryptocurrency. Minimum deposit \u2014 10 USDT equivalent. Withdrawals processed within 24\u201372 hours after KYC verification.',
+    bonus_note: '<strong>Important about bonuses:</strong> Before withdrawing winnings obtained with a bonus, wagering requirements must be met. Details in the Bonuses section.',
+    h5: '5. Bonuses and Promotions',
+    li_welcome: 'Welcome bonus is for new players only',
+    li_wagering: 'Bonuses are subject to wagering requirements (\u00d710\u2013\u00d730)',
+    li_change: 'Casino reserves the right to change or cancel promotions',
+    li_abuse: 'Abuse of the bonus system will result in account suspension',
+    h6: '6. Responsible Gambling',
+    p6: 'We take responsible gambling seriously. We provide these tools:',
+    li_limits: 'Daily and weekly wagering limits',
+    li_exclude: 'Self-exclusion (1\u2013365 days)',
+    li_reality: 'Reality check notifications',
+    li_help: 'Links to help organizations',
+    h7: '7. Prohibited Activities',
+    li_fraud: 'Fraud, collusion or any game manipulation',
+    li_money: 'Money laundering or other illegal financial activity',
+    li_exploit: 'Exploiting software bugs',
+    li_bots: 'Using automated bots or programs',
+    li_multi: 'Having multiple accounts',
+    h8: '8. Provably Fair',
+    p8a: 'Our games use a cryptographic Provably Fair algorithm that guarantees fairness. Each game can be independently verified.',
+    h9: '9. Intellectual Property',
+    p9: 'All platform rights belong to HATHOR Royal Casino. Copying, distributing or modifying our content without written permission is prohibited.',
+    h10: '10. Limitation of Liability',
+    p10: 'The Casino is not responsible for losses due to technical failures, internet issues or force majeure. Gambling is entertainment \u2014 do not try to recover losses by gambling more.',
+    h11: '11. Dispute Resolution',
+    p11: 'Disputes are resolved through our support service. If not resolved within 30 days, it is referred to an independent arbitration body.',
+    h12: '12. Changes to Terms',
+    p12: 'We reserve the right to change these terms at any time. We will notify you of important changes by email. Continued use means acceptance of new terms.',
+    h13: '13. Contact',
+    contact_html: 'Email: support@hathor.casino<br/>Support: <a href="/" style="color:var(--gold)">Live Chat</a> (on website)<br/>Response time: 24\u201348 hours',
+    footer: '\u00a9 2026 HATHOR Royal Casino. All games run fairly under the Provably Fair system.',
+    responsibleLink: 'Responsible Gambling page',
+    provablyLink: 'Learn more about Provably Fair \u2192',
+  },
+  lt: {
+    pageTitle: 'Taisykl\u0117s ir S\u0105lygos',
+    backLink: '\u2190 Gr\u012f\u017eti',
+    updated: 'Paskutin\u012f kart\u0105 atnaujinta: 2026 m. sausio 1 d.',
+    warning: '\u26a0\ufe0f <strong>Svarbu:</strong> Naudodamiesi HATHOR Royal Casino patvirtinate, kad esate vyresni nei 18 met\u0173 ir kad lo\u0161imas j\u016bs\u0173 jurisdikcijoje yra legalus.',
+    h1: '1. Bendrosios nuostatos',
+    p1a: 'HATHOR Royal Casino (\u201eKazino\u201c, \u201emes\u201c, \u201em\u016bs\u0173\u201c) teikia internetinio lo\u0161imo paslaugas. \u0160ios Taisykl\u0117s ir S\u0105lygos (\u201eSutartis\u201c) reguliuoja j\u016bs\u0173 naudojim\u0105si m\u016bs\u0173 platforma.',
+    p1b: 'Naudodamiesi m\u016bs\u0173 paslaugomis j\u016bs sutinkate su \u0161iomis s\u0105lygomis. Jei nesutinkate \u2014 pra\u0161ome nesinaudoti.',
+    h2: '2. Tinkamum\u0173 reikalavimai',
+    li_18: 'Turite b\u016bti <strong>ne jaunesni nei 18 met\u0173</strong>',
+    li_legal: 'Lo\u0161imas turi b\u016bti legalus j\u016bs\u0173 gyvenamojoje \u0161alyje',
+    li_one: 'Draud\u017eiama tur\u0117ti daugiau nei vien\u0105 paskyr\u0105',
+    li_restricted: 'Draud\u017eiama naudotis JAV, JK, Pranc\u016bzijoje, Ispanijoje ir kitose jurisdikcijose, kuriose internetinis lo\u0161imas draud\u017eiamas',
+    h3: '3. Paskyra ir registracija',
+    p3: 'Registruodamiesi privalote pateikti teisingas informacij\u0105. Kazino pasilieka teis\u0119 reikalauti tapatyb\u0117s patvirtinimo (KYC) bet kuriuo metu.',
+    li_one_acc: 'Vienas asmuo \u2014 viena paskyra',
+    li_no_transfer: 'Paskyros negalima perduoti ar parduoti',
+    li_security: 'Esate atsakingi u\u017e savo prisijungimo duomen\u0173 saugum\u0105',
+    li_report: 'Privalote nedelsiant prane\u0161ti apie nete\u0117\u0117t\u0105 prieig\u0105',
+    h4: '4. L\u0117\u0161\u0173 \u012fne\u0161imas ir i\u0161\u0117mimas',
+    p4: 'Visos transakcijos vykdomos kriptovaliuta. Minimalus \u012fne\u0161imas \u2014 10 USDT. I\u0161\u0117mimai apdorojami per 24\u201372 val. po KYC.',
+    bonus_note: '<strong>Svarbu d\u0117l bonus\u0173:</strong> Prie\u0161 i\u0161imant laim\u0117jimus su bonusu, privaloma \u012fvykdyti lo\u0161imo reikalavimus.',
+    h5: '5. Bonusai ir akcijos',
+    li_welcome: 'Sveikinamasis bonusas \u2014 tik naujiems \u017eid\u0117jams',
+    li_wagering: 'Bonusams taikomi lo\u0161imo reikalavimai (\u00d710\u2013\u00d730)',
+    li_change: 'Kazino pasilieka teis\u0119 keisti ar at\u0161aukti akcijas',
+    li_abuse: 'Piktnaud\u017eiavimas bonus\u0173 sistema u\u017etrauks paskyros blokavim\u0105',
+    h6: '6. Atsakingas lo\u0161imas',
+    p6: 'Mes rimtai \u017ei\u016brime \u012f atsaking\u0105 lo\u0161im\u0105. Teikiame \u0161ias priemones:',
+    li_limits: 'Dienos ir savait\u0117s statym\u0173 limitai',
+    li_exclude: 'Savii\u0161skyrimoas (1\u2013365 dienos)',
+    li_reality: 'Realyb\u0117s patikros prane\u0161imai',
+    li_help: 'Nuorodos \u012f pagalbos organizacijas',
+    h7: '7. Draud\u017eiama veikla',
+    li_fraud: 'Suk\u010diavimas, koluzija ar \u017eidimo manipuliacijos',
+    li_money: 'Pinig\u0173 plovimas ar kita nete\u0117\u0117ta finansin\u0117 veikla',
+    li_exploit: 'Programin\u0117s \u012frangos klaid\u0173 i\u0161naudojimas',
+    li_bots: 'Automatizuot\u0173 bot\u0173 ar program\u0173 naudojimas',
+    li_multi: 'Keli\u0173 paskyr\u0173 tur\u0117jimas',
+    h8: '8. Provably Fair',
+    p8a: 'M\u016bs\u0173 \u017edimai naudoja kriptografin\u012f Provably Fair algoritm\u0105. Kiekvienas lo\u0161imas gali b\u016bti patikrintas nepriklausomai.',
+    h9: '9. Intelektin\u0117 nuosavyb\u0117',
+    p9: 'Visos platformos teis\u0117s priklauso HATHOR Royal Casino. Draud\u017eiama kopijuoti ar modifikuoti m\u016bs\u0173 turin\u012f be ra\u0161ytinio leidimo.',
+    h10: '10. Atsakomyb\u0117s apribojimas',
+    p10: 'Kazino neatsako u\u017e nuostolius d\u0117l technini\u0173 gedim\u0173 ar force majeure. Lo\u0161imas yra pramoga \u2014 nesistenkite kompensuoti nuostoli\u0173.',
+    h11: '11. Gin\u010d\u0173 sprendimas',
+    p11: 'Gin\u010dai sprendžiami per m\u016bs\u0173 palaikymo tarnyb\u0105. Jei gin\u010das nei\u0161sprendžiamas per 30 dien\u0173 \u2014 perduodamas arbitražui.',
+    h12: '12. Taisykli\u0173 keitimai',
+    p12: 'Mes pasiliekame teis\u0119 keisti \u0161ias taisykles. Apie svarbius pakeitimus prane\u0161ime el. pa\u0161tu.',
+    h13: '13. Kontaktai',
+    contact_html: 'El. pa\u0161tas: support@hathor.casino<br/>Palaikymas: <a href="/" style="color:var(--gold)">Live Chat</a> (svetain\u0117je)<br/>Atsakymo laikas: 24\u201348 val.',
+    footer: '\u00a9 2026 HATHOR Royal Casino. Visi lo\u0161imai vykdomi s\u0105\u017einingai pagal Provably Fair sistem\u0105.',
+    responsibleLink: 'Atsakingo lo\u0161imo puslapis',
+    provablyLink: 'Su\u017einoti daugiau apie Provably Fair \u2192',
+  },
+  ru: {
+    pageTitle: '\u041f\u0440\u0430\u0432\u0438\u043b\u0430 \u0438 \u0423\u0441\u043b\u043e\u0432\u0438\u044f',
+    backLink: '\u2190 \u041d\u0430\u0437\u0430\u0434',
+    updated: '\u041f\u043e\u0441\u043b\u0435\u0434\u043d\u0435\u0435 \u043e\u0431\u043d\u043e\u0432\u043b\u0435\u043d\u0438\u0435: 1 \u044f\u043d\u0432\u0430\u0440\u044f 2026 \u0433.',
+    warning: '\u26a0\ufe0f <strong>\u0412\u0430\u0436\u043d\u043e:</strong> \u0418\u0441\u043f\u043e\u043b\u044c\u0437\u0443\u044f HATHOR Royal Casino, \u0432\u044b \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0430\u0435\u0442\u0435, \u0447\u0442\u043e \u0432\u0430\u043c \u0438\u0441\u043f\u043e\u043b\u043d\u0438\u043b\u043e\u0441\u044c 18 \u043b\u0435\u0442 \u0438 \u0447\u0442\u043e \u0430\u0437\u0430\u0440\u0442\u043d\u044b\u0435 \u0438\u0433\u0440\u044b \u043b\u0435\u0433\u0430\u043b\u044c\u043d\u044b \u0432 \u0432\u0430\u0448\u0435\u0439 \u044e\u0440\u0438\u0441\u0434\u0438\u043a\u0446\u0438\u0438.',
+    h1: '1. \u041e\u0431\u0449\u0438\u0435 \u043f\u043e\u043b\u043e\u0436\u0435\u043d\u0438\u044f',
+    p1a: 'HATHOR Royal Casino (\u00ab\u041a\u0430\u0437\u0438\u043d\u043e\u00bb, \u00ab\u043c\u044b\u00bb, \u00ab\u043d\u0430\u0448\u00bb) \u043f\u0440\u0435\u0434\u043e\u0441\u0442\u0430\u0432\u043b\u044f\u0435\u0442 \u0443\u0441\u043b\u0443\u0433\u0438 \u043e\u043d\u043b\u0430\u0439\u043d-\u0433\u0435\u043c\u0431\u043b\u0438\u043d\u0433\u0430. \u041d\u0430\u0441\u0442\u043e\u044f\u0449\u0438\u0435 \u041f\u0440\u0430\u0432\u0438\u043b\u0430 \u0440\u0435\u0433\u0443\u043b\u0438\u0440\u0443\u044e\u0442 \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u043d\u0438\u0435 \u043d\u0430\u0448\u0435\u0439 \u043f\u043b\u0430\u0442\u0444\u043e\u0440\u043c\u044b.',
+    p1b: '\u0418\u0441\u043f\u043e\u043b\u044c\u0437\u0443\u044f \u043d\u0430\u0448\u0438 \u0443\u0441\u043b\u0443\u0433\u0438, \u0432\u044b \u0441\u043e\u0433\u043b\u0430\u0448\u0430\u0435\u0442\u0435\u0441\u044c \u0441 \u044d\u0442\u0438\u043c\u0438 \u0443\u0441\u043b\u043e\u0432\u0438\u044f\u043c\u0438. \u0415\u0441\u043b\u0438 \u0432\u044b \u043d\u0435 \u0441\u043e\u0433\u043b\u0430\u0441\u043d\u044b \u2014 \u043f\u043e\u0436\u0430\u043b\u0443\u0439\u0441\u0442\u0430, \u043d\u0435 \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u0443\u0439\u0442\u0435 \u043d\u0430\u0448\u0438 \u0443\u0441\u043b\u0443\u0433\u0438.',
+    h2: '2. \u0422\u0440\u0435\u0431\u043e\u0432\u0430\u043d\u0438\u044f \u043a \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0430\u043c',
+    li_18: '\u0412\u0430\u043c \u0434\u043e\u043b\u0436\u043d\u043e \u0431\u044b\u0442\u044c <strong>\u043d\u0435 \u043c\u0435\u043d\u0435\u0435 18 \u043b\u0435\u0442</strong>',
+    li_legal: '\u0410\u0437\u0430\u0440\u0442\u043d\u044b\u0435 \u0438\u0433\u0440\u044b \u0434\u043e\u043b\u0436\u043d\u044b \u0431\u044b\u0442\u044c \u0437\u0430\u043a\u043e\u043d\u043d\u044b \u0432 \u0432\u0430\u0448\u0435\u0439 \u0441\u0442\u0440\u0430\u043d\u0435',
+    li_one: '\u0417\u0430\u043f\u0440\u0435\u0449\u0435\u043d\u043e \u0438\u043c\u0435\u0442\u044c \u0431\u043e\u043b\u0435\u0435 \u043e\u0434\u043d\u043e\u0433\u043e \u0430\u043a\u043a\u0430\u0443\u043d\u0442\u0430',
+    li_restricted: '\u0418\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u043d\u0438\u0435 \u0437\u0430\u043f\u0440\u0435\u0449\u0435\u043d\u043e \u0432 \u0421\u0428\u0410, \u0412\u0435\u043b\u0438\u043a\u043e\u0431\u0440\u0438\u0442\u0430\u043d\u0438\u0438, \u0424\u0440\u0430\u043d\u0446\u0438\u0438, \u0418\u0441\u043f\u0430\u043d\u0438\u0438 \u0438 \u0434\u0440\u0443\u0433\u0438\u0445 \u044e\u0440\u0438\u0441\u0434\u0438\u043a\u0446\u0438\u044f\u0445, \u0433\u0434\u0435 \u043e\u043d\u043b\u0430\u0439\u043d-\u0433\u0435\u043c\u0431\u043b\u0438\u043d\u0433 \u0437\u0430\u043f\u0440\u0435\u0449\u0451\u043d',
+    h3: '3. \u0410\u043a\u043a\u0430\u0443\u043d\u0442 \u0438 \u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0430\u0446\u0438\u044f',
+    p3: '\u041f\u0440\u0438 \u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0430\u0446\u0438\u0438 \u0432\u044b \u043e\u0431\u044f\u0437\u0430\u043d\u044b \u043f\u0440\u0435\u0434\u043e\u0441\u0442\u0430\u0432\u0438\u0442\u044c \u0434\u043e\u0441\u0442\u043e\u0432\u0435\u0440\u043d\u0443\u044e \u0438\u043d\u0444\u043e\u0440\u043c\u0430\u0446\u0438\u044e. \u041a\u0430\u0437\u0438\u043d\u043e \u043e\u0441\u0442\u0430\u0432\u043b\u044f\u0435\u0442 \u0437\u0430 \u0441\u043e\u0431\u043e\u0439 \u043f\u0440\u0430\u0432\u043e \u043f\u043e\u0442\u0440\u0435\u0431\u043e\u0432\u0430\u0442\u044c \u0432\u0435\u0440\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u044e \u043b\u0438\u0447\u043d\u043e\u0441\u0442\u0438 (KYC) \u0432 \u043b\u044e\u0431\u043e\u0435 \u0432\u0440\u0435\u043c\u044f.',
+    li_one_acc: '\u041e\u0434\u0438\u043d \u0447\u0435\u043b\u043e\u0432\u0435\u043a \u2014 \u043e\u0434\u0438\u043d \u0430\u043a\u043a\u0430\u0443\u043d\u0442',
+    li_no_transfer: '\u0410\u043a\u043a\u0430\u0443\u043d\u0442\u044b \u043d\u0435 \u043c\u043e\u0433\u0443\u0442 \u0431\u044b\u0442\u044c \u043f\u0435\u0440\u0435\u0434\u0430\u043d\u044b \u0438\u043b\u0438 \u043f\u0440\u043e\u0434\u0430\u043d\u044b',
+    li_security: '\u0412\u044b \u043d\u0435\u0441\u0451\u0442\u0435 \u043e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0441\u0442\u044c \u0437\u0430 \u0431\u0435\u0437\u043e\u043f\u0430\u0441\u043d\u043e\u0441\u0442\u044c \u0441\u0432\u043e\u0438\u0445 \u0434\u0430\u043d\u043d\u044b\u0445 \u0434\u043b\u044f \u0432\u0445\u043e\u0434\u0430',
+    li_report: '\u0412\u044b \u0434\u043e\u043b\u0436\u043d\u044b \u043d\u0435\u043c\u0435\u0434\u043b\u0435\u043d\u043d\u043e \u0441\u043e\u043e\u0431\u0449\u0438\u0442\u044c \u043e \u043d\u0435\u0441\u0430\u043d\u043a\u0446\u0438\u043e\u043d\u0438\u0440\u043e\u0432\u0430\u043d\u043d\u043e\u043c \u0434\u043e\u0441\u0442\u0443\u043f\u0435 \u043a \u0432\u0430\u0448\u0435\u043c\u0443 \u0430\u043a\u043a\u0430\u0443\u043d\u0442\u0443',
+    h4: '4. \u0414\u0435\u043f\u043e\u0437\u0438\u0442\u044b \u0438 \u0432\u044b\u0432\u043e\u0434\u044b',
+    p4: '\u0412\u0441\u0435 \u0442\u0440\u0430\u043d\u0437\u0430\u043a\u0446\u0438\u0438 \u043e\u0441\u0443\u0449\u0435\u0441\u0442\u0432\u043b\u044f\u044e\u0442\u0441\u044f \u0432 \u043a\u0440\u0438\u043f\u0442\u043e\u0432\u0430\u043b\u044e\u0442\u0435. \u041c\u0438\u043d\u0438\u043c\u0430\u043b\u044c\u043d\u044b\u0439 \u0434\u0435\u043f\u043e\u0437\u0438\u0442 \u2014 10 USDT. \u0412\u044b\u0432\u043e\u0434\u044b \u043e\u0431\u0440\u0430\u0431\u0430\u0442\u044b\u0432\u0430\u044e\u0442\u0441\u044f \u0432 \u0442\u0435\u0447\u0435\u043d\u0438\u0435 24\u201372 \u0447\u0430\u0441\u043e\u0432 \u043f\u043e\u0441\u043b\u0435 KYC.',
+    bonus_note: '<strong>\u0412\u0430\u0436\u043d\u043e \u043e \u0431\u043e\u043d\u0443\u0441\u0430\u0445:</strong> \u041f\u0435\u0440\u0435\u0434 \u0432\u044b\u0432\u043e\u0434\u043e\u043c \u0432\u044b\u0438\u0433\u0440\u044b\u0448\u0435\u0439 \u0441 \u0431\u043e\u043d\u0443\u0441\u043e\u043c \u043d\u0435\u043e\u0431\u0445\u043e\u0434\u0438\u043c\u043e \u0432\u044b\u043f\u043e\u043b\u043d\u0438\u0442\u044c \u0442\u0440\u0435\u0431\u043e\u0432\u0430\u043d\u0438\u044f \u043f\u043e \u043e\u0442\u044b\u0433\u0440\u044b\u0448\u0443.',
+    h5: '5. \u0411\u043e\u043d\u0443\u0441\u044b \u0438 \u0430\u043a\u0446\u0438\u0438',
+    li_welcome: '\u041f\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0435\u043d\u043d\u044b\u0439 \u0431\u043e\u043d\u0443\u0441 \u2014 \u0442\u043e\u043b\u044c\u043a\u043e \u0434\u043b\u044f \u043d\u043e\u0432\u044b\u0445 \u0438\u0433\u0440\u043e\u043a\u043e\u0432',
+    li_wagering: '\u041d\u0430 \u0431\u043e\u043d\u0443\u0441\u044b \u0440\u0430\u0441\u043f\u0440\u043e\u0441\u0442\u0440\u0430\u043d\u044f\u044e\u0442\u0441\u044f \u0442\u0440\u0435\u0431\u043e\u0432\u0430\u043d\u0438\u044f \u043f\u043e \u043e\u0442\u044b\u0433\u0440\u044b\u0448\u0443 (\u00d710\u2013\u00d730)',
+    li_change: '\u041a\u0430\u0437\u0438\u043d\u043e \u043e\u0441\u0442\u0430\u0432\u043b\u044f\u0435\u0442 \u0437\u0430 \u0441\u043e\u0431\u043e\u0439 \u043f\u0440\u0430\u0432\u043e \u0438\u0437\u043c\u0435\u043d\u044f\u0442\u044c \u0438\u043b\u0438 \u043e\u0442\u043c\u0435\u043d\u044f\u0442\u044c \u0430\u043a\u0446\u0438\u0438',
+    li_abuse: '\u0417\u043b\u043e\u0443\u043f\u043e\u0442\u0440\u0435\u0431\u043b\u0435\u043d\u0438\u0435 \u0431\u043e\u043d\u0443\u0441\u043d\u043e\u0439 \u0441\u0438\u0441\u0442\u0435\u043c\u043e\u0439 \u043f\u0440\u0438\u0432\u0435\u0434\u0451\u0442 \u043a \u0431\u043b\u043e\u043a\u0438\u0440\u043e\u0432\u043a\u0435 \u0430\u043a\u043a\u0430\u0443\u043d\u0442\u0430',
+    h6: '6. \u041e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0435\u043d\u043d\u0430\u044f \u0438\u0433\u0440\u0430',
+    p6: '\u041c\u044b \u0441\u0435\u0440\u044c\u0451\u0437\u043d\u043e \u043e\u0442\u043d\u043e\u0441\u0438\u043c\u0441\u044f \u043a \u043e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0439 \u0438\u0433\u0440\u0435. \u041c\u044b \u043f\u0440\u0435\u0434\u043e\u0441\u0442\u0430\u0432\u043b\u044f\u0435\u043c \u0441\u043b\u0435\u0434\u0443\u044e\u0449\u0438\u0435 \u0438\u043d\u0441\u0442\u0440\u0443\u043c\u0435\u043d\u0442\u044b:',
+    li_limits: '\u0414\u043d\u0435\u0432\u043d\u044b\u0435 \u0438 \u043d\u0435\u0434\u0435\u043b\u044c\u043d\u044b\u0435 \u043b\u0438\u043c\u0438\u0442\u044b \u0441\u0442\u0430\u0432\u043e\u043a',
+    li_exclude: '\u0421\u0430\u043c\u043e\u0438\u0441\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u0435 (1\u2013365 \u0434\u043d\u0435\u0439)',
+    li_reality: '\u0423\u0432\u0435\u0434\u043e\u043c\u043b\u0435\u043d\u0438\u044f \u043e \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0435 \u0440\u0435\u0430\u043b\u044c\u043d\u043e\u0441\u0442\u0438',
+    li_help: '\u0421\u0441\u044b\u043b\u043a\u0438 \u043d\u0430 \u043e\u0440\u0433\u0430\u043d\u0438\u0437\u0430\u0446\u0438\u0438 \u043f\u043e\u043c\u043e\u0449\u0438',
+    h7: '7. \u0417\u0430\u043f\u0440\u0435\u0449\u0451\u043d\u043d\u044b\u0435 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044f',
+    li_fraud: '\u041c\u043e\u0448\u0435\u043d\u043d\u0438\u0447\u0435\u0441\u0442\u0432\u043e, \u0441\u0433\u043e\u0432\u043e\u0440 \u0438\u043b\u0438 \u043c\u0430\u043d\u0438\u043f\u0443\u043b\u044f\u0446\u0438\u0438 \u0441 \u0438\u0433\u0440\u0430\u043c\u0438',
+    li_money: '\u041e\u0442\u043c\u044b\u0432\u0430\u043d\u0438\u0435 \u0434\u0435\u043d\u0435\u0433 \u0438\u043b\u0438 \u0438\u043d\u0430\u044f \u043d\u0435\u0437\u0430\u043a\u043e\u043d\u043d\u0430\u044f \u0444\u0438\u043d\u0430\u043d\u0441\u043e\u0432\u0430\u044f \u0434\u0435\u044f\u0442\u0435\u043b\u044c\u043d\u043e\u0441\u0442\u044c',
+    li_exploit: '\u0418\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u043d\u0438\u0435 \u043f\u0440\u043e\u0433\u0440\u0430\u043c\u043c\u043d\u044b\u0445 \u043e\u0448\u0438\u0431\u043e\u043a',
+    li_bots: '\u0418\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u043d\u0438\u0435 \u0430\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u0445 \u0431\u043e\u0442\u043e\u0432 \u0438\u043b\u0438 \u043f\u0440\u043e\u0433\u0440\u0430\u043c\u043c',
+    li_multi: '\u041d\u0430\u043b\u0438\u0447\u0438\u0435 \u043d\u0435\u0441\u043a\u043e\u043b\u044c\u043a\u0438\u0445 \u0430\u043a\u043a\u0430\u0443\u043d\u0442\u043e\u0432',
+    h8: '8. Provably Fair',
+    p8a: '\u041d\u0430\u0448\u0438 \u0438\u0433\u0440\u044b \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u0443\u044e\u0442 \u043a\u0440\u0438\u043f\u0442\u043e\u0433\u0440\u0430\u0444\u0438\u0447\u0435\u0441\u043a\u0438\u0439 \u0430\u043b\u0433\u043e\u0440\u0438\u0442\u043c Provably Fair. \u041a\u0430\u0436\u0434\u0430\u044f \u0441\u0442\u0430\u0432\u043a\u0430 \u043c\u043e\u0436\u0435\u0442 \u0431\u044b\u0442\u044c \u043f\u0440\u043e\u0432\u0435\u0440\u0435\u043d\u0430 \u043d\u0435\u0437\u0430\u0432\u0438\u0441\u0438\u043c\u043e.',
+    h9: '9. \u0418\u043d\u0442\u0435\u043b\u043b\u0435\u043a\u0442\u0443\u0430\u043b\u044c\u043d\u0430\u044f \u0441\u043e\u0431\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0441\u0442\u044c',
+    p9: '\u0412\u0441\u0435 \u043f\u0440\u0430\u0432\u0430 \u043d\u0430 \u043f\u043b\u0430\u0442\u0444\u043e\u0440\u043c\u0443 \u043f\u0440\u0438\u043d\u0430\u0434\u043b\u0435\u0436\u0430\u0442 HATHOR Royal Casino. \u0417\u0430\u043f\u0440\u0435\u0449\u0435\u043d\u043e \u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0438\u043b\u0438 \u043c\u043e\u0434\u0438\u0444\u0438\u0446\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u043d\u0430\u0448 \u043a\u043e\u043d\u0442\u0435\u043d\u0442 \u0431\u0435\u0437 \u043f\u0438\u0441\u044c\u043c\u0435\u043d\u043d\u043e\u0433\u043e \u0440\u0430\u0437\u0440\u0435\u0448\u0435\u043d\u0438\u044f.',
+    h10: '10. \u041e\u0433\u0440\u0430\u043d\u0438\u0447\u0435\u043d\u0438\u0435 \u043e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0441\u0442\u0438',
+    p10: '\u041a\u0430\u0437\u0438\u043d\u043e \u043d\u0435 \u043d\u0435\u0441\u0451\u0442 \u043e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0441\u0442\u0438 \u0437\u0430 \u0443\u0431\u044b\u0442\u043a\u0438 \u0438\u0437-\u0437\u0430 \u0442\u0435\u0445\u043d\u0438\u0447\u0435\u0441\u043a\u0438\u0445 \u0441\u0431\u043e\u0435\u0432 \u0438\u043b\u0438 \u0444\u043e\u0440\u0441-\u043c\u0430\u0436\u043e\u0440\u0430. \u0410\u0437\u0430\u0440\u0442\u043d\u044b\u0435 \u0438\u0433\u0440\u044b \u2014 \u044d\u0442\u043e \u0440\u0430\u0437\u0432\u043b\u0435\u0447\u0435\u043d\u0438\u0435.',
+    h11: '11. \u0420\u0430\u0437\u0440\u0435\u0448\u0435\u043d\u0438\u0435 \u0441\u043f\u043e\u0440\u043e\u0432',
+    p11: '\u0421\u043f\u043e\u0440\u044b \u0440\u0435\u0448\u0430\u044e\u0442\u0441\u044f \u0447\u0435\u0440\u0435\u0437 \u043d\u0430\u0448\u0443 \u0441\u043b\u0443\u0436\u0431\u0443 \u043f\u043e\u0434\u0434\u0435\u0440\u0436\u043a\u0438. \u0415\u0441\u043b\u0438 \u0441\u043f\u043e\u0440 \u043d\u0435 \u0440\u0430\u0437\u0440\u0435\u0448\u0451\u043d \u0432 \u0442\u0435\u0447\u0435\u043d\u0438\u0435 30 \u0434\u043d\u0435\u0439 \u2014 \u043e\u043d \u043f\u0435\u0440\u0435\u0434\u0430\u0451\u0442\u0441\u044f \u0432 \u0430\u0440\u0431\u0438\u0442\u0440\u0430\u0436.',
+    h12: '12. \u0418\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u044f \u043f\u0440\u0430\u0432\u0438\u043b',
+    p12: '\u041c\u044b \u043e\u0441\u0442\u0430\u0432\u043b\u044f\u0435\u043c \u0437\u0430 \u0441\u043e\u0431\u043e\u0439 \u043f\u0440\u0430\u0432\u043e \u0438\u0437\u043c\u0435\u043d\u044f\u0442\u044c \u044d\u0442\u0438 \u043f\u0440\u0430\u0432\u0438\u043b\u0430 \u0432 \u043b\u044e\u0431\u043e\u0435 \u0432\u0440\u0435\u043c\u044f. \u041e \u0432\u0430\u0436\u043d\u044b\u0445 \u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u044f\u0445 \u0441\u043e\u043e\u0431\u0449\u0438\u043c \u043f\u043e \u044d\u043b\u0435\u043a\u0442\u0440\u043e\u043d\u043d\u043e\u0439 \u043f\u043e\u0447\u0442\u0435.',
+    h13: '13. \u041a\u043e\u043d\u0442\u0430\u043a\u0442\u044b',
+    contact_html: 'Email: support@hathor.casino<br/>\u041f\u043e\u0434\u0434\u0435\u0440\u0436\u043a\u0430: <a href="/" style="color:var(--gold)">Live Chat</a> (\u043d\u0430 \u0441\u0430\u0439\u0442\u0435)<br/>\u0412\u0440\u0435\u043c\u044f \u043e\u0442\u0432\u0435\u0442\u0430: 24\u201348 \u0447.',
+    footer: '\u00a9 2026 HATHOR Royal Casino. \u0412\u0441\u0435 \u0438\u0433\u0440\u044b \u043f\u0440\u043e\u0432\u043e\u0434\u044f\u0442\u0441\u044f \u0447\u0435\u0441\u0442\u043d\u043e \u043f\u043e \u0441\u0438\u0441\u0442\u0435\u043c\u0435 Provably Fair.',
+    responsibleLink: '\u0421\u0442\u0440\u0430\u043d\u0438\u0446\u0430 \u043e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0439 \u0438\u0433\u0440\u044b',
+    provablyLink: '\u0423\u0437\u043d\u0430\u0442\u044c \u0431\u043e\u043b\u044c\u0448\u0435 \u043e Provably Fair \u2192',
+  },
+  de: {
+    pageTitle: 'Allgemeine Gesch\u00e4ftsbedingungen',
+    backLink: '\u2190 Zur\u00fcck',
+    updated: 'Zuletzt aktualisiert: 1. Januar 2026',
+    warning: '\u26a0\ufe0f <strong>Wichtig:</strong> Durch die Nutzung von HATHOR Royal Casino best\u00e4tigen Sie, dass Sie 18 Jahre oder \u00e4lter sind und das Gl\u00fccksspiel in Ihrer Jurisdiktion legal ist.',
+    h1: '1. Allgemeine Bestimmungen',
+    p1a: 'HATHOR Royal Casino (\u201eCasino\u201c, \u201ewir\u201c, \u201eunser\u201c) bietet Online-Gl\u00fccksspieldienste an. Diese AGB regeln Ihre Nutzung unserer Plattform.',
+    p1b: 'Durch die Nutzung unserer Dienste stimmen Sie diesen Bedingungen zu. Wenn Sie nicht einverstanden sind \u2014 nutzen Sie unsere Dienste bitte nicht.',
+    h2: '2. Teilnahmevoraussetzungen',
+    li_18: 'Sie m\u00fcssen <strong>mindestens 18 Jahre alt</strong> sein',
+    li_legal: 'Gl\u00fccksspiel muss in Ihrem Wohnsitzland legal sein',
+    li_one: 'Es ist verboten, mehr als ein Konto zu haben',
+    li_restricted: 'Nutzung ist in den USA, UK, Frankreich, Spanien und anderen Jurisdiktionen verboten, wo Online-Gl\u00fccksspiel untersagt ist',
+    h3: '3. Konto und Registrierung',
+    p3: 'Bei der Registrierung m\u00fcssen Sie korrekte Angaben machen. Das Casino beh\u00e4lt sich das Recht vor, jederzeit eine Identit\u00e4tsverifizierung (KYC) zu verlangen.',
+    li_one_acc: 'Eine Person \u2014 ein Konto',
+    li_no_transfer: 'Konten d\u00fcrfen nicht \u00fcbertragen oder verkauft werden',
+    li_security: 'Sie sind f\u00fcr die Sicherheit Ihrer Anmeldedaten verantwortlich',
+    li_report: 'Unbefugten Zugriff auf Ihr Konto m\u00fcssen Sie sofort melden',
+    h4: '4. Ein- und Auszahlungen',
+    p4: 'Alle Transaktionen werden in Kryptow\u00e4hrung abgewickelt. Mindesteinzahlung \u2014 10 USDT. Auszahlungen werden innerhalb von 24\u201372 Stunden nach KYC bearbeitet.',
+    bonus_note: '<strong>Wichtig zu Boni:</strong> Vor dem Auszahlen von mit einem Bonus erzielten Gewinnen m\u00fcssen Umsatzanforderungen erf\u00fcllt werden.',
+    h5: '5. Boni und Aktionen',
+    li_welcome: 'Willkommensbonus nur f\u00fcr neue Spieler',
+    li_wagering: 'F\u00fcr Boni gelten Umsatzanforderungen (\u00d710\u2013\u00d730)',
+    li_change: 'Das Casino beh\u00e4lt sich das Recht vor, Aktionen zu \u00e4ndern oder zu stornieren',
+    li_abuse: 'Missbrauch des Bonussystems f\u00fchrt zur Kontosperrung',
+    h6: '6. Verantwortungsvolles Spielen',
+    p6: 'Wir nehmen verantwortungsvolles Spielen ernst. Wir bieten folgende Tools:',
+    li_limits: 'T\u00e4gliche und w\u00f6chentliche Einsatzlimits',
+    li_exclude: 'Selbstausschluss (1\u2013365 Tage)',
+    li_reality: 'Reality-Check-Benachrichtigungen',
+    li_help: 'Links zu Hilfsorganisationen',
+    h7: '7. Verbotene Aktivit\u00e4ten',
+    li_fraud: 'Betrug, Kollusion oder Spielmanipulationen',
+    li_money: 'Geldw\u00e4sche oder andere illegale Finanzaktivit\u00e4ten',
+    li_exploit: 'Ausnutzen von Software-Fehlern',
+    li_bots: 'Einsatz automatisierter Bots oder Programme',
+    li_multi: 'Mehrere Konten besitzen',
+    h8: '8. Provably Fair',
+    p8a: 'Unsere Spiele verwenden einen kryptografischen Provably Fair-Algorithmus. Jede Wette kann unabh\u00e4ngig \u00fcberpr\u00fcft werden.',
+    h9: '9. Geistiges Eigentum',
+    p9: 'Alle Plattformrechte geh\u00f6ren HATHOR Royal Casino. Kopieren oder Modifizieren unserer Inhalte ohne schriftliche Genehmigung ist verboten.',
+    h10: '10. Haftungsbeschr\u00e4nkung',
+    p10: 'Das Casino haftet nicht f\u00fcr Verluste durch technische Ausf\u00e4lle oder h\u00f6here Gewalt. Gl\u00fccksspiel ist Unterhaltung.',
+    h11: '11. Streitbeilegung',
+    p11: 'Streitigkeiten werden \u00fcber unseren Support-Service gel\u00f6st. Falls nicht innerhalb von 30 Tagen gel\u00f6st, wird an eine Schiedsstelle verwiesen.',
+    h12: '12. \u00c4nderungen der Bedingungen',
+    p12: 'Wir behalten uns das Recht vor, diese Bedingungen jederzeit zu \u00e4ndern. \u00dcber wichtige \u00c4nderungen informieren wir per E-Mail.',
+    h13: '13. Kontakt',
+    contact_html: 'E-Mail: support@hathor.casino<br/>Support: <a href="/" style="color:var(--gold)">Live Chat</a> (auf der Website)<br/>Antwortzeit: 24\u201348 Std.',
+    footer: '\u00a9 2026 HATHOR Royal Casino. Alle Spiele laufen fair nach dem Provably Fair-System.',
+    responsibleLink: 'Seite f\u00fcr verantwortungsvolles Spielen',
+    provablyLink: 'Mehr \u00fcber Provably Fair \u2192',
+  },
+  pl: {
+    pageTitle: 'Regulamin i Warunki',
+    backLink: '\u2190 Wr\u00f3\u0107',
+    updated: 'Ostatnia aktualizacja: 1 stycznia 2026',
+    warning: '\u26a0\ufe0f <strong>Wa\u017cne:</strong> Korzystaj\u0105c z HATHOR Royal Casino potwierdzasz, \u017ce masz uko\u0144czone 18 lat i \u017ce hazard jest legalny w Twojej jurysdykcji.',
+    h1: '1. Postanowienia og\u00f3lne',
+    p1a: 'HATHOR Royal Casino (\u201eKasyno\u201c, \u201emy\u201c, \u201enasz\u201c) \u015bwiadczy us\u0142ugi hazardu online. Niniejszy Regulamin reguluje korzystanie z naszej platformy.',
+    p1b: 'Korzystaj\u0105c z naszych us\u0142ug, akceptujesz niniejszy regulamin. Je\u015bli si\u0119 nie zgadzasz \u2014 prosimy nie korzysta\u0107 z naszych us\u0142ug.',
+    h2: '2. Wymagania kwalifikacyjne',
+    li_18: 'Musisz mie\u0107 <strong>co najmniej 18 lat</strong>',
+    li_legal: 'Hazard musi by\u0107 legalny w Twoim kraju zamieszkania',
+    li_one: 'Posiadanie wi\u0119cej ni\u017c jednego konta jest zabronione',
+    li_restricted: 'Korzystanie jest zabronione w USA, UK, Francji, Hiszpanii i innych jurysdykcjach, gdzie hazard online jest nielegalny',
+    h3: '3. Konto i rejestracja',
+    p3: 'Rejestruj\u0105c si\u0119, musisz poda\u0107 prawdziwe informacje. Kasyno zastrzega sobie prawo do \u017c\u0105dania weryfikacji to\u017csamo\u015bci (KYC) w dowolnym momencie.',
+    li_one_acc: 'Jedna osoba \u2014 jedno konto',
+    li_no_transfer: 'Kont nie mo\u017cna przenosi\u0107 ani sprzedawa\u0107',
+    li_security: 'Jeste\u015b odpowiedzialny za bezpiecze\u0144stwo swoich danych logowania',
+    li_report: 'Musisz natychmiast zg\u0142osi\u0107 nieautoryzowany dost\u0119p do konta',
+    h4: '4. Wp\u0142aty i wyp\u0142aty',
+    p4: 'Wszystkie transakcje realizowane s\u0105 w kryptowalucie. Minimalna wp\u0142ata \u2014 10 USDT. Wyp\u0142aty przetwarzane w ci\u0105gu 24\u201372 godzin po KYC.',
+    bonus_note: '<strong>Wa\u017cne dot. bonus\u00f3w:</strong> Przed wyp\u0142at\u0105 wygranych z bonusem nale\u017cy spe\u0142ni\u0107 wymagania dotycz\u0105ce obrotu.',
+    h5: '5. Bonusy i promocje',
+    li_welcome: 'Bonus powitalny tylko dla nowych graczy',
+    li_wagering: 'Bonusy podlegaj\u0105 wymaganiom obrotu (\u00d710\u2013\u00d730)',
+    li_change: 'Kasyno zastrzega sobie prawo do zmiany lub anulowania promocji',
+    li_abuse: 'Nadu\u017cywanie systemu bonusowego spowoduje zawieszenie konta',
+    h6: '6. Odpowiedzialny hazard',
+    p6: 'Powa\u017cnie podchodzimy do odpowiedzialnego hazardu. Oferujemy nast\u0119puj\u0105ce narz\u0119dzia:',
+    li_limits: 'Dzienne i tygodniowe limity zak\u0142ad\u00f3w',
+    li_exclude: 'Samowykluczenie (1\u2013365 dni)',
+    li_reality: 'Powiadomienia o sprawdzeniu rzeczywisto\u015bci',
+    li_help: 'Linki do organizacji pomocowych',
+    h7: '7. Zabronione dzia\u0142ania',
+    li_fraud: 'Oszustwo, zmowa lub manipulacje w grach',
+    li_money: 'Pranie pieni\u0119dzy lub inna nielegalna dzia\u0142alno\u015b\u0107 finansowa',
+    li_exploit: 'Wykorzystywanie b\u0142\u0119d\u00f3w oprogramowania',
+    li_bots: 'U\u017cywanie automatycznych bot\u00f3w lub program\u00f3w',
+    li_multi: 'Posiadanie wielu kont',
+    h8: '8. Provably Fair',
+    p8a: 'Nasze gry u\u017cywaj\u0105 kryptograficznego algorytmu Provably Fair. Ka\u017cdy zak\u0142ad mo\u017cna niezale\u017cnie zweryfikowa\u0107.',
+    h9: '9. W\u0142asno\u015b\u0107 intelektualna',
+    p9: 'Wszelkie prawa do platformy nale\u017c\u0105 do HATHOR Royal Casino. Kopiowanie lub modyfikowanie naszych tre\u015bci bez pisemnej zgody jest zabronione.',
+    h10: '10. Ograniczenie odpowiedzialno\u015bci',
+    p10: 'Kasyno nie ponosi odpowiedzialno\u015bci za straty spowodowane awariami technicznymi lub si\u0142\u0105 wy\u017csz\u0105. Hazard to rozrywka.',
+    h11: '11. Rozstrzyganie spor\u00f3w',
+    p11: 'Spory rozwi\u0105zywane s\u0105 za po\u015brednictwem naszego serwisu wsparcia. Je\u015bli spor nie zostanie rozwi\u0105zany w ci\u0105gu 30 dni, zostanie skierowany do niezale\u017cnego arbitra\u017cu.',
+    h12: '12. Zmiany regulaminu',
+    p12: 'Zastrzegamy sobie prawo do zmiany niniejszego regulaminu w dowolnym momencie. O wa\u017cnych zmianach poinformujemy e-mailem.',
+    h13: '13. Kontakt',
+    contact_html: 'E-mail: support@hathor.casino<br/>Wsparcie: <a href="/" style="color:var(--gold)">Live Chat</a> (na stronie)<br/>Czas odpowiedzi: 24\u201348 godz.',
+    footer: '\u00a9 2026 HATHOR Royal Casino. Wszystkie gry odbywaj\u0105 si\u0119 uczciwie w systemie Provably Fair.',
+    responsibleLink: 'Strona odpowiedzialnego hazardu',
+    provablyLink: 'Dowiedz si\u0119 wi\u0119cej o Provably Fair \u2192',
+  },
+  fr: {
+    pageTitle: 'Conditions G\u00e9n\u00e9rales d\'Utilisation',
+    backLink: '\u2190 Retour',
+    updated: 'Derni\u00e8re mise \u00e0 jour: 1er janvier 2026',
+    warning: '\u26a0\ufe0f <strong>Important:</strong> En utilisant HATHOR Royal Casino, vous confirmez avoir 18 ans ou plus et que les jeux d\'argent sont l\u00e9gaux dans votre juridiction.',
+    h1: '1. Dispositions g\u00e9n\u00e9rales',
+    p1a: 'HATHOR Royal Casino (\u201cCasino\u201d, \u201cnous\u201d, \u201cnotre\u201d) fournit des services de jeux en ligne. Ces Conditions G\u00e9n\u00e9rales r\u00e9gissent votre utilisation de notre plateforme.',
+    p1b: 'En utilisant nos services, vous acceptez ces conditions. Si vous n\'\'tes pas d\'accord \u2014 veuillez ne pas utiliser nos services.',
+    h2: '2. Conditions d\'\u00e9ligibilit\u00e9',
+    li_18: 'Vous devez avoir <strong>au moins 18 ans</strong>',
+    li_legal: 'Les jeux d\'argent doivent \u00eatre l\u00e9gaux dans votre pays de r\u00e9sidence',
+    li_one: 'Il est interdit d\'avoir plus d\'un compte',
+    li_restricted: 'L\'utilisation est interdite aux \u00c9tats-Unis, au Royaume-Uni, en France, en Espagne et dans d\'autres juridictions o\u00f9 les jeux en ligne sont interdits',
+    h3: '3. Compte et inscription',
+    p3: 'En vous inscrivant, vous devez fournir des informations exactes. Le Casino se r\u00e9serve le droit d\'exiger une v\u00e9rification d\'identit\u00e9 (KYC) \u00e0 tout moment.',
+    li_one_acc: 'Une personne \u2014 un compte',
+    li_no_transfer: 'Les comptes ne peuvent pas \u00eatre transf\u00e9r\u00e9s ou vendus',
+    li_security: 'Vous \u00eates responsable de la s\u00e9curit\u00e9 de vos identifiants de connexion',
+    li_report: 'Vous devez imm\u00e9diatement signaler tout acc\u00e8s non autoris\u00e9 \u00e0 votre compte',
+    h4: '4. D\u00e9p\u00f4ts et retraits',
+    p4: 'Toutes les transactions sont effectu\u00e9es en cryptomonnaie. D\u00e9p\u00f4t minimum \u2014 10 USDT \u00e9quivalent. Retraits trait\u00e9s sous 24\u201372 heures apr\u00e8s v\u00e9rification KYC.',
+    bonus_note: '<strong>Important concernant les bonus:</strong> Avant de retirer des gains obtenus avec un bonus, les conditions de mise doivent \u00eatre remplies.',
+    h5: '5. Bonus et promotions',
+    li_welcome: 'Le bonus de bienvenue est r\u00e9serv\u00e9 aux nouveaux joueurs',
+    li_wagering: 'Les bonus sont soumis \u00e0 des conditions de mise (\u00d710\u2013\u00d730)',
+    li_change: 'Le Casino se r\u00e9serve le droit de modifier ou d\'annuler les promotions',
+    li_abuse: 'L\'abus du syst\u00e8me de bonus entra\u00eenera la suspension du compte',
+    h6: '6. Jeu responsable',
+    p6: 'Nous prenons le jeu responsable au s\u00e9rieux. Nous proposons ces outils:',
+    li_limits: 'Limites de mise quotidiennes et hebdomadaires',
+    li_exclude: 'Auto-exclusion (1\u2013365 jours)',
+    li_reality: 'Notifications de v\u00e9rification de r\u00e9alit\u00e9',
+    li_help: 'Liens vers des organisations d\'aide',
+    h7: '7. Activit\u00e9s interdites',
+    li_fraud: 'Fraude, collusion ou toute manipulation de jeu',
+    li_money: 'Blanchiment d\'argent ou autre activit\u00e9 financi\u00e8re ill\u00e9gale',
+    li_exploit: 'Exploitation de bugs logiciels',
+    li_bots: 'Utilisation de bots automatis\u00e9s ou de programmes',
+    li_multi: 'Possession de plusieurs comptes',
+    h8: '8. Provably Fair',
+    p8a: 'Nos jeux utilisent un algorithme cryptographique Provably Fair qui garantit l\'\u00e9quit\u00e9. Chaque mise peut \u00eatre v\u00e9rifi\u00e9e ind\u00e9pendamment.',
+    h9: '9. Propri\u00e9t\u00e9 intellectuelle',
+    p9: 'Tous les droits de la plateforme appartiennent \u00e0 HATHOR Royal Casino. Il est interdit de copier ou modifier notre contenu sans autorisation \u00e9crite.',
+    h10: '10. Limitation de responsabilit\u00e9',
+    p10: 'Le Casino n\'est pas responsable des pertes dues \u00e0 des d\u00e9faillances techniques ou \u00e0 des cas de force majeure. Le jeu est un divertissement.',
+    h11: '11. R\u00e9solution des litiges',
+    p11: 'Les litiges sont r\u00e9solus via notre service de support. Si non r\u00e9solu dans les 30 jours, il est soumis \u00e0 un arbitrage ind\u00e9pendant.',
+    h12: '12. Modifications des conditions',
+    p12: 'Nous nous r\u00e9servons le droit de modifier ces conditions \u00e0 tout moment. Nous vous informerons des changements importants par e-mail.',
+    h13: '13. Contact',
+    contact_html: 'E-mail: support@hathor.casino<br/>Support: <a href="/" style="color:var(--gold)">Live Chat</a> (sur le site)<br/>Temps de r\u00e9ponse: 24\u201348 heures',
+    footer: '\u00a9 2026 HATHOR Royal Casino. Tous les jeux se d\u00e9roulent \u00e9quitablement selon le syst\u00e8me Provably Fair.',
+    responsibleLink: 'Page de jeu responsable',
+    provablyLink: 'En savoir plus sur Provably Fair \u2192',
+  },
+};
+
+const LANGS_LIST=[{code:'en',flag:'\ud83c\uddec\ud83c\udde7'},{code:'lt',flag:'\ud83c\uddf1\ud83c\uddf9'},{code:'ru',flag:'\ud83c\uddf7\ud83c\uddfa'},{code:'de',flag:'\ud83c\udde9\ud83c\uddea'},{code:'pl',flag:'\ud83c\uddf5\ud83c\uddf1'},{code:'fr',flag:'\ud83c\uddeb\ud83c\uddf7'}];
+function applyLang(code){
+  var t=TERMS_LANGS[code]||TERMS_LANGS.en;
+  localStorage.setItem('hrc_lang',code);
+  document.querySelectorAll('[data-i18n]').forEach(function(el){var k=el.getAttribute('data-i18n');if(t[k]!==undefined)el.textContent=t[k];});
+  document.querySelectorAll('[data-i18n-html]').forEach(function(el){var k=el.getAttribute('data-i18n-html');if(t[k]!==undefined)el.innerHTML=t[k];});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===code);});
+  document.documentElement.lang=code;
+}
+document.getElementById('langBar').innerHTML=LANGS_LIST.map(function(l){return '<button class="lang-btn" data-lang="'+l.code+'" onclick="applyLang(\''+l.code+'\')">'+ l.flag+' '+l.code.toUpperCase()+'</button>';}).join('');
+applyLang(localStorage.getItem('hrc_lang')||'en');
+</script>
 </body>
 </html>

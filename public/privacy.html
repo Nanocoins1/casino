@@ -1,22 +1,25 @@
 <!DOCTYPE html>
-<html lang="lt">
+<html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Privatumo Politika — HATHOR Royal Casino</title>
+<title>Privacy Policy — HATHOR Royal Casino</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
   *{box-sizing:border-box;margin:0;padding:0;}
   :root{--gold:#c9a84c;--gold2:#ffd680;--bg:#0a0806;--card:rgba(255,255,255,0.03);--border:rgba(201,168,76,0.15);--cream:#e8e2d4;}
   body{background:var(--bg);color:var(--cream);font-family:'Inter',sans-serif;font-size:15px;line-height:1.7;}
-  header{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,8,6,0.95);backdrop-filter:blur(10px);z-index:100;}
-  .logo{font-family:'Cinzel',serif;font-size:20px;font-weight:700;color:var(--gold);text-decoration:none;letter-spacing:2px;}
-  .back-link{color:var(--gold);text-decoration:none;font-size:13px;border:1px solid var(--border);padding:6px 14px;border-radius:8px;transition:all .2s;}
-  .back-link:hover{background:rgba(201,168,76,0.1);}
+  header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,8,6,0.97);backdrop-filter:blur(10px);z-index:100;gap:12px;flex-wrap:wrap;}
+  .logo{font-family:'Cinzel',serif;font-size:18px;font-weight:700;color:var(--gold);text-decoration:none;letter-spacing:2px;white-space:nowrap;}
+  .back-link{color:var(--gold);text-decoration:none;font-size:12px;border:1px solid var(--border);padding:5px 12px;border-radius:8px;white-space:nowrap;}
+  .lang-bar{display:flex;gap:5px;align-items:center;flex-wrap:wrap;}
+  .lang-btn{background:none;border:1px solid rgba(201,168,76,0.2);border-radius:6px;color:rgba(232,226,212,0.5);font-size:11px;padding:4px 7px;cursor:pointer;transition:all .2s;}
+  .lang-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,0.08);}
+  .lang-btn:hover{color:var(--cream);}
   .container{max-width:820px;margin:0 auto;padding:48px 24px 80px;}
   .page-title{font-family:'Cinzel',serif;font-size:28px;font-weight:700;color:var(--gold2);margin-bottom:8px;}
-  .updated{font-size:12px;color:rgba(201,168,76,0.4);margin-bottom:40px;}
-  h2{font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:var(--gold);margin:36px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  .updated{font-size:12px;color:rgba(201,168,76,0.4);margin-bottom:32px;}
+  h2{font-family:'Cinzel',serif;font-size:15px;font-weight:700;color:var(--gold);margin:32px 0 10px;padding-bottom:8px;border-bottom:1px solid var(--border);}
   p{margin-bottom:12px;color:rgba(232,226,212,0.8);}
   ul{margin:8px 0 12px 20px;color:rgba(232,226,212,0.8);}
   li{margin-bottom:6px;}
@@ -31,76 +34,383 @@
 <body>
 <header>
   <a class="logo" href="/">&#x2B21; HATHOR</a>
-  <a class="back-link" href="/">&#8592; Grįžti</a>
+  <div class="lang-bar" id="langBar"></div>
+  <a class="back-link" href="/" data-i18n="backLink">&#8592; Back</a>
 </header>
 <div class="container">
-  <div class="page-title">Privatumo Politika</div>
-  <div class="updated">Galioja nuo: 2026 m. sausio 1 d. · GDPR suderinta</div>
+  <div class="page-title" data-i18n="pageTitle">Privacy Policy</div>
+  <div class="updated" data-i18n="updated">Effective: January 1, 2026 · GDPR compliant</div>
 
-  <h2>1. Duomenų valdytojas</h2>
-  <p>HATHOR Royal Casino yra jūsų asmens duomenų valdytojas. Mes atsakingai tvarkome visus jūsų pateiktus duomenis ir laikomės BDAR (GDPR) reikalavimų.</p>
+  <h2 data-i18n="h1">1. Data Controller</h2>
+  <p data-i18n="p1"></p>
 
-  <h2>2. Kokie duomenys renkami</h2>
+  <h2 data-i18n="h2">2. What Data We Collect</h2>
   <ul>
-    <li><strong>Registracijos duomenys:</strong> vardas, el. paštas, slaptažodis (užšifruotas)</li>
-    <li><strong>KYC duomenys:</strong> asmens tapatybės dokumentai, selfie nuotrauka (tik patvirtinimui)</li>
-    <li><strong>Transakcijų duomenys:</strong> kripto piniginių adresai, įnešimų/išėmimų istorija</li>
-    <li><strong>Lošimų duomenys:</strong> žaidimų istorija, statymų sumos, laimėjimai</li>
-    <li><strong>Techniniai duomenys:</strong> IP adresas, naršyklė, sesijų trukmė</li>
-    <li><strong>Komunikacijos duomenys:</strong> palaikymo pokalbiai, el. laiškai</li>
+    <li data-i18n-html="li_reg"></li>
+    <li data-i18n-html="li_kyc"></li>
+    <li data-i18n-html="li_tx"></li>
+    <li data-i18n-html="li_game"></li>
+    <li data-i18n-html="li_tech"></li>
+    <li data-i18n-html="li_comm"></li>
   </ul>
 
-  <h2>3. Kaip naudojami duomenys</h2>
+  <h2 data-i18n="h3">3. How Data Is Used</h2>
   <ul>
-    <li>Paskyros sukūrimas ir valdymas</li>
-    <li>KYC/AML patikrinimas (teisinis reikalavimas)</li>
-    <li>Sukčiavimo prevencija ir saugumo užtikrinimas</li>
-    <li>Mokėjimų apdorojimas</li>
-    <li>Klientų palaikymas</li>
-    <li>Teisės aktų reikalavimų vykdymas</li>
-    <li>Platformos tobulinimas (anonimizuotai)</li>
+    <li data-i18n="li_use1"></li>
+    <li data-i18n="li_use2"></li>
+    <li data-i18n="li_use3"></li>
+    <li data-i18n="li_use4"></li>
+    <li data-i18n="li_use5"></li>
+    <li data-i18n="li_use6"></li>
+    <li data-i18n="li_use7"></li>
   </ul>
 
-  <h2>4. Duomenų saugojimas</h2>
-  <p>Jūsų duomenys saugomi šifruotose duomenų bazėse. Lošimų istorija saugoma 5 metus (AML reikalavimas). KYC dokumentai — 7 metus. Paskyros duomenys — kol paskyra aktyvi + 2 metai.</p>
+  <h2 data-i18n="h4">4. Data Retention</h2>
+  <p data-i18n="p4"></p>
 
-  <h2>5. Duomenų dalinimasis</h2>
-  <p>Mes <strong>neparduodame</strong> jūsų duomenų trečiosioms šalims. Duomenys gali būti perduoti:</p>
+  <h2 data-i18n="h5">5. Data Sharing</h2>
+  <p data-i18n-html="p5"></p>
   <ul>
-    <li>Teisėsaugos institucijoms — teisinio reikalavimo pagrindu</li>
-    <li>KYC paslaugų teikėjams — tapatybės patvirtinimui</li>
-    <li>Mokėjimų procesoriams — transakcijoms vykdyti</li>
+    <li data-i18n="li_share1"></li>
+    <li data-i18n="li_share2"></li>
+    <li data-i18n="li_share3"></li>
   </ul>
 
-  <h2>6. Jūsų teisės (GDPR)</h2>
-  <div class="rights-grid">
-    <div class="right-card"><div class="right-title">&#128203; Prieigos teisė</div><div class="right-desc">Galite gauti visų jūsų duomenų kopiją</div></div>
-    <div class="right-card"><div class="right-title">&#9999;&#65039; Taisymo teisė</div><div class="right-desc">Galite reikalauti ištaisyti netikslius duomenis</div></div>
-    <div class="right-card"><div class="right-title">&#128465;&#65039; Ištrynimo teisė</div><div class="right-desc">Galite reikalauti ištrinti duomenis (išskyrus teisinius reikalavimus)</div></div>
-    <div class="right-card"><div class="right-title">&#9208;&#65039; Apribojimo teisė</div><div class="right-desc">Galite apriboti duomenų tvarkymą</div></div>
-    <div class="right-card"><div class="right-title">&#128230; Perkeliamumo teisė</div><div class="right-desc">Galite gauti duomenis mašininio skaitomumo formatu</div></div>
-    <div class="right-card"><div class="right-title">&#128683; Prieštaravimo teisė</div><div class="right-desc">Galite prieštarauti duomenų tvarkymui rinkodaros tikslais</div></div>
-  </div>
-  <p>Norėdami pasinaudoti teisėmis, rašykite: <strong>privacy@hathor.casino</strong></p>
+  <h2 data-i18n="h6">6. Your Rights (GDPR)</h2>
+  <div class="rights-grid" id="rightsGrid"></div>
+  <p data-i18n-html="rightsContact"></p>
 
-  <h2>7. Slapukai (Cookies)</h2>
-  <p>Naudojame būtinus sesijos slapukus ir analitinius slapukus (su jūsų sutikimu). Galite valdyti slapukus naršyklės nustatymuose.</p>
+  <h2 data-i18n="h7">7. Cookies</h2>
+  <p data-i18n="p7"></p>
 
-  <h2>8. Duomenų saugumo priemonės</h2>
+  <h2 data-i18n="h8">8. Security Measures</h2>
   <ul>
-    <li>HTTPS šifravimas visoms jungtims</li>
-    <li>Slaptažodžiai saugomi su bcrypt hashavimo algoritmu</li>
-    <li>Dviejų veiksnių autentifikacija (artimoje ateityje)</li>
-    <li>Reguliarūs saugumo auditai</li>
+    <li data-i18n="li_sec1"></li>
+    <li data-i18n="li_sec2"></li>
+    <li data-i18n="li_sec3"></li>
+    <li data-i18n="li_sec4"></li>
   </ul>
 
-  <h2>9. Kontaktai</h2>
-  <div class="info-box">
-    Duomenų apsaugos pareigūnas: <strong>dpo@hathor.casino</strong><br/>
-    Bendra užklausos: <strong>privacy@hathor.casino</strong><br/>
-    Atsakymo laikas: iki 30 dienų
-  </div>
+  <h2 data-i18n="h9">9. Contact (DPO)</h2>
+  <div class="info-box" data-i18n-html="contactDpo"></div>
 </div>
-<footer>&#169; 2026 HATHOR Royal Casino · <a href="/terms.html" style="color:var(--gold);">T&amp;C</a> · <a href="/responsible.html" style="color:var(--gold);">Atsakingas lošimas</a></footer>
+<footer data-i18n-html="footer">&#169; 2026 HATHOR Royal Casino</footer>
+<script>
+const PRIVACY_LANGS = {
+  en: {
+    pageTitle: 'Privacy Policy',
+    backLink: '\u2190 Back',
+    updated: 'Effective: January 1, 2026 \u00b7 GDPR compliant',
+    h1: '1. Data Controller',
+    p1: 'HATHOR Royal Casino is the controller of your personal data. We handle all data you provide responsibly and comply with GDPR requirements.',
+    h2: '2. What Data We Collect',
+    li_reg: '<strong>Registration data:</strong> name, email, password (encrypted)',
+    li_kyc: '<strong>KYC data:</strong> identity documents, selfie photo (for verification only)',
+    li_tx: '<strong>Transaction data:</strong> crypto wallet addresses, deposit/withdrawal history',
+    li_game: '<strong>Game data:</strong> game history, bet amounts, winnings',
+    li_tech: '<strong>Technical data:</strong> IP address, browser, session duration',
+    li_comm: '<strong>Communication data:</strong> support chats, emails',
+    h3: '3. How Data Is Used',
+    li_use1: 'Account creation and management',
+    li_use2: 'KYC/AML verification (legal requirement)',
+    li_use3: 'Fraud prevention and security',
+    li_use4: 'Payment processing',
+    li_use5: 'Customer support',
+    li_use6: 'Regulatory compliance',
+    li_use7: 'Platform improvement (anonymized)',
+    h4: '4. Data Retention',
+    p4: 'Your data is stored in encrypted databases. Game history retained for 5 years (AML requirement). KYC documents \u2014 7 years. Account data \u2014 while account is active + 2 years.',
+    h5: '5. Data Sharing',
+    p5: 'We do <strong>not sell</strong> your data to third parties. Data may be shared with:',
+    li_share1: 'Law enforcement \u2014 on legal basis',
+    li_share2: 'KYC service providers \u2014 for identity verification',
+    li_share3: 'Payment processors \u2014 for transaction processing',
+    h6: '6. Your Rights (GDPR)',
+    rights: [
+      {icon:'\ud83d\udccb', title:'Right of Access', desc:'You can get a copy of all your data'},
+      {icon:'\u270f\ufe0f', title:'Right to Rectification', desc:'You can request correction of inaccurate data'},
+      {icon:'\ud83d\uddd1\ufe0f', title:'Right to Erasure', desc:'You can request deletion of data (except legal requirements)'},
+      {icon:'\u23f8\ufe0f', title:'Right to Restriction', desc:'You can restrict data processing'},
+      {icon:'\ud83d\udce6', title:'Right to Portability', desc:'You can receive your data in machine-readable format'},
+      {icon:'\ud83d\udeab', title:'Right to Object', desc:'You can object to processing for marketing purposes'},
+    ],
+    rightsContact: 'To exercise your rights, write to: <strong>privacy@hathor.casino</strong>',
+    h7: '7. Cookies',
+    p7: 'We use necessary session cookies and analytical cookies (with your consent). You can manage cookies in your browser settings.',
+    h8: '8. Security Measures',
+    li_sec1: 'HTTPS encryption for all connections',
+    li_sec2: 'Passwords stored with bcrypt hashing algorithm',
+    li_sec3: 'Two-factor authentication (coming soon)',
+    li_sec4: 'Regular security audits',
+    h9: '9. Contact (DPO)',
+    contactDpo: 'Data Protection Officer: <strong>dpo@hathor.casino</strong><br/>General inquiries: <strong>privacy@hathor.casino</strong><br/>Response time: up to 30 days',
+    footer: '\u00a9 2026 HATHOR Royal Casino \u00b7 <a href="/terms.html" style="color:var(--gold)">T&amp;C</a> \u00b7 <a href="/responsible.html" style="color:var(--gold)">Responsible Gambling</a>',
+  },
+  lt: {
+    pageTitle: 'Privatumo Politika',
+    backLink: '\u2190 Gr\u012f\u017eti',
+    updated: 'Galioja nuo: 2026 m. sausio 1 d. \u00b7 GDPR suderinta',
+    h1: '1. Duomen\u0173 valdytojas',
+    p1: 'HATHOR Royal Casino yra j\u016bs\u0173 asmens duomen\u0173 valdytojas. Mes atsakingai tvarkome visus j\u016bs\u0173 pateiktus duomenis ir laikom\u0117s BDAR (GDPR) reikalavim\u0173.',
+    h2: '2. Kokie duomenys renkami',
+    li_reg: '<strong>Registracijos duomenys:</strong> vardas, el. pa\u0161tas, slapta\u017eodis (\u0161ifruotas)',
+    li_kyc: '<strong>KYC duomenys:</strong> asmens tapatyb\u0117s dokumentai, selfie nuotrauka (tik patvirtinimui)',
+    li_tx: '<strong>Transakcij\u0173 duomenys:</strong> kripto pinigin\u0117s adresai, \u012fne\u0161im\u0173/i\u0161\u0117mim\u0173 istorija',
+    li_game: '<strong>Lo\u0161im\u0173 duomenys:</strong> \u017eidim\u0173 istorija, statym\u0173 sumos, laim\u0117jimai',
+    li_tech: '<strong>Techniniai duomenys:</strong> IP adresas, nar\u0161ykl\u0117, sesij\u0173 trukm\u0117',
+    li_comm: '<strong>Komunikacijos duomenys:</strong> palaikymo pokalbiai, el. lai\u0161kai',
+    h3: '3. Kaip naudojami duomenys',
+    li_use1: 'Paskyros k\u016brimas ir valdymas',
+    li_use2: 'KYC/AML patikrinimas (teisinis reikalavimas)',
+    li_use3: 'Suk\u010diavimo prevencija ir saugumo u\u017etikrinimas',
+    li_use4: 'Mok\u0117jim\u0173 apdorojimas',
+    li_use5: 'Klient\u0173 palaikymas',
+    li_use6: 'Teis\u0117s akt\u0173 reikalavim\u0173 vykdymas',
+    li_use7: 'Platformos tobulinimas (anoniminiai duomenys)',
+    h4: '4. Duomen\u0173 saugojimas',
+    p4: 'J\u016bs\u0173 duomenys saugomi \u0161ifruotose duomen\u0173 baz\u0117se. Lo\u0161im\u0173 istorija saugoma 5 metus (AML reikalavimas). KYC dokumentai \u2014 7 metus. Paskyros duomenys \u2014 kol paskyra aktyvi + 2 metai.',
+    h5: '5. Duomen\u0173 dalinimasis',
+    p5: 'Mes <strong>neparduodame</strong> j\u016bs\u0173 duomen\u0173 tre\u010diosioms \u0161alims. Duomenys gali b\u016bti perduoti:',
+    li_share1: 'Teis\u0117saugos institucijoms \u2014 teisinio reikalavimo pagrindu',
+    li_share2: 'KYC paslaugas teikian\u010dioms \u012fmon\u0117ms \u2014 tapatyb\u0117s patvirtinimui',
+    li_share3: 'Mok\u0117jim\u0173 procesoriams \u2014 transakcijoms vykdyti',
+    h6: '6. J\u016bs\u0173 teis\u0117s (GDPR)',
+    rights: [
+      {icon:'\ud83d\udccb', title:'Prieigos teis\u0117', desc:'Galite gauti vis\u0173 j\u016bs\u0173 duomen\u0173 kopi\u0105'},
+      {icon:'\u270f\ufe0f', title:'Taisymo teis\u0117', desc:'Galite reikalauti ita\u0117styti netikslias duomenis'},
+      {icon:'\ud83d\uddd1\ufe0f', title:'I\u0161trynimo teis\u0117', desc:'Galite reikalauti i\u0161trinti duomenis (i\u0161skyrus teisinius reikalavimus)'},
+      {icon:'\u23f8\ufe0f', title:'Apribojimo teis\u0117', desc:'Galite apriboti duomen\u0173 tvarkym\u0105'},
+      {icon:'\ud83d\udce6', title:'Perkeliamumo teis\u0117', desc:'Galite gauti duomenis ma\u0161ininio skaitomumo formatu'},
+      {icon:'\ud83d\udeab', title:'Prie\u0161taravimo teis\u0117', desc:'Galite prie\u0161tarauti duomen\u0173 tvarkymui rinkodaros tikslais'},
+    ],
+    rightsContact: 'Nor\u0117dami pasinaudoti teis\u0117mis, ra\u0161ykite: <strong>privacy@hathor.casino</strong>',
+    h7: '7. Slapukai (Cookies)',
+    p7: 'Naudojame b\u016btinus sesijos slapukus ir analitinius slapukus (su j\u016bs\u0173 sutikimu). Galite valdyti slapukus nar\u0161ykl\u0117s nustatymuose.',
+    h8: '8. Duomen\u0173 saugumo priemon\u0117s',
+    li_sec1: 'HTTPS \u0161ifravimas visoms jungtims',
+    li_sec2: 'Slapta\u017eod\u017eiai saugomi su bcrypt ha\u0161avimo algoritmu',
+    li_sec3: 'Dviej\u0173 veiksni\u0173 autentifikacija (artimoje ateityje)',
+    li_sec4: 'Reguliar\u016bs saugumo auditai',
+    h9: '9. Kontaktai',
+    contactDpo: 'Duomen\u0173 apsaugos pareig\u016bnas: <strong>dpo@hathor.casino</strong><br/>Bendros u\u017eklausos: <strong>privacy@hathor.casino</strong><br/>Atsakymo laikas: iki 30 dien\u0173',
+    footer: '\u00a9 2026 HATHOR Royal Casino \u00b7 <a href="/terms.html" style="color:var(--gold)">T&amp;C</a> \u00b7 <a href="/responsible.html" style="color:var(--gold)">Atsakingas lo\u0161imas</a>',
+  },
+  ru: {
+    pageTitle: '\u041f\u043e\u043b\u0438\u0442\u0438\u043a\u0430 \u043a\u043e\u043d\u0444\u0438\u0434\u0435\u043d\u0446\u0438\u0430\u043b\u044c\u043d\u043e\u0441\u0442\u0438',
+    backLink: '\u2190 \u041d\u0430\u0437\u0430\u0434',
+    updated: '\u0414\u0435\u0439\u0441\u0442\u0432\u0443\u0435\u0442 \u0441: 1 \u044f\u043d\u0432\u0430\u0440\u044f 2026 \u0433. \u00b7 \u0421\u043e\u043e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u0435\u0442 GDPR',
+    h1: '1. \u041e\u043f\u0435\u0440\u0430\u0442\u043e\u0440 \u0434\u0430\u043d\u043d\u044b\u0445',
+    p1: 'HATHOR Royal Casino \u044f\u0432\u043b\u044f\u0435\u0442\u0441\u044f \u043e\u043f\u0435\u0440\u0430\u0442\u043e\u0440\u043e\u043c \u0432\u0430\u0448\u0438\u0445 \u043f\u0435\u0440\u0441\u043e\u043d\u0430\u043b\u044c\u043d\u044b\u0445 \u0434\u0430\u043d\u043d\u044b\u0445. \u041c\u044b \u043e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0435\u043d\u043d\u043e \u043e\u0431\u0440\u0430\u0431\u0430\u0442\u044b\u0432\u0430\u0435\u043c \u0432\u0441\u0435 \u043f\u0440\u0435\u0434\u043e\u0441\u0442\u0430\u0432\u043b\u0435\u043d\u043d\u044b\u0435 \u0432\u0430\u043c\u0438 \u0434\u0430\u043d\u043d\u044b\u0435 \u0438 \u0441\u043e\u0431\u043b\u044e\u0434\u0430\u0435\u043c \u0442\u0440\u0435\u0431\u043e\u0432\u0430\u043d\u0438\u044f GDPR.',
+    h2: '2. \u041a\u0430\u043a\u0438\u0435 \u0434\u0430\u043d\u043d\u044b\u0435 \u0441\u043e\u0431\u0438\u0440\u0430\u044e\u0442\u0441\u044f',
+    li_reg: '<strong>\u0414\u0430\u043d\u043d\u044b\u0435 \u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0430\u0446\u0438\u0438:</strong> \u0438\u043c\u044f, email, \u043f\u0430\u0440\u043e\u043b\u044c (\u0437\u0430\u0448\u0438\u0444\u0440\u043e\u0432\u0430\u043d)',
+    li_kyc: '<strong>KYC \u0434\u0430\u043d\u043d\u044b\u0435:</strong> \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u044b, \u0443\u0434\u043e\u0441\u0442\u043e\u0432\u0435\u0440\u044f\u044e\u0449\u0438\u0435 \u043b\u0438\u0447\u043d\u043e\u0441\u0442\u044c, \u0441\u0435\u043b\u0444\u0438 (\u0442\u043e\u043b\u044c\u043a\u043e \u0434\u043b\u044f \u0432\u0435\u0440\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u0438)',
+    li_tx: '<strong>\u0414\u0430\u043d\u043d\u044b\u0435 \u0442\u0440\u0430\u043d\u0437\u0430\u043a\u0446\u0438\u0439:</strong> \u0430\u0434\u0440\u0435\u0441\u0430 \u043a\u0440\u0438\u043f\u0442\u043e\u043a\u043e\u0448\u0435\u043b\u044c\u043a\u043e\u0432, \u0438\u0441\u0442\u043e\u0440\u0438\u044f \u043f\u043e\u043f\u043e\u043b\u043d\u0435\u043d\u0438\u0439/\u0432\u044b\u0432\u043e\u0434\u043e\u0432',
+    li_game: '<strong>\u0418\u0433\u0440\u043e\u0432\u044b\u0435 \u0434\u0430\u043d\u043d\u044b\u0435:</strong> \u0438\u0441\u0442\u043e\u0440\u0438\u044f \u0438\u0433\u0440, \u0441\u0443\u043c\u043c\u044b \u0441\u0442\u0430\u0432\u043e\u043a, \u0432\u044b\u0438\u0433\u0440\u044b\u0448\u0438',
+    li_tech: '<strong>\u0422\u0435\u0445\u043d\u0438\u0447\u0435\u0441\u043a\u0438\u0435 \u0434\u0430\u043d\u043d\u044b\u0435:</strong> IP \u0430\u0434\u0440\u0435\u0441, \u0431\u0440\u0430\u0443\u0437\u0435\u0440, \u0434\u043b\u0438\u0442\u0435\u043b\u044c\u043d\u043e\u0441\u0442\u044c \u0441\u0435\u0441\u0441\u0438\u0438',
+    li_comm: '<strong>\u0414\u0430\u043d\u043d\u044b\u0435 \u043e\u0431\u0449\u0435\u043d\u0438\u044f:</strong> \u0447\u0430\u0442\u044b \u043f\u043e\u0434\u0434\u0435\u0440\u0436\u043a\u0438, email',
+    h3: '3. \u041a\u0430\u043a \u0434\u0430\u043d\u043d\u044b\u0435 \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u0443\u044e\u0442\u0441\u044f',
+    li_use1: '\u0421\u043e\u0437\u0434\u0430\u043d\u0438\u0435 \u0430\u043a\u043a\u0430\u0443\u043d\u0442\u0430 \u0438 \u0443\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0435',
+    li_use2: '\u0412\u0435\u0440\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u044f KYC/AML (\u0437\u0430\u043a\u043e\u043d\u043e\u0434\u0430\u0442\u0435\u043b\u044c\u043d\u043e\u0435 \u0442\u0440\u0435\u0431\u043e\u0432\u0430\u043d\u0438\u0435)',
+    li_use3: '\u041f\u0440\u0435\u0434\u043e\u0442\u0432\u0440\u0430\u0449\u0435\u043d\u0438\u0435 \u043c\u043e\u0448\u0435\u043d\u043d\u0438\u0447\u0435\u0441\u0442\u0432\u0430 \u0438 \u0437\u0430\u0449\u0438\u0442\u0430',
+    li_use4: '\u041e\u0431\u0440\u0430\u0431\u043e\u0442\u043a\u0430 \u043f\u043b\u0430\u0442\u0435\u0436\u0435\u0439',
+    li_use5: '\u041f\u043e\u0434\u0434\u0435\u0440\u0436\u043a\u0430 \u043a\u043b\u0438\u0435\u043d\u0442\u043e\u0432',
+    li_use6: '\u0421\u043e\u0431\u043b\u044e\u0434\u0435\u043d\u0438\u0435 \u0437\u0430\u043a\u043e\u043d\u043e\u0434\u0430\u0442\u0435\u043b\u044c\u043d\u044b\u0445 \u0442\u0440\u0435\u0431\u043e\u0432\u0430\u043d\u0438\u0439',
+    li_use7: '\u0423\u043b\u0443\u0447\u0448\u0435\u043d\u0438\u0435 \u043f\u043b\u0430\u0442\u0444\u043e\u0440\u043c\u044b (\u0430\u043d\u043e\u043d\u0438\u043c\u043d\u044b\u0435 \u0434\u0430\u043d\u043d\u044b\u0435)',
+    h4: '4. \u0425\u0440\u0430\u043d\u0435\u043d\u0438\u0435 \u0434\u0430\u043d\u043d\u044b\u0445',
+    p4: '\u0412\u0430\u0448\u0438 \u0434\u0430\u043d\u043d\u044b\u0435 \u0445\u0440\u0430\u043d\u044f\u0442\u0441\u044f \u0432 \u0437\u0430\u0448\u0438\u0444\u0440\u043e\u0432\u0430\u043d\u043d\u044b\u0445 \u0431\u0430\u0437\u0430\u0445 \u0434\u0430\u043d\u043d\u044b\u0445. \u0418\u0433\u0440\u043e\u0432\u0430\u044f \u0438\u0441\u0442\u043e\u0440\u0438\u044f \u2014 5 \u043b\u0435\u0442 (AML). KYC \u2014 7 \u043b\u0435\u0442. \u0414\u0430\u043d\u043d\u044b\u0435 \u0430\u043a\u043a\u0430\u0443\u043d\u0442\u0430 \u2014 \u043f\u043e\u043a\u0430 \u0430\u043a\u0442\u0438\u0432\u0435\u043d + 2 \u0433\u043e\u0434\u0430.',
+    h5: '5. \u041f\u0435\u0440\u0435\u0434\u0430\u0447\u0430 \u0434\u0430\u043d\u043d\u044b\u0445',
+    p5: '\u041c\u044b <strong>\u043d\u0435 \u043f\u0440\u043e\u0434\u0430\u0451\u043c</strong> \u0432\u0430\u0448\u0438 \u0434\u0430\u043d\u043d\u044b\u0435 \u0442\u0440\u0435\u0442\u044c\u0438\u043c \u043b\u0438\u0446\u0430\u043c. \u0414\u0430\u043d\u043d\u044b\u0435 \u043c\u043e\u0433\u0443\u0442 \u0431\u044b\u0442\u044c \u043f\u0435\u0440\u0435\u0434\u0430\u043d\u044b:',
+    li_share1: '\u041f\u0440\u0430\u0432\u043e\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u044b\u043c \u043e\u0440\u0433\u0430\u043d\u0430\u043c \u2014 \u043f\u043e \u0437\u0430\u043a\u043e\u043d\u043d\u043e\u043c\u0443 \u0442\u0440\u0435\u0431\u043e\u0432\u0430\u043d\u0438\u044e',
+    li_share2: '\u041f\u043e\u0441\u0442\u0430\u0432\u0449\u0438\u043a\u0430\u043c KYC \u2014 \u0434\u043b\u044f \u0432\u0435\u0440\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u0438 \u043b\u0438\u0447\u043d\u043e\u0441\u0442\u0438',
+    li_share3: '\u041f\u043b\u0430\u0442\u0451\u0436\u043d\u044b\u043c \u043f\u0440\u043e\u0446\u0435\u0441\u0441\u043e\u0440\u0430\u043c \u2014 \u0434\u043b\u044f \u043e\u0431\u0440\u0430\u0431\u043e\u0442\u043a\u0438 \u0442\u0440\u0430\u043d\u0437\u0430\u043a\u0446\u0438\u0439',
+    h6: '6. \u0412\u0430\u0448\u0438 \u043f\u0440\u0430\u0432\u0430 (GDPR)',
+    rights: [
+      {icon:'\ud83d\udccb', title:'\u041f\u0440\u0430\u0432\u043e \u043d\u0430 \u0434\u043e\u0441\u0442\u0443\u043f', desc:'\u0412\u044b \u043c\u043e\u0436\u0435\u0442\u0435 \u043f\u043e\u043b\u0443\u0447\u0438\u0442\u044c \u043a\u043e\u043f\u0438\u044e \u0432\u0441\u0435\u0445 \u0432\u0430\u0448\u0438\u0445 \u0434\u0430\u043d\u043d\u044b\u0445'},
+      {icon:'\u270f\ufe0f', title:'\u041f\u0440\u0430\u0432\u043e \u043d\u0430 \u0438\u0441\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0435', desc:'\u0412\u044b \u043c\u043e\u0436\u0435\u0442\u0435 \u0437\u0430\u043f\u0440\u043e\u0441\u0438\u0442\u044c \u0438\u0441\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0435 \u043d\u0435\u0442\u043e\u0447\u043d\u044b\u0445 \u0434\u0430\u043d\u043d\u044b\u0445'},
+      {icon:'\ud83d\uddd1\ufe0f', title:'\u041f\u0440\u0430\u0432\u043e \u043d\u0430 \u0443\u0434\u0430\u043b\u0435\u043d\u0438\u0435', desc:'\u0412\u044b \u043c\u043e\u0436\u0435\u0442\u0435 \u0437\u0430\u043f\u0440\u043e\u0441\u0438\u0442\u044c \u0443\u0434\u0430\u043b\u0435\u043d\u0438\u0435 \u0434\u0430\u043d\u043d\u044b\u0445'},
+      {icon:'\u23f8\ufe0f', title:'\u041f\u0440\u0430\u0432\u043e \u043d\u0430 \u043e\u0433\u0440\u0430\u043d\u0438\u0447\u0435\u043d\u0438\u0435', desc:'\u0412\u044b \u043c\u043e\u0436\u0435\u0442\u0435 \u043e\u0433\u0440\u0430\u043d\u0438\u0447\u0438\u0442\u044c \u043e\u0431\u0440\u0430\u0431\u043e\u0442\u043a\u0443 \u0434\u0430\u043d\u043d\u044b\u0445'},
+      {icon:'\ud83d\udce6', title:'\u041f\u0440\u0430\u0432\u043e \u043d\u0430 \u043f\u0435\u0440\u0435\u043d\u043e\u0441', desc:'\u0412\u044b \u043c\u043e\u0436\u0435\u0442\u0435 \u043f\u043e\u043b\u0443\u0447\u0438\u0442\u044c \u0434\u0430\u043d\u043d\u044b\u0435 \u0432 \u043c\u0430\u0448\u0438\u043d\u043e\u0447\u0438\u0442\u0430\u0435\u043c\u043e\u043c \u0444\u043e\u0440\u043c\u0430\u0442\u0435'},
+      {icon:'\ud83d\udeab', title:'\u041f\u0440\u0430\u0432\u043e \u043d\u0430 \u0432\u043e\u0437\u0440\u0430\u0436\u0435\u043d\u0438\u0435', desc:'\u0412\u044b \u043c\u043e\u0436\u0435\u0442\u0435 \u0432\u043e\u0437\u0440\u0430\u0437\u0438\u0442\u044c \u043f\u0440\u043e\u0442\u0438\u0432 \u043e\u0431\u0440\u0430\u0431\u043e\u0442\u043a\u0438 \u0432 \u043c\u0430\u0440\u043a\u0435\u0442\u0438\u043d\u0433\u043e\u0432\u044b\u0445 \u0446\u0435\u043b\u044f\u0445'},
+    ],
+    rightsContact: '\u0427\u0442\u043e\u0431\u044b \u0432\u043e\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u044c\u0441\u044f \u043f\u0440\u0430\u0432\u0430\u043c\u0438, \u043f\u0438\u0448\u0438\u0442\u0435: <strong>privacy@hathor.casino</strong>',
+    h7: '7. \u0424\u0430\u0439\u043b\u044b cookie',
+    p7: '\u041c\u044b \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u0443\u0435\u043c \u043d\u0435\u043e\u0431\u0445\u043e\u0434\u0438\u043c\u044b\u0435 \u0441\u0435\u0441\u0441\u0438\u043e\u043d\u043d\u044b\u0435 cookie \u0438 \u0430\u043d\u0430\u043b\u0438\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u0435 cookie (\u0441 \u0432\u0430\u0448\u0435\u0433\u043e \u0441\u043e\u0433\u043b\u0430\u0441\u0438\u044f). \u0412\u044b \u043c\u043e\u0436\u0435\u0442\u0435 \u0443\u043f\u0440\u0430\u0432\u043b\u044f\u0442\u044c cookie \u0432 \u043d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0430\u0445 \u0431\u0440\u0430\u0443\u0437\u0435\u0440\u0430.',
+    h8: '8. \u041c\u0435\u0440\u044b \u0437\u0430\u0449\u0438\u0442\u044b \u0434\u0430\u043d\u043d\u044b\u0445',
+    li_sec1: 'HTTPS \u0448\u0438\u0444\u0440\u043e\u0432\u0430\u043d\u0438\u0435 \u0434\u043b\u044f \u0432\u0441\u0435\u0445 \u0441\u043e\u0435\u0434\u0438\u043d\u0435\u043d\u0438\u0439',
+    li_sec2: '\u041f\u0430\u0440\u043e\u043b\u0438 \u0445\u0440\u0430\u043d\u044f\u0442\u0441\u044f \u0441 \u0430\u043b\u0433\u043e\u0440\u0438\u0442\u043c\u043e\u043c bcrypt',
+    li_sec3: '\u0414\u0432\u0443\u0445\u0444\u0430\u043a\u0442\u043e\u0440\u043d\u0430\u044f \u0430\u0443\u0442\u0435\u043d\u0442\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u044f (\u0441\u043a\u043e\u0440\u043e)',
+    li_sec4: '\u0420\u0435\u0433\u0443\u043b\u044f\u0440\u043d\u044b\u0435 \u0430\u0443\u0434\u0438\u0442\u044b \u0431\u0435\u0437\u043e\u043f\u0430\u0441\u043d\u043e\u0441\u0442\u0438',
+    h9: '9. \u041a\u043e\u043d\u0442\u0430\u043a\u0442\u044b',
+    contactDpo: '\u0414\u043f\u043e: <strong>dpo@hathor.casino</strong><br/>\u041e\u0431\u0449\u0438\u0435 \u0437\u0430\u043f\u0440\u043e\u0441\u044b: <strong>privacy@hathor.casino</strong><br/>\u0412\u0440\u0435\u043c\u044f \u043e\u0442\u0432\u0435\u0442\u0430: \u0434\u043e 30 \u0434\u043d\u0435\u0439',
+    footer: '\u00a9 2026 HATHOR Royal Casino \u00b7 <a href="/terms.html" style="color:var(--gold)">T&amp;C</a> \u00b7 <a href="/responsible.html" style="color:var(--gold)">\u041e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0435\u043d\u043d\u0430\u044f \u0438\u0433\u0440\u0430</a>',
+  },
+  de: {
+    pageTitle: 'Datenschutzerkl\u00e4rung',
+    backLink: '\u2190 Zur\u00fcck',
+    updated: 'G\u00fcltig ab: 1. Januar 2026 \u00b7 DSGVO-konform',
+    h1: '1. Verantwortlicher',
+    p1: 'HATHOR Royal Casino ist der Verantwortliche f\u00fcr Ihre personenbezogenen Daten. Wir verarbeiten alle von Ihnen bereitgestellten Daten verantwortungsvoll und gem\u00e4\u00df DSGVO.',
+    h2: '2. Welche Daten wir erheben',
+    li_reg: '<strong>Registrierungsdaten:</strong> Name, E-Mail, Passwort (verschl\u00fcsselt)',
+    li_kyc: '<strong>KYC-Daten:</strong> Ausweisdokumente, Selfie (nur zur Verifizierung)',
+    li_tx: '<strong>Transaktionsdaten:</strong> Krypto-Wallet-Adressen, Ein-/Auszahlungshistorie',
+    li_game: '<strong>Spieldaten:</strong> Spielverlauf, Einsatzbetr\u00e4ge, Gewinne',
+    li_tech: '<strong>Technische Daten:</strong> IP-Adresse, Browser, Sitzungsdauer',
+    li_comm: '<strong>Kommunikationsdaten:</strong> Support-Chats, E-Mails',
+    h3: '3. Verwendung der Daten',
+    li_use1: 'Kontoerstellung und -verwaltung',
+    li_use2: 'KYC/AML-Verifizierung (gesetzliche Anforderung)',
+    li_use3: 'Betrugspr\u00e4vention und Sicherheit',
+    li_use4: 'Zahlungsabwicklung',
+    li_use5: 'Kundensupport',
+    li_use6: 'Einhaltung gesetzlicher Vorschriften',
+    li_use7: 'Plattformverbesserung (anonymisiert)',
+    h4: '4. Datenspeicherung',
+    p4: 'Ihre Daten werden in verschl\u00fcsselten Datenbanken gespeichert. Spielhistorie 5 Jahre (AML). KYC-Dokumente \u2014 7 Jahre. Kontodaten \u2014 solange aktiv + 2 Jahre.',
+    h5: '5. Datenweitergabe',
+    p5: 'Wir <strong>verkaufen</strong> Ihre Daten nicht an Dritte. Daten k\u00f6nnen weitergegeben werden an:',
+    li_share1: 'Strafverfolgungsbeh\u00f6rden \u2014 auf gesetzlicher Grundlage',
+    li_share2: 'KYC-Dienstleister \u2014 f\u00fcr Identit\u00e4tspr\u00fcfung',
+    li_share3: 'Zahlungsabwickler \u2014 f\u00fcr Transaktionen',
+    h6: '6. Ihre Rechte (DSGVO)',
+    rights: [
+      {icon:'\ud83d\udccb', title:'Auskunftsrecht', desc:'Sie k\u00f6nnen eine Kopie aller Ihrer Daten erhalten'},
+      {icon:'\u270f\ufe0f', title:'Berichtigungsrecht', desc:'Sie k\u00f6nnen Berichtigung ungenauer Daten verlangen'},
+      {icon:'\ud83d\uddd1\ufe0f', title:'L\u00f6schungsrecht', desc:'Sie k\u00f6nnen L\u00f6schung von Daten verlangen'},
+      {icon:'\u23f8\ufe0f', title:'Einschr\u00e4nkungsrecht', desc:'Sie k\u00f6nnen die Verarbeitung einschr\u00e4nken'},
+      {icon:'\ud83d\udce6', title:'Daten\u00fcbertragbarkeit', desc:'Sie k\u00f6nnen Daten in maschinenlesbarem Format erhalten'},
+      {icon:'\ud83d\udeab', title:'Widerspruchsrecht', desc:'Sie k\u00f6nnen der Verarbeitung zu Marketingzwecken widersprechen'},
+    ],
+    rightsContact: 'Um Ihre Rechte wahrzunehmen, schreiben Sie an: <strong>privacy@hathor.casino</strong>',
+    h7: '7. Cookies',
+    p7: 'Wir verwenden notwendige Sitzungscookies und analytische Cookies (mit Ihrer Zustimmung). Sie k\u00f6nnen Cookies in Ihren Browsereinstellungen verwalten.',
+    h8: '8. Sicherheitsma\u00dfnahmen',
+    li_sec1: 'HTTPS-Verschl\u00fcsselung f\u00fcr alle Verbindungen',
+    li_sec2: 'Passw\u00f6rter mit bcrypt-Algorithmus gespeichert',
+    li_sec3: 'Zwei-Faktor-Authentifizierung (demnächst)',
+    li_sec4: 'Regelm\u00e4\u00dfige Sicherheitsaudits',
+    h9: '9. Kontakt (DSB)',
+    contactDpo: 'Datenschutzbeauftragter: <strong>dpo@hathor.casino</strong><br/>Allgemeine Anfragen: <strong>privacy@hathor.casino</strong><br/>Antwortzeit: bis zu 30 Tage',
+    footer: '\u00a9 2026 HATHOR Royal Casino \u00b7 <a href="/terms.html" style="color:var(--gold)">AGB</a> \u00b7 <a href="/responsible.html" style="color:var(--gold)">Verantwortungsvolles Spielen</a>',
+  },
+  pl: {
+    pageTitle: 'Polityka Prywatno\u015bci',
+    backLink: '\u2190 Wr\u00f3\u0107',
+    updated: 'Obowi\u0105zuje od: 1 stycznia 2026 \u00b7 Zgodna z RODO',
+    h1: '1. Administrator danych',
+    p1: 'HATHOR Royal Casino jest administratorem Twoich danych osobowych. Przetwarzamy wszystkie dostarczone dane w odpowiedzialny spos\u00f3b zgodnie z RODO.',
+    h2: '2. Jakie dane zbieramy',
+    li_reg: '<strong>Dane rejestracyjne:</strong> imi\u0119, e-mail, has\u0142o (zaszyfrowane)',
+    li_kyc: '<strong>Dane KYC:</strong> dokumenty to\u017csamo\u015bci, zdj\u0119cie selfie (tylko do weryfikacji)',
+    li_tx: '<strong>Dane transakcji:</strong> adresy portfeli krypto, historia wp\u0142at/wyp\u0142at',
+    li_game: '<strong>Dane gier:</strong> historia gier, kwoty zak\u0142ad\u00f3w, wygrane',
+    li_tech: '<strong>Dane techniczne:</strong> adres IP, przegl\u0105darka, czas sesji',
+    li_comm: '<strong>Dane komunikacji:</strong> czaty wsparcia, e-maile',
+    h3: '3. Jak dane s\u0105 wykorzystywane',
+    li_use1: 'Tworzenie i zarz\u0105dzanie kontem',
+    li_use2: 'Weryfikacja KYC/AML (wymog prawny)',
+    li_use3: 'Zapobieganie oszustwom i bezpiecze\u0144stwo',
+    li_use4: 'Przetwarzanie p\u0142atno\u015bci',
+    li_use5: 'Obs\u0142uga klienta',
+    li_use6: 'Spe\u0142nianie wymog\u00f3w prawnych',
+    li_use7: 'Ulepszanie platformy (anonimizowane)',
+    h4: '4. Przechowywanie danych',
+    p4: 'Twoje dane s\u0105 przechowywane w zaszyfrowanych bazach danych. Historia gier \u2014 5 lat (AML). Dokumenty KYC \u2014 7 lat. Dane konta \u2014 gdy aktywne + 2 lata.',
+    h5: '5. Udost\u0119pnianie danych',
+    p5: 'Nie <strong>sprzedajemy</strong> Twoich danych osobom trzecim. Dane mog\u0105 by\u0107 udost\u0119pniane:',
+    li_share1: 'Organom \u015bcigania \u2014 na podstawie prawnej',
+    li_share2: 'Dostawcom KYC \u2014 do weryfikacji to\u017csamo\u015bci',
+    li_share3: 'Procesorom p\u0142atno\u015bci \u2014 do przetwarzania transakcji',
+    h6: '6. Twoje prawa (RODO)',
+    rights: [
+      {icon:'\ud83d\udccb', title:'Prawo dost\u0119pu', desc:'Mo\u017cesz otrzyma\u0107 kopi\u0119 wszystkich swoich danych'},
+      {icon:'\u270f\ufe0f', title:'Prawo do sprostowania', desc:'Mo\u017cesz za\u017c\u0105da\u0107 poprawy niedok\u0142adnych danych'},
+      {icon:'\ud83d\uddd1\ufe0f', title:'Prawo do usuni\u0119cia', desc:'Mo\u017cesz za\u017c\u0105da\u0107 usuni\u0119cia danych'},
+      {icon:'\u23f8\ufe0f', title:'Prawo do ograniczenia', desc:'Mo\u017cesz ograniczy\u0107 przetwarzanie danych'},
+      {icon:'\ud83d\udce6', title:'Prawo do przenoszenia', desc:'Mo\u017cesz otrzyma\u0107 dane w formacie do odczytu maszynowego'},
+      {icon:'\ud83d\udeab', title:'Prawo sprzeciwu', desc:'Mo\u017cesz sprzeciwi\u0107 si\u0119 przetwarzaniu w celach marketingowych'},
+    ],
+    rightsContact: 'Aby skorzysta\u0107 z praw, napisz do: <strong>privacy@hathor.casino</strong>',
+    h7: '7. Pliki cookie',
+    p7: 'U\u017cywamy niezb\u0119dnych plik\u00f3w cookie sesji i analitycznych (za Twoim poj\u0119ciem). Mo\u017cesz zarz\u0105dza\u0107 plikami cookie w ustawieniach przegl\u0105darki.',
+    h8: '8. \u015arodki bezpiecze\u0144stwa',
+    li_sec1: 'Szyfrowanie HTTPS dla wszystkich po\u0142\u0105cze\u0144',
+    li_sec2: 'Has\u0142a przechowywane z algorytmem bcrypt',
+    li_sec3: 'Uwierzytelnianie dwusk\u0142adnikowe (wkr\u00f3tce)',
+    li_sec4: 'Regularne audyty bezpiecze\u0144stwa',
+    h9: '9. Kontakt (IOD)',
+    contactDpo: 'Inspektor ochrony danych: <strong>dpo@hathor.casino</strong><br/>Og\u00f3lne zapytania: <strong>privacy@hathor.casino</strong><br/>Czas odpowiedzi: do 30 dni',
+    footer: '\u00a9 2026 HATHOR Royal Casino \u00b7 <a href="/terms.html" style="color:var(--gold)">Regulamin</a> \u00b7 <a href="/responsible.html" style="color:var(--gold)">Odpowiedzialny hazard</a>',
+  },
+  fr: {
+    pageTitle: 'Politique de Confidentialit\u00e9',
+    backLink: '\u2190 Retour',
+    updated: 'En vigueur: 1er janvier 2026 \u00b7 Conforme au RGPD',
+    h1: '1. Responsable du traitement',
+    p1: 'HATHOR Royal Casino est le responsable du traitement de vos donn\u00e9es personnelles. Nous traitons toutes les donn\u00e9es que vous fournissez de mani\u00e8re responsable et en conformit\u00e9 avec le RGPD.',
+    h2: '2. Donn\u00e9es collect\u00e9es',
+    li_reg: '<strong>Donn\u00e9es d\'inscription:</strong> nom, e-mail, mot de passe (chiffr\u00e9)',
+    li_kyc: '<strong>Donn\u00e9es KYC:</strong> documents d\'identit\u00e9, selfie (uniquement pour v\u00e9rification)',
+    li_tx: '<strong>Donn\u00e9es de transaction:</strong> adresses de portefeuilles crypto, historique des d\u00e9p\u00f4ts/retraits',
+    li_game: '<strong>Donn\u00e9es de jeu:</strong> historique des jeux, montants des mises, gains',
+    li_tech: '<strong>Donn\u00e9es techniques:</strong> adresse IP, navigateur, dur\u00e9e de session',
+    li_comm: '<strong>Donn\u00e9es de communication:</strong> chats du support, e-mails',
+    h3: '3. Utilisation des donn\u00e9es',
+    li_use1: 'Cr\u00e9ation et gestion du compte',
+    li_use2: 'V\u00e9rification KYC/AML (obligation l\u00e9gale)',
+    li_use3: 'Pr\u00e9vention de la fraude et s\u00e9curit\u00e9',
+    li_use4: 'Traitement des paiements',
+    li_use5: 'Support client',
+    li_use6: 'Conformit\u00e9 r\u00e9glementaire',
+    li_use7: 'Am\u00e9lioration de la plateforme (anonymis\u00e9)',
+    h4: '4. Conservation des donn\u00e9es',
+    p4: 'Vos donn\u00e9es sont stock\u00e9es dans des bases de donn\u00e9es chiffr\u00e9es. Historique de jeu: 5 ans (AML). Documents KYC: 7 ans. Donn\u00e9es de compte: actif + 2 ans.',
+    h5: '5. Partage des donn\u00e9es',
+    p5: 'Nous ne <strong>vendons pas</strong> vos donn\u00e9es \u00e0 des tiers. Les donn\u00e9es peuvent \u00eatre partag\u00e9es avec:',
+    li_share1: 'Les autorit\u00e9s judiciaires \u2014 sur base l\u00e9gale',
+    li_share2: 'Les prestataires KYC \u2014 pour v\u00e9rification d\'identit\u00e9',
+    li_share3: 'Les processeurs de paiement \u2014 pour les transactions',
+    h6: '6. Vos droits (RGPD)',
+    rights: [
+      {icon:'\ud83d\udccb', title:'Droit d\'acc\u00e8s', desc:'Vous pouvez obtenir une copie de toutes vos donn\u00e9es'},
+      {icon:'\u270f\ufe0f', title:'Droit de rectification', desc:'Vous pouvez demander la correction de donn\u00e9es inexactes'},
+      {icon:'\ud83d\uddd1\ufe0f', title:'Droit \u00e0 l\'effacement', desc:'Vous pouvez demander la suppression des donn\u00e9es'},
+      {icon:'\u23f8\ufe0f', title:'Droit \u00e0 la limitation', desc:'Vous pouvez limiter le traitement des donn\u00e9es'},
+      {icon:'\ud83d\udce6', title:'Droit \u00e0 la portabilit\u00e9', desc:'Vous pouvez recevoir vos donn\u00e9es en format lisible par machine'},
+      {icon:'\ud83d\udeab', title:'Droit d\'opposition', desc:'Vous pouvez vous opposer au traitement \u00e0 des fins marketing'},
+    ],
+    rightsContact: 'Pour exercer vos droits, \u00e9crivez \u00e0: <strong>privacy@hathor.casino</strong>',
+    h7: '7. Cookies',
+    p7: 'Nous utilisons des cookies de session n\u00e9cessaires et des cookies analytiques (avec votre consentement). Vous pouvez g\u00e9rer les cookies dans les param\u00e8tres de votre navigateur.',
+    h8: '8. Mesures de s\u00e9curit\u00e9',
+    li_sec1: 'Chiffrement HTTPS pour toutes les connexions',
+    li_sec2: 'Mots de passe stock\u00e9s avec l\'algorithme bcrypt',
+    li_sec3: 'Authentification \u00e0 deux facteurs (\u00e0 venir)',
+    li_sec4: 'Audits de s\u00e9curit\u00e9 r\u00e9guliers',
+    h9: '9. Contact (DPO)',
+    contactDpo: 'D\u00e9l\u00e9gu\u00e9 \u00e0 la protection des donn\u00e9es: <strong>dpo@hathor.casino</strong><br/>Demandes g\u00e9n\u00e9rales: <strong>privacy@hathor.casino</strong><br/>D\u00e9lai de r\u00e9ponse: jusqu\'\u00e0 30 jours',
+    footer: '\u00a9 2026 HATHOR Royal Casino \u00b7 <a href="/terms.html" style="color:var(--gold)">CGU</a> \u00b7 <a href="/responsible.html" style="color:var(--gold)">Jeu responsable</a>',
+  },
+};
+
+const LANGS_LIST=[{code:'en',flag:'\ud83c\uddec\ud83c\udde7'},{code:'lt',flag:'\ud83c\uddf1\ud83c\uddf9'},{code:'ru',flag:'\ud83c\uddf7\ud83c\uddfa'},{code:'de',flag:'\ud83c\udde9\ud83c\uddea'},{code:'pl',flag:'\ud83c\uddf5\ud83c\uddf1'},{code:'fr',flag:'\ud83c\uddeb\ud83c\uddf7'}];
+function applyLang(code){
+  var t=PRIVACY_LANGS[code]||PRIVACY_LANGS.en;
+  localStorage.setItem('hrc_lang',code);
+  document.querySelectorAll('[data-i18n]').forEach(function(el){var k=el.getAttribute('data-i18n');if(t[k]!==undefined)el.textContent=t[k];});
+  document.querySelectorAll('[data-i18n-html]').forEach(function(el){var k=el.getAttribute('data-i18n-html');if(t[k]!==undefined)el.innerHTML=t[k];});
+  // Render rights grid
+  var grid=document.getElementById('rightsGrid');
+  if(grid&&t.rights){
+    grid.innerHTML=t.rights.map(function(r){
+      return '<div class="right-card"><div class="right-title">'+r.icon+' '+r.title+'</div><div class="right-desc">'+r.desc+'</div></div>';
+    }).join('');
+  }
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===code);});
+  document.documentElement.lang=code;
+}
+document.getElementById('langBar').innerHTML=LANGS_LIST.map(function(l){return '<button class="lang-btn" data-lang="'+l.code+'" onclick="applyLang(\''+l.code+'\')">'+ l.flag+' '+l.code.toUpperCase()+'</button>';}).join('');
+applyLang(localStorage.getItem('hrc_lang')||'en');
+</script>
 </body>
 </html>
