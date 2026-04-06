@@ -145,12 +145,74 @@ db.exec(`
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'hathor2026';
 
-// Middleware to check admin
+// ── Admin Staff tables (migration safe) ───────────────────
+try { db.exec(`
+  CREATE TABLE IF NOT EXISTS admin_staff (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'support',
+    display_name TEXT,
+    created_at TEXT DEFAULT (datetime('now')),
+    last_login TEXT,
+    active INTEGER DEFAULT 1
+  );
+  CREATE TABLE IF NOT EXISTS admin_sessions (
+    token TEXT PRIMARY KEY,
+    staff_id INTEGER NOT NULL,
+    role TEXT NOT NULL,
+    username TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now')),
+    expires_at TEXT NOT NULL
+  );
+`); } catch(e){ console.log('Admin staff tables already exist'); }
+
+// Role permissions
+const ROLE_PERMS = {
+  superadmin: ['*'],
+  moderator:  ['players.view','players.ban','players.unban','chat.broadcast','stats.view'],
+  support:    ['players.view','players.gift','chat.broadcast'],
+  finance:    ['players.view','stats.view','withdrawals.view','withdrawals.process'],
+  kyc:        ['players.view','kyc.view','kyc.approve','kyc.reject'],
+};
+
+function hasPerm(role, perm) {
+  const perms = ROLE_PERMS[role] || [];
+  return perms.includes('*') || perms.includes(perm);
+}
+
+function hashAdminPw(pw) {
+  return crypto.createHash('sha256').update(pw + 'hathor_staff_2026').digest('hex');
+}
+
+// Middleware — accepts superadmin password OR valid staff token
 const adminAuth = (req, res, next) => {
-  const pw = req.headers['x-admin-key'] || req.query.key;
-  if(pw !== ADMIN_PASSWORD) return res.status(403).json({error:'Unauthorized'});
+  const key = req.headers['x-admin-key'] || req.query.key;
+  if(key === ADMIN_PASSWORD) {
+    req.adminRole = 'superadmin';
+    req.adminUser = 'superadmin';
+    return next();
+  }
+  if(key && key.startsWith('staff_')) {
+    const sess = db.prepare('SELECT * FROM admin_sessions WHERE token=? AND expires_at > datetime("now")').get(key);
+    if(sess) {
+      req.adminRole = sess.role;
+      req.adminUser = sess.username;
+      db.prepare('UPDATE admin_staff SET last_login=datetime("now") WHERE username=?').run(sess.username);
+      return next();
+    }
+  }
+  return res.status(403).json({error:'Unauthorized'});
+};
+
+// Permission check middleware factory
+const requirePerm = (perm) => (req, res, next) => {
+  if(!hasPerm(req.adminRole, perm)) return res.status(403).json({error:`Leidimas atmestas: ${perm}`, role: req.adminRole});
   next();
 };
+
+// Cleanup expired sessions every hour
+setInterval(() => { try { db.prepare('DELETE FROM admin_sessions WHERE expires_at < datetime("now")').run(); } catch(e){} }, 3600000);
 
 // ── Settings helpers ──────────────────────────────────────
 const getSetting = key => { const r=db.prepare('SELECT value FROM settings WHERE key=?').get(key); return r?r.value:null; };
@@ -1277,6 +1339,66 @@ app.post('/api/pf/blackjack', express.json(), (req,res)=>{
 });
 
 
+// ── STAFF AUTH ENDPOINTS ─────────────────────────────────
+
+// Staff login
+app.post('/admin/staff/login', express.json(), (req,res)=>{
+  const {username,password} = req.body||{};
+  if(!username||!password) return res.status(400).json({error:'Trūksta duomenų'});
+  const staff = db.prepare('SELECT * FROM admin_staff WHERE username=? AND active=1').get(username);
+  if(!staff || staff.password_hash !== hashAdminPw(password))
+    return res.status(401).json({error:'Neteisingas vardas arba slaptažodis'});
+  const token = 'staff_' + crypto.randomBytes(32).toString('hex');
+  const expires = new Date(Date.now()+12*3600000).toISOString().replace('T',' ').substring(0,19);
+  db.prepare('INSERT INTO admin_sessions(token,staff_id,role,username,expires_at) VALUES(?,?,?,?,?)').run(token,staff.id,staff.role,staff.username,expires);
+  db.prepare('UPDATE admin_staff SET last_login=datetime("now") WHERE id=?').run(staff.id);
+  res.json({ok:true,token,role:staff.role,displayName:staff.display_name||staff.username});
+});
+
+// Get my info
+app.get('/admin/staff/me', adminAuth, (req,res)=>{
+  res.json({username:req.adminUser,role:req.adminRole,permissions:ROLE_PERMS[req.adminRole]||[],isSuperadmin:req.adminRole==='superadmin'});
+});
+
+// List all staff (superadmin only)
+app.get('/admin/staff', adminAuth, (req,res)=>{
+  if(req.adminRole!=='superadmin') return res.status(403).json({error:'Tik superadmin'});
+  const list = db.prepare('SELECT id,username,role,display_name,created_at,last_login,active FROM admin_staff ORDER BY created_at DESC').all();
+  res.json(list);
+});
+
+// Create staff
+app.post('/admin/staff/create', adminAuth, express.json(), (req,res)=>{
+  if(req.adminRole!=='superadmin') return res.status(403).json({error:'Tik superadmin'});
+  const {username,password,role,display_name} = req.body||{};
+  if(!username||!password||!role) return res.status(400).json({error:'Trūksta laukų'});
+  if(!ROLE_PERMS[role]||role==='superadmin') return res.status(400).json({error:'Neteisinga rolė'});
+  try {
+    db.prepare('INSERT INTO admin_staff(username,password_hash,role,display_name) VALUES(?,?,?,?)').run(username,hashAdminPw(password),role,display_name||username);
+    res.json({ok:true});
+  } catch(e){ res.status(400).json({error:'Vartotojas jau egzistuoja'}); }
+});
+
+// Update staff
+app.put('/admin/staff/:id', adminAuth, express.json(), (req,res)=>{
+  if(req.adminRole!=='superadmin') return res.status(403).json({error:'Tik superadmin'});
+  const {role,display_name,active,password} = req.body||{};
+  const id = req.params.id;
+  if(role&&ROLE_PERMS[role]&&role!=='superadmin') db.prepare('UPDATE admin_staff SET role=? WHERE id=?').run(role,id);
+  if(display_name!==undefined) db.prepare('UPDATE admin_staff SET display_name=? WHERE id=?').run(display_name,id);
+  if(active!==undefined){ db.prepare('UPDATE admin_staff SET active=? WHERE id=?').run(active?1:0,id); if(!active) db.prepare('DELETE FROM admin_sessions WHERE staff_id=?').run(id); }
+  if(password) db.prepare('UPDATE admin_staff SET password_hash=? WHERE id=?').run(hashAdminPw(password),id);
+  res.json({ok:true});
+});
+
+// Delete staff
+app.delete('/admin/staff/:id', adminAuth, (req,res)=>{
+  if(req.adminRole!=='superadmin') return res.status(403).json({error:'Tik superadmin'});
+  db.prepare('DELETE FROM admin_sessions WHERE staff_id=?').run(req.params.id);
+  db.prepare('DELETE FROM admin_staff WHERE id=?').run(req.params.id);
+  res.json({ok:true});
+});
+
 // ── ADMIN PANEL ──────────────────────────────────────────
 // Get all players
 // Ensure banned column exists (migration safe)
@@ -1306,21 +1428,21 @@ app.get('/admin/player/:uid', adminAuth, (req,res)=>{
 });
 
 // Ban / unban
-app.post('/admin/ban/:uid', adminAuth, (req,res)=>{
+app.post('/admin/ban/:uid', adminAuth, requirePerm('players.ban'), (req,res)=>{
   db.prepare('UPDATE users SET banned=1 WHERE uid=?').run(req.params.uid);
   // Kick active sessions
   db.prepare('DELETE FROM sessions WHERE uid=?').run(req.params.uid);
   const u = db.prepare('SELECT name FROM users WHERE uid=?').get(req.params.uid);
   res.json({ok:true, name: u?.name});
 });
-app.post('/admin/unban/:uid', adminAuth, (req,res)=>{
+app.post('/admin/unban/:uid', adminAuth, requirePerm('players.unban'), (req,res)=>{
   db.prepare('UPDATE users SET banned=0 WHERE uid=?').run(req.params.uid);
   const u = db.prepare('SELECT name FROM users WHERE uid=?').get(req.params.uid);
   res.json({ok:true, name: u?.name});
 });
 
 // Broadcast to global chat
-app.post('/admin/broadcast', adminAuth, express.json(), (req,res)=>{
+app.post('/admin/broadcast', adminAuth, requirePerm('chat.broadcast'), express.json(), (req,res)=>{
   const {msg} = req.body;
   if(!msg) return res.status(400).json({error:'No message'});
   io.emit('globalChat', {uid:'__admin', name:'🛡️ HATHOR Admin', msg, levelEmoji:'👑', time:Date.now()});
@@ -1328,7 +1450,7 @@ app.post('/admin/broadcast', adminAuth, express.json(), (req,res)=>{
 });
 
 // Give tokens to player
-app.post('/admin/give-tokens', adminAuth, express.json(), (req,res)=>{
+app.post('/admin/give-tokens', adminAuth, requirePerm('players.gift'), express.json(), (req,res)=>{
   const {uid, amount, name} = req.body;
   let user;
   if(uid) user = db.prepare('SELECT * FROM users WHERE uid=?').get(uid);
@@ -1402,6 +1524,7 @@ app.post('/api/use-promo', express.json(), (req,res)=>{
 
 // Delete player
 app.delete('/admin/player/:uid', adminAuth, (req,res)=>{
+  if(req.adminRole!=='superadmin') return res.status(403).json({error:'Tik superadmin gali trinti žaidėjus'});
   db.prepare('DELETE FROM users WHERE uid=?').run(req.params.uid);
   res.json({ok:true});
 });
@@ -1639,14 +1762,14 @@ app.get('/admin/kyc/stats',adminAuth,(req,res)=>{
 });
 
 // Admin: patvirtinti KYC
-app.post('/admin/kyc/approve/:uid',adminAuth,(req,res)=>{
+app.post('/admin/kyc/approve/:uid',adminAuth,requirePerm('kyc.approve'),(req,res)=>{
   db.prepare("UPDATE kyc SET status='approved',reviewed_at=datetime('now') WHERE uid=?").run(req.params.uid);
   if(sockets[req.params.uid]) sockets[req.params.uid].socket.emit('kycStatusUpdate',{status:'approved'});
   res.json({ok:true});
 });
 
 // Admin: atmesti KYC
-app.post('/admin/kyc/reject/:uid',adminAuth,express.json(),(req,res)=>{
+app.post('/admin/kyc/reject/:uid',adminAuth,requirePerm('kyc.reject'),express.json(),(req,res)=>{
   const reason=req.body?.reason||'Dokumentų nepavyko patvirtinti';
   db.prepare("UPDATE kyc SET status='rejected',rejection_reason=?,reviewed_at=datetime('now') WHERE uid=?").run(reason,req.params.uid);
   if(sockets[req.params.uid]) sockets[req.params.uid].socket.emit('kycStatusUpdate',{status:'rejected',reason});

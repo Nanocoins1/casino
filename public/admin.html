@@ -135,8 +135,22 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
   <div class="login-card">
     <h1>⬡ HATHOR</h1>
     <p>ADMIN PANEL · SECURE ACCESS</p>
-    <input class="inp" type="password" id="pwInp" placeholder="Admin password" onkeydown="if(event.key==='Enter')login()"/>
-    <button class="btn btn-primary" onclick="login()">Enter Admin Panel</button>
+    <!-- Login tabs -->
+    <div style="display:flex;gap:8px;margin-bottom:16px;">
+      <button id="ltab-super" onclick="setLoginTab('super')" style="flex:1;padding:9px;border-radius:8px;border:1px solid rgba(201,168,76,0.5);background:rgba(201,168,76,0.12);color:#f0c060;cursor:pointer;font-size:12px;font-weight:700;">👑 Superadmin</button>
+      <button id="ltab-staff" onclick="setLoginTab('staff')" style="flex:1;padding:9px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:none;color:rgba(232,224,208,0.4);cursor:pointer;font-size:12px;font-weight:700;">👤 Darbuotojas</button>
+    </div>
+    <!-- Superadmin login -->
+    <div id="login-super">
+      <input class="inp" type="password" id="pwInp" placeholder="Admin password" onkeydown="if(event.key==='Enter')login()"/>
+      <button class="btn btn-primary" onclick="login()">Enter Admin Panel</button>
+    </div>
+    <!-- Staff login -->
+    <div id="login-staff" style="display:none;">
+      <input class="inp" type="text" id="staffUserInp" placeholder="Vartotojo vardas" autocomplete="username"/>
+      <input class="inp" type="password" id="staffPwInp" placeholder="Slaptažodis" onkeydown="if(event.key==='Enter')staffLogin()" autocomplete="current-password"/>
+      <button class="btn btn-primary" onclick="staffLogin()" style="background:linear-gradient(135deg,#7c3aed,#a855f7);">Prisijungti</button>
+    </div>
     <div class="err" id="loginErr"></div>
   </div>
 </div>
@@ -146,8 +160,9 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
   <div class="header">
     <div class="header-logo">⬡ HATHOR ADMIN</div>
     <div class="header-right">
+      <span id="adminRoleBadge" style="font-size:11px;padding:4px 10px;border-radius:6px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);color:#f0c060;"></span>
       <span><span class="online-dot"></span>LIVE</span>
-      <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
+      <button class="btn btn-ghost btn-sm" onclick="logout()">Atsijungti</button>
     </div>
   </div>
 
@@ -167,6 +182,7 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
     <div class="tab" onclick="showTab('limits',this)">🛡️ Limitai</div>
     <div class="tab" onclick="showTab('vip-admin',this)">🌟 VIP</div>
     <div class="tab" onclick="showTab('push',this)">🔔 Push</div>
+    <div class="tab" id="tab-staff" onclick="showTab('staff',this)" style="display:none;">👥 Darbuotojai</div>
   </div>
 
   <div class="content">
@@ -568,6 +584,47 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
       </div>
     </div>
 
+    <!-- STAFF MANAGEMENT SECTION -->
+    <div class="section" id="sec-staff">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;color:#e8e2d4;">👥 Darbuotojų valdymas</h2>
+        <button class="btn btn-primary" onclick="openCreateStaff()">+ Naujas darbuotojas</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-bottom:20px;">
+        <div style="background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.25);border-radius:10px;padding:12px;"><div style="color:#a855f7;font-weight:700;font-size:12px;margin-bottom:4px;">🛡️ Moderator</div><div style="font-size:11px;color:rgba(232,224,208,0.5);">Ban/Unban žaidėjus, statistika, chat pranešimai</div></div>
+        <div style="background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.25);border-radius:10px;padding:12px;"><div style="color:#00e5ff;font-weight:700;font-size:12px;margin-bottom:4px;">💬 Support</div><div style="font-size:11px;color:rgba(232,224,208,0.5);">Peržiūrėti žaidėjus, dovanoti žetonus, chat</div></div>
+        <div style="background:rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.25);border-radius:10px;padding:12px;"><div style="color:#00e676;font-weight:700;font-size:12px;margin-bottom:4px;">💰 Finance</div><div style="font-size:11px;color:rgba(232,224,208,0.5);">Išmokėjimai, finansinė statistika</div></div>
+        <div style="background:rgba(255,193,7,0.08);border:1px solid rgba(255,193,7,0.25);border-radius:10px;padding:12px;"><div style="color:#ffc107;font-weight:700;font-size:12px;margin-bottom:4px;">📋 KYC</div><div style="font-size:11px;color:rgba(232,224,208,0.5);">Tapatybės dokumentų tikrinimas</div></div>
+      </div>
+      <table class="players-table" style="width:100%">
+        <thead><tr><th>Darbuotojas</th><th>Rolė</th><th>Sukurta</th><th>Paskutinis prisijungimas</th><th>Statusas</th><th>Veiksmai</th></tr></thead>
+        <tbody id="staffTbody"><tr><td colspan="6" style="text-align:center;padding:20px;color:rgba(232,224,208,0.3);">Kraunama...</td></tr></tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- Create/Edit Staff Modal -->
+<div class="modal-overlay" id="staffModal" style="display:none;">
+  <div class="modal" style="max-width:400px;">
+    <h3 id="staffModalTitle">Naujas darbuotojas</h3>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px;">
+      <input class="inp" id="sm-username" placeholder="Vartotojo vardas (login)"/>
+      <input class="inp" id="sm-displayname" placeholder="Rodomas vardas"/>
+      <input class="inp" type="password" id="sm-password" placeholder="Slaptažodis"/>
+      <select class="inp" id="sm-role" style="background:#0d0d1a;cursor:pointer;">
+        <option value="moderator">🛡️ Moderator</option>
+        <option value="support">💬 Support</option>
+        <option value="finance">💰 Finance</option>
+        <option value="kyc">📋 KYC</option>
+      </select>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button class="btn btn-primary" onclick="saveStaff()" style="flex:1;">Išsaugoti</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('staffModal').style.display='none'" style="flex:1;">Atšaukti</button>
+      </div>
+      <div id="sm-err" style="color:#ff6688;font-size:12px;display:none;"></div>
+    </div>
   </div>
 </div>
 
@@ -623,42 +680,127 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
 
 <script>
 let API_KEY = '';
+let ADMIN_ROLE = '';
+let ADMIN_USER = '';
+let editStaffId = null;
 let allPlayers = [];
 let giftTargetUid = '';
 
 const fmt = n => Number(n||0).toLocaleString();
 
 // ── Auth ──────────────────────────────────────────
+function setLoginTab(tab) {
+  document.getElementById('login-super').style.display = tab === 'super' ? '' : 'none';
+  document.getElementById('login-staff').style.display = tab === 'staff' ? '' : 'none';
+  document.getElementById('ltab-super').style.borderColor = tab === 'super' ? 'rgba(201,168,76,0.5)' : 'rgba(255,255,255,0.1)';
+  document.getElementById('ltab-super').style.background = tab === 'super' ? 'rgba(201,168,76,0.12)' : 'none';
+  document.getElementById('ltab-super').style.color = tab === 'super' ? '#f0c060' : 'rgba(232,224,208,0.4)';
+  document.getElementById('ltab-staff').style.borderColor = tab === 'staff' ? 'rgba(168,85,247,0.5)' : 'rgba(255,255,255,0.1)';
+  document.getElementById('ltab-staff').style.background = tab === 'staff' ? 'rgba(168,85,247,0.12)' : 'none';
+  document.getElementById('ltab-staff').style.color = tab === 'staff' ? '#a855f7' : 'rgba(232,224,208,0.4)';
+}
+
 function login() {
   const pw = document.getElementById('pwInp').value;
   if(!pw) return;
   fetch('/admin/overview', {headers:{'x-admin-key':pw}})
     .then(r => {
       if(r.ok) {
-        API_KEY = pw;
-        sessionStorage.setItem('admin_key', pw);
-        document.getElementById('loginWrap').style.display = 'none';
-        document.getElementById('app').classList.add('visible');
-        loadOverview();
-        loadPlayers();
-        loadPromos();
-        loadKYCStats();
-        loadRTP();
+        sessionStorage.setItem('admin_session', JSON.stringify({key:pw, role:'superadmin', username:'superadmin'}));
+        onLoginOk('superadmin', 'superadmin', pw);
       } else {
         document.getElementById('loginErr').textContent = '❌ Wrong password';
       }
     }).catch(() => document.getElementById('loginErr').textContent = '❌ Connection error');
 }
 
+function staffLogin() {
+  const username = document.getElementById('staffUserInp').value.trim();
+  const password = document.getElementById('staffPwInp').value;
+  const errEl = document.getElementById('loginErr');
+  if(!username || !password) { errEl.textContent = '❌ Įveskite vardą ir slaptažodį'; return; }
+  fetch('/admin/staff/login', {
+    method:'POST',
+    headers:{'content-type':'application/json'},
+    body: JSON.stringify({username, password})
+  }).then(r => r.json()).then(d => {
+    if(d.token) {
+      sessionStorage.setItem('admin_session', JSON.stringify({key:d.token, role:d.role, username:d.username}));
+      onLoginOk(d.role, d.username, d.token);
+    } else {
+      errEl.textContent = '❌ ' + (d.error || 'Prisijungti nepavyko');
+    }
+  }).catch(() => { errEl.textContent = '❌ Ryšio klaida'; });
+}
+
+function onLoginOk(role, username, key) {
+  API_KEY = key;
+  ADMIN_ROLE = role;
+  ADMIN_USER = username;
+  document.getElementById('loginWrap').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+  // Role badge
+  const badge = document.getElementById('adminRoleBadge');
+  const roleLabels = {superadmin:'👑 Superadmin', moderator:'🛡️ Moderator', support:'💬 Support', finance:'💰 Finance', kyc:'📋 KYC'};
+  badge.textContent = (roleLabels[role] || role) + ' — ' + username;
+  // Staff tab: only superadmin
+  if(role === 'superadmin') document.getElementById('tab-staff').style.display = '';
+  // Apply tab visibility based on role
+  applyRoleRestrictions(role);
+  loadOverview();
+  loadPlayers();
+  if(role === 'superadmin') { loadPromos(); loadRTP(); }
+  if(role === 'kyc' || role === 'superadmin') loadKYCStats();
+}
+
+function applyRoleRestrictions(role) {
+  // Tabs that are only for superadmin/certain roles
+  const tabRules = {
+    promos:       ['superadmin'],
+    tournaments:  ['superadmin'],
+    'vip-admin':  ['superadmin'],
+    push:         ['superadmin'],
+    staff:        ['superadmin'],
+    rtp:          ['superadmin','finance'],
+    analytics:    ['superadmin','moderator','finance'],
+    pending:      ['superadmin','finance'],
+    sports:       ['superadmin','finance'],
+    bets:         ['superadmin','moderator','finance'],
+    kyc:          ['superadmin','kyc'],
+    give:         ['superadmin','support'],
+  };
+  document.querySelectorAll('.tab[onclick]').forEach(tab => {
+    const m = tab.getAttribute('onclick').match(/showTab\('([^']+)'/);
+    if(!m) return;
+    const name = m[1];
+    if(tabRules[name] && !tabRules[name].includes(role)) {
+      tab.style.display = 'none';
+    }
+  });
+}
+
 function logout() {
-  sessionStorage.removeItem('admin_key');
+  sessionStorage.removeItem('admin_session');
   location.reload();
 }
 
 // Auto-login if session exists
 window.onload = () => {
-  const saved = sessionStorage.getItem('admin_key');
-  if(saved) { document.getElementById('pwInp').value = saved; login(); }
+  try {
+    const saved = sessionStorage.getItem('admin_session');
+    if(saved) {
+      const sess = JSON.parse(saved);
+      if(sess && sess.key && sess.role) {
+        // Verify session is still valid
+        fetch('/admin/staff/me', {headers:{'x-admin-key': sess.key}})
+          .then(r => r.json())
+          .then(d => {
+            if(d.username) { onLoginOk(d.role, d.username, sess.key); }
+            else { sessionStorage.removeItem('admin_session'); }
+          }).catch(() => sessionStorage.removeItem('admin_session'));
+      }
+    }
+  } catch(e) { sessionStorage.removeItem('admin_session'); }
 };
 
 // ── Tabs ──────────────────────────────────────────
@@ -678,6 +820,7 @@ function showTab(name, el) {
   if(name === 'tournaments') loadActiveTournament();
   if(name === 'vip-admin') loadVIPDistribution();
   if(name === 'push') loadPushStatus();
+  if(name === 'staff') loadStaff();
 }
 
 // ── API helpers ───────────────────────────────────
@@ -1477,6 +1620,101 @@ async function sendUserPush(){
   msg.textContent=d.ok?(d.demo?'✓ Išsiųsta (demo)':'✓ Žaidėjui išsiųsta!'):'Klaida';
   msg.style.color=d.ok?'#2ecc71':'#ff3d71';
   msg.style.display='block';
+}
+
+// ── Staff Management ──────────────────────────────
+function loadStaff() {
+  api('/admin/staff').then(list => {
+    const tbody = document.getElementById('staffTbody');
+    if(!list || !list.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:rgba(232,224,208,0.3);">Darbuotojų nerasta</td></tr>';
+      return;
+    }
+    const roleColors = {superadmin:'#f0c060', moderator:'#a855f7', support:'#00e5ff', finance:'#00e676', kyc:'#ffc107'};
+    tbody.innerHTML = list.map(s => `
+      <tr>
+        <td><strong style="color:var(--cream)">${s.display_name||s.username}</strong><br/><span class="mono" style="font-size:10px;color:rgba(232,224,208,0.4)">${s.username}</span></td>
+        <td><span style="color:${roleColors[s.role]||'var(--cream)'};font-weight:700;font-size:12px;">${s.role.toUpperCase()}</span></td>
+        <td class="mono" style="font-size:11px;">${s.created_at?s.created_at.slice(0,10):'—'}</td>
+        <td class="mono" style="font-size:11px;">${s.last_login?s.last_login.slice(0,16):'Niekada'}</td>
+        <td><span style="color:${s.active?'var(--green)':'var(--red)'};font-size:12px;">${s.active?'✅ Aktyvus':'❌ Išjungtas'}</span></td>
+        <td class="actions-cell">
+          <button class="btn btn-info btn-sm" onclick="editStaff(${s.id})">✏️</button>
+          <button class="btn btn-${s.active?'danger':'success'} btn-sm" onclick="toggleStaff(${s.id},${s.active})">${s.active?'Išjungti':'Įjungti'}</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteStaff(${s.id},'${(s.display_name||s.username).replace(/'/g,'')}')" style="padding:5px 8px;">🗑️</button>
+        </td>
+      </tr>
+    `).join('');
+  }).catch(() => {
+    document.getElementById('staffTbody').innerHTML = '<tr><td colspan="6" style="color:#ff6688;text-align:center;padding:16px;">Klaida kraunant darbuotojus</td></tr>';
+  });
+}
+
+function openCreateStaff() {
+  editStaffId = null;
+  document.getElementById('staffModalTitle').textContent = '+ Naujas darbuotojas';
+  document.getElementById('sm-username').value = '';
+  document.getElementById('sm-username').disabled = false;
+  document.getElementById('sm-displayname').value = '';
+  document.getElementById('sm-password').value = '';
+  document.getElementById('sm-password').placeholder = 'Slaptažodis';
+  document.getElementById('sm-role').value = 'support';
+  document.getElementById('sm-err').style.display = 'none';
+  document.getElementById('staffModal').style.display = 'flex';
+}
+
+function editStaff(id) {
+  api('/admin/staff').then(list => {
+    const s = list.find(x => x.id === id);
+    if(!s) return;
+    editStaffId = id;
+    document.getElementById('staffModalTitle').textContent = '✏️ Redaguoti: ' + (s.display_name||s.username);
+    document.getElementById('sm-username').value = s.username;
+    document.getElementById('sm-username').disabled = true;
+    document.getElementById('sm-displayname').value = s.display_name||'';
+    document.getElementById('sm-password').value = '';
+    document.getElementById('sm-password').placeholder = 'Slaptažodis (palikite tuščią jei nekeičiate)';
+    document.getElementById('sm-role').value = s.role;
+    document.getElementById('sm-err').style.display = 'none';
+    document.getElementById('staffModal').style.display = 'flex';
+  });
+}
+
+function saveStaff() {
+  const username = document.getElementById('sm-username').value.trim();
+  const display_name = document.getElementById('sm-displayname').value.trim();
+  const password = document.getElementById('sm-password').value;
+  const role = document.getElementById('sm-role').value;
+  const errEl = document.getElementById('sm-err');
+  if(!editStaffId && (!username || !password)) {
+    errEl.textContent = 'Vartotojo vardas ir slaptažodis privalomi'; errEl.style.display='block'; return;
+  }
+  const body = editStaffId
+    ? {display_name, role, ...(password ? {password} : {})}
+    : {username, display_name, password, role};
+  const url = editStaffId ? `/admin/staff/${editStaffId}` : '/admin/staff/create';
+  const method = editStaffId ? 'PUT' : 'POST';
+  api(url, {method, body: JSON.stringify(body)}).then(d => {
+    if(d.ok || d.id) {
+      document.getElementById('staffModal').style.display = 'none';
+      loadStaff();
+    } else {
+      errEl.textContent = d.error || 'Klaida'; errEl.style.display='block';
+    }
+  }).catch(() => { errEl.textContent = 'Ryšio klaida'; errEl.style.display='block'; });
+}
+
+function toggleStaff(id, currentActive) {
+  api(`/admin/staff/${id}`, {method:'PUT', body:JSON.stringify({active: currentActive ? 0 : 1})})
+    .then(() => loadStaff()).catch(() => alert('Klaida'));
+}
+
+function deleteStaff(id, name) {
+  if(!confirm(`Ar tikrai norite ištrinti darbuotoją "${name}"?`)) return;
+  api(`/admin/staff/${id}`, {method:'DELETE'}).then(d => {
+    if(d.ok) loadStaff();
+    else alert(d.error || 'Klaida trinant darbuotoją');
+  }).catch(() => alert('Ryšio klaida'));
 }
 </script>
 </body>
