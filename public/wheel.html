@@ -1,344 +1,784 @@
 <!DOCTYPE html>
-<html lang="lt">
+<html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
-<title>HATHOR — Lucky Wheel</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>NEXUS WHEEL — HATHOR Casino</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
-:root{--bg:#04040a;--gold:#f0c060;--gold2:#ffd980;--green:#00e676;--red:#ff3d71;--neon:#00e5ff;--cream:#e8e0d0;--border:rgba(255,255,255,0.08);--glass:rgba(255,255,255,0.04);}
-html,body{height:100%;}
-body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cream);display:flex;flex-direction:column;overflow:hidden;}
-@media(max-width:750px){html,body{height:auto;overflow:auto;}body{overflow:visible;}}
-.header{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(4,4,10,.98);border-bottom:1px solid var(--border);flex-shrink:0;}
-.logo{font-family:'Orbitron',monospace;font-size:14px;font-weight:900;letter-spacing:3px;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.game-title{font-family:'Orbitron',monospace;font-size:16px;font-weight:900;letter-spacing:2px;}
-.balance{font-family:'DM Mono',monospace;font-size:14px;color:var(--gold);}
-.back-btn{padding:6px 14px;border-radius:7px;border:1px solid var(--border);background:var(--glass);color:rgba(232,224,208,.5);font-size:11px;cursor:pointer;text-decoration:none;transition:all .2s;}
-.back-btn:hover{color:var(--cream);}
-.main{flex:1;display:grid;grid-template-columns:1fr 300px;overflow:hidden;}
-@media(max-width:750px){.main{grid-template-columns:1fr;grid-template-rows:auto auto;overflow:visible;height:auto;}}
-.game-area{display:flex;align-items:center;justify-content:center;background:#060610;padding:20px;position:relative;overflow:hidden;}
-.game-area::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(124,58,237,.08),transparent 70%);pointer-events:none;}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:#000005;font-family:'Space Grotesk',sans-serif}
+  #canvas-wrap{position:fixed;inset:0;z-index:0}
+  canvas{display:block!important;width:100%!important;height:100%!important}
 
-/* Wheel */
-.wheel-wrap{position:relative;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;}
-.wheel-container{position:relative;width:min(340px,80vw);height:min(340px,80vw);}
-.pointer{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:28px;z-index:10;filter:drop-shadow(0 4px 8px rgba(240,192,96,.6));animation:pointerBob 2s ease-in-out infinite;}
-@keyframes pointerBob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(3px)}}
-canvas#wheelCanvas{border-radius:50%;box-shadow:0 0 60px rgba(124,58,237,.3),0 0 120px rgba(124,58,237,.1),inset 0 0 30px rgba(0,0,0,.5);}
+  .hdr{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 16px;
+    background:linear-gradient(180deg,rgba(0,0,10,0.95) 0%,transparent 100%);
+    pointer-events:none;
+  }
+  .back-btn{
+    pointer-events:all;
+    font-family:'Orbitron',monospace;font-size:11px;letter-spacing:2px;
+    color:rgba(240,192,96,0.7);text-decoration:none;
+    border:1px solid rgba(240,192,96,0.25);padding:6px 12px;border-radius:6px;
+    transition:all .2s;
+  }
+  .back-btn:hover{color:#f0c060;border-color:rgba(240,192,96,0.6);background:rgba(240,192,96,0.08)}
+  .logo{
+    font-family:'Orbitron',monospace;font-size:18px;font-weight:900;
+    letter-spacing:4px;color:#f0c060;
+    text-shadow:0 0 20px rgba(240,192,96,0.5),0 0 40px rgba(240,192,96,0.2);
+  }
+  .bal-row{
+    font-family:'Orbitron',monospace;font-size:14px;font-weight:700;
+    color:#f0c060;letter-spacing:1px;
+  }
 
-/* Result display */
-.result-display{text-align:center;min-height:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.result-mult{font-family:'Orbitron',monospace;font-size:42px;font-weight:900;color:var(--gold);transition:all .3s;}
-.result-label{font-size:11px;letter-spacing:3px;color:rgba(232,224,208,.25);margin-top:4px;}
+  #ui{
+    position:fixed;bottom:0;left:0;right:0;z-index:100;
+    padding:16px 20px 28px;
+    background:linear-gradient(transparent,rgba(0,0,10,0.97) 35%);
+    display:flex;flex-direction:column;align-items:center;gap:10px;
+    pointer-events:none;
+  }
+  #ui>*{pointer-events:all}
 
-/* Right panel */
-.bet-panel{background:rgba(8,8,18,.95);border-left:1px solid var(--border);padding:20px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;}
-@media(max-width:750px){.bet-panel{border-left:none;border-top:1px solid var(--border);padding:12px 14px;max-height:45vh;overflow-y:auto;}}
-.panel-title{font-family:'Orbitron',monospace;font-size:12px;color:rgba(232,224,208,.3);letter-spacing:2px;}
-.bet-label{font-size:10px;letter-spacing:2px;color:rgba(232,224,208,.3);text-transform:uppercase;margin-bottom:6px;}
-.bet-inp{width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid var(--border);border-radius:9px;color:var(--gold);font-family:'DM Mono',monospace;font-size:15px;font-weight:700;outline:none;transition:border-color .2s;}
-.bet-inp:focus{border-color:rgba(240,192,96,.4);}
-.bet-quick{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:6px;}
-.bq{padding:5px;border-radius:6px;border:1px solid var(--border);background:var(--glass);color:rgba(232,224,208,.5);font-size:10px;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;}
-.bq:hover{border-color:rgba(240,192,96,.3);color:var(--gold);}
+  #history{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:center}
+  .h-dot{
+    width:28px;height:28px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:8px;font-weight:700;color:#fff;
+    border:1px solid rgba(255,255,255,0.15);
+    font-family:'Orbitron',monospace;
+    text-shadow:0 1px 2px rgba(0,0,0,0.8);
+  }
 
-/* Mode select */
-.mode-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
-.mode-btn{padding:9px 4px;border-radius:8px;border:1px solid var(--border);background:var(--glass);color:rgba(232,224,208,.4);font-size:11px;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;}
-.mode-btn:hover{border-color:rgba(240,192,96,.3);color:var(--gold);}
-.mode-btn.active{background:rgba(240,192,96,.12);border-color:rgba(240,192,96,.35);color:var(--gold);}
-.mode-desc{font-size:10px;color:rgba(232,224,208,.25);margin-top:8px;line-height:1.6;}
+  #bet-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center}
+  .qbtn{
+    background:rgba(240,192,96,0.08);border:1px solid rgba(240,192,96,0.25);
+    color:#f0c060;font-family:'Orbitron',monospace;font-size:10px;letter-spacing:1px;
+    padding:7px 14px;border-radius:7px;cursor:pointer;transition:all .2s;
+  }
+  .qbtn:hover{background:rgba(240,192,96,0.18);border-color:rgba(240,192,96,0.55);transform:scale(1.05)}
+  #bet-input{
+    background:rgba(0,0,20,0.85);border:1px solid rgba(240,192,96,0.35);
+    color:#f0c060;font-family:'Orbitron',monospace;font-size:14px;font-weight:700;
+    padding:9px 16px;border-radius:8px;width:145px;text-align:center;outline:none;
+    transition:border-color .2s;
+  }
+  #bet-input:focus{border-color:rgba(240,192,96,0.75)}
 
-/* Spin button */
-.spin-btn{width:100%;padding:14px;border-radius:12px;border:none;cursor:pointer;font-family:'Orbitron',monospace;font-size:14px;font-weight:900;letter-spacing:1px;background:linear-gradient(135deg,#c9a84c,#f0c060,#a07830);color:#080600;transition:all .2s;}
-.spin-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(240,192,96,.4);}
-.spin-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+  #spin-btn{
+    font-family:'Orbitron',monospace;font-size:18px;font-weight:900;letter-spacing:4px;
+    color:#000;background:linear-gradient(135deg,#ffd700,#f0c060,#cc8800);
+    border:none;padding:15px 64px;border-radius:50px;cursor:pointer;
+    box-shadow:0 0 30px rgba(240,192,96,0.5),0 4px 20px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.3);
+    transition:all .2s;position:relative;overflow:hidden;
+  }
+  #spin-btn::before{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.35) 50%,transparent 100%);
+    transform:translateX(-150%);transition:transform .5s;
+  }
+  #spin-btn:hover::before{transform:translateX(150%)}
+  #spin-btn:hover{transform:translateY(-2px) scale(1.04);box-shadow:0 0 55px rgba(240,192,96,0.75),0 6px 30px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.3)}
+  #spin-btn:active{transform:translateY(1px) scale(0.97)}
+  #spin-btn:disabled{opacity:0.38;cursor:not-allowed;transform:none!important;box-shadow:0 0 10px rgba(240,192,96,0.2)}
 
-/* History */
-.hist-row{display:flex;gap:5px;flex-wrap:wrap;}
-.hist-pill{padding:3px 8px;border-radius:10px;font-family:'DM Mono',monospace;font-size:11px;font-weight:700;}
+  #result-overlay{
+    position:fixed;inset:0;z-index:200;
+    display:none;flex-direction:column;align-items:center;justify-content:center;
+    background:rgba(0,0,10,0.4);
+    backdrop-filter:blur(2px);
+    pointer-events:none;
+  }
+  #result-box{
+    background:linear-gradient(160deg,rgba(0,0,20,0.97),rgba(5,0,25,0.97));
+    border:1px solid rgba(240,192,96,0.35);
+    border-radius:20px;padding:44px 64px;text-align:center;
+    transform:scale(0) rotate(-5deg);
+    transition:transform .5s cubic-bezier(0.34,1.56,0.64,1);
+    box-shadow:0 0 80px rgba(0,0,0,0.9),0 0 40px rgba(0,0,0,0.7),inset 0 1px 0 rgba(240,192,96,0.1);
+    pointer-events:all;
+    min-width:320px;
+  }
+  #result-box.show{transform:scale(1) rotate(0deg)}
+  #result-mult{
+    font-family:'Orbitron',monospace;font-size:68px;font-weight:900;
+    line-height:1;margin-bottom:6px;
+    text-shadow:0 0 30px currentColor;
+  }
+  #result-jackpot{
+    font-family:'Orbitron',monospace;font-size:14px;letter-spacing:6px;color:#ffd700;
+    margin-bottom:4px;display:none;
+    text-shadow:0 0 20px rgba(255,215,0,0.7);
+  }
+  #result-label{font-size:11px;letter-spacing:4px;color:rgba(232,224,208,0.4);margin-bottom:20px;text-transform:uppercase}
+  #result-win{font-family:'Orbitron',monospace;font-size:28px;font-weight:700}
+  #result-close{
+    margin-top:28px;font-family:'Orbitron',monospace;font-size:11px;letter-spacing:2px;
+    color:rgba(240,192,96,0.65);background:none;border:1px solid rgba(240,192,96,0.3);
+    padding:9px 28px;border-radius:8px;cursor:pointer;transition:all .2s;display:inline-block;
+  }
+  #result-close:hover{color:#f0c060;border-color:rgba(240,192,96,0.65);background:rgba(240,192,96,0.08)}
 
-/* Stats */
-.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.stat-box{padding:9px;border-radius:8px;background:rgba(0,0,0,.3);border:1px solid var(--border);text-align:center;}
-.stat-v{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;color:var(--gold);}
-.stat-l{font-size:9px;letter-spacing:1px;color:rgba(232,224,208,.25);margin-top:2px;}
+  #pointer-wrap{
+    position:fixed;left:50%;transform:translateX(-50%);z-index:90;
+    pointer-events:none;transition:top .05s linear;
+  }
 
-/* Toast */
-.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-20px);padding:12px 24px;border-radius:12px;font-size:13px;font-weight:600;z-index:999;opacity:0;transition:all .3s;white-space:nowrap;}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-.toast.win{background:rgba(0,230,118,.2);border:1px solid rgba(0,230,118,.4);color:var(--green);}
-.toast.loss{background:rgba(255,61,113,.2);border:1px solid rgba(255,61,113,.3);color:#ff8ca0;}
-
-/* ── Mobile full fix ── */
-@media(max-width:750px){
-  .game-area{padding:12px;min-height:180px;}
-  .wheel-container{width:min(260px,70vw);height:min(260px,70vw);}
-  .result-mult{font-size:30px;}
-  .result-label{font-size:10px;}
-  .header{height:44px;padding:0 12px;}
-  .game-title{font-size:13px;}
-  .balance{font-size:12px;}
-  .back-btn{padding:5px 10px;font-size:10px;}
-  .logo{font-size:12px;}
-  .panel-title{font-size:11px;}
-  .bet-inp{font-size:13px;padding:8px 10px;}
-  .bq{font-size:9px;padding:4px;}
-  .mode-btn{font-size:10px;padding:7px 2px;}
-  .mode-desc{font-size:9px;}
-  .spin-btn{font-size:12px;padding:11px;}
-  .stat-v{font-size:12px;}
-  .stat-l{font-size:8px;}
-  .hist-pill{font-size:10px;}
-}
+  @media(max-width:600px){
+    .logo{font-size:13px;letter-spacing:2px}
+    #spin-btn{font-size:14px;padding:13px 42px;letter-spacing:2px}
+    #result-mult{font-size:48px}
+    #result-box{padding:30px 36px;min-width:280px}
+    #result-win{font-size:22px}
+  }
 </style>
 </head>
 <body>
-<div class="header">
-  <a class="back-btn" href="/">← Lobby</a>
-  <div class="game-title">🎡 LUCKY WHEEL</div>
-  <div class="balance">🪙 <span id="bal">—</span></div>
+
+<div class="hdr">
+  <a href="/" class="back-btn">← HATHOR</a>
+  <div class="logo">NEXUS WHEEL</div>
+  <div class="bal-row" id="balDisp">⬡ 1,000</div>
 </div>
-<div class="main">
-  <div class="game-area">
-    <div class="wheel-wrap">
-      <div class="wheel-container">
-        <div class="pointer">▼</div>
-        <canvas id="wheelCanvas"></canvas>
-      </div>
-      <div class="result-display">
-        <div class="result-mult" id="resultMult">?</div>
-        <div class="result-label" id="resultLabel">SUKITE RATĄ</div>
-      </div>
-    </div>
+
+<div id="canvas-wrap"></div>
+
+<!-- Pointer indicator (fixed, points down toward wheel top) -->
+<div id="pointer-wrap">
+  <svg width="36" height="46" viewBox="0 0 36 46">
+    <defs>
+      <filter id="pglow">
+        <feGaussianBlur stdDeviation="2.5" result="blur"/>
+        <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+      </filter>
+    </defs>
+    <polygon points="18,44 1,6 35,6" fill="rgba(240,192,96,0.25)" filter="url(#pglow)"/>
+    <polygon points="18,40 4,10 32,10" fill="#f0c060"/>
+    <polygon points="18,38 6,12 30,12" fill="#ffd700"/>
+    <circle cx="18" cy="10" r="4" fill="#ffffff" opacity="0.9"/>
+    <circle cx="18" cy="10" r="2" fill="#ffd700"/>
+  </svg>
+</div>
+
+<div id="ui">
+  <div id="history"></div>
+  <div id="bet-row">
+    <button class="qbtn" id="halfBtn">½</button>
+    <input id="bet-input" type="number" value="100" min="10" max="50000">
+    <button class="qbtn" id="dblBtn">2×</button>
+    <button class="qbtn" id="maxBtn">MAX</button>
   </div>
-  <div class="bet-panel">
-    <div class="panel-title">🎡 LUCKY WHEEL</div>
-    <div>
-      <div class="bet-label">Statymų suma</div>
-      <input class="bet-inp" id="betInp" type="number" value="100" min="10"/>
-      <div class="bet-quick">
-        <button class="bq" onclick="ab(50)">+50</button>
-        <button class="bq" onclick="ab(100)">+100</button>
-        <button class="bq" onclick="hb()">½</button>
-        <button class="bq" onclick="db()">×2</button>
-      </div>
-    </div>
-    <div>
-      <div class="bet-label">Rizikos lygis</div>
-      <div class="mode-grid">
-        <div class="mode-btn active" onclick="setMode('low',this)">🟢 Žemas</div>
-        <div class="mode-btn" onclick="setMode('med',this)">🟡 Vidutinis</div>
-        <div class="mode-btn" onclick="setMode('high',this)">🔴 Aukštas</div>
-      </div>
-      <div class="mode-desc" id="modeDesc">Dažniau laimėsite, bet mažiau. Tobula pradedantiesiems.</div>
-    </div>
-    <button class="spin-btn" id="spinBtn" onclick="spin()">SUKTI 🎡</button>
-    <div>
-      <div class="bet-label">Istorija</div>
-      <div class="hist-row" id="histRow"></div>
-    </div>
-    <div class="stats-row">
-      <div class="stat-box"><div class="stat-v" id="stWin">0</div><div class="stat-l">LAIMĖTA</div></div>
-      <div class="stat-box"><div class="stat-v" id="stLoss">0</div><div class="stat-l">PRARASTA</div></div>
-    </div>
+  <button id="spin-btn">SPIN</button>
+</div>
+
+<div id="result-overlay">
+  <div id="result-box">
+    <div id="result-jackpot">✦ JACKPOT ✦</div>
+    <div id="result-mult">0×</div>
+    <div id="result-label">MULTIPLIER</div>
+    <div id="result-win"></div>
+    <button id="result-close">CONTINUE</button>
   </div>
 </div>
-<div class="toast" id="toastEl"></div>
-<script>
-const uid = localStorage.getItem('casino_uid');
-if(!uid){ localStorage.setItem('login_return', location.href); location.href = '/login.html'; }
-let tokens = parseInt(localStorage.getItem('casino_tokens')||'10000');
-let _wheelRTP = 90;
-fetch('/api/rtp-config').then(function(r){return r.json();}).then(function(d){_wheelRTP=d.wheel||90;}).catch(function(){});
-let spinning = false;
-let mode = 'low';
-let wins = 0, losses = 0;
-let history = [];
 
-// Wheel segments per mode
-const MODES = {
-  low: [
-    {label:'0.2×',mult:0.2,color:'#1a0a20',count:2},
-    {label:'0.5×',mult:0.5,color:'#2d1a4a',count:3},
-    {label:'1×',  mult:1,  color:'#3d2060',count:5},
-    {label:'1.5×',mult:1.5,color:'#4a2a7a',count:4},
-    {label:'2×',  mult:2,  color:'#5a3090',count:5},
-    {label:'3×',  mult:3,  color:'#f0c060',count:3},
-    {label:'5×',  mult:5,  color:'#f0a020',count:2},
-    {label:'10×', mult:10, color:'#ff6030',count:1},
-  ],
-  med: [
-    {label:'0×',  mult:0,  color:'#1a0515',count:3},
-    {label:'0.5×',mult:0.5,color:'#2d1040',count:2},
-    {label:'1×',  mult:1,  color:'#3d2060',count:3},
-    {label:'2×',  mult:2,  color:'#5a3090',count:4},
-    {label:'3×',  mult:3,  color:'#f0c060',count:3},
-    {label:'5×',  mult:5,  color:'#f0a020',count:2},
-    {label:'10×', mult:10, color:'#ff6030',count:2},
-    {label:'25×', mult:25, color:'#ff3050',count:1},
-  ],
-  high: [
-    {label:'0×',  mult:0,  color:'#1a0515',count:8},
-    {label:'1×',  mult:1,  color:'#3d2060',count:3},
-    {label:'3×',  mult:3,  color:'#f0c060',count:2},
-    {label:'5×',  mult:5,  color:'#f0a020',count:2},
-    {label:'10×', mult:10, color:'#ff6030',count:2},
-    {label:'25×', mult:25, color:'#ff3050',count:1},
-    {label:'50×', mult:50, color:'#ff0080',count:1},
-    {label:'100×',mult:100,color:'#c000ff',count:1},
-  ]
-};
-const MODE_DESC = {
-  low:'Dažniau laimėsite, bet mažiau. Tobula pradedantiesiems.',
-  med:'Subalansuota rizika ir atlygiai. Rekomenduojama.',
-  high:'Retas laimėjimas bet milžiniški atlygiai. Tik drąsiems!'
-};
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
 
-let segments = [];
-let canvas, ctx, currentAngle = 0;
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
-function buildSegments() {
-  segments = [];
-  MODES[mode].forEach(s => {
-    for(let i=0;i<s.count;i++) segments.push({...s});
+// ── Token storage ────────────────────────────────────────────────────────────
+function getTokens(){
+  return parseInt(localStorage.getItem('hathor_tokens')||localStorage.getItem('casino_tokens')||'1000');
+}
+function setTokens(v){
+  const s=String(Math.max(0,Math.round(v)));
+  localStorage.setItem('hathor_tokens',s);
+  localStorage.setItem('casino_tokens',s);
+}
+let balance=getTokens();
+const balEl=document.getElementById('balDisp');
+function updateBal(){balEl.textContent='⬡ '+balance.toLocaleString();}
+updateBal();
+
+// ── Segments ─────────────────────────────────────────────────────────────────
+const SEGMENTS=[
+  {mult:2,   weight:8,   hex:0x00ccdd, emHex:0x004455, label:'2×'},
+  {mult:0,   weight:18,  hex:0x050508, emHex:0x000000, label:'VOID'},
+  {mult:1.5, weight:10,  hex:0x1a4fcc, emHex:0x0a1f66, label:'1.5×'},
+  {mult:0,   weight:18,  hex:0x050508, emHex:0x000000, label:'VOID'},
+  {mult:3,   weight:6,   hex:0x00cc55, emHex:0x004422, label:'3×'},
+  {mult:0,   weight:18,  hex:0x050508, emHex:0x000000, label:'VOID'},
+  {mult:1.2, weight:12,  hex:0x1a3a7a, emHex:0x081530, label:'1.2×'},
+  {mult:0,   weight:18,  hex:0x050508, emHex:0x000000, label:'VOID'},
+  {mult:5,   weight:4,   hex:0xddcc00, emHex:0x554f00, label:'5×'},
+  {mult:0,   weight:18,  hex:0x050508, emHex:0x000000, label:'VOID'},
+  {mult:1.5, weight:10,  hex:0x1a4fcc, emHex:0x0a1f66, label:'1.5×'},
+  {mult:0,   weight:18,  hex:0x050508, emHex:0x000000, label:'VOID'},
+  {mult:2,   weight:8,   hex:0x00ccdd, emHex:0x004455, label:'2×'},
+  {mult:0,   weight:18,  hex:0x050508, emHex:0x000000, label:'VOID'},
+  {mult:10,  weight:2,   hex:0xff8800, emHex:0x662200, label:'10×'},
+  {mult:0,   weight:18,  hex:0x050508, emHex:0x000000, label:'VOID'},
+  {mult:1.2, weight:12,  hex:0x1a3a7a, emHex:0x081530, label:'1.2×'},
+  {mult:0,   weight:18,  hex:0x050508, emHex:0x000000, label:'VOID'},
+  {mult:50,  weight:0.5, hex:0xff2200, emHex:0x881100, label:'50×'},
+  {mult:0,   weight:18,  hex:0x050508, emHex:0x000000, label:'VOID'},
+];
+const N=SEGMENTS.length;
+const TOTAL_W=SEGMENTS.reduce((a,s)=>a+s.weight,0);
+const SEG_ANGLE=(Math.PI*2)/N;
+
+function pickSegment(){
+  let r=Math.random()*TOTAL_W;
+  for(let i=0;i<N;i++){r-=SEGMENTS[i].weight;if(r<=0)return i;}
+  return N-1;
+}
+
+// ── Three.js ─────────────────────────────────────────────────────────────────
+const wrap=document.getElementById('canvas-wrap');
+const W=()=>window.innerWidth, H=()=>window.innerHeight;
+
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+renderer.setSize(W(),H());
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setClearColor(0x000005);
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.3;
+wrap.appendChild(renderer.domElement);
+
+const scene=new THREE.Scene();
+scene.fog=new THREE.FogExp2(0x000510,0.035);
+
+const camera=new THREE.PerspectiveCamera(52,W()/H(),0.1,300);
+camera.position.set(0,3.2,7);
+camera.lookAt(0,0,0);
+
+// Post-processing
+const composer=new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene,camera));
+const bloom=new UnrealBloomPass(new THREE.Vector2(W(),H()),1.4,0.55,0.12);
+composer.addPass(bloom);
+
+// ── Lighting ─────────────────────────────────────────────────────────────────
+scene.add(new THREE.AmbientLight(0x112244,1.0));
+
+const ptLight=new THREE.PointLight(0xffeedd,3.0,25);
+ptLight.position.set(0,7,4);
+scene.add(ptLight);
+
+const spotLight=new THREE.SpotLight(0xffffff,3.5,35,Math.PI/5,0.25,1.5);
+spotLight.position.set(0,9,3);
+spotLight.target.position.set(0,0,0);
+scene.add(spotLight,spotLight.target);
+
+const rimLight=new THREE.PointLight(0x3366cc,2.0,15);
+rimLight.position.set(-6,2,-4);
+scene.add(rimLight);
+
+const rimLight2=new THREE.PointLight(0xcc3366,1.5,12);
+rimLight2.position.set(6,1,-3);
+scene.add(rimLight2);
+
+// ── Wheel construction ───────────────────────────────────────────────────────
+const WHEEL_R=3.0;
+const DEPTH=0.55;
+const wheelGroup=new THREE.Group();
+scene.add(wheelGroup);
+
+const segMeshes=[]; // {mesh, mat, originalEmIntensity}
+
+// Build each segment as a pie slice (custom BufferGeometry)
+const DIVS=14; // arc subdivisions per segment
+
+for(let i=0;i<N;i++){
+  const seg=SEGMENTS[i];
+  const a0=i*SEG_ANGLE;
+  const a1=(i+1)*SEG_ANGLE;
+  const midA=(a0+a1)/2;
+  const zF=DEPTH/2, zB=-DEPTH/2;
+
+  const pos=[], norm=[], uv=[], idx=[];
+
+  // ── Front face ──
+  pos.push(0,0,zF); norm.push(0,0,1); uv.push(0.5,0.5);
+  for(let d=0;d<=DIVS;d++){
+    const a=a0+d*(a1-a0)/DIVS;
+    pos.push(Math.cos(a)*WHEEL_R, Math.sin(a)*WHEEL_R, zF);
+    norm.push(0,0,1);
+    uv.push(0.5+Math.cos(a)*0.5,0.5+Math.sin(a)*0.5);
+  }
+  for(let d=0;d<DIVS;d++) idx.push(0,d+1,d+2);
+
+  const fc=DIVS+2;
+
+  // ── Back face ──
+  const bOff=fc;
+  pos.push(0,0,zB); norm.push(0,0,-1); uv.push(0.5,0.5);
+  for(let d=0;d<=DIVS;d++){
+    const a=a0+d*(a1-a0)/DIVS;
+    pos.push(Math.cos(a)*WHEEL_R, Math.sin(a)*WHEEL_R, zB);
+    norm.push(0,0,-1);
+    uv.push(0.5+Math.cos(a)*0.5,0.5+Math.sin(a)*0.5);
+  }
+  for(let d=0;d<DIVS;d++) idx.push(bOff,bOff+d+2,bOff+d+1);
+
+  // ── Rim strip ──
+  const sOff=fc*2;
+  for(let d=0;d<=DIVS;d++){
+    const a=a0+d*(a1-a0)/DIVS;
+    const cx=Math.cos(a)*WHEEL_R, cy=Math.sin(a)*WHEEL_R;
+    pos.push(cx,cy,zF); norm.push(Math.cos(a),Math.sin(a),0); uv.push(d/DIVS,1);
+    pos.push(cx,cy,zB); norm.push(Math.cos(a),Math.sin(a),0); uv.push(d/DIVS,0);
+  }
+  for(let d=0;d<DIVS;d++){
+    const b=sOff+d*2;
+    idx.push(b,b+1,b+2); idx.push(b+1,b+3,b+2);
+  }
+
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  geo.setAttribute('normal',new THREE.Float32BufferAttribute(norm,3));
+  geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
+  geo.setIndex(idx);
+  geo.computeVertexNormals();
+
+  const isVoid=seg.mult===0;
+  const mat=new THREE.MeshPhongMaterial({
+    color:seg.hex,
+    emissive:seg.emHex,
+    emissiveIntensity: isVoid ? 0.3 : 0.7,
+    shininess: isVoid ? 10 : 70,
+    specular: isVoid ? 0x111111 : 0x444444,
   });
-  // Shuffle
-  for(let i=segments.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[segments[i],segments[j]]=[segments[j],segments[i]];}
+  const mesh=new THREE.Mesh(geo,mat);
+  wheelGroup.add(mesh);
+  segMeshes.push({mesh,mat,baseEI: isVoid?0.3:0.7, seg, idx:i});
+
+  // Segment label (only for non-void)
+  if(seg.mult>0){
+    const canvas=document.createElement('canvas');
+    canvas.width=160; canvas.height=72;
+    const ctx=canvas.getContext('2d');
+    ctx.clearRect(0,0,160,72);
+    const isJP=seg.mult===50;
+    ctx.font=`bold ${isJP?26:22}px Orbitron,monospace`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillStyle=isJP?'#ffd700':'rgba(255,255,255,0.95)';
+    ctx.shadowColor=isJP?'rgba(255,215,0,0.8)':'rgba(255,255,255,0.5)';
+    ctx.shadowBlur=10;
+    ctx.fillText(seg.label,80,36);
+    const tex=new THREE.CanvasTexture(canvas);
+    const lMat=new THREE.MeshBasicMaterial({map:tex,transparent:true,depthWrite:false,side:THREE.DoubleSide});
+    const lGeo=new THREE.PlaneGeometry(1.0,0.45);
+    const lm=new THREE.Mesh(lGeo,lMat);
+    const lr=WHEEL_R*0.63;
+    lm.position.set(Math.cos(midA)*lr, Math.sin(midA)*lr, DEPTH/2+0.015);
+    lm.rotation.z=midA+Math.PI/2;
+    wheelGroup.add(lm);
+  }
 }
 
-function initCanvas(){
-  canvas = document.getElementById('wheelCanvas');
-  const sz = canvas.parentElement.clientWidth;
-  canvas.width = canvas.height = sz;
-  ctx = canvas.getContext('2d');
+// Dividers
+const divMat=new THREE.MeshPhongMaterial({color:0x223366,emissive:0x0a1133,emissiveIntensity:0.8,shininess:40});
+for(let i=0;i<N;i++){
+  const a=i*SEG_ANGLE;
+  // Thin rectangle along the radius
+  const geo=new THREE.BoxGeometry(WHEEL_R,0.035,DEPTH+0.015);
+  const mesh=new THREE.Mesh(geo,divMat);
+  // Position it centered along radius direction
+  mesh.position.set(Math.cos(a)*WHEEL_R*0.5, Math.sin(a)*WHEEL_R*0.5, 0);
+  mesh.rotation.z=a;
+  wheelGroup.add(mesh);
 }
 
-function drawWheel(angle=0){
-  if(!canvas) return;
-  const sz = canvas.width;
-  const cx = sz/2, cy = sz/2, r = sz/2 - 4;
-  ctx.clearRect(0,0,sz,sz);
-  const sliceAngle = (2*Math.PI)/segments.length;
-  // Outer glow
-  ctx.save();
-  ctx.shadowColor='rgba(124,58,237,.4)';ctx.shadowBlur=20;
-  ctx.beginPath();ctx.arc(cx,cy,r+2,0,2*Math.PI);
-  ctx.strokeStyle='rgba(124,58,237,.5)';ctx.lineWidth=3;ctx.stroke();
-  ctx.restore();
-  segments.forEach((seg,i)=>{
-    const start = angle + i*sliceAngle, end = start+sliceAngle;
-    // Slice
-    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,start,end);ctx.closePath();
-    ctx.fillStyle=seg.color;ctx.fill();
-    ctx.strokeStyle='rgba(255,255,255,.07)';ctx.lineWidth=1;ctx.stroke();
-    // Label
-    ctx.save();
-    ctx.translate(cx,cy);ctx.rotate(start+sliceAngle/2);
-    ctx.textAlign='right';ctx.fillStyle='rgba(255,255,255,.9)';
-    ctx.font=`bold ${Math.max(10,sz/30)}px Orbitron,monospace`;
-    ctx.shadowColor='rgba(0,0,0,.6)';ctx.shadowBlur=4;
-    ctx.fillText(seg.label, r-8, 4);
-    ctx.restore();
-  });
-  // Center circle
-  ctx.beginPath();ctx.arc(cx,cy,sz/10,0,2*Math.PI);
-  const grad=ctx.createRadialGradient(cx,cy,0,cx,cy,sz/10);
-  grad.addColorStop(0,'#2a1a50');grad.addColorStop(1,'#0d0820');
-  ctx.fillStyle=grad;ctx.fill();
-  ctx.strokeStyle='rgba(240,192,96,.3)';ctx.lineWidth=2;ctx.stroke();
-  // Center logo
-  ctx.fillStyle='rgba(240,192,96,.8)';ctx.font=`bold ${sz/14}px Orbitron,monospace`;
-  ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText('⬡',cx,cy);
+// Center hub
+const hubGeo=new THREE.CylinderGeometry(0.42,0.42,DEPTH+0.08,32);
+hubGeo.rotateX(Math.PI/2);
+const hubMat=new THREE.MeshPhongMaterial({color:0xf0c060,emissive:0x664400,emissiveIntensity:0.9,shininess:150,specular:0xffffff});
+wheelGroup.add(new THREE.Mesh(hubGeo,hubMat));
+
+// Hub glow orb
+const hgMat=new THREE.MeshBasicMaterial({color:0xffd700,transparent:true,opacity:0.25});
+const hgMesh=new THREE.Mesh(new THREE.SphereGeometry(0.48,16,16),hgMat);
+wheelGroup.add(hgMesh);
+
+// Outer torus (rim)
+const rimGeo=new THREE.TorusGeometry(WHEEL_R+0.06,0.13,16,100);
+const rimMat=new THREE.MeshPhongMaterial({color:0xf0c060,emissive:0x885500,emissiveIntensity:1.0,shininess:120,specular:0xffffff});
+const rimMesh=new THREE.Mesh(rimGeo,rimMat);
+wheelGroup.add(rimMesh);
+
+// Glow ring (wider, transparent)
+const grGeo=new THREE.TorusGeometry(WHEEL_R+0.06,0.35,8,100);
+const grMat=new THREE.MeshBasicMaterial({color:0xf0c060,transparent:true,opacity:0.07,side:THREE.BackSide});
+wheelGroup.add(new THREE.Mesh(grGeo,grMat));
+
+// Back plate
+const bpGeo=new THREE.CylinderGeometry(WHEEL_R+0.22,WHEEL_R+0.22,0.12,64);
+bpGeo.rotateX(Math.PI/2);
+const bpMat=new THREE.MeshPhongMaterial({color:0x0d0d1e,emissive:0x060612,shininess:20});
+const bpMesh=new THREE.Mesh(bpGeo,bpMat);
+bpMesh.position.z=-DEPTH/2-0.07;
+wheelGroup.add(bpMesh);
+
+// Pedestal
+const standGeo=new THREE.CylinderGeometry(0.18,0.36,2.0,16);
+const standMat=new THREE.MeshPhongMaterial({color:0x1a1a2e,emissive:0x0a0a18,shininess:60});
+const stand=new THREE.Mesh(standGeo,standMat);
+stand.position.set(0,-WHEEL_R-1.05,0);
+scene.add(stand);
+const baseGeo=new THREE.CylinderGeometry(1.1,1.4,0.18,24);
+const base=new THREE.Mesh(baseGeo,standMat);
+base.position.set(0,-WHEEL_R-2.12,0);
+scene.add(base);
+
+// ── Stars ─────────────────────────────────────────────────────────────────────
+const starPos=new Float32Array(1400*3);
+for(let i=0;i<1400;i++){
+  const r=30+Math.random()*90;
+  const theta=Math.random()*Math.PI*2;
+  const phi=Math.acos(2*Math.random()-1);
+  starPos[i*3]=r*Math.sin(phi)*Math.cos(theta);
+  starPos[i*3+1]=r*Math.sin(phi)*Math.sin(theta);
+  starPos[i*3+2]=r*Math.cos(phi);
+}
+const starGeo=new THREE.BufferGeometry();
+starGeo.setAttribute('position',new THREE.BufferAttribute(starPos,3));
+const starMat=new THREE.PointsMaterial({color:0xffffff,size:0.16,sizeAttenuation:true,transparent:true,opacity:0.55});
+const stars=new THREE.Points(starGeo,starMat);
+scene.add(stars);
+
+// ── Floating orb decorations ──────────────────────────────────────────────────
+const ORB_DATA=[
+  {color:0x44aaff,radius:WHEEL_R+1.2,speed:0.4,phase:0,yAmp:0.6},
+  {color:0xff44aa,radius:WHEEL_R+1.4,speed:0.3,phase:1.6,yAmp:0.4},
+  {color:0x44ffcc,radius:WHEEL_R+1.1,speed:0.5,phase:3.2,yAmp:0.7},
+  {color:0xffcc44,radius:WHEEL_R+1.5,speed:0.35,phase:4.8,yAmp:0.5},
+];
+const orbMeshes=ORB_DATA.map(d=>{
+  const m=new THREE.Mesh(
+    new THREE.SphereGeometry(0.1,10,10),
+    new THREE.MeshBasicMaterial({color:d.color,transparent:true,opacity:0.65})
+  );
+  scene.add(m);
+  return {mesh:m,data:d,angle:d.phase};
+});
+
+// ── Particle system ───────────────────────────────────────────────────────────
+const PC=250;
+const pPos=new Float32Array(PC*3);
+const pVel=new Array(PC).fill(null).map(()=>({vx:0,vy:0,vz:0,life:0,decay:0.02}));
+const pGeo=new THREE.BufferGeometry();
+pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3));
+const pMat=new THREE.PointsMaterial({color:0xffd700,size:0.2,sizeAttenuation:true,transparent:true,opacity:0});
+const pSystem=new THREE.Points(pGeo,pMat);
+scene.add(pSystem);
+let pActive=false;
+
+function burstParticles(color){
+  pMat.color.setHex(color);
+  pMat.opacity=1.0;
+  pActive=true;
+  for(let i=0;i<PC;i++){
+    pPos[i*3]=0;pPos[i*3+1]=0;pPos[i*3+2]=0.4;
+    const speed=1.5+Math.random()*5.5;
+    const a=Math.random()*Math.PI*2;
+    const elev=(Math.random()-0.2)*Math.PI*0.75;
+    pVel[i]={
+      vx:Math.cos(a)*Math.cos(elev)*speed,
+      vy:Math.sin(elev)*speed+0.8,
+      vz:Math.sin(a)*Math.cos(elev)*speed*0.2,
+      life:1,
+      decay:0.013+Math.random()*0.018,
+    };
+  }
+  pGeo.attributes.position.needsUpdate=true;
 }
 
-function setMode(m,el){
-  mode=m;
-  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('modeDesc').textContent=MODE_DESC[m];
-  buildSegments();drawWheel(currentAngle);
+function updateParticles(dt){
+  if(!pActive)return;
+  let alive=false;
+  for(let i=0;i<PC;i++){
+    const p=pVel[i];
+    if(p.life<=0)continue;
+    alive=true;
+    p.life-=p.decay;
+    p.vy-=5*dt;
+    pPos[i*3]+=p.vx*dt;
+    pPos[i*3+1]+=p.vy*dt;
+    pPos[i*3+2]+=p.vz*dt;
+  }
+  pGeo.attributes.position.needsUpdate=true;
+  pMat.opacity=Math.max(0,pMat.opacity-dt*0.55);
+  if(!alive||pMat.opacity<=0){pActive=false;pMat.opacity=0;}
 }
 
-function spin(){
-  if(spinning) return;
-  const bet=parseInt(document.getElementById('betInp').value)||100;
-  if(bet<10) return;
-  if(bet>tokens){showToast('Nepakanka žetonų','loss');return;}
-  tokens-=bet;localStorage.setItem('casino_tokens',tokens);updateBal();
+// ── Spin state ────────────────────────────────────────────────────────────────
+let spinAngle=0;
+let spinVelocity=0;
+let spinning=false;
+let targetAngle=0;
+let winIdx=0;
+let cameraOrbit=false;
+let cameraOrbitA=0;
+let camTargetPos=new THREE.Vector3(0,3.2,7);
+let flashIdx=-1;
+let flashTimer=0;
+const historyData=[];
+
+// ── UI wiring ─────────────────────────────────────────────────────────────────
+function getBet(){
+  const v=parseInt(document.getElementById('bet-input').value)||0;
+  if(v<10){toast('Min bet: 10');return null;}
+  if(v>50000){toast('Max bet: 50,000');return null;}
+  return v;
+}
+function halfBet(){const el=document.getElementById('bet-input');el.value=Math.max(10,Math.floor(parseInt(el.value||100)/2));}
+function doubleBet(){const el=document.getElementById('bet-input');el.value=Math.min(50000,Math.floor(parseInt(el.value||100)*2));}
+function maxBet(){document.getElementById('bet-input').value=Math.min(50000,balance);}
+document.getElementById('halfBtn').onclick=halfBet;
+document.getElementById('dblBtn').onclick=doubleBet;
+document.getElementById('maxBtn').onclick=maxBet;
+document.getElementById('result-close').onclick=closeResult;
+
+function toast(msg){
+  const d=document.createElement('div');
+  d.style.cssText='position:fixed;top:72px;left:50%;transform:translateX(-50%);background:rgba(15,0,0,0.95);color:#f0c060;font-family:Orbitron,monospace;font-size:11px;letter-spacing:2px;padding:10px 24px;border-radius:8px;border:1px solid rgba(240,192,96,0.4);z-index:9999;pointer-events:none;white-space:nowrap';
+  d.textContent=msg;
+  document.body.appendChild(d);
+  setTimeout(()=>d.remove(),2300);
+}
+
+function spinWheel(){
+  if(spinning)return;
+  const bet=getBet();
+  if(bet===null)return;
+  if(bet>balance){toast('Insufficient balance!');return;}
+  balance-=bet;
+  setTokens(balance);
+  updateBal();
+
+  winIdx=pickSegment();
+
+  // Target angle: bring winIdx segment midpoint to pointer (top = π/2)
+  const midOfWinner=(winIdx+0.5)*SEG_ANGLE;
+  const needed=Math.PI/2-midOfWinner;
+  const extra=(6+Math.floor(Math.random()*5))*Math.PI*2;
+  // Current spinAngle mod 2π
+  const cur=((spinAngle%(Math.PI*2))+Math.PI*2)%(Math.PI*2);
+  const needMod=((needed%(Math.PI*2))+Math.PI*2)%(Math.PI*2);
+  let diff=(needMod-cur+Math.PI*2)%(Math.PI*2);
+  if(diff<0.1)diff+=Math.PI*2;
+  targetAngle=spinAngle+extra+diff;
+
+  spinVelocity=Math.PI*8+Math.random()*Math.PI*5;
   spinning=true;
-  document.getElementById('spinBtn').disabled=true;
-  document.getElementById('resultLabel').textContent='SUKASI...';
-  document.getElementById('resultMult').textContent='🎡';
+  cameraOrbit=true;
+  cameraOrbitA=0;
 
-  // Pick result
-  const resultIdx=Math.floor(Math.random()*segments.length);
-  const seg=segments[resultIdx];
-  const sliceAngle=(2*Math.PI)/segments.length;
-  // Target angle: pointer at top (offset -PI/2), pointing at segment center
-  const targetSegAngle=-(resultIdx*sliceAngle+sliceAngle/2)+Math.PI/2;
-  const extraSpins=(5+Math.floor(Math.random()*4))*2*Math.PI;
-  const totalAngle=extraSpins+targetSegAngle-(currentAngle%(2*Math.PI));
-  const duration=4000+Math.random()*1500;
-  const start=performance.now();
-  const startAngle=currentAngle;
+  document.getElementById('spin-btn').disabled=true;
+  flashIdx=-1;
+}
+document.getElementById('spin-btn').onclick=spinWheel;
+document.getElementById('spin-btn').addEventListener('touchend',e=>{e.preventDefault();spinWheel();});
 
-  function animate(now){
-    const elapsed=now-start;
-    const t=Math.min(1,elapsed/duration);
-    const ease=1-Math.pow(1-t,4);
-    currentAngle=startAngle+totalAngle*ease;
-    drawWheel(currentAngle);
-    if(t<1){requestAnimationFrame(animate);}
-    else{
-      currentAngle=startAngle+totalAngle;
-      drawWheel(currentAngle);
-      // Result
-      const won=Math.floor(bet*seg.mult*(_wheelRTP/100));
-      tokens+=won;localStorage.setItem('casino_tokens',tokens);updateBal();
-      if(won>bet){wins++;document.getElementById('stWin').textContent=wins;showToast(`🎉 ${seg.label} — +🪙${fmt(won-bet)}`,'win');}
-      else if(won===0){losses++;document.getElementById('stLoss').textContent=losses;showToast(`😢 ${seg.label} — Prarasta 🪙${fmt(bet)}`,'loss');}
-      else{losses++;document.getElementById('stLoss').textContent=losses;showToast(`${seg.label} — 🪙${fmt(won)}`,'loss');}
-      document.getElementById('resultMult').textContent=seg.label;
-      document.getElementById('resultMult').style.color=seg.mult>=3?'var(--green)':seg.mult>=1?'var(--gold)':'var(--red)';
-      document.getElementById('resultLabel').textContent=won>bet?'LAIMĖJOTE! 🎉':won===0?'PRALAIMĖJOTE 😢':'GRĄŽINTA';
-      addHistory(seg);
-      logGame(bet,won);
-      spinning=false;
-      document.getElementById('spinBtn').disabled=false;
-      buildSegments();
+function closeResult(){
+  const box=document.getElementById('result-box');
+  box.classList.remove('show');
+  setTimeout(()=>{document.getElementById('result-overlay').style.display='none';},420);
+}
+
+function showResult(winI,bet){
+  const seg=SEGMENTS[winI];
+  const raw=Math.round(bet*seg.mult);
+  const win=Math.min(raw,500000);
+  balance+=win;
+  setTokens(balance);
+  updateBal();
+
+  historyData.push({mult:seg.mult,hex:seg.hex,label:seg.label});
+  if(historyData.length>10)historyData.shift();
+  renderHistory();
+
+  flashIdx=winI;flashTimer=0;
+  if(win>0)burstParticles(seg.hex);
+
+  setTimeout(()=>{
+    const ov=document.getElementById('result-overlay');
+    const box=document.getElementById('result-box');
+    const multEl=document.getElementById('result-mult');
+    const winEl=document.getElementById('result-win');
+    const jp=document.getElementById('result-jackpot');
+
+    const isJP=seg.mult===50;
+    const colorStr='#'+seg.hex.toString(16).padStart(6,'0');
+    multEl.style.color=seg.mult>0?colorStr:'rgba(80,80,120,0.7)';
+    multEl.style.textShadow=seg.mult>0?`0 0 30px ${colorStr}`:'none';
+    multEl.textContent=seg.mult+'×';
+    jp.style.display=isJP?'block':'none';
+
+    if(seg.mult===0){
+      winEl.style.color='rgba(120,120,160,0.6)';
+      winEl.textContent='VOID — NO WIN';
+    } else {
+      winEl.style.color='#f0c060';
+      winEl.textContent='+⬡ '+win.toLocaleString();
+    }
+
+    ov.style.display='flex';
+    setTimeout(()=>box.classList.add('show'),40);
+    document.getElementById('spin-btn').disabled=false;
+  },650);
+}
+
+function renderHistory(){
+  const el=document.getElementById('history');
+  el.innerHTML='';
+  historyData.forEach(h=>{
+    const d=document.createElement('div');
+    d.className='h-dot';
+    const c='#'+h.hex.toString(16).padStart(6,'0');
+    d.style.cssText=`background:${h.mult===0?'#080810':c};border-color:${h.mult===0?'rgba(80,80,120,0.3)':c};box-shadow:${h.mult>0?`0 0 8px ${c}40`:'none'}`;
+    d.textContent=h.mult===0?'V':h.label.replace('×','');
+    d.title=h.label;
+    el.appendChild(d);
+  });
+}
+
+// ── Pointer positioning ───────────────────────────────────────────────────────
+const pointerWrap=document.getElementById('pointer-wrap');
+function positionPointer(){
+  // Project wheel top center to screen
+  const tp=new THREE.Vector3(0,WHEEL_R+0.1,0);
+  tp.project(camera);
+  const sy=(-tp.y*0.5+0.5)*H();
+  pointerWrap.style.top=(sy-8)+'px';
+}
+
+// ── Main animation loop ───────────────────────────────────────────────────────
+let lastT=performance.now()/1000;
+let totalT=0;
+let spinPhase='idle'; // idle|spinning|stopping
+let lastBet=100;
+
+function animate(now){
+  requestAnimationFrame(animate);
+  const t=now/1000;
+  const dt=Math.min(t-lastT,0.05);
+  lastT=t;
+  totalT+=dt;
+
+  // Stars drift
+  stars.rotation.y+=dt*0.006;
+  stars.rotation.x+=dt*0.002;
+
+  // Orbs
+  orbMeshes.forEach(o=>{
+    o.angle+=dt*o.data.speed;
+    const a=o.angle;
+    const d=o.data;
+    o.mesh.position.set(
+      Math.cos(a)*d.radius,
+      Math.sin(a*0.6)*d.yAmp,
+      Math.sin(a)*d.radius*0.25-0.8
+    );
+  });
+
+  // Hub pulse
+  hgMat.opacity=0.18+Math.sin(totalT*2.5)*0.09;
+
+  // Rim glow breathe
+  rimMat.emissiveIntensity=0.85+Math.sin(totalT*1.8)*0.18;
+
+  // Flash winning segment
+  if(flashIdx>=0){
+    flashTimer+=dt;
+    const sm=segMeshes[flashIdx];
+    if(sm){
+      sm.mat.emissiveIntensity=sm.baseEI+Math.abs(Math.sin(flashTimer*9))*1.2;
+      if(flashTimer>2.5){sm.mat.emissiveIntensity=sm.baseEI;flashIdx=-1;}
     }
   }
-  requestAnimationFrame(animate);
+
+  // Spin physics
+  if(spinning){
+    const remaining=targetAngle-spinAngle;
+    if(spinPhase==='idle')spinPhase='spinning';
+
+    if(spinPhase==='spinning'){
+      if(remaining<Math.PI*5)spinPhase='stopping';
+      spinAngle+=spinVelocity*dt;
+      spinVelocity*=Math.pow(0.990,dt*60);
+    } else {
+      // Ease to target
+      const progress=Math.max(0,Math.min(1,1-remaining/(Math.PI*5)));
+      const friction=0.975-progress*0.06; // gets stronger as we approach
+      spinVelocity*=Math.pow(friction,dt*60);
+      spinAngle+=spinVelocity*dt;
+
+      if(spinVelocity<0.04||spinAngle>=targetAngle-0.002){
+        spinAngle=targetAngle;
+        spinVelocity=0;
+        spinning=false;
+        spinPhase='idle';
+        cameraOrbit=false;
+        camTargetPos.set(0,3.0,6.5);
+
+        const bet=parseInt(document.getElementById('bet-input').value)||100;
+        showResult(winIdx,bet);
+      }
+    }
+    wheelGroup.rotation.z=spinAngle;
+  }
+
+  // Camera
+  if(cameraOrbit){
+    cameraOrbitA+=dt*0.65;
+    const orbitR=6.8;
+    const tx=Math.sin(cameraOrbitA)*orbitR;
+    const tz=Math.cos(cameraOrbitA)*orbitR;
+    const ty=3.0+Math.sin(cameraOrbitA*0.4)*1.0;
+    camTargetPos.set(tx,ty,tz);
+    camera.position.lerp(camTargetPos,dt*1.8);
+    camera.lookAt(0,0,0);
+  } else {
+    camera.position.lerp(camTargetPos,dt*2.2);
+    camera.lookAt(0,0,0);
+  }
+
+  // Particles
+  updateParticles(dt);
+
+  // Pointer
+  positionPointer();
+
+  composer.render();
 }
 
-function addHistory(seg){
-  history.unshift(seg);if(history.length>12)history.pop();
-  const el=document.getElementById('histRow');
-  el.innerHTML=history.map(s=>{
-    const color=s.mult>=10?'#ff6030':s.mult>=3?'var(--gold)':s.mult>=1?'rgba(232,224,208,.5)':'var(--red)';
-    return `<div class="hist-pill" style="background:rgba(255,255,255,.05);color:${color}">${s.label}</div>`;
-  }).join('');
-}
-
-function fmt(n){return Number(n).toLocaleString();}
-function updateBal(){document.getElementById('bal').textContent=fmt(tokens);}
-function ab(n){document.getElementById('betInp').value=Math.max(10,parseInt(document.getElementById('betInp').value||0)+n);}
-function hb(){document.getElementById('betInp').value=Math.max(10,Math.floor(parseInt(document.getElementById('betInp').value||10)/2));}
-function db(){document.getElementById('betInp').value=Math.min(tokens,parseInt(document.getElementById('betInp').value||10)*2);}
-let toastTimer;
-function showToast(msg,type){const el=document.getElementById('toastEl');el.textContent=msg;el.className='toast '+type+' show';clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3000);}
-function logGame(bet,result){fetch('/api/log-game',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid,game:'wheel',bet,result,won:result>bet})}).catch(()=>{});}
-
-window.addEventListener('load',()=>{
-  initCanvas();buildSegments();drawWheel();updateBal();
+window.addEventListener('resize',()=>{
+  renderer.setSize(W(),H());
+  composer.setSize(W(),H());
+  camera.aspect=W()/H();
+  camera.updateProjectionMatrix();
+  bloom.resolution.set(W(),H());
 });
-window.addEventListener('resize',()=>{initCanvas();drawWheel(currentAngle);});
+
+animate(performance.now());
 </script>
-<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
 </body>
 </html>
