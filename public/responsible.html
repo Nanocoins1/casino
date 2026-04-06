@@ -1,17 +1,21 @@
 <!DOCTYPE html>
-<html lang="lt">
+<html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Atsakingas Lošimas — HATHOR Royal Casino</title>
+<title>Responsible Gambling — HATHOR Royal Casino</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
   *{box-sizing:border-box;margin:0;padding:0;}
   :root{--gold:#c9a84c;--gold2:#ffd680;--bg:#0a0806;--card:rgba(255,255,255,0.03);--border:rgba(201,168,76,0.15);--cream:#e8e2d4;--red:rgba(255,61,113,1);--green:#2ecc71;}
   body{background:var(--bg);color:var(--cream);font-family:'Inter',sans-serif;font-size:15px;line-height:1.7;}
-  header{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,8,6,0.95);backdrop-filter:blur(10px);z-index:100;}
-  .logo{font-family:'Cinzel',serif;font-size:20px;font-weight:700;color:var(--gold);text-decoration:none;letter-spacing:2px;}
-  .back-link{color:var(--gold);text-decoration:none;font-size:13px;border:1px solid var(--border);padding:6px 14px;border-radius:8px;}
+  header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,8,6,0.97);backdrop-filter:blur(10px);z-index:100;gap:12px;flex-wrap:wrap;}
+  .logo{font-family:'Cinzel',serif;font-size:18px;font-weight:700;color:var(--gold);text-decoration:none;letter-spacing:2px;white-space:nowrap;}
+  .back-link{color:var(--gold);text-decoration:none;font-size:12px;border:1px solid var(--border);padding:5px 12px;border-radius:8px;white-space:nowrap;}
+  .lang-bar{display:flex;gap:5px;align-items:center;flex-wrap:wrap;}
+  .lang-btn{background:none;border:1px solid rgba(201,168,76,0.2);border-radius:6px;color:rgba(232,226,212,0.5);font-size:11px;padding:4px 7px;cursor:pointer;transition:all .2s;}
+  .lang-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,0.08);}
+  .lang-btn:hover{color:var(--cream);}
   .container{max-width:860px;margin:0 auto;padding:48px 24px 80px;}
   .page-title{font-family:'Cinzel',serif;font-size:28px;font-weight:700;color:var(--gold2);margin-bottom:8px;}
   .page-sub{font-size:14px;color:rgba(232,226,212,0.6);margin-bottom:40px;}
@@ -40,137 +44,564 @@
   .btn-danger:hover{background:rgba(255,61,113,0.25);}
   .inp{width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;color:var(--cream);font-size:14px;outline:none;margin-bottom:10px;}
   .inp:focus{border-color:var(--gold);}
-  .orgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:16px 0;}
-  .org-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;}
-  .org-name{font-weight:600;font-size:13px;color:var(--gold);margin-bottom:4px;}
+  select.inp{cursor:pointer;}
+  /* Organisations */
+  .orgs-region{margin-bottom:24px;}
+  .region-title{font-family:'Cinzel',serif;font-size:13px;color:var(--gold);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+  .orgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;margin-bottom:4px;}
+  .org-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+  .org-name{font-weight:600;font-size:13px;color:var(--gold);margin-bottom:3px;}
   .org-url{font-size:11px;color:rgba(201,168,76,0.5);}
+  .org-phone{font-size:11px;color:rgba(46,204,113,0.7);margin-top:2px;}
   .selfexclude-form{background:rgba(255,61,113,0.04);border:1px solid rgba(255,61,113,0.2);border-radius:14px;padding:24px;margin-top:24px;}
   .msg{padding:12px 16px;border-radius:8px;margin-top:12px;font-size:13px;display:none;}
   .msg.ok{background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.3);color:var(--green);}
   .msg.err{background:rgba(255,61,113,0.1);border:1px solid rgba(255,61,113,0.3);color:#ff9999;}
-  select.inp{cursor:pointer;}
   footer{text-align:center;padding:24px;border-top:1px solid var(--border);font-size:12px;color:rgba(201,168,76,0.3);}
 </style>
 </head>
 <body>
 <header>
   <a class="logo" href="/">&#x2B21; HATHOR</a>
-  <a class="back-link" href="/">&#8592; Grįžti</a>
+  <div class="lang-bar" id="langBar"></div>
+  <a class="back-link" href="/" data-i18n="backLink">&#8592; Back</a>
 </header>
 <div class="container">
-  <div class="page-title">Atsakingas Lošimas</div>
-  <div class="page-sub">Mes rūpinamės jūsų gerove. Lošimas turi būti pramoginė veikla — ne finansinė strategija.</div>
+  <div class="page-title" data-i18n="pageTitle">Responsible Gambling</div>
+  <div class="page-sub" data-i18n="pageSub">We care about your wellbeing. Gambling should be entertainment — not a financial strategy.</div>
 
   <div class="hero-warning">
     <div class="warn-icon">&#128737;&#65039;</div>
     <div>
-      <div class="warn-title">Lošimas — tik pramogai</div>
-      <p style="font-size:13px;color:rgba(232,226,212,0.7);margin:0;">Niekada nelošite daugiau nei galite sau leisti prarasti. Lošimas negali būti pajamų šaltinis. Jei jaučiate, kad lošimas tampa problema — kreipkitės pagalbos.</p>
+      <div class="warn-title" data-i18n="warnTitle">Gambling — for entertainment only</div>
+      <p style="font-size:13px;color:rgba(232,226,212,0.7);margin:0;" data-i18n="warnText">Never gamble more than you can afford to lose. Gambling cannot be a source of income. If you feel gambling is becoming a problem — seek help.</p>
     </div>
   </div>
 
-  <h2>Mūsų įrankiai jūsų apsaugai</h2>
-  <div class="tools-grid">
-    <div class="tool-card">
-      <div class="tool-icon">&#128202;</div>
-      <div class="tool-title">Dienos limitas</div>
-      <div class="tool-desc">Nustatykite maksimalią statymų sumą per dieną. Pasiekus limitą — žaidimai automatiškai blokuojami.</div>
-    </div>
-    <div class="tool-card">
-      <div class="tool-icon">&#128197;</div>
-      <div class="tool-title">Savaitės limitas</div>
-      <div class="tool-desc">Savaitinė statymų suma negali viršyti nustatytos ribos. Limitai įsigalioja iš karto.</div>
-    </div>
-    <div class="tool-card">
-      <div class="tool-icon">&#9208;&#65039;</div>
-      <div class="tool-title">Pertrauka</div>
-      <div class="tool-desc">Galite laikinai sustabdyti paskyrą nuo 1 iki 30 dienų. Pertrauka pradeda galioti nedelsiant.</div>
-    </div>
-    <div class="tool-card">
-      <div class="tool-icon">&#128683;</div>
-      <div class="tool-title">Saviišskyrimoas</div>
-      <div class="tool-desc">Visiškas prieigos prie paskyros užblokavimas nuo 30 dienų iki 1 metų. Negalima atšaukti anksčiau laiko.</div>
-    </div>
-    <div class="tool-card">
-      <div class="tool-icon">&#9200;</div>
-      <div class="tool-title">Realybės patikra</div>
-      <div class="tool-desc">Kas 30/60/90 minučių gausite pranešimą kiek laiko ir pinigų praleido lošdami.</div>
-    </div>
-    <div class="tool-card">
-      <div class="tool-icon">&#128200;</div>
-      <div class="tool-title">Lošimų istorija</div>
-      <div class="tool-desc">Visada galite peržiūrėti savo lošimų istoriją ir išleistas sumas paskyroje.</div>
-    </div>
-  </div>
+  <h2 data-i18n="h1">Our Tools for Your Protection</h2>
+  <div class="tools-grid" id="toolsGrid"></div>
 
-  <h2>Ar lošimas tapo problema? — Savitikrinimas</h2>
+  <h2 data-i18n="h2">Is Gambling a Problem? — Self-Check</h2>
   <div class="quiz">
-    <p style="margin-bottom:16px;font-size:13px;color:rgba(232,226,212,0.6);">Atsakykite į šiuos klausimus sąžiningai:</p>
-    <div class="quiz-q"><label><input type="checkbox" id="q1"/> Lošiu daugiau nei planavau?</label></div>
-    <div class="quiz-q"><label><input type="checkbox" id="q2"/> Bandau susigrąžinti prarasti pinigus toliau lošdamas?</label></div>
-    <div class="quiz-q"><label><input type="checkbox" id="q3"/> Meluoju artimiesiems apie lošimą?</label></div>
-    <div class="quiz-q"><label><input type="checkbox" id="q4"/> Lošimas daro įtaką mano darbui ar santykiams?</label></div>
-    <div class="quiz-q"><label><input type="checkbox" id="q5"/> Negaliu sustoti kai norėčiau?</label></div>
-    <div class="quiz-q"><label><input type="checkbox" id="q6"/> Naudoju lėšas, skirtas būtiniausioms išlaidoms?</label></div>
-    <button class="btn btn-primary" onclick="checkQuiz()" style="margin-top:12px;">Patikrinti</button>
-    <div class="quiz-result ok" id="quiz-ok">&#9989; Puiku! Atrodo, kad lošimas jums nekelia problemų. Tačiau visada būkite budrus ir laikykitės nustatytų limitų.</div>
-    <div class="quiz-result warn" id="quiz-warn">&#9888;&#65039; Jūsų atsakymai rodo galimą problemą. Rekomenduojame kreiptis pagalbos arba pasinaudoti saviišskyrimu. Jūs nesate vieni — pagalba prieinama.</div>
+    <p style="margin-bottom:16px;font-size:13px;color:rgba(232,226,212,0.6);" data-i18n="quizIntro">Answer these questions honestly:</p>
+    <div class="quiz-q"><label><input type="checkbox" id="q1"/> <span data-i18n="q1">Do I gamble more than I planned?</span></label></div>
+    <div class="quiz-q"><label><input type="checkbox" id="q2"/> <span data-i18n="q2">Do I try to win back losses by gambling more?</span></label></div>
+    <div class="quiz-q"><label><input type="checkbox" id="q3"/> <span data-i18n="q3">Do I lie to family about my gambling?</span></label></div>
+    <div class="quiz-q"><label><input type="checkbox" id="q4"/> <span data-i18n="q4">Is gambling affecting my work or relationships?</span></label></div>
+    <div class="quiz-q"><label><input type="checkbox" id="q5"/> <span data-i18n="q5">Can I not stop when I want to?</span></label></div>
+    <div class="quiz-q"><label><input type="checkbox" id="q6"/> <span data-i18n="q6">Am I using funds needed for essentials?</span></label></div>
+    <button class="btn btn-primary" id="quizBtn" onclick="checkQuiz()" style="margin-top:12px;" data-i18n="quizBtn">Check</button>
+    <div class="quiz-result ok" id="quiz-ok" data-i18n="quizOk">&#9989; Great! Gambling doesn't seem to be a problem for you. But always stay alert and keep to your set limits.</div>
+    <div class="quiz-result warn" id="quiz-warn" data-i18n="quizWarn">&#9888;&#65039; Your answers suggest a possible problem. We recommend seeking help or using self-exclusion. You are not alone — help is available.</div>
   </div>
 
-  <h2>Pagalbos organizacijos</h2>
-  <div class="orgs">
-    <div class="org-card"><div class="tool-icon">&#127473;&#127481;</div><div class="org-name">Anoniminiai Lošėjai Lietuva</div><div class="org-url">al-lietuva.lt</div></div>
-    <div class="org-card"><div class="tool-icon">&#127757;</div><div class="org-name">GamCare</div><div class="org-url">gamcare.org.uk</div></div>
-    <div class="org-card"><div class="tool-icon">&#127757;</div><div class="org-name">Gamblers Anonymous</div><div class="org-url">gamblersanonymous.org</div></div>
-    <div class="org-card"><div class="tool-icon">&#127757;</div><div class="org-name">BeGambleAware</div><div class="org-url">begambleaware.org</div></div>
-    <div class="org-card"><div class="tool-icon">&#127757;</div><div class="org-name">GamStop (UK)</div><div class="org-url">gamstop.co.uk</div></div>
-    <div class="org-card"><div class="tool-icon">&#128222;</div><div class="org-name">Pagalbos linija LT</div><div class="org-url">Tel: 8 800 28 888</div></div>
-  </div>
+  <h2 data-i18n="h3">Help Organizations</h2>
+  <div id="orgsContainer"></div>
 
-  <h2>Saviišskyrimoas</h2>
-  <p>Nusprendėte sustoti? Mes jums padėsime. Saviišskyrimoas blokuoja prieigą prie paskyros nustatytam laikotarpiui.</p>
-
+  <h2 data-i18n="h4">Self-Exclusion</h2>
+  <p data-i18n="selfExcludeIntro">Decided to stop? We will help you. Self-exclusion blocks access to your account for a set period.</p>
   <div class="selfexclude-form" id="selfexclude-section">
     <div id="login-required" style="text-align:center;padding:20px;display:none;">
       <div style="font-size:32px;margin-bottom:12px;">&#128272;</div>
-      <p style="color:rgba(232,226,212,0.6);">Prisijunkite prie paskyros, kad galėtumėte nustatyti saviišskyrimą.</p>
-      <a href="/" class="btn btn-primary" style="text-decoration:none;display:inline-block;margin-top:12px;">Prisijungti</a>
+      <p style="color:rgba(232,226,212,0.6);" data-i18n="loginRequired">Log in to your account to set self-exclusion.</p>
+      <a href="/" class="btn btn-primary" style="text-decoration:none;display:inline-block;margin-top:12px;" data-i18n="loginBtn">Log In</a>
     </div>
     <div id="selfexclude-form-inner">
-      <div style="font-family:'Cinzel',serif;font-size:14px;color:#ff7096;margin-bottom:16px;">&#9888;&#65039; Saviišskyrimoas yra neatšaukiamas iki nurodyto termino pabaigos</div>
-      <label style="font-size:13px;color:rgba(232,226,212,0.7);display:block;margin-bottom:6px;">Saviišskyriomo laikotarpis:</label>
-      <select class="inp" id="exclude-days">
-        <option value="30">30 dienų</option>
-        <option value="90">90 dienų</option>
-        <option value="180">6 mėnesiai</option>
-        <option value="365">1 metai</option>
-      </select>
-      <label style="font-size:13px;color:rgba(232,226,212,0.7);display:block;margin-bottom:6px;">Patvirtinkite — įveskite žodį "SUSTOTI":</label>
-      <input class="inp" id="exclude-confirm" placeholder="SUSTOTI" autocomplete="off"/>
-      <button class="btn btn-danger" onclick="submitSelfExclusion()">&#128683; Vykdyti saviišskyrimą</button>
-      <div class="msg ok" id="exclude-ok">&#9989; Saviišskyrimoas įjungtas. Paskyra užblokuota. Pasveikame jūsų sprendimą.</div>
+      <div style="font-family:'Cinzel',serif;font-size:14px;color:#ff7096;margin-bottom:16px;" data-i18n="selfExcludeWarning">&#9888;&#65039; Self-exclusion is irrevocable until the specified end date</div>
+      <label style="font-size:13px;color:rgba(232,226,212,0.7);display:block;margin-bottom:6px;" data-i18n="periodLabel">Self-exclusion period:</label>
+      <select class="inp" id="exclude-days" data-i18n-select="periodOptions"></select>
+      <label style="font-size:13px;color:rgba(232,226,212,0.7);display:block;margin-bottom:6px;" data-i18n-confirm-label="confirmLabel"></label>
+      <input class="inp" id="exclude-confirm" autocomplete="off"/>
+      <button class="btn btn-danger" id="selfExcludeBtn" onclick="submitSelfExclusion()">&#128683; <span data-i18n="selfExcludeBtn">Activate Self-Exclusion</span></button>
+      <div class="msg ok" id="exclude-ok" data-i18n="excludeOk">&#9989; Self-exclusion activated. Account blocked. We commend your decision.</div>
       <div class="msg err" id="exclude-err"></div>
     </div>
   </div>
 </div>
 
-<footer>&#169; 2026 HATHOR Royal Casino · <a href="/terms.html" style="color:var(--gold);">T&amp;C</a> · <a href="/privacy.html" style="color:var(--gold);">Privatumo politika</a> · Lošimas nuo 18 metų</footer>
+<footer data-i18n-html="footer">&#169; 2026 HATHOR Royal Casino</footer>
 
 <script>
+var CONFIRM_WORDS = {en:'STOP',lt:'SUSTOTI',ru:'\u0421\u0422\u041e\u041f',de:'STOPP',pl:'STOP',fr:'STOP'};
+
+var RESP_LANGS = {
+  en: {
+    pageTitle: 'Responsible Gambling',
+    backLink: '\u2190 Back',
+    pageSub: 'We care about your wellbeing. Gambling should be entertainment \u2014 not a financial strategy.',
+    warnTitle: 'Gambling \u2014 for entertainment only',
+    warnText: 'Never gamble more than you can afford to lose. Gambling cannot be a source of income. If you feel gambling is becoming a problem \u2014 seek help.',
+    h1: 'Our Tools for Your Protection',
+    tools: [
+      {icon:'\ud83d\udcca', title:'Daily Limit', desc:'Set a maximum betting amount per day. When reached, games are automatically blocked.'},
+      {icon:'\ud83d\udcc5', title:'Weekly Limit', desc:'Weekly bet total cannot exceed the set limit. Limits take effect immediately.'},
+      {icon:'\u23f8\ufe0f', title:'Break', desc:'Temporarily suspend your account from 1 to 30 days. Break takes effect immediately.'},
+      {icon:'\ud83d\udeab', title:'Self-Exclusion', desc:'Full account access block from 30 days to 1 year. Cannot be reversed before time.'},
+      {icon:'\u23f0', title:'Reality Check', desc:'Every 30/60/90 minutes you will receive a notification about time and money spent.'},
+      {icon:'\ud83d\udcc8', title:'Game History', desc:'You can always review your game history and amounts spent in your account.'},
+    ],
+    h2: 'Is Gambling a Problem? \u2014 Self-Check',
+    quizIntro: 'Answer these questions honestly:',
+    q1: 'Do I gamble more than I planned?',
+    q2: 'Do I try to win back losses by gambling more?',
+    q3: 'Do I lie to family about my gambling?',
+    q4: 'Is gambling affecting my work or relationships?',
+    q5: 'Can I not stop when I want to?',
+    q6: 'Am I using funds needed for essentials?',
+    quizBtn: 'Check',
+    quizOk: '\u2705 Great! Gambling doesn\'t seem to be a problem for you. But always stay alert and keep to your set limits.',
+    quizWarn: '\u26a0\ufe0f Your answers suggest a possible problem. We recommend seeking help or using self-exclusion. You are not alone \u2014 help is available.',
+    h3: 'Help Organizations',
+    regions: [
+      {flag:'\ud83c\uddea\ud83c\uddfa', name:'Europe', orgs:[
+        {name:'GamCare (UK)', url:'gamcare.org.uk', phone:'0808 8020 133'},
+        {name:'GamStop (UK self-exclusion)', url:'gamstop.co.uk'},
+        {name:'BeGambleAware (UK)', url:'begambleaware.org'},
+        {name:'Gamblers Anonymous UK', url:'gamblersanonymous.org.uk'},
+        {name:'YGAM (UK Youth)', url:'ygam.org'},
+      ]},
+      {flag:'\ud83c\uddf1\ud83c\uddf9', name:'Lithuania', orgs:[
+        {name:'Anoniminiai Lo\u0161\u0117jai Lietuva', url:'al-lietuva.lt'},
+        {name:'Pagalbos linija', phone:'8 800 28 888 (free)', url:''},
+        {name:'Vilniaus priklausomybi\u0173 centras', url:'vpc.lt'},
+      ]},
+      {flag:'\ud83c\udde9\ud83c\uddea', name:'Germany', orgs:[
+        {name:'Bundeszentrale f\u00fcr Suchtfragen', url:'bzga.de'},
+        {name:'Spielsucht Hilfe', url:'spielen-mit-verantwortung.de'},
+        {name:'Telefonseelsorge', phone:'0800 111 0 111 (free)', url:''},
+      ]},
+      {flag:'\ud83c\uddf5\ud83c\uddf1', name:'Poland', orgs:[
+        {name:'Centrum Leczenia Uzale\u017cnie\u0144', url:'clu.waw.pl'},
+        {name:'Anonimowi Hazardzisci', url:'hazardanon.pl'},
+        {name:'Telefon Zaufania', phone:'116 123', url:''},
+      ]},
+      {flag:'\ud83c\uddf7\ud83c\uddfa', name:'Russia/CIS', orgs:[
+        {name:'Gamblers Anonymous Russia', url:'ganblers-anonymous.ru'},
+        {name:'\u0422\u0435\u043b\u0435\u0444\u043e\u043d \u0434\u043e\u0432\u0435\u0440\u0438\u044f', phone:'8-800-2000-122 (free)', url:''},
+      ]},
+      {flag:'\ud83c\uddeb\ud83c\uddf7', name:'France', orgs:[
+        {name:'Joueurs Info Service', url:'joueurs-info-service.fr', phone:'09 74 75 13 13'},
+        {name:'SOS Addictions', url:'sosaddictions.org'},
+      ]},
+      {flag:'\ud83c\uddf9\ud83c\uddf7', name:'Turkey', orgs:[
+        {name:'YKDK', url:'ykdk.gov.tr'},
+      ]},
+      {flag:'\ud83c\udf0d', name:'International', orgs:[
+        {name:'Gamblers Anonymous (global)', url:'gamblersanonymous.org'},
+        {name:'GambleAware', url:'gambleaware.org'},
+        {name:'National Problem Gambling Helpline (US)', phone:'1-800-522-4700', url:''},
+      ]},
+    ],
+    h4: 'Self-Exclusion',
+    selfExcludeIntro: 'Decided to stop? We will help you. Self-exclusion blocks access to your account for a set period.',
+    loginRequired: 'Log in to your account to set self-exclusion.',
+    loginBtn: 'Log In',
+    selfExcludeWarning: '\u26a0\ufe0f Self-exclusion is irrevocable until the specified end date',
+    periodLabel: 'Self-exclusion period:',
+    periodOptions: [{val:'30',label:'30 days'},{val:'90',label:'90 days'},{val:'180',label:'6 months'},{val:'365',label:'1 year'}],
+    confirmLabel: 'Confirm \u2014 type the word "STOP":',
+    confirmPlaceholder: 'STOP',
+    selfExcludeBtn: 'Activate Self-Exclusion',
+    excludeOk: '\u2705 Self-exclusion activated. Account blocked. We commend your decision.',
+    errWord: 'Enter the word STOP',
+    errFail: 'Error. Please try again.',
+    footer: '\u00a9 2026 HATHOR Royal Casino \u00b7 <a href="/terms.html" style="color:var(--gold)">T&C</a> \u00b7 <a href="/privacy.html" style="color:var(--gold)">Privacy Policy</a> \u00b7 18+',
+  },
+  lt: {
+    pageTitle: 'Atsakingas Lo\u0161imas',
+    backLink: '\u2190 Gr\u012f\u017eti',
+    pageSub: 'Mes r\u016bpinam\u0117s j\u016bs\u0173 gerove. Lo\u0161imas turi b\u016bti pramogin\u0117 veikla \u2014 ne finansin\u0117 strategija.',
+    warnTitle: 'Lo\u0161imas \u2014 tik pramogai',
+    warnText: 'Niekada nelo\u0161kite daugiau nei galite sau leisti prarasti. Lo\u0161imas negali b\u016bti pajam\u0173 \u0161altinis. Jei jaučiate, kad lo\u0161imas tampa problema \u2014 kreipkit\u0117s pagalbos.',
+    h1: 'M\u016bs\u0173 \u012frankiai j\u016bs\u0173 apsaugai',
+    tools: [
+      {icon:'\ud83d\udcca', title:'Dienos limitas', desc:'Nustatykite maksimali\u0105 statym\u0173 sum\u0105 per dien\u0105. Pasiekus limit\u0105 \u2014 \u017edimai automatiškai blokuojami.'},
+      {icon:'\ud83d\udcc5', title:'Savait\u0117s limitas', desc:'Savaitin\u0117 statym\u0173 suma negali vir\u0161yti nustatytos ribos. Limitai \u012fsigalioja i\u0161 karto.'},
+      {icon:'\u23f8\ufe0f', title:'Pertrauka', desc:'Galite laikinai sustabdyti paskyr\u0105 nuo 1 iki 30 dien\u0173. Pertrauka pradeda galioti nedelsiant.'},
+      {icon:'\ud83d\udeab', title:'Savii\u0161skyrimoas', desc:'Visiškas prieigos prie paskyros u\u017eblokavimas nuo 30 dien\u0173 iki 1 met\u0173. Negalima at\u0161aukti anksciau laiko.'},
+      {icon:'\u23f0', title:'Realyb\u0117s patikra', desc:'Kas 30/60/90 minuci\u0173 gausite prane\u0161im\u0105 kiek laiko ir pinig\u0173 prarad\u0117.'},
+      {icon:'\ud83d\udcc8', title:'Lo\u0161im\u0173 istorija', desc:'Visada galite per\u017ei\u016br\u0117ti savo lo\u0161im\u0173 istorij\u0105 ir i\u0161leistar sumas paskyroje.'},
+    ],
+    h2: 'Ar lo\u0161imas tapo problema? \u2014 Savitikrinimas',
+    quizIntro: 'Atsakykite \u012f \u0161iuos klausimus s\u0105\u017einingai:',
+    q1: 'Lo\u0161iu daugiau nei planavau?',
+    q2: 'Bandau susigrau\u017einti prarastus pinigus toliau lo\u0161damas?',
+    q3: 'Meluoju artimiesiems apie lo\u0161im\u0105?',
+    q4: 'Lo\u0161imas daro \u012ftaka mano darbui ar santykiams?',
+    q5: 'Negaliu sustoti kai nor\u0117\u010diau?',
+    q6: 'Naudoju l\u0117\u0161as, skirtas b\u016btiniausioms i\u0161laidoms?',
+    quizBtn: 'Patikrinti',
+    quizOk: '\u2705 Puiku! Atrodo, kad lo\u0161imas jums nekelia problem\u0173. Ta\u010diau visada b\u016bkite budrus ir laikykites nustatyt\u0173 limit\u0173.',
+    quizWarn: '\u26a0\ufe0f J\u016bs\u0173 atsakymai rodo galiam\u0105 problem\u0105. Rekomenduojame kreiptis pagalbos arba pasinaudoti savii\u0161skyrimu. J\u016bs nesate vieni \u2014 pagalba prieinama.',
+    h3: 'Pagalbos organizacijos',
+    regions: [
+      {flag:'\ud83c\uddea\ud83c\uddfa', name:'Europa', orgs:[
+        {name:'GamCare (JK)', url:'gamcare.org.uk', phone:'0808 8020 133'},
+        {name:'GamStop (JK savii\u0161skyrimoas)', url:'gamstop.co.uk'},
+        {name:'BeGambleAware', url:'begambleaware.org'},
+        {name:'Gamblers Anonymous UK', url:'gamblersanonymous.org.uk'},
+      ]},
+      {flag:'\ud83c\uddf1\ud83c\uddf9', name:'Lietuva', orgs:[
+        {name:'Anoniminiai Lo\u0161\u0117jai Lietuva', url:'al-lietuva.lt'},
+        {name:'Pagalbos linija', phone:'8 800 28 888 (nemokamas)', url:''},
+        {name:'Vilniaus priklausomybi\u0173 centras', url:'vpc.lt'},
+      ]},
+      {flag:'\ud83c\udde9\ud83c\uddea', name:'Vokietija', orgs:[
+        {name:'Bundeszentrale f\u00fcr Suchtfragen', url:'bzga.de'},
+        {name:'Spielsucht Hilfe', url:'spielen-mit-verantwortung.de'},
+        {name:'Telefonseelsorge', phone:'0800 111 0 111 (nemokamas)', url:''},
+      ]},
+      {flag:'\ud83c\uddf5\ud83c\uddf1', name:'Lenkija', orgs:[
+        {name:'Centrum Leczenia Uzale\u017cnie\u0144', url:'clu.waw.pl'},
+        {name:'Anonimowi Hazardzisci', url:'hazardanon.pl'},
+        {name:'Telefon Zaufania', phone:'116 123', url:''},
+      ]},
+      {flag:'\ud83c\uddf7\ud83c\uddfa', name:'Rusija/NVS', orgs:[
+        {name:'Gamblers Anonymous Russia', url:'ganblers-anonymous.ru'},
+        {name:'\u0422\u0435\u043b\u0435\u0444\u043e\u043d \u0434\u043e\u0432\u0435\u0440\u0438\u044f', phone:'8-800-2000-122 (nemokamas)', url:''},
+      ]},
+      {flag:'\ud83c\udf0d', name:'Tarptautin\u0117s', orgs:[
+        {name:'Gamblers Anonymous (globalus)', url:'gamblersanonymous.org'},
+        {name:'GambleAware', url:'gambleaware.org'},
+        {name:'National Problem Gambling Helpline (JAV)', phone:'1-800-522-4700', url:''},
+      ]},
+    ],
+    h4: 'Savii\u0161skyrimoas',
+    selfExcludeIntro: 'Nusprendate sustoti? Mes jums pad\u0117sime. Savii\u0161skyrimoas blokuoja prieig\u0105 prie paskyros nustatytam laikotarpiui.',
+    loginRequired: 'Prisijunkite prie paskyros, kad gal\u0117tum\u0117te nustatyti savii\u0161skyrim\u0105.',
+    loginBtn: 'Prisijungti',
+    selfExcludeWarning: '\u26a0\ufe0f Savii\u0161skyrimoas yra neat\u0161aukiamas iki nurodyto termino pabaigos',
+    periodLabel: 'Savii\u0161skyriomo laikotarpis:',
+    periodOptions: [{val:'30',label:'30 dien\u0173'},{val:'90',label:'90 dien\u0173'},{val:'180',label:'6 m\u0117nesiai'},{val:'365',label:'1 metai'}],
+    confirmLabel: 'Patvirtinkite \u2014 \u012fveskite \u017eod\u012f \u201eSUSTOTI\u201c:',
+    confirmPlaceholder: 'SUSTOTI',
+    selfExcludeBtn: 'Vykdyti savii\u0161skyrim\u0105',
+    excludeOk: '\u2705 Savii\u0161skyrimoas \u012fjungtas. Paskyra u\u017eblokuota. Pasveikiname j\u016bs\u0173 sprendim\u0105.',
+    errWord: '\u012eveskite \u017eod\u012f SUSTOTI',
+    errFail: 'Klaida. Bandykite dar kart\u0105.',
+    footer: '\u00a9 2026 HATHOR Royal Casino \u00b7 <a href="/terms.html" style="color:var(--gold)">T&C</a> \u00b7 <a href="/privacy.html" style="color:var(--gold)">Privatumo politika</a> \u00b7 Lo\u0161imas nuo 18 met\u0173',
+  },
+  ru: {
+    pageTitle: '\u041e\u0442\u0432\u0435\u0442\u0441\u0442\u0432\u0435\u043d\u043d\u0430\u044f \u0438\u0433\u0440\u0430',
+    backLink: '\u2190 \u041d\u0430\u0437\u0430\u0434',
+    pageSub: '\u041c\u044b \u0437\u0430\u0431\u043e\u0442\u0438\u043c\u0441\u044f \u043e \u0432\u0430\u0448\u0435\u043c \u0431\u043b\u0430\u0433\u043e\u043f\u043e\u043b\u0443\u0447\u0438\u0438. \u0418\u0433\u0440\u0430 \u2014 \u044d\u0442\u043e \u0440\u0430\u0437\u0432\u043b\u0435\u0447\u0435\u043d\u0438\u0435, \u0430 \u043d\u0435 \u0444\u0438\u043d\u0430\u043d\u0441\u043e\u0432\u0430\u044f \u0441\u0442\u0440\u0430\u0442\u0435\u0433\u0438\u044f.',
+    warnTitle: '\u0418\u0433\u0440\u0430 \u2014 \u0442\u043e\u043b\u044c\u043a\u043e \u0434\u043b\u044f \u0440\u0430\u0437\u0432\u043b\u0435\u0447\u0435\u043d\u0438\u044f',
+    warnText: '\u041d\u0438\u043a\u043e\u0433\u0434\u0430 \u043d\u0435 \u0438\u0433\u0440\u0430\u0439\u0442\u0435 \u0431\u043e\u043b\u044c\u0448\u0435, \u0447\u0435\u043c \u0432\u044b \u043c\u043e\u0436\u0435\u0442\u0435 \u043f\u043e\u0437\u0432\u043e\u043b\u0438\u0442\u044c \u0441\u0435\u0431\u0435 \u043f\u043e\u0442\u0435\u0440\u044f\u0442\u044c. \u0418\u0433\u0440\u0430 \u043d\u0435 \u043c\u043e\u0436\u0435\u0442 \u0431\u044b\u0442\u044c \u0438\u0441\u0442\u043e\u0447\u043d\u0438\u043a\u043e\u043c \u0434\u043e\u0445\u043e\u0434\u0430. \u0415\u0441\u043b\u0438 \u0447\u0443\u0432\u0441\u0442\u0432\u0443\u0435\u0442\u0435 \u043f\u0440\u043e\u0431\u043b\u0435\u043c\u0443 \u2014 \u043e\u0431\u0440\u0430\u0442\u0438\u0442\u0435\u0441\u044c \u0437\u0430 \u043f\u043e\u043c\u043e\u0449\u044c\u044e.',
+    h1: '\u041d\u0430\u0448\u0438 \u0438\u043d\u0441\u0442\u0440\u0443\u043c\u0435\u043d\u0442\u044b \u0434\u043b\u044f \u0432\u0430\u0448\u0435\u0439 \u0437\u0430\u0449\u0438\u0442\u044b',
+    tools: [
+      {icon:'\ud83d\udcca', title:'\u0414\u043d\u0435\u0432\u043d\u043e\u0439 \u043b\u0438\u043c\u0438\u0442', desc:'\u0423\u0441\u0442\u0430\u043d\u043e\u0432\u0438\u0442\u0435 \u043c\u0430\u043a\u0441\u0438\u043c\u0430\u043b\u044c\u043d\u0443\u044e \u0441\u0443\u043c\u043c\u0443 \u0441\u0442\u0430\u0432\u043e\u043a \u0432 \u0434\u0435\u043d\u044c. \u041f\u0440\u0438 \u0434\u043e\u0441\u0442\u0438\u0436\u0435\u043d\u0438\u0438 \u2014 \u0438\u0433\u0440\u044b \u0430\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0447\u0435\u0441\u043a\u0438 \u0431\u043b\u043e\u043a\u0438\u0440\u0443\u044e\u0442\u0441\u044f.'},
+      {icon:'\ud83d\udcc5', title:'\u041d\u0435\u0434\u0435\u043b\u044c\u043d\u044b\u0439 \u043b\u0438\u043c\u0438\u0442', desc:'\u041d\u0435\u0434\u0435\u043b\u044c\u043d\u0430\u044f \u0441\u0443\u043c\u043c\u0430 \u0441\u0442\u0430\u0432\u043e\u043a \u043d\u0435 \u043c\u043e\u0436\u0435\u0442 \u043f\u0440\u0435\u0432\u044b\u0448\u0430\u0442\u044c \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u043b\u0435\u043d\u043d\u044b\u0439 \u043f\u0440\u0435\u0434\u0435\u043b. \u0414\u0435\u0439\u0441\u0442\u0432\u0443\u0435\u0442 \u043d\u0435\u043c\u0435\u0434\u043b\u0435\u043d\u043d\u043e.'},
+      {icon:'\u23f8\ufe0f', title:'\u041f\u0435\u0440\u0435\u0440\u044b\u0432', desc:'\u0412\u0440\u0435\u043c\u0435\u043d\u043d\u0430\u044f \u043f\u0440\u0438\u043e\u0441\u0442\u0430\u043d\u043e\u0432\u043a\u0430 \u0430\u043a\u043a\u0430\u0443\u043d\u0442\u0430 \u043e\u0442 1 \u0434\u043e 30 \u0434\u043d\u0435\u0439. \u0414\u0435\u0439\u0441\u0442\u0432\u0443\u0435\u0442 \u043d\u0435\u043c\u0435\u0434\u043b\u0435\u043d\u043d\u043e.'},
+      {icon:'\ud83d\udeab', title:'\u0421\u0430\u043c\u043e\u0438\u0441\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u0435', desc:'\u041f\u043e\u043b\u043d\u0430\u044f \u0431\u043b\u043e\u043a\u0438\u0440\u043e\u0432\u043a\u0430 \u0430\u043a\u043a\u0430\u0443\u043d\u0442\u0430 \u043e\u0442 30 \u0434\u043d\u0435\u0439 \u0434\u043e 1 \u0433\u043e\u0434\u0430. \u041d\u0435\u043b\u044c\u0437\u044f \u043e\u0442\u043c\u0435\u043d\u0438\u0442\u044c \u0434\u043e\u0441\u0440\u043e\u043a\u0430.'},
+      {icon:'\u23f0', title:'\u041f\u0440\u043e\u0432\u0435\u0440\u043a\u0430 \u0440\u0435\u0430\u043b\u044c\u043d\u043e\u0441\u0442\u0438', desc:'\u041a\u0430\u0436\u0434\u044b\u0435 30/60/90 \u043c\u0438\u043d\u0443\u0442 \u0432\u044b \u0431\u0443\u0434\u0435\u0442\u0435 \u043f\u043e\u043b\u0443\u0447\u0430\u0442\u044c \u0443\u0432\u0435\u0434\u043e\u043c\u043b\u0435\u043d\u0438\u0435 \u043e \u0432\u0440\u0435\u043c\u0435\u043d\u0438 \u0438 \u0434\u0435\u043d\u044c\u0433\u0430\u0445.'},
+      {icon:'\ud83d\udcc8', title:'\u0418\u0441\u0442\u043e\u0440\u0438\u044f \u0438\u0433\u0440', desc:'\u0412\u044b \u0432\u0441\u0435\u0433\u0434\u0430 \u043c\u043e\u0436\u0435\u0442\u0435 \u043f\u0440\u043e\u0441\u043c\u043e\u0442\u0440\u0435\u0442\u044c \u0438\u0441\u0442\u043e\u0440\u0438\u044e \u0438\u0433\u0440 \u0438 \u043f\u043e\u0442\u0440\u0430\u0447\u0435\u043d\u043d\u044b\u0435 \u0441\u0443\u043c\u043c\u044b.'},
+    ],
+    h2: '\u0418\u0433\u0440\u0430 \u0441\u0442\u0430\u043b\u0430 \u043f\u0440\u043e\u0431\u043b\u0435\u043c\u043e\u0439? \u2014 \u0421\u0430\u043c\u043e\u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0430',
+    quizIntro: '\u041e\u0442\u0432\u0435\u0442\u044c\u0442\u0435 \u0447\u0435\u0441\u0442\u043d\u043e:',
+    q1: '\u042f \u0438\u0433\u0440\u0430\u044e \u0431\u043e\u043b\u044c\u0448\u0435, \u0447\u0435\u043c \u043f\u043b\u0430\u043d\u0438\u0440\u043e\u0432\u0430\u043b?',
+    q2: '\u042f \u043f\u044b\u0442\u0430\u044e\u0441\u044c \u043e\u0442\u044b\u0433\u0440\u0430\u0442\u044c \u043f\u043e\u0442\u0435\u0440\u0438 \u0434\u0430\u043b\u044c\u043d\u0435\u0439\u0448\u0435\u0439 \u0438\u0433\u0440\u043e\u0439?',
+    q3: '\u042f \u043b\u0433\u0443 \u0431\u043b\u0438\u0437\u043a\u0438\u043c \u043e\u0431 \u0430\u0437\u0430\u0440\u0442\u043d\u044b\u0445 \u0438\u0433\u0440\u0430\u0445?',
+    q4: '\u0418\u0433\u0440\u0430 \u0432\u043b\u0438\u044f\u0435\u0442 \u043d\u0430 \u043c\u043e\u044e \u0440\u0430\u0431\u043e\u0442\u0443 \u0438\u043b\u0438 \u043e\u0442\u043d\u043e\u0448\u0435\u043d\u0438\u044f?',
+    q5: '\u042f \u043d\u0435 \u043c\u043e\u0433\u0443 \u043e\u0441\u0442\u0430\u043d\u043e\u0432\u0438\u0442\u044c\u0441\u044f, \u043a\u043e\u0433\u0434\u0430 \u0445\u043e\u0447\u0443?',
+    q6: '\u042f \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u0443\u044e \u0441\u0440\u0435\u0434\u0441\u0442\u0432\u0430, \u043d\u0435\u043e\u0431\u0445\u043e\u0434\u0438\u043c\u044b\u0435 \u0434\u043b\u044f \u0436\u0438\u0437\u043d\u0438?',
+    quizBtn: '\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c',
+    quizOk: '\u2705 \u041e\u0442\u043b\u0438\u0447\u043d\u043e! \u041f\u043e\u0445\u043e\u0436\u0435, \u0430\u0437\u0430\u0440\u0442\u043d\u044b\u0435 \u0438\u0433\u0440\u044b \u043d\u0435 \u044f\u0432\u043b\u044f\u044e\u0442\u0441\u044f \u0434\u043b\u044f \u0432\u0430\u0441 \u043f\u0440\u043e\u0431\u043b\u0435\u043c\u043e\u0439. \u041d\u043e \u0432\u0441\u0435\u0433\u0434\u0430 \u0431\u0443\u0434\u044c\u0442\u0435 \u0432\u043d\u0438\u043c\u0430\u0442\u0435\u043b\u044c\u043d\u044b.',
+    quizWarn: '\u26a0\ufe0f \u0412\u0430\u0448\u0438 \u043e\u0442\u0432\u0435\u0442\u044b \u0443\u043a\u0430\u0437\u044b\u0432\u0430\u044e\u0442 \u043d\u0430 \u0432\u043e\u0437\u043c\u043e\u0436\u043d\u0443\u044e \u043f\u0440\u043e\u0431\u043b\u0435\u043c\u0443. \u0420\u0435\u043a\u043e\u043c\u0435\u043d\u0434\u0443\u0435\u043c \u043e\u0431\u0440\u0430\u0442\u0438\u0442\u044c\u0441\u044f \u0437\u0430 \u043f\u043e\u043c\u043e\u0449\u044c\u044e \u0438\u043b\u0438 \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u044c \u0441\u0430\u043c\u043e\u0438\u0441\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u0435. \u0412\u044b \u043d\u0435 \u043e\u0434\u0438\u043d\u0438.',
+    h3: '\u041e\u0440\u0433\u0430\u043d\u0438\u0437\u0430\u0446\u0438\u0438 \u043f\u043e\u043c\u043e\u0449\u0438',
+    regions: [
+      {flag:'\ud83c\uddea\ud83c\uddfa', name:'\u0415\u0432\u0440\u043e\u043f\u0430', orgs:[
+        {name:'GamCare (\u0412\u0435\u043b\u0438\u043a\u043e\u0431\u0440\u0438\u0442\u0430\u043d\u0438\u044f)', url:'gamcare.org.uk', phone:'0808 8020 133'},
+        {name:'GamStop', url:'gamstop.co.uk'},
+        {name:'BeGambleAware', url:'begambleaware.org'},
+      ]},
+      {flag:'\ud83c\uddf7\ud83c\uddfa', name:'\u0420\u043e\u0441\u0441\u0438\u044f/\u0421\u041d\u0413', orgs:[
+        {name:'Gamblers Anonymous Russia', url:'ganblers-anonymous.ru'},
+        {name:'\u0422\u0435\u043b\u0435\u0444\u043e\u043d \u0434\u043e\u0432\u0435\u0440\u0438\u044f', phone:'8-800-2000-122 (\u0431\u0435\u0441\u043f\u043b\u0430\u0442\u043d\u043e)', url:''},
+      ]},
+      {flag:'\ud83c\udde9\ud83c\uddea', name:'\u0413\u0435\u0440\u043c\u0430\u043d\u0438\u044f', orgs:[
+        {name:'Bundeszentrale f\u00fcr Suchtfragen', url:'bzga.de'},
+        {name:'Telefonseelsorge', phone:'0800 111 0 111 (\u0431\u0435\u0441\u043f\u043b\u0430\u0442\u043d\u043e)', url:''},
+      ]},
+      {flag:'\ud83c\udf0d', name:'\u041c\u0435\u0436\u0434\u0443\u043d\u0430\u0440\u043e\u0434\u043d\u044b\u0435', orgs:[
+        {name:'Gamblers Anonymous (\u0432\u0435\u0441\u044c \u043c\u0438\u0440)', url:'gamblersanonymous.org'},
+        {name:'GambleAware', url:'gambleaware.org'},
+        {name:'National Problem Gambling Helpline (\u0421\u0428\u0410)', phone:'1-800-522-4700', url:''},
+      ]},
+    ],
+    h4: '\u0421\u0430\u043c\u043e\u0438\u0441\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u0435',
+    selfExcludeIntro: '\u0420\u0435\u0448\u0438\u043b\u0438 \u043e\u0441\u0442\u0430\u043d\u043e\u0432\u0438\u0442\u044c\u0441\u044f? \u041c\u044b \u043f\u043e\u043c\u043e\u0436\u0435\u043c \u0432\u0430\u043c. \u0421\u0430\u043c\u043e\u0438\u0441\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u0435 \u0431\u043b\u043e\u043a\u0438\u0440\u0443\u0435\u0442 \u0434\u043e\u0441\u0442\u0443\u043f \u043a \u0432\u0430\u0448\u0435\u043c\u0443 \u0430\u043a\u043a\u0430\u0443\u043d\u0442\u0443 \u043d\u0430 \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u043b\u0435\u043d\u043d\u044b\u0439 \u0441\u0440\u043e\u043a.',
+    loginRequired: '\u0412\u043e\u0439\u0434\u0438\u0442\u0435 \u0432 \u0430\u043a\u043a\u0430\u0443\u043d\u0442 \u0434\u043b\u044f \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u043a\u0438 \u0441\u0430\u043c\u043e\u0438\u0441\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u044f.',
+    loginBtn: '\u0412\u043e\u0439\u0442\u0438',
+    selfExcludeWarning: '\u26a0\ufe0f \u0421\u0430\u043c\u043e\u0438\u0441\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u0435 \u043d\u0435\u043e\u0442\u0437\u044b\u0432\u043d\u043e \u0434\u043e \u0443\u043a\u0430\u0437\u0430\u043d\u043d\u043e\u0439 \u0434\u0430\u0442\u044b',
+    periodLabel: '\u0421\u0440\u043e\u043a \u0441\u0430\u043c\u043e\u0438\u0441\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u044f:',
+    periodOptions: [{val:'30',label:'30 \u0434\u043d\u0435\u0439'},{val:'90',label:'90 \u0434\u043d\u0435\u0439'},{val:'180',label:'6 \u043c\u0435\u0441\u044f\u0446\u0435\u0432'},{val:'365',label:'1 \u0433\u043e\u0434'}],
+    confirmLabel: '\u041f\u043e\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0435 \u2014 \u0432\u0432\u0435\u0434\u0438\u0442\u0435 \u0441\u043b\u043e\u0432\u043e \u00ab\u0421\u0422\u041e\u041f\u00bb:',
+    confirmPlaceholder: '\u0421\u0422\u041e\u041f',
+    selfExcludeBtn: '\u0410\u043a\u0442\u0438\u0432\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0441\u0430\u043c\u043e\u0438\u0441\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u0435',
+    excludeOk: '\u2705 \u0421\u0430\u043c\u043e\u0438\u0441\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u0435 \u0430\u043a\u0442\u0438\u0432\u0438\u0440\u043e\u0432\u0430\u043d\u043e. \u0410\u043a\u043a\u0430\u0443\u043d\u0442 \u0437\u0430\u0431\u043b\u043e\u043a\u0438\u0440\u043e\u0432\u0430\u043d. \u041c\u044b \u0446\u0435\u043d\u0438\u043c \u0432\u0430\u0448\u0435 \u0440\u0435\u0448\u0435\u043d\u0438\u0435.',
+    errWord: '\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0441\u043b\u043e\u0432\u043e \u0421\u0422\u041e\u041f',
+    errFail: '\u041e\u0448\u0438\u0431\u043a\u0430. \u041f\u043e\u043f\u0440\u043e\u0431\u0443\u0439\u0442\u0435 \u0435\u0449\u0451 \u0440\u0430\u0437.',
+    footer: '\u00a9 2026 HATHOR Royal Casino \u00b7 <a href="/terms.html" style="color:var(--gold)">T&C</a> \u00b7 <a href="/privacy.html" style="color:var(--gold)">\u041f\u043e\u043b\u0438\u0442\u0438\u043a\u0430 \u043a\u043e\u043d\u0444\u0438\u0434\u0435\u043d\u0446\u0438\u0430\u043b\u044c\u043d\u043e\u0441\u0442\u0438</a> \u00b7 18+',
+  },
+  de: {
+    pageTitle: 'Verantwortungsvolles Spielen',
+    backLink: '\u2190 Zur\u00fcck',
+    pageSub: 'Wir k\u00fcmmern uns um Ihr Wohlbefinden. Spielen sollte Unterhaltung sein \u2014 keine finanzielle Strategie.',
+    warnTitle: 'Spielen \u2014 nur zur Unterhaltung',
+    warnText: 'Spielen Sie nie mehr als Sie sich leisten k\u00f6nnen zu verlieren. Spielen kann keine Einkommensquelle sein. Wenn Sie f\u00fchlen, dass das Spielen zum Problem wird \u2014 suchen Sie Hilfe.',
+    h1: 'Unsere Werkzeuge f\u00fcr Ihren Schutz',
+    tools: [
+      {icon:'\ud83d\udcca', title:'Tageslimit', desc:'Legen Sie einen maximalen Einsatzbetrag pro Tag fest. Bei Erreichen werden Spiele automatisch gesperrt.'},
+      {icon:'\ud83d\udcc5', title:'Wochenlimit', desc:'Die w\u00f6chentliche Einsatzsumme kann das festgelegte Limit nicht \u00fcberschreiten.'},
+      {icon:'\u23f8\ufe0f', title:'Pause', desc:'Sperren Sie Ihr Konto vor\u00fcbergehend f\u00fcr 1 bis 30 Tage. Gilt sofort.'},
+      {icon:'\ud83d\udeab', title:'Selbstausschluss', desc:'Vollst\u00e4ndige Kontosperrung von 30 Tagen bis 1 Jahr. Nicht vor Ablauf aufhebbar.'},
+      {icon:'\u23f0', title:'Reality Check', desc:'Alle 30/60/90 Minuten erhalten Sie eine Benachrichtigung \u00fcber Zeit und Geld.'},
+      {icon:'\ud83d\udcc8', title:'Spielverlauf', desc:'Sie k\u00f6nnen jederzeit Ihren Spielverlauf und die ausgegebenen Betr\u00e4ge einsehen.'},
+    ],
+    h2: 'Ist Spielen ein Problem? \u2014 Selbsttest',
+    quizIntro: 'Beantworten Sie diese Fragen ehrlich:',
+    q1: 'Spiele ich mehr als geplant?',
+    q2: 'Versuche ich Verluste durch weiteres Spielen zur\u00fcckzugewinnen?',
+    q3: 'L\u00fcge ich der Familie \u00fcber mein Spielen?',
+    q4: 'Beeinflusst das Spielen meine Arbeit oder Beziehungen?',
+    q5: 'Kann ich nicht aufh\u00f6ren wenn ich m\u00f6chte?',
+    q6: 'Verwende ich Mittel f\u00fcr den Lebensunterhalt?',
+    quizBtn: 'Pr\u00fcfen',
+    quizOk: '\u2705 Super! Das Spielen scheint kein Problem f\u00fcr Sie zu sein. Bleiben Sie jedoch wachsam.',
+    quizWarn: '\u26a0\ufe0f Ihre Antworten deuten auf ein m\u00f6gliches Problem hin. Wir empfehlen Hilfe zu suchen oder den Selbstausschluss zu nutzen.',
+    h3: 'Hilfsorganisationen',
+    regions: [
+      {flag:'\ud83c\uddea\ud83c\uddfa', name:'Europa', orgs:[
+        {name:'GamCare (UK)', url:'gamcare.org.uk', phone:'0808 8020 133'},
+        {name:'GamStop (UK)', url:'gamstop.co.uk'},
+        {name:'BeGambleAware', url:'begambleaware.org'},
+      ]},
+      {flag:'\ud83c\udde9\ud83c\uddea', name:'Deutschland', orgs:[
+        {name:'Bundeszentrale f\u00fcr Suchtfragen', url:'bzga.de'},
+        {name:'Spielsucht Hilfe', url:'spielen-mit-verantwortung.de'},
+        {name:'Telefonseelsorge', phone:'0800 111 0 111 (kostenlos)', url:''},
+      ]},
+      {flag:'\ud83c\udf0d', name:'International', orgs:[
+        {name:'Gamblers Anonymous', url:'gamblersanonymous.org'},
+        {name:'GambleAware', url:'gambleaware.org'},
+        {name:'National Problem Gambling Helpline (US)', phone:'1-800-522-4700', url:''},
+      ]},
+    ],
+    h4: 'Selbstausschluss',
+    selfExcludeIntro: 'Haben Sie sich entschieden aufzuh\u00f6ren? Wir helfen Ihnen. Der Selbstausschluss sperrt den Zugang zu Ihrem Konto f\u00fcr einen festgelegten Zeitraum.',
+    loginRequired: 'Melden Sie sich in Ihrem Konto an, um den Selbstausschluss einzurichten.',
+    loginBtn: 'Anmelden',
+    selfExcludeWarning: '\u26a0\ufe0f Der Selbstausschluss ist bis zum angegebenen Enddatum unwiderruflich',
+    periodLabel: 'Selbstausschluss-Zeitraum:',
+    periodOptions: [{val:'30',label:'30 Tage'},{val:'90',label:'90 Tage'},{val:'180',label:'6 Monate'},{val:'365',label:'1 Jahr'}],
+    confirmLabel: 'Best\u00e4tigen \u2014 geben Sie das Wort \u201eSSTOPP\u201c ein:',
+    confirmPlaceholder: 'STOPP',
+    selfExcludeBtn: 'Selbstausschluss aktivieren',
+    excludeOk: '\u2705 Selbstausschluss aktiviert. Konto gesperrt. Wir begr\u00fc\u00dfen Ihre Entscheidung.',
+    errWord: 'Geben Sie das Wort STOPP ein',
+    errFail: 'Fehler. Bitte versuchen Sie es erneut.',
+    footer: '\u00a9 2026 HATHOR Royal Casino \u00b7 <a href="/terms.html" style="color:var(--gold)">AGB</a> \u00b7 <a href="/privacy.html" style="color:var(--gold)">Datenschutz</a> \u00b7 18+',
+  },
+  pl: {
+    pageTitle: 'Odpowiedzialny Hazard',
+    backLink: '\u2190 Wr\u00f3\u0107',
+    pageSub: 'Troszczymy si\u0119 o Twoje dobre samopoczucie. Hazard powinien by\u0107 rozrywk\u0105 \u2014 nie strategi\u0105 finansow\u0105.',
+    warnTitle: 'Hazard \u2014 tylko dla rozrywki',
+    warnText: 'Nigdy nie graj wi\u0119cej ni\u017c mo\u017cesz sobie pozwoli\u0107 przegra\u0107. Hazard nie mo\u017ce by\u0107 \u017ar\u00f3d\u0142em dochod\u00f3w. Je\u015bli czujesz, \u017ce hazard staje si\u0119 problemem \u2014 szukaj pomocy.',
+    h1: 'Nasze narz\u0119dzia dla Twojej ochrony',
+    tools: [
+      {icon:'\ud83d\udcca', title:'Dzienny limit', desc:'Ustaw maksymaln\u0105 kwot\u0119 zak\u0142ad\u00f3w dziennie. Po osi\u0105gni\u0119ciu \u2014 gry s\u0105 automatycznie blokowane.'},
+      {icon:'\ud83d\udcc5', title:'Tygodniowy limit', desc:'Tygodniowa suma zak\u0142ad\u00f3w nie mo\u017ce przekroczy\u0107 ustawionego limitu.'},
+      {icon:'\u23f8\ufe0f', title:'Przerwa', desc:'Tymczasowe zawieszenie konta od 1 do 30 dni. Obowi\u0105zuje natychmiast.'},
+      {icon:'\ud83d\udeab', title:'Samowykluczenie', desc:'Pe\u0142na blokada konta od 30 dni do 1 roku. Nie mo\u017cna cofn\u0105\u0107 przed terminem.'},
+      {icon:'\u23f0', title:'Sprawdzenie rzeczywisto\u015bci', desc:'Co 30/60/90 minut otrzymasz powiadomienie o czasie i pieni\u0105dzach.'},
+      {icon:'\ud83d\udcc8', title:'Historia gier', desc:'Mo\u017cesz zawsze przegl\u0105da\u0107 histori\u0119 gier i wydane kwoty.'},
+    ],
+    h2: 'Czy hazard sta\u0142 si\u0119 problemem? \u2014 Samotest',
+    quizIntro: 'Odpowiedz szczerze na te pytania:',
+    q1: 'Gram wi\u0119cej ni\u017c planowa\u0142em?',
+    q2: 'Pr\u00f3buj\u0119 odegra\u0107 straty dalszym hazardem?',
+    q3: 'K\u0142ami\u0119 rodzinie o hazardzie?',
+    q4: 'Czy hazard wp\u0142ywa na moj\u0105 prac\u0119 lub relacje?',
+    q5: 'Nie mog\u0119 si\u0119 zatrzyma\u0107 kiedy chc\u0119?',
+    q6: 'Czy u\u017cywam \u015brodk\u00f3w na podstawowe potrzeby?',
+    quizBtn: 'Sprawd\u017a',
+    quizOk: '\u2705 Swietnie! Hazard nie wydaje si\u0119 by\u0107 dla Ciebie problemem. Jednak zawsze b\u0105d\u017a czujny.',
+    quizWarn: '\u26a0\ufe0f Twoje odpowiedzi wskazuj\u0105 na mo\u017cliwy problem. Zalecamy szukanie pomocy lub skorzystanie z samowykluczenia.',
+    h3: 'Organizacje pomocowe',
+    regions: [
+      {flag:'\ud83c\uddea\ud83c\uddfa', name:'Europa', orgs:[
+        {name:'GamCare (UK)', url:'gamcare.org.uk', phone:'0808 8020 133'},
+        {name:'BeGambleAware', url:'begambleaware.org'},
+      ]},
+      {flag:'\ud83c\uddf5\ud83c\uddf1', name:'Polska', orgs:[
+        {name:'Centrum Leczenia Uzale\u017cnie\u0144', url:'clu.waw.pl'},
+        {name:'Anonimowi Hazardzisci', url:'hazardanon.pl'},
+        {name:'Telefon Zaufania', phone:'116 123', url:''},
+      ]},
+      {flag:'\ud83c\udf0d', name:'Mi\u0119dzynarodowe', orgs:[
+        {name:'Gamblers Anonymous', url:'gamblersanonymous.org'},
+        {name:'GambleAware', url:'gambleaware.org'},
+        {name:'National Problem Gambling Helpline (US)', phone:'1-800-522-4700', url:''},
+      ]},
+    ],
+    h4: 'Samowykluczenie',
+    selfExcludeIntro: 'Zdecydowa\u0142e\u015b si\u0119 zatrzyma\u0107? Pomo\u017cemy Ci. Samowykluczenie blokuje dost\u0119p do konta na okre\u015blony czas.',
+    loginRequired: 'Zaloguj si\u0119 do konta, aby ustawi\u0107 samowykluczenie.',
+    loginBtn: 'Zaloguj si\u0119',
+    selfExcludeWarning: '\u26a0\ufe0f Samowykluczenie jest nieodwo\u0142alne do podanej daty ko\u0144ca',
+    periodLabel: 'Okres samowykluczenia:',
+    periodOptions: [{val:'30',label:'30 dni'},{val:'90',label:'90 dni'},{val:'180',label:'6 miesi\u0119cy'},{val:'365',label:'1 rok'}],
+    confirmLabel: 'Potwierd\u017a \u2014 wpisz s\u0142owo \u201eSTOP\u201c:',
+    confirmPlaceholder: 'STOP',
+    selfExcludeBtn: 'Aktywuj samowykluczenie',
+    excludeOk: '\u2705 Samowykluczenie aktywowane. Konto zablokowane. Doceniamy Twoj\u0105 decyzj\u0119.',
+    errWord: 'Wpisz s\u0142owo STOP',
+    errFail: 'B\u0142\u0105d. Spr\u00f3buj ponownie.',
+    footer: '\u00a9 2026 HATHOR Royal Casino \u00b7 <a href="/terms.html" style="color:var(--gold)">Regulamin</a> \u00b7 <a href="/privacy.html" style="color:var(--gold)">Prywatno\u015b\u0107</a> \u00b7 18+',
+  },
+  fr: {
+    pageTitle: 'Jeu Responsable',
+    backLink: '\u2190 Retour',
+    pageSub: 'Nous nous soucions de votre bien-\u00eatre. Le jeu doit \u00eatre un divertissement \u2014 pas une strat\u00e9gie financi\u00e8re.',
+    warnTitle: 'Le jeu \u2014 uniquement pour le divertissement',
+    warnText: 'Ne jouez jamais plus que vous ne pouvez vous permettre de perdre. Le jeu ne peut pas \u00eatre une source de revenus. Si vous sentez que le jeu devient un probl\u00e8me \u2014 cherchez de l\'aide.',
+    h1: 'Nos outils pour votre protection',
+    tools: [
+      {icon:'\ud83d\udcca', title:'Limite quotidienne', desc:'D\u00e9finissez un montant maximum de mises par jour. Une fois atteint, les jeux sont automatiquement bloqu\u00e9s.'},
+      {icon:'\ud83d\udcc5', title:'Limite hebdomadaire', desc:'Le total des mises hebdomadaires ne peut pas d\u00e9passer la limite fix\u00e9e.'},
+      {icon:'\u23f8\ufe0f', title:'Pause', desc:'Suspendez temporairement votre compte de 1 \u00e0 30 jours. Prend effet imm\u00e9diatement.'},
+      {icon:'\ud83d\udeab', title:'Auto-exclusion', desc:'Blocage total de l\'acc\u00e8s au compte de 30 jours \u00e0 1 an. Irrr\u00e9vocable avant la date.'},
+      {icon:'\u23f0', title:'V\u00e9rification de r\u00e9alit\u00e9', desc:'Toutes les 30/60/90 minutes vous recevrez une notification sur le temps et l\'argent.'},
+      {icon:'\ud83d\udcc8', title:'Historique des jeux', desc:'Vous pouvez toujours consulter votre historique de jeux et les montants d\u00e9pens\u00e9s.'},
+    ],
+    h2: 'Le jeu est-il un probl\u00e8me? \u2014 Auto-\u00e9valuation',
+    quizIntro: 'R\u00e9pondez honn\u00eatement \u00e0 ces questions:',
+    q1: 'Est-ce que je joue plus que pr\u00e9vu?',
+    q2: 'Est-ce que j\'essaie de r\u00e9cup\u00e9rer mes pertes en jouant plus?',
+    q3: 'Est-ce que je mens \u00e0 ma famille sur mon jeu?',
+    q4: 'Le jeu affecte-t-il mon travail ou mes relations?',
+    q5: 'Ne puis-je pas m\'arr\u00eater quand je le veux?',
+    q6: 'Est-ce que j\'utilise des fonds n\u00e9cessaires pour les d\u00e9penses essentielles?',
+    quizBtn: 'V\u00e9rifier',
+    quizOk: '\u2705 Excellent! Le jeu ne semble pas \u00eatre un probl\u00e8me pour vous. Restez toujours vigilant.',
+    quizWarn: '\u26a0\ufe0f Vos r\u00e9ponses sugg\u00e8rent un probl\u00e8me possible. Nous recommandons de chercher de l\'aide ou d\'utiliser l\'auto-exclusion.',
+    h3: 'Organisations d\'aide',
+    regions: [
+      {flag:'\ud83c\uddea\ud83c\uddfa', name:'Europe', orgs:[
+        {name:'GamCare (UK)', url:'gamcare.org.uk', phone:'0808 8020 133'},
+        {name:'GamStop (UK)', url:'gamstop.co.uk'},
+        {name:'BeGambleAware', url:'begambleaware.org'},
+      ]},
+      {flag:'\ud83c\uddeb\ud83c\uddf7', name:'France', orgs:[
+        {name:'Joueurs Info Service', url:'joueurs-info-service.fr', phone:'09 74 75 13 13'},
+        {name:'SOS Addictions', url:'sosaddictions.org'},
+      ]},
+      {flag:'\ud83c\udf0d', name:'International', orgs:[
+        {name:'Gamblers Anonymous', url:'gamblersanonymous.org'},
+        {name:'GambleAware', url:'gambleaware.org'},
+        {name:'National Problem Gambling Helpline (US)', phone:'1-800-522-4700', url:''},
+      ]},
+    ],
+    h4: 'Auto-exclusion',
+    selfExcludeIntro: 'D\u00e9cid\u00e9 d\'arr\u00eater? Nous vous aiderons. L\'auto-exclusion bloque l\'acc\u00e8s \u00e0 votre compte pour une p\u00e9riode d\u00e9finie.',
+    loginRequired: 'Connectez-vous \u00e0 votre compte pour configurer l\'auto-exclusion.',
+    loginBtn: 'Se connecter',
+    selfExcludeWarning: '\u26a0\ufe0f L\'auto-exclusion est irr\u00e9vocable jusqu\'\u00e0 la date de fin sp\u00e9cifi\u00e9e',
+    periodLabel: 'P\u00e9riode d\'auto-exclusion:',
+    periodOptions: [{val:'30',label:'30 jours'},{val:'90',label:'90 jours'},{val:'180',label:'6 mois'},{val:'365',label:'1 an'}],
+    confirmLabel: 'Confirmez \u2014 tapez le mot \u00abSTOP\u00bb:',
+    confirmPlaceholder: 'STOP',
+    selfExcludeBtn: 'Activer l\'auto-exclusion',
+    excludeOk: '\u2705 Auto-exclusion activ\u00e9e. Compte bloqu\u00e9. Nous saluons votre d\u00e9cision.',
+    errWord: 'Entrez le mot STOP',
+    errFail: 'Erreur. Veuillez r\u00e9essayer.',
+    footer: '\u00a9 2026 HATHOR Royal Casino \u00b7 <a href="/terms.html" style="color:var(--gold)">CGU</a> \u00b7 <a href="/privacy.html" style="color:var(--gold)">Confidentialit\u00e9</a> \u00b7 18+',
+  },
+};
+
+var _currentLang = 'en';
+
+var LANGS_LIST=[{code:'en',flag:'\ud83c\uddec\ud83c\udde7'},{code:'lt',flag:'\ud83c\uddf1\ud83c\uddf9'},{code:'ru',flag:'\ud83c\uddf7\ud83c\uddfa'},{code:'de',flag:'\ud83c\udde9\ud83c\uddea'},{code:'pl',flag:'\ud83c\uddf5\ud83c\uddf1'},{code:'fr',flag:'\ud83c\uddeb\ud83c\uddf7'}];
+
+function applyLang(code){
+  var t=RESP_LANGS[code]||RESP_LANGS.en;
+  _currentLang = code;
+  localStorage.setItem('hrc_lang',code);
+  // Simple text keys
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    var k=el.getAttribute('data-i18n');
+    if(t[k]!==undefined)el.textContent=t[k];
+  });
+  // HTML keys
+  document.querySelectorAll('[data-i18n-html]').forEach(function(el){
+    var k=el.getAttribute('data-i18n-html');
+    if(t[k]!==undefined)el.innerHTML=t[k];
+  });
+  // Tools grid
+  var tg=document.getElementById('toolsGrid');
+  if(tg&&t.tools){
+    tg.innerHTML=t.tools.map(function(tool){
+      return '<div class="tool-card"><div class="tool-icon">'+tool.icon+'</div><div class="tool-title">'+tool.title+'</div><div class="tool-desc">'+tool.desc+'</div></div>';
+    }).join('');
+  }
+  // Organizations
+  var oc=document.getElementById('orgsContainer');
+  if(oc&&t.regions){
+    oc.innerHTML=t.regions.map(function(region){
+      var cards=region.orgs.map(function(org){
+        var phone=org.phone?'<div class="org-phone">&#128222; '+org.phone+'</div>':'';
+        var url=org.url?'<div class="org-url">'+org.url+'</div>':'';
+        return '<div class="org-card"><div class="org-name">'+org.name+'</div>'+url+phone+'</div>';
+      }).join('');
+      return '<div class="orgs-region"><div class="region-title">'+region.flag+' '+region.name+'</div><div class="orgs">'+cards+'</div></div>';
+    }).join('');
+  }
+  // Self-exclusion period dropdown
+  var sel=document.getElementById('exclude-days');
+  if(sel&&t.periodOptions){
+    var curVal=sel.value;
+    sel.innerHTML=t.periodOptions.map(function(o){return '<option value="'+o.val+'">'+o.label+'</option>';}).join('');
+    if(curVal)sel.value=curVal;
+  }
+  // Confirm label
+  var cl=document.querySelector('[data-i18n-confirm-label]');
+  if(cl&&t.confirmLabel)cl.textContent=t.confirmLabel;
+  // Confirm placeholder
+  var ci=document.getElementById('exclude-confirm');
+  if(ci&&t.confirmPlaceholder)ci.placeholder=t.confirmPlaceholder;
+  // Self-exclude button
+  var seb=document.getElementById('selfExcludeBtn');
+  if(seb&&t.selfExcludeBtn)seb.innerHTML='\ud83d\udeab <span>'+t.selfExcludeBtn+'</span>';
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===code);});
+  document.documentElement.lang=code;
+}
+
+document.getElementById('langBar').innerHTML=LANGS_LIST.map(function(l){return '<button class="lang-btn" data-lang="'+l.code+'" onclick="applyLang(\''+l.code+'\')">'+ l.flag+' '+l.code.toUpperCase()+'</button>';}).join('');
+
 function checkQuiz(){
   var qs=['q1','q2','q3','q4','q5','q6'];
   var checked=qs.filter(function(q){return document.getElementById(q).checked;}).length;
+  var t=RESP_LANGS[_currentLang]||RESP_LANGS.en;
+  document.getElementById('quiz-ok').textContent=t.quizOk||'';
+  document.getElementById('quiz-warn').textContent=t.quizWarn||'';
   document.getElementById('quiz-ok').style.display=checked<=1?'block':'none';
   document.getElementById('quiz-warn').style.display=checked>=2?'block':'none';
 }
 
 function submitSelfExclusion(){
   var uid=localStorage.getItem('hrc_uid')||localStorage.getItem('casino_uid');
-  if(!uid){alert('Prisijunkite prie paskyros!');return;}
-  var confirmVal=document.getElementById('exclude-confirm').value.trim();
-  if(confirmVal!=='SUSTOTI'){
-    document.getElementById('exclude-err').textContent='Įveskite žodį SUSTOTI';
-    document.getElementById('exclude-err').style.display='block';
+  var t=RESP_LANGS[_currentLang]||RESP_LANGS.en;
+  if(!uid){
+    alert(t.loginRequired||'Please log in');
+    return;
+  }
+  var confirmVal=document.getElementById('exclude-confirm').value.trim().toUpperCase();
+  var expectedWord=(CONFIRM_WORDS[_currentLang]||'STOP').toUpperCase();
+  if(confirmVal!==expectedWord){
+    var errEl=document.getElementById('exclude-err');
+    errEl.textContent=t.errWord||'Enter the confirmation word';
+    errEl.style.display='block';
     return;
   }
   var days=parseInt(document.getElementById('exclude-days').value)||30;
@@ -178,6 +609,7 @@ function submitSelfExclusion(){
     .then(function(r){return r.json();})
     .then(function(d){
       if(d.ok){
+        document.getElementById('exclude-ok').textContent=t.excludeOk||'Self-exclusion activated.';
         document.getElementById('exclude-ok').style.display='block';
         document.getElementById('selfexclude-form-inner').style.opacity='0.4';
         document.getElementById('selfexclude-form-inner').style.pointerEvents='none';
@@ -185,8 +617,9 @@ function submitSelfExclusion(){
       }
     })
     .catch(function(){
-      document.getElementById('exclude-err').textContent='Klaida. Bandykite dar kartą.';
-      document.getElementById('exclude-err').style.display='block';
+      var errEl=document.getElementById('exclude-err');
+      errEl.textContent=t.errFail||'Error. Please try again.';
+      errEl.style.display='block';
     });
 }
 
@@ -195,6 +628,8 @@ if(!uid){
   document.getElementById('login-required').style.display='block';
   document.getElementById('selfexclude-form-inner').style.display='none';
 }
+
+applyLang(localStorage.getItem('hrc_lang')||'en');
 </script>
 </body>
 </html>
