@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node scripts/sync-translations.js --check 2>&1 | grep -E 'Missing|\\[' | head -20 || true"
+          }
+        ]
+      }
+    ]
+  }
+}
