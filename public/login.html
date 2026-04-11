@@ -105,10 +105,17 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 .success-icon{font-size:52px;margin-bottom:16px;display:block;}
 .success-title{font-family:'Orbitron',monospace;font-size:18px;color:var(--green);margin-bottom:8px;}
 .success-desc{font-size:13px;color:rgba(232,224,208,.4);}
+
+  .lang-bar{display:flex;gap:5px;align-items:center;flex-wrap:wrap;}
+  .lang-btn{background:none;border:1px solid rgba(201,168,76,0.2);border-radius:6px;color:rgba(232,226,212,0.5);font-size:11px;padding:4px 7px;cursor:pointer;transition:all .2s;}
+  .lang-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,0.08);}
+  .lang-btn:hover{color:var(--cream);}
+  .lang-wrap{position:fixed;top:12px;right:12px;z-index:999;}
 </style>
 </head>
 <body>
 
+<div class="lang-wrap"><div class="lang-bar" id="langBar"></div></div>
 <div class="card">
   <div class="logo-wrap">
     <div class="logo">⬡ HATHOR</div>
@@ -118,8 +125,8 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
   <div class="panel">
     <!-- Tabs -->
     <div class="auth-tabs">
-      <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Prisijungti</div>
-      <div class="auth-tab" id="tab-register" onclick="switchTab('register')">Registruotis</div>
+      <div class="auth-tab active" id="tab-login" onclick="switchTab('login')" data-i18n="tab_login">Log In</div>
+      <div class="auth-tab" id="tab-register" onclick="switchTab('register')" data-i18n="tab_register">Register</div>
     </div>
 
     <!-- Error box -->
@@ -128,26 +135,26 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
     <!-- Success -->
     <div class="success-wrap" id="successWrap">
       <span class="success-icon">🎰</span>
-      <div class="success-title">Sveiki atvykę!</div>
-      <div class="success-desc">Nukreipiame į kazino...</div>
+      <div class="success-title" data-i18n="welcome">Welcome!</div>
+      <div class="success-desc" data-i18n="redirecting">Redirecting...</div>
     </div>
 
     <!-- LOGIN FORM -->
     <div class="form-section active" id="form-login">
       <div class="field">
-        <label>El. paštas</label>
-        <input class="inp" id="loginEmail" type="email" placeholder="jusu@pastas.lt" autocomplete="email" onkeydown="if(event.key==='Enter')doLogin()"/>
+        <label data-i18n="lbl_email">Email</label>
+        <input class="inp" id="loginEmail" type="email" placeholder="your@email.com" data-i18n-ph="ph_email" autocomplete="email" onkeydown="if(event.key==='Enter')doLogin()"/>
       </div>
       <div class="field">
-        <label>Slaptažodis</label>
+        <label data-i18n="lbl_pwd">Password</label>
         <div class="inp-wrap">
           <input class="inp" id="loginPwd" type="password" placeholder="••••••••" autocomplete="current-password" style="padding-right:44px;" onkeydown="if(event.key==='Enter')doLogin()"/>
           <button class="eye-btn" onclick="togglePwd('loginPwd',this)" tabindex="-1">👁</button>
         </div>
       </div>
-      <button class="submit-btn" id="loginBtn" onclick="doLogin()">Prisijungti →</button>
+      <button class="submit-btn" id="loginBtn" onclick="doLogin()" id="loginBtnLbl" data-i18n="btn_login">Log In →</button>
       <div class="legal">
-        Neturite paskyros? <a href="#" onclick="switchTab('register');return false;">Registruokitės čia</a>
+        <span data-i18n-html="no_account">No account? <a href="#" onclick="switchTab('register');return false;">Register here</a></span>
       </div>
     </div>
 
@@ -155,20 +162,20 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
     <div class="form-section" id="form-register">
       <div class="age-warn">
         <span class="icon">🔞</span>
-        <span>Registracija ir žaidimas leidžiami <strong>tik nuo 18 metų</strong>. Jaunesniems asmenims prieiga draudžiama pagal Lietuvos azartinių lošimų įstatymą.</span>
+        <span data-i18n-html="age_warn">Registration and play allowed <strong>only for 18+</strong>. Access is prohibited for minors.</span>
       </div>
       <div class="field">
-        <label>Vardas ir Pavardė</label>
-        <input class="inp" id="regName" type="text" placeholder="Vardenis Pavardenis" autocomplete="name"/>
+        <label data-i18n="lbl_name">Full Name</label>
+        <input class="inp" id="regName" type="text" placeholder="Your Name" data-i18n-ph="ph_name" autocomplete="name"/>
       </div>
       <div class="field">
-        <label>El. paštas</label>
-        <input class="inp" id="regEmail" type="email" placeholder="jusu@pastas.lt" autocomplete="email"/>
+        <label data-i18n="lbl_email">Email</label>
+        <input class="inp" id="regEmail" type="email" placeholder="your@email.com" data-i18n-ph="ph_email" autocomplete="email"/>
       </div>
       <div class="field">
-        <label>Slaptažodis</label>
+        <label data-i18n="lbl_pwd">Password</label>
         <div class="inp-wrap">
-          <input class="inp" id="regPwd" type="password" placeholder="Bent 8 simboliai" autocomplete="new-password" style="padding-right:44px;" oninput="checkStrength(this.value)"/>
+          <input class="inp" id="regPwd" type="password" placeholder="At least 8 characters" data-i18n-ph="ph_pwd_min" autocomplete="new-password" style="padding-right:44px;" oninput="checkStrength(this.value)"/>
           <button class="eye-btn" onclick="togglePwd('regPwd',this)" tabindex="-1">👁</button>
         </div>
         <div class="pwd-strength" id="pwdStrength">
@@ -177,16 +184,16 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
         </div>
       </div>
       <div class="field">
-        <label>Pakartokite Slaptažodį</label>
+        <label data-i18n="lbl_pwd2">Repeat Password</label>
         <div class="inp-wrap">
           <input class="inp" id="regPwd2" type="password" placeholder="••••••••" autocomplete="new-password" style="padding-right:44px;" onkeydown="if(event.key==='Enter')doRegister()"/>
           <button class="eye-btn" onclick="togglePwd('regPwd2',this)" tabindex="-1">👁</button>
         </div>
       </div>
-      <button class="submit-btn" id="regBtn" onclick="doRegister()">Sukurti Paskyrą →</button>
+      <button class="submit-btn" id="regBtn" onclick="doRegister()" id="regBtnLbl" data-i18n="btn_register">Create Account →</button>
       <div class="legal">
-        Registruodamiesi sutinkate su <a href="#">Naudojimo taisyklėmis</a> ir patvirtinate, kad esate 18+ metų amžiaus.<br/>
-        Jau turite paskyrą? <a href="#" onclick="switchTab('login');return false;">Prisijunkite</a>
+        <span data-i18n-html="legal">By registering you agree to <a href="/terms.html">Terms &amp; Conditions</a> and confirm you are 18+.</span><br/>
+        <span data-i18n-html="have_account">Already have an account? <a href="#" onclick="switchTab('login');return false;">Log in</a></span>
       </div>
     </div>
   </div>
@@ -332,6 +339,24 @@ function showSuccess() {
   document.querySelector('.auth-tabs').style.display = 'none';
   document.getElementById('successWrap').classList.add('visible');
 }
+</script>
+
+<script>
+const LANGS_LIST=[{code:'en',flag:'🇬🇧'},{code:'lt',flag:'🇱🇹'},{code:'ru',flag:'🇷🇺'},{code:'de',flag:'🇩🇪'},{code:'pl',flag:'🇵🇱'},{code:'fr',flag:'🇫🇷'},{code:'tr',flag:'🇹🇷'},{code:'ar',flag:'🇸🇦'},{code:'zh',flag:'🇨🇳'},{code:'hi',flag:'🇮🇳'},{code:'uk',flag:'🇺🇦'}];
+const PAGE_LANGS = {"en":{"tab_login":"Log In","tab_register":"Register","welcome":"Welcome!","redirecting":"Redirecting to casino...","lbl_email":"Email","lbl_pwd":"Password","lbl_name":"Full Name","lbl_pwd2":"Repeat Password","btn_login":"Log In →","btn_register":"Create Account →","age_warn":"Registration and play allowed <strong>only for 18+</strong>. Access is prohibited for minors.","no_account":"No account? <a href=\"#\" onclick=\"switchTab('register');return false;\">Register here</a>","have_account":"Already have an account? <a href=\"#\" onclick=\"switchTab('login');return false;\">Log in</a>","legal":"By registering you agree to <a href=\"/terms.html\">Terms & Conditions</a> and confirm you are 18+.","ph_email":"your@email.com","ph_name":"Your Name","ph_pwd":"••••••••","ph_pwd_min":"At least 8 characters","pwd_weak":"Weak","pwd_ok":"OK","pwd_strong":"Strong","err_fill":"Fill in all fields","err_short":"Password must be at least 8 characters","err_match":"Passwords do not match","err_invalid":"Invalid email or password","err_exists":"Email already registered","logging_in":"Logging in...","registering":"Creating account...","forgot":"Forgot password?"},"lt":{"tab_login":"Prisijungti","tab_register":"Registruotis","welcome":"Sveiki atvykę!","redirecting":"Nukreipiame į kazino...","lbl_email":"El. paštas","lbl_pwd":"Slaptažodis","lbl_name":"Vardas ir Pavardė","lbl_pwd2":"Pakartokite Slaptažodį","btn_login":"Prisijungti →","btn_register":"Sukurti Paskyrą →","age_warn":"Registracija ir žaidimas leidžiami <strong>tik nuo 18 metų</strong>. Jaunesniems prieiga draudžiama.","no_account":"Neturite paskyros? <a href=\"#\" onclick=\"switchTab('register');return false;\">Registruokitės čia</a>","have_account":"Jau turite paskyrą? <a href=\"#\" onclick=\"switchTab('login');return false;\">Prisijunkite</a>","legal":"Registruodamiesi sutinkate su <a href=\"/terms.html\">Naudojimo taisyklėmis</a> ir patvirtinate, kad esate 18+.","ph_email":"jusu@pastas.lt","ph_name":"Vardenis Pavardenis","ph_pwd":"••••••••","ph_pwd_min":"Bent 8 simboliai","pwd_weak":"Silpnas","pwd_ok":"Vidutinis","pwd_strong":"Stiprus","err_fill":"Užpildykite visus laukus","err_short":"Slaptažodis turi būti bent 8 simboliai","err_match":"Slaptažodžiai nesutampa","err_invalid":"Neteisingas el. paštas arba slaptažodis","err_exists":"El. paštas jau registruotas","logging_in":"Jungiamasi...","registering":"Kuriama paskyra...","forgot":"Pamiršote slaptažodį?"},"ru":{"tab_login":"Войти","tab_register":"Регистрация","welcome":"Добро пожаловать!","redirecting":"Перенаправление в казино...","lbl_email":"Email","lbl_pwd":"Пароль","lbl_name":"Имя и фамилия","lbl_pwd2":"Повторите пароль","btn_login":"Войти →","btn_register":"Создать аккаунт →","age_warn":"Регистрация и игра разрешены <strong>только для 18+</strong>.","no_account":"Нет аккаунта? <a href=\"#\" onclick=\"switchTab('register');return false;\">Зарегистрируйтесь</a>","have_account":"Есть аккаунт? <a href=\"#\" onclick=\"switchTab('login');return false;\">Войдите</a>","legal":"Регистрируясь, вы соглашаетесь с <a href=\"/terms.html\">Правилами</a>.","ph_email":"your@email.com","ph_name":"Имя Фамилия","ph_pwd":"••••••••","ph_pwd_min":"Минимум 8 символов","pwd_weak":"Слабый","pwd_ok":"Средний","pwd_strong":"Сильный","err_fill":"Заполните все поля","err_short":"Пароль минимум 8 символов","err_match":"Пароли не совпадают","err_invalid":"Неверный email или пароль","err_exists":"Email уже зарегистрирован","logging_in":"Вход...","registering":"Создание аккаунта...","forgot":"Забыли пароль?"},"de":{"tab_login":"Anmelden","tab_register":"Registrieren","welcome":"Willkommen!","redirecting":"Weiterleitung zum Casino...","lbl_email":"E-Mail","lbl_pwd":"Passwort","lbl_name":"Vor- und Nachname","lbl_pwd2":"Passwort wiederholen","btn_login":"Anmelden →","btn_register":"Konto erstellen →","age_warn":"Registrierung und Spiel nur für <strong>18+</strong> erlaubt.","no_account":"Kein Konto? <a href=\"#\" onclick=\"switchTab('register');return false;\">Registrieren</a>","have_account":"Konto vorhanden? <a href=\"#\" onclick=\"switchTab('login');return false;\">Anmelden</a>","legal":"Durch die Registrierung stimmen Sie den <a href=\"/terms.html\">AGB</a> zu.","ph_email":"ihre@email.de","ph_name":"Vorname Nachname","ph_pwd":"••••••••","ph_pwd_min":"Mindestens 8 Zeichen","pwd_weak":"Schwach","pwd_ok":"Mittel","pwd_strong":"Stark","err_fill":"Alle Felder ausfüllen","err_short":"Passwort mindestens 8 Zeichen","err_match":"Passwörter stimmen nicht überein","err_invalid":"Ungültige E-Mail oder falsches Passwort","err_exists":"E-Mail bereits registriert","logging_in":"Anmeldung...","registering":"Konto wird erstellt...","forgot":"Passwort vergessen?"},"pl":{"tab_login":"Zaloguj się","tab_register":"Zarejestruj się","welcome":"Witamy!","redirecting":"Przekierowanie do kasyna...","lbl_email":"Email","lbl_pwd":"Hasło","lbl_name":"Imię i nazwisko","lbl_pwd2":"Powtórz hasło","btn_login":"Zaloguj się →","btn_register":"Utwórz konto →","age_warn":"Rejestracja i gra dozwolona <strong>tylko dla 18+</strong>.","no_account":"Nie masz konta? <a href=\"#\" onclick=\"switchTab('register');return false;\">Zarejestruj się</a>","have_account":"Masz konto? <a href=\"#\" onclick=\"switchTab('login');return false;\">Zaloguj się</a>","legal":"Rejestrując się, akceptujesz <a href=\"/terms.html\">Regulamin</a>.","ph_email":"twoj@email.pl","ph_name":"Imię Nazwisko","ph_pwd":"••••••••","ph_pwd_min":"Minimum 8 znaków","pwd_weak":"Słabe","pwd_ok":"Średnie","pwd_strong":"Silne","err_fill":"Wypełnij wszystkie pola","err_short":"Hasło musi mieć min. 8 znaków","err_match":"Hasła nie są zgodne","err_invalid":"Nieprawidłowy email lub hasło","err_exists":"Email już zarejestrowany","logging_in":"Logowanie...","registering":"Tworzenie konta...","forgot":"Zapomniałeś hasła?"},"fr":{"tab_login":"Se connecter","tab_register":"S'inscrire","welcome":"Bienvenue !","redirecting":"Redirection vers le casino...","lbl_email":"Email","lbl_pwd":"Mot de passe","lbl_name":"Prénom et nom","lbl_pwd2":"Répéter le mot de passe","btn_login":"Se connecter →","btn_register":"Créer un compte →","age_warn":"Inscription et jeu autorisés <strong>uniquement pour 18+</strong>.","no_account":"Pas de compte ? <a href=\"#\" onclick=\"switchTab('register');return false;\">S'inscrire</a>","have_account":"Déjà un compte ? <a href=\"#\" onclick=\"switchTab('login');return false;\">Se connecter</a>","legal":"En vous inscrivant, vous acceptez les <a href=\"/terms.html\">CGU</a>.","ph_email":"votre@email.fr","ph_name":"Prénom Nom","ph_pwd":"••••••••","ph_pwd_min":"Au moins 8 caractères","pwd_weak":"Faible","pwd_ok":"Moyen","pwd_strong":"Fort","err_fill":"Remplissez tous les champs","err_short":"Mot de passe minimum 8 caractères","err_match":"Les mots de passe ne correspondent pas","err_invalid":"Email ou mot de passe invalide","err_exists":"Email déjà enregistré","logging_in":"Connexion...","registering":"Création du compte...","forgot":"Mot de passe oublié ?"},"tr":{"tab_login":"Giriş Yap","tab_register":"Kayıt Ol","welcome":"Hoş Geldiniz!","redirecting":"Kumarhaneye yönlendiriliyor...","lbl_email":"E-posta","lbl_pwd":"Şifre","lbl_name":"Ad Soyad","lbl_pwd2":"Şifreyi Tekrarla","btn_login":"Giriş Yap →","btn_register":"Hesap Oluştur →","age_warn":"Kayıt ve oyun <strong>yalnızca 18+</strong> için.","no_account":"Hesabınız yok mu? <a href=\"#\" onclick=\"switchTab('register');return false;\">Kayıt olun</a>","have_account":"Hesabınız var mı? <a href=\"#\" onclick=\"switchTab('login');return false;\">Giriş yapın</a>","legal":"Kaydolarak <a href=\"/terms.html\">Şartlar</a>'ı kabul etmiş sayılırsınız.","ph_email":"email@adresiniz.com","ph_name":"Ad Soyad","ph_pwd":"••••••••","ph_pwd_min":"En az 8 karakter","pwd_weak":"Zayıf","pwd_ok":"Orta","pwd_strong":"Güçlü","err_fill":"Tüm alanları doldurun","err_short":"Şifre en az 8 karakter","err_match":"Şifreler eşleşmiyor","err_invalid":"Geçersiz e-posta veya şifre","err_exists":"E-posta zaten kayıtlı","logging_in":"Giriş yapılıyor...","registering":"Hesap oluşturuluyor...","forgot":"Şifremi unuttum"},"ar":{"tab_login":"تسجيل الدخول","tab_register":"إنشاء حساب","welcome":"مرحباً!","redirecting":"جارٍ التوجيه إلى الكازينو...","lbl_email":"البريد الإلكتروني","lbl_pwd":"كلمة المرور","lbl_name":"الاسم الكامل","lbl_pwd2":"تكرار كلمة المرور","btn_login":"تسجيل الدخول →","btn_register":"إنشاء حساب →","age_warn":"التسجيل واللعب مسموح <strong>فقط لمن هم 18+</strong>.","no_account":"ليس لديك حساب؟ <a href=\"#\" onclick=\"switchTab('register');return false;\">سجّل الآن</a>","have_account":"لديك حساب؟ <a href=\"#\" onclick=\"switchTab('login');return false;\">سجّل الدخول</a>","legal":"بالتسجيل، تقبل <a href=\"/terms.html\">الشروط والأحكام</a>.","ph_email":"بريدك@الإلكتروني.com","ph_name":"الاسم الكامل","ph_pwd":"••••••••","ph_pwd_min":"8 أحرف على الأقل","pwd_weak":"ضعيف","pwd_ok":"متوسط","pwd_strong":"قوي","err_fill":"أكمل جميع الحقول","err_short":"كلمة المرور 8 أحرف على الأقل","err_match":"كلمتا المرور غير متطابقتين","err_invalid":"البريد أو كلمة المرور غير صحيحة","err_exists":"البريد الإلكتروني مسجّل مسبقاً","logging_in":"جارٍ تسجيل الدخول...","registering":"جارٍ إنشاء الحساب...","forgot":"نسيت كلمة المرور؟"},"zh":{"tab_login":"登录","tab_register":"注册","welcome":"欢迎！","redirecting":"正在跳转到赌场...","lbl_email":"邮箱","lbl_pwd":"密码","lbl_name":"姓名","lbl_pwd2":"重复密码","btn_login":"登录 →","btn_register":"创建账户 →","age_warn":"注册和游戏仅限 <strong>18岁以上</strong>。","no_account":"没有账户？<a href=\"#\" onclick=\"switchTab('register');return false;\">注册</a>","have_account":"已有账户？<a href=\"#\" onclick=\"switchTab('login');return false;\">登录</a>","legal":"注册即表示您同意<a href=\"/terms.html\">服务条款</a>。","ph_email":"你的@邮箱.com","ph_name":"姓名","ph_pwd":"••••••••","ph_pwd_min":"至少8个字符","pwd_weak":"弱","pwd_ok":"中","pwd_strong":"强","err_fill":"请填写所有字段","err_short":"密码至少8个字符","err_match":"密码不匹配","err_invalid":"邮箱或密码无效","err_exists":"邮箱已注册","logging_in":"登录中...","registering":"创建账户中...","forgot":"忘记密码？"},"hi":{"tab_login":"लॉग इन","tab_register":"रजिस्टर","welcome":"स्वागत है!","redirecting":"कैसीनो पर रीडायरेक्ट हो रहा है...","lbl_email":"ईमेल","lbl_pwd":"पासवर्ड","lbl_name":"पूरा नाम","lbl_pwd2":"पासवर्ड दोबारा","btn_login":"लॉग इन →","btn_register":"खाता बनाएं →","age_warn":"पंजीकरण और खेल केवल <strong>18+</strong> के लिए।","no_account":"खाता नहीं है? <a href=\"#\" onclick=\"switchTab('register');return false;\">यहाँ रजिस्टर करें</a>","have_account":"खाता है? <a href=\"#\" onclick=\"switchTab('login');return false;\">लॉग इन करें</a>","legal":"रजिस्टर करके आप <a href=\"/terms.html\">नियमों</a> से सहमत हैं।","ph_email":"आपका@ईमेल.com","ph_name":"पूरा नाम","ph_pwd":"••••••••","ph_pwd_min":"कम से कम 8 अक्षर","pwd_weak":"कमजोर","pwd_ok":"ठीक","pwd_strong":"मजबूत","err_fill":"सभी फ़ील्ड भरें","err_short":"पासवर्ड कम से कम 8 अक्षर","err_match":"पासवर्ड मेल नहीं खाते","err_invalid":"अमान्य ईमेल या पासवर्ड","err_exists":"ईमेल पहले से पंजीकृत है","logging_in":"लॉग इन हो रहा है...","registering":"खाता बन रहा है...","forgot":"पासवर्ड भूल गए?"},"uk":{"tab_login":"Увійти","tab_register":"Реєстрація","welcome":"Ласкаво просимо!","redirecting":"Переспрямування до казино...","lbl_email":"Email","lbl_pwd":"Пароль","lbl_name":"Імʼя та прізвище","lbl_pwd2":"Повторіть пароль","btn_login":"Увійти →","btn_register":"Створити акаунт →","age_warn":"Реєстрація та гра дозволені <strong>лише для 18+</strong>.","no_account":"Немає акаунту? <a href=\"#\" onclick=\"switchTab('register');return false;\">Зареєструйтесь</a>","have_account":"Вже є акаунт? <a href=\"#\" onclick=\"switchTab('login');return false;\">Увійдіть</a>","legal":"Реєструючись, ви погоджуєтесь з <a href=\"/terms.html\">Умовами</a>.","ph_email":"ваш@email.com","ph_name":"Імʼя Прізвище","ph_pwd":"••••••••","ph_pwd_min":"Мінімум 8 символів","pwd_weak":"Слабкий","pwd_ok":"Середній","pwd_strong":"Сильний","err_fill":"Заповніть усі поля","err_short":"Пароль мінімум 8 символів","err_match":"Паролі не збігаються","err_invalid":"Неправильний email або пароль","err_exists":"Email вже зареєстрований","logging_in":"Вхід...","registering":"Створення акаунту...","forgot":"Забули пароль?"}};
+
+function applyLang(code){
+  var t=PAGE_LANGS[code]||PAGE_LANGS.en;
+  localStorage.setItem('hrc_lang',code);
+  document.querySelectorAll('[data-i18n]').forEach(function(el){var k=el.getAttribute('data-i18n');if(t[k]!==undefined)el.textContent=t[k];});
+  document.querySelectorAll('[data-i18n-html]').forEach(function(el){var k=el.getAttribute('data-i18n-html');if(t[k]!==undefined)el.innerHTML=t[k];});
+  document.querySelectorAll('[data-i18n-ph]').forEach(function(el){var k=el.getAttribute('data-i18n-ph');if(t[k]!==undefined)el.placeholder=t[k];});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===code);});
+  document.documentElement.lang=code;
+}
+document.getElementById('langBar').innerHTML=LANGS_LIST.map(function(l){return '<button class="lang-btn" data-lang="'+l.code+'" onclick="applyLang(''+l.code+'')">'+ l.flag+' '+l.code.toUpperCase()+'</button>';}).join('');
+applyLang(localStorage.getItem('hrc_lang')||'en');
+
 </script>
 </body>
 </html>

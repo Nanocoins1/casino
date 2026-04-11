@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="lt">
+<html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
@@ -9,9 +9,9 @@
   *{box-sizing:border-box;margin:0;padding:0;}
   :root{--gold:#c9a84c;--gold2:#ffd680;--bg:#0a0806;--card:rgba(255,255,255,0.03);--border:rgba(201,168,76,0.15);--cream:#e8e2d4;--green:#2ecc71;--purple:#7b2fff;}
   body{background:var(--bg);color:var(--cream);font-family:'Inter',sans-serif;font-size:15px;line-height:1.7;}
-  header{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,8,6,0.95);backdrop-filter:blur(10px);z-index:100;}
+  header{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,8,6,0.95);backdrop-filter:blur(10px);z-index:100;gap:12px;flex-wrap:wrap;}
   .logo{font-family:'Cinzel',serif;font-size:20px;font-weight:700;color:var(--gold);text-decoration:none;letter-spacing:2px;}
-  .back-link{color:var(--gold);text-decoration:none;font-size:13px;border:1px solid var(--border);padding:6px 14px;border-radius:8px;}
+  .back-link{color:var(--gold);text-decoration:none;font-size:13px;border:1px solid var(--border);padding:6px 14px;border-radius:8px;white-space:nowrap;}
   .container{max-width:860px;margin:0 auto;padding:48px 24px 80px;}
   .page-title{font-family:'Cinzel',serif;font-size:28px;font-weight:700;color:var(--gold2);margin-bottom:8px;}
   .page-sub{font-size:14px;color:rgba(232,226,212,0.6);margin-bottom:40px;}
@@ -39,100 +39,146 @@
   .history-table th{padding:10px 12px;text-align:left;font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:rgba(201,168,76,0.5);border-bottom:1px solid var(--border);}
   .history-table td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.04);font-family:'DM Mono',monospace;font-size:11px;}
   footer{text-align:center;padding:24px;border-top:1px solid var(--border);font-size:12px;color:rgba(201,168,76,0.3);}
+  
+.lang-wrap{display:flex;align-items:center;}
+.lang-bar{display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end;}
+.lang-btn{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  color:rgba(232,226,212,.5);border-radius:6px;padding:3px 7px;font-size:10px;
+  cursor:pointer;transition:all .15s;font-family:inherit;white-space:nowrap;}
+.lang-btn:hover{background:rgba(255,255,255,.1);color:#e8e2d4;}
+.lang-btn.active{background:rgba(201,168,76,.15);border-color:rgba(201,168,76,.4);color:#f0c060;}
 </style>
 </head>
 <body>
 <header>
   <a class="logo" href="/">&#x2B21; HATHOR</a>
-  <a class="back-link" href="/">&#8592; Grįžti</a>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <a class="back-link" href="/" data-i18n="back">← Back</a>
+    <div class="lang-wrap"><div class="lang-bar" id="langBar"></div></div>
+  </div>
 </header>
 <div class="container">
   <div class="page-title">Provably Fair</div>
-  <div class="page-sub">Kriptografinė žaidimų sąžiningumo sistema — patikrinkite kiekvieną lošimą patys</div>
+  <div class="page-sub" data-i18n="subtitle">Cryptographic fairness system — verify every bet yourself</div>
 
-  <h2>Kaip tai veikia</h2>
+  <h2 data-i18n="how">How it works</h2>
   <div class="how-it-works">
     <div class="step">
       <div class="step-num">1</div>
       <div class="step-icon">&#128273;</div>
-      <div class="step-title">Serverio seed</div>
-      <div class="step-desc">Prieš lošimą serveris sugeneruoja slaptą atsitiktinį skaičių ir pateikia tik jo SHA-256 hash.</div>
+      <div class="step-title" data-i18n="s1t">Server seed</div>
+      <div class="step-desc" data-i18n="s1d">Before each game the server generates a secret random number and provides only its SHA-256 hash.</div>
     </div>
     <div class="step">
       <div class="step-num">2</div>
       <div class="step-icon">&#127922;</div>
-      <div class="step-title">Kliento seed</div>
-      <div class="step-desc">Jūs pateikiate savo atsitiktinį skaičių (arba naudojamas automatinis). Abu seedai jungiami.</div>
+      <div class="step-title" data-i18n="s2t">Client seed</div>
+      <div class="step-desc" data-i18n="s2d">You provide your own random number (or an automatic one is used). Both seeds are combined.</div>
     </div>
     <div class="step">
       <div class="step-num">3</div>
       <div class="step-icon">&#128290;</div>
-      <div class="step-title">Rezultatas</div>
-      <div class="step-desc">HMAC-SHA256 iš abiejų seedų nustato lošimo rezultatą. Niekas negali manipuliuoti šiuo procesu.</div>
+      <div class="step-title" data-i18n="s3t">Result</div>
+      <div class="step-desc" data-i18n="s3d">HMAC-SHA256 of both seeds determines the game outcome. Nobody can manipulate this process.</div>
     </div>
     <div class="step">
       <div class="step-num">4</div>
       <div class="step-icon">&#9989;</div>
-      <div class="step-title">Verifikacija</div>
-      <div class="step-desc">Po lošimo gausite serverio seed — galite patys patikrinti rezultatą naudodami bet kurį SHA-256 įrankį.</div>
+      <div class="step-title" data-i18n="s4t">Verification</div>
+      <div class="step-desc" data-i18n="s4d">After the game you receive the server seed — verify the result yourself with any SHA-256 tool.</div>
     </div>
   </div>
 
-  <h2>Patikrinti lošimą</h2>
+  <h2 data-i18n="verifyH">Verify a round</h2>
   <div class="verify-card">
     <label style="font-size:12px;color:rgba(232,226,212,0.5);display:block;margin-bottom:4px;">Round ID</label>
     <input class="inp" id="v-round-id" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"/>
-    <label style="font-size:12px;color:rgba(232,226,212,0.5);display:block;margin-bottom:4px;">Kliento seed (neprivaloma)</label>
-    <input class="inp" id="v-client-seed" placeholder="Jūsų seed arba palikite tuščią"/>
-    <label style="font-size:12px;color:rgba(232,226,212,0.5);display:block;margin-bottom:4px;">Nonce</label>
+    <label style="font-size:12px;color:rgba(232,226,212,0.5);display:block;margin-bottom:4px;" data-i18n="csLbl">Client seed (optional)</label>
+    <input class="inp" id="v-client-seed" data-i18n-ph="csPh" placeholder="Your seed or leave empty"/>
+    <label style="font-size:12px;color:rgba(232,226,212,0.5);display:block;margin-bottom:4px;" data-i18n="nonceLbl">Nonce</label>
     <input class="inp" id="v-nonce" placeholder="0" value="0"/>
-    <button class="btn" onclick="verifyRound()">&#128269; Patikrinti</button>
+    <button class="btn" id="verifyBtnEl" onclick="verifyRound()">&#128269; Verify</button>
 
     <div class="result-box" id="verify-result">
-      <div style="font-family:'Cinzel',serif;font-size:13px;color:var(--green);margin-bottom:14px;">&#9989; Lošimas patvirtintas</div>
+      <div style="font-family:'Cinzel',serif;font-size:13px;color:var(--green);margin-bottom:14px;" id="verifiedMsgEl">&#9989; Round verified</div>
       <div class="result-row"><span class="result-label">Round ID</span><span class="result-val" id="res-id"></span></div>
-      <div class="result-row"><span class="result-label">Žaidimas</span><span class="result-val" id="res-game"></span></div>
-      <div class="result-row"><span class="result-label">Serverio hash</span><span class="result-val" id="res-shash" style="font-size:10px;"></span></div>
-      <div class="result-row"><span class="result-label">Serverio seed</span><span class="result-val" id="res-sseed" style="font-size:10px;"></span></div>
-      <div class="result-row"><span class="result-label">Kliento seed</span><span class="result-val" id="res-cseed"></span></div>
-      <div class="result-row"><span class="result-label">Nonce</span><span class="result-val" id="res-nonce"></span></div>
-      <div class="result-row"><span class="result-label">Rezultatas (0-9999)</span><span class="result-val" id="res-result" style="color:var(--gold2);font-size:16px;font-weight:700;"></span></div>
-      <div style="margin-top:14px;font-size:11px;color:rgba(232,226,212,0.4);">Galite patikrinti patys: HMAC-SHA256(serverSeed, serverSeed+"-"+clientSeed+"-"+nonce)</div>
+      <div class="result-row"><span class="result-label" data-i18n="gameLbl">Game</span><span class="result-val" id="res-game"></span></div>
+      <div class="result-row"><span class="result-label" data-i18n="sHashLbl">Server hash</span><span class="result-val" id="res-shash" style="font-size:10px;"></span></div>
+      <div class="result-row"><span class="result-label" data-i18n="sSeedLbl">Server seed</span><span class="result-val" id="res-sseed" style="font-size:10px;"></span></div>
+      <div class="result-row"><span class="result-label" data-i18n="cSeedLbl">Client seed</span><span class="result-val" id="res-cseed"></span></div>
+      <div class="result-row"><span class="result-label" data-i18n="nonceLbl2">Nonce</span><span class="result-val" id="res-nonce"></span></div>
+      <div class="result-row"><span class="result-label" data-i18n="resultLbl">Result (0–9999)</span><span class="result-val" id="res-result" style="color:var(--gold2);font-size:16px;font-weight:700;"></span></div>
+      <div style="margin-top:14px;font-size:11px;color:rgba(232,226,212,0.4);" data-i18n="formula">You can verify yourself: HMAC-SHA256(serverSeed, serverSeed+"-"+clientSeed+"-"+nonce)</div>
     </div>
     <div class="result-box error" id="verify-error">
       <div style="color:#ff9999;" id="verify-error-msg"></div>
     </div>
   </div>
 
-  <h2>Jūsų lošimų istorija</h2>
+  <h2 data-i18n="histH">Your game history</h2>
   <div id="history-section">
-    <div id="history-login" style="text-align:center;padding:32px;color:rgba(232,226,212,0.4);">Prisijunkite, kad matytumėte lošimų istoriją</div>
+    <div id="history-login" style="text-align:center;padding:32px;color:rgba(232,226,212,0.4);" data-i18n="loginMsg">Log in to see your game history</div>
     <div id="history-table-wrap" style="display:none;overflow-x:auto;">
       <table class="history-table">
-        <thead><tr><th>Data</th><th>Žaidimas</th><th>Round ID</th><th>Hash</th><th>Atskleistas</th></tr></thead>
+        <thead><tr>
+          <th data-i18n="dateTh">Date</th>
+          <th data-i18n="gameTh">Game</th>
+          <th>Round ID</th>
+          <th data-i18n="hashTh">Hash</th>
+          <th data-i18n="revealedTh">Revealed</th>
+        </tr></thead>
         <tbody id="history-tbody"></tbody>
       </table>
     </div>
   </div>
 
-  <h2>Algoritmas (techniškai)</h2>
-  <p>Kiekvieno lošimo rezultatas apskaičiuojamas taip:</p>
+  <h2 data-i18n="algoH">Algorithm (technical)</h2>
+  <p data-i18n="algoDesc">Each game result is calculated as follows:</p>
   <div class="hash-display">combined = serverSeed + "-" + clientSeed + "-" + nonce
 hash = HMAC-SHA256(key=serverSeed, data=combined)
 result = parseInt(hash[0..7], 16) % 10000  // 0-9999</div>
-  <p>Šį algoritmą galite patikrinti naudodami bet kurį programavimo aplinką arba internetinius HMAC-SHA256 įrankius.</p>
+  <p data-i18n="algoNote">You can verify this using any programming environment or online HMAC-SHA256 tools.</p>
 </div>
-<footer>&#169; 2026 HATHOR Royal Casino · <a href="/terms.html" style="color:var(--gold);">T&amp;C</a> · <a href="/responsible.html" style="color:var(--gold);">Atsakingas lošimas</a></footer>
+<footer>&#169; 2026 HATHOR Royal Casino &middot; <a href="/terms.html" style="color:var(--gold);">T&amp;C</a> &middot; <a href="/responsible.html" style="color:var(--gold);">Responsible Gaming</a></footer>
 
 <script>
+var PAGE_LANGS={"en":{"back":"← Back","subtitle":"Cryptographic fairness system — verify every bet yourself","how":"How it works","s1t":"Server seed","s1d":"Before each game the server generates a secret random number and provides only its SHA-256 hash.","s2t":"Client seed","s2d":"You provide your own random number (or an automatic one is used). Both seeds are combined.","s3t":"Result","s3d":"HMAC-SHA256 of both seeds determines the game outcome. Nobody can manipulate this process.","s4t":"Verification","s4d":"After the game you receive the server seed — verify the result yourself with any SHA-256 tool.","verifyH":"Verify a round","csLbl":"Client seed (optional)","csPh":"Your seed or leave empty","nonceLbl":"Nonce","verifyBtn":"🔍 Verify","verifiedMsg":"✅ Round verified","gameLbl":"Game","sHashLbl":"Server hash","sSeedLbl":"Server seed","cSeedLbl":"Client seed","nonceLbl2":"Nonce","resultLbl":"Result (0–9999)","formula":"You can verify yourself: HMAC-SHA256(serverSeed, serverSeed+\"-\"+clientSeed+\"-\"+nonce)","histH":"Your game history","loginMsg":"Log in to see your game history","dateTh":"Date","gameTh":"Game","roundTh":"Round ID","hashTh":"Hash","revealedTh":"Revealed","noRec":"No records","algoH":"Algorithm (technical)","algoDesc":"Each game result is calculated as follows:","algoNote":"You can verify this using any programming environment or online HMAC-SHA256 tools.","enterRound":"Enter Round ID","netErr":"Network error","yesStr":"✅ Yes","noStr":"⏳ No"},"lt":{"back":"← Grįžti","subtitle":"Kriptografinė sąžiningumo sistema — patikrinkite kiekvieną lošimą patys","how":"Kaip tai veikia","s1t":"Serverio seed","s1d":"Prieš lošimą serveris sugeneruoja slaptą atsitiktinį skaičių ir pateikia tik jo SHA-256 hash.","s2t":"Kliento seed","s2d":"Jūs pateikiate savo atsitiktinį skaičių (arba naudojamas automatinis). Abu seedai jungiami.","s3t":"Rezultatas","s3d":"HMAC-SHA256 iš abiejų seedų nustato lošimo rezultatą. Niekas negali manipuliuoti šiuo procesu.","s4t":"Verifikacija","s4d":"Po lošimo gausite serverio seed — galite patys patikrinti rezultatą naudodami bet kurį SHA-256 įrankį.","verifyH":"Patikrinti lošimą","csLbl":"Kliento seed (neprivaloma)","csPh":"Jūsų seed arba palikite tuščią","nonceLbl":"Nonce","verifyBtn":"🔍 Patikrinti","verifiedMsg":"✅ Lošimas patvirtintas","gameLbl":"Žaidimas","sHashLbl":"Serverio hash","sSeedLbl":"Serverio seed","cSeedLbl":"Kliento seed","nonceLbl2":"Nonce","resultLbl":"Rezultatas (0–9999)","formula":"Galite patikrinti patys: HMAC-SHA256(serverSeed, serverSeed+\"-\"+clientSeed+\"-\"+nonce)","histH":"Jūsų lošimų istorija","loginMsg":"Prisijunkite, kad matytumėte lošimų istoriją","dateTh":"Data","gameTh":"Žaidimas","roundTh":"Round ID","hashTh":"Hash","revealedTh":"Atskleistas","noRec":"Nėra įrašų","algoH":"Algoritmas (techniškai)","algoDesc":"Kiekvieno lošimo rezultatas apskaičiuojamas taip:","algoNote":"Šį algoritmą galite patikrinti naudodami bet kurį programavimo aplinką arba internetinius HMAC-SHA256 įrankius.","enterRound":"Įveskite Round ID","netErr":"Tinklo klaida","yesStr":"✅ Taip","noStr":"⏳ Ne"},"ru":{"back":"← Назад","subtitle":"Криптографическая система честности — проверяйте каждую ставку сами","how":"Как это работает","s1t":"Сид сервера","s1d":"Перед игрой сервер генерирует секретное случайное число и предоставляет только его SHA-256 хэш.","s2t":"Сид клиента","s2d":"Вы предоставляете своё случайное число (или используется автоматическое). Оба сида объединяются.","s3t":"Результат","s3d":"HMAC-SHA256 обоих сидов определяет результат игры. Никто не может манипулировать этим процессом.","s4t":"Верификация","s4d":"После игры вы получите сид сервера — проверьте результат сами с помощью любого SHA-256 инструмента.","verifyH":"Проверить раунд","csLbl":"Сид клиента (необязательно)","csPh":"Ваш сид или оставьте пустым","nonceLbl":"Nonce","verifyBtn":"🔍 Проверить","verifiedMsg":"✅ Раунд подтверждён","gameLbl":"Игра","sHashLbl":"Хэш сервера","sSeedLbl":"Сид сервера","cSeedLbl":"Сид клиента","nonceLbl2":"Nonce","resultLbl":"Результат (0–9999)","formula":"Проверьте сами: HMAC-SHA256(serverSeed, serverSeed+\"-\"+clientSeed+\"-\"+nonce)","histH":"История ваших игр","loginMsg":"Войдите, чтобы увидеть историю игр","dateTh":"Дата","gameTh":"Игра","roundTh":"Round ID","hashTh":"Хэш","revealedTh":"Раскрыт","noRec":"Нет записей","algoH":"Алгоритм (технически)","algoDesc":"Результат каждой игры рассчитывается следующим образом:","algoNote":"Этот алгоритм можно проверить в любой среде программирования или через онлайн-инструменты HMAC-SHA256.","enterRound":"Введите Round ID","netErr":"Ошибка сети","yesStr":"✅ Да","noStr":"⏳ Нет"},"de":{"back":"← Zurück","subtitle":"Kryptografisches Fairness-System — überprüfen Sie jede Wette selbst","how":"Wie es funktioniert","s1t":"Server-Seed","s1d":"Vor jedem Spiel generiert der Server eine geheime Zufallszahl und gibt nur deren SHA-256-Hash an.","s2t":"Client-Seed","s2d":"Sie geben Ihre eigene Zufallszahl ein (oder es wird eine automatische verwendet). Beide Seeds werden kombiniert.","s3t":"Ergebnis","s3d":"HMAC-SHA256 beider Seeds bestimmt das Spielergebnis. Niemand kann diesen Prozess manipulieren.","s4t":"Verifizierung","s4d":"Nach dem Spiel erhalten Sie den Server-Seed — überprüfen Sie das Ergebnis selbst mit einem SHA-256-Tool.","verifyH":"Runde überprüfen","csLbl":"Client-Seed (optional)","csPh":"Ihr Seed oder leer lassen","nonceLbl":"Nonce","verifyBtn":"🔍 Überprüfen","verifiedMsg":"✅ Runde bestätigt","gameLbl":"Spiel","sHashLbl":"Server-Hash","sSeedLbl":"Server-Seed","cSeedLbl":"Client-Seed","nonceLbl2":"Nonce","resultLbl":"Ergebnis (0–9999)","formula":"Selbst überprüfen: HMAC-SHA256(serverSeed, serverSeed+\"-\"+clientSeed+\"-\"+nonce)","histH":"Ihre Spielhistorie","loginMsg":"Melden Sie sich an, um Ihre Spielhistorie zu sehen","dateTh":"Datum","gameTh":"Spiel","roundTh":"Round ID","hashTh":"Hash","revealedTh":"Aufgedeckt","noRec":"Keine Einträge","algoH":"Algorithmus (technisch)","algoDesc":"Jedes Spielergebnis wird wie folgt berechnet:","algoNote":"Sie können diesen Algorithmus mit jeder Programmierumgebung oder Online-HMAC-SHA256-Tools überprüfen.","enterRound":"Round ID eingeben","netErr":"Netzwerkfehler","yesStr":"✅ Ja","noStr":"⏳ Nein"},"pl":{"back":"← Wróć","subtitle":"Kryptograficzny system uczciwości — weryfikuj każdy zakład samodzielnie","how":"Jak to działa","s1t":"Seed serwera","s1d":"Przed grą serwer generuje tajną liczbę losową i podaje tylko jej skrót SHA-256.","s2t":"Seed klienta","s2d":"Podajesz własną liczbę losową (lub używana jest automatyczna). Oba seedy są łączone.","s3t":"Wynik","s3d":"HMAC-SHA256 obu seedów określa wynik gry. Nikt nie może manipulować tym procesem.","s4t":"Weryfikacja","s4d":"Po grze otrzymasz seed serwera — możesz samodzielnie zweryfikować wynik dowolnym narzędziem SHA-256.","verifyH":"Zweryfikuj rundę","csLbl":"Seed klienta (opcjonalnie)","csPh":"Twój seed lub pozostaw puste","nonceLbl":"Nonce","verifyBtn":"🔍 Weryfikuj","verifiedMsg":"✅ Runda potwierdzona","gameLbl":"Gra","sHashLbl":"Hash serwera","sSeedLbl":"Seed serwera","cSeedLbl":"Seed klienta","nonceLbl2":"Nonce","resultLbl":"Wynik (0–9999)","formula":"Sprawdź sam: HMAC-SHA256(serverSeed, serverSeed+\"-\"+clientSeed+\"-\"+nonce)","histH":"Historia Twoich gier","loginMsg":"Zaloguj się, aby zobaczyć historię gier","dateTh":"Data","gameTh":"Gra","roundTh":"Round ID","hashTh":"Hash","revealedTh":"Ujawniony","noRec":"Brak rekordów","algoH":"Algorytm (technicznie)","algoDesc":"Wynik każdej gry jest obliczany następująco:","algoNote":"Możesz zweryfikować ten algorytm w dowolnym środowisku programistycznym lub online narzędziami HMAC-SHA256.","enterRound":"Podaj Round ID","netErr":"Błąd sieci","yesStr":"✅ Tak","noStr":"⏳ Nie"},"fr":{"back":"← Retour","subtitle":"Système d'équité cryptographique — vérifiez chaque mise vous-même","how":"Comment ça marche","s1t":"Seed serveur","s1d":"Avant chaque jeu, le serveur génère un nombre aléatoire secret et fournit uniquement son hash SHA-256.","s2t":"Seed client","s2d":"Vous fournissez votre propre nombre aléatoire (ou un automatique est utilisé). Les deux seeds sont combinés.","s3t":"Résultat","s3d":"Le HMAC-SHA256 des deux seeds détermine le résultat du jeu. Personne ne peut manipuler ce processus.","s4t":"Vérification","s4d":"Après le jeu vous recevez le seed serveur — vérifiez le résultat vous-même avec n'importe quel outil SHA-256.","verifyH":"Vérifier un tour","csLbl":"Seed client (optionnel)","csPh":"Votre seed ou laisser vide","nonceLbl":"Nonce","verifyBtn":"🔍 Vérifier","verifiedMsg":"✅ Tour vérifié","gameLbl":"Jeu","sHashLbl":"Hash serveur","sSeedLbl":"Seed serveur","cSeedLbl":"Seed client","nonceLbl2":"Nonce","resultLbl":"Résultat (0–9999)","formula":"Vérifiez vous-même: HMAC-SHA256(serverSeed, serverSeed+\"-\"+clientSeed+\"-\"+nonce)","histH":"Historique de vos jeux","loginMsg":"Connectez-vous pour voir l'historique","dateTh":"Date","gameTh":"Jeu","roundTh":"Round ID","hashTh":"Hash","revealedTh":"Révélé","noRec":"Aucun enregistrement","algoH":"Algorithme (technique)","algoDesc":"Le résultat de chaque jeu est calculé comme suit:","algoNote":"Vous pouvez vérifier cet algorithme avec n'importe quel environnement de programmation ou outil HMAC-SHA256 en ligne.","enterRound":"Entrer Round ID","netErr":"Erreur réseau","yesStr":"✅ Oui","noStr":"⏳ Non"},"tr":{"back":"← Geri","subtitle":"Kriptografik adalet sistemi — her bahsinizi kendiniz doğrulayın","how":"Nasıl çalışır","s1t":"Sunucu seed'i","s1d":"Her oyundan önce sunucu gizli bir rastgele sayı üretir ve yalnızca SHA-256 karmasını sağlar.","s2t":"İstemci seed'i","s2d":"Kendi rastgele sayınızı sağlarsınız (veya otomatik kullanılır). Her iki seed birleştirilir.","s3t":"Sonuç","s3d":"Her iki seed'in HMAC-SHA256'sı oyun sonucunu belirler. Kimse bu süreci manipüle edemez.","s4t":"Doğrulama","s4d":"Oyundan sonra sunucu seed'ini alırsınız — herhangi bir SHA-256 aracıyla sonucu kendiniz doğrulayabilirsiniz.","verifyH":"Tur doğrula","csLbl":"İstemci seed'i (isteğe bağlı)","csPh":"Seed'iniz veya boş bırakın","nonceLbl":"Nonce","verifyBtn":"🔍 Doğrula","verifiedMsg":"✅ Tur doğrulandı","gameLbl":"Oyun","sHashLbl":"Sunucu karma","sSeedLbl":"Sunucu seed","cSeedLbl":"İstemci seed","nonceLbl2":"Nonce","resultLbl":"Sonuç (0–9999)","formula":"Kendiniz doğrulayın: HMAC-SHA256(serverSeed, serverSeed+\"-\"+clientSeed+\"-\"+nonce)","histH":"Oyun geçmişiniz","loginMsg":"Oyun geçmişini görmek için giriş yapın","dateTh":"Tarih","gameTh":"Oyun","roundTh":"Round ID","hashTh":"Karma","revealedTh":"Açıklandı","noRec":"Kayıt yok","algoH":"Algoritma (teknik)","algoDesc":"Her oyun sonucu şu şekilde hesaplanır:","algoNote":"Bu algoritmayı herhangi bir programlama ortamı veya çevrimiçi HMAC-SHA256 araçlarıyla doğrulayabilirsiniz.","enterRound":"Round ID girin","netErr":"Ağ hatası","yesStr":"✅ Evet","noStr":"⏳ Hayır"},"ar":{"back":"← رجوع","subtitle":"نظام عدالة تشفيري — تحقق من كل رهان بنفسك","how":"كيف يعمل","s1t":"بذرة الخادم","s1d":"قبل كل لعبة يولّد الخادم رقمًا عشوائيًا سريًا ويوفر فقط تجزئة SHA-256 الخاصة به.","s2t":"بذرة العميل","s2d":"تقدم رقمك العشوائي الخاص (أو يُستخدم رقم تلقائي). يتم دمج كلا البذرتين.","s3t":"النتيجة","s3d":"يحدد HMAC-SHA256 للبذرتين نتيجة اللعبة. لا يمكن لأحد التلاعب بهذه العملية.","s4t":"التحقق","s4d":"بعد اللعبة ستحصل على بذرة الخادم — تحقق من النتيجة بنفسك باستخدام أي أداة SHA-256.","verifyH":"تحقق من الجولة","csLbl":"بذرة العميل (اختياري)","csPh":"بذرتك أو اتركه فارغًا","nonceLbl":"Nonce","verifyBtn":"🔍 تحقق","verifiedMsg":"✅ تم التحقق من الجولة","gameLbl":"اللعبة","sHashLbl":"تجزئة الخادم","sSeedLbl":"بذرة الخادم","cSeedLbl":"بذرة العميل","nonceLbl2":"Nonce","resultLbl":"النتيجة (0–9999)","formula":"تحقق بنفسك: HMAC-SHA256(serverSeed, serverSeed+\"-\"+clientSeed+\"-\"+nonce)","histH":"سجل ألعابك","loginMsg":"سجّل الدخول لرؤية سجل الألعاب","dateTh":"التاريخ","gameTh":"اللعبة","roundTh":"Round ID","hashTh":"التجزئة","revealedTh":"مكشوف","noRec":"لا توجد سجلات","algoH":"الخوارزمية (تقنيًا)","algoDesc":"يُحسب نتيجة كل لعبة على النحو التالي:","algoNote":"يمكنك التحقق من هذه الخوارزمية باستخدام أي بيئة برمجية أو أدوات HMAC-SHA256 عبر الإنترنت.","enterRound":"أدخل Round ID","netErr":"خطأ في الشبكة","yesStr":"✅ نعم","noStr":"⏳ لا"},"zh":{"back":"← 返回","subtitle":"密码学公平系统 — 自行验证每一次投注","how":"工作原理","s1t":"服务器种子","s1d":"每次游戏前，服务器生成一个秘密随机数，仅提供其SHA-256哈希值。","s2t":"客户端种子","s2d":"您提供自己的随机数（或使用自动生成的）。两个种子合并使用。","s3t":"结果","s3d":"两个种子的HMAC-SHA256决定游戏结果。没有人可以操纵这个过程。","s4t":"验证","s4d":"游戏后您将收到服务器种子 — 可使用任何SHA-256工具自行验证结果。","verifyH":"验证回合","csLbl":"客户端种子（可选）","csPh":"您的种子或留空","nonceLbl":"Nonce","verifyBtn":"🔍 验证","verifiedMsg":"✅ 回合已验证","gameLbl":"游戏","sHashLbl":"服务器哈希","sSeedLbl":"服务器种子","cSeedLbl":"客户端种子","nonceLbl2":"Nonce","resultLbl":"结果 (0–9999)","formula":"自行验证: HMAC-SHA256(serverSeed, serverSeed+\"-\"+clientSeed+\"-\"+nonce)","histH":"您的游戏历史","loginMsg":"登录以查看游戏历史","dateTh":"日期","gameTh":"游戏","roundTh":"回合ID","hashTh":"哈希","revealedTh":"已揭示","noRec":"无记录","algoH":"算法（技术）","algoDesc":"每个游戏结果计算如下：","algoNote":"您可以使用任何编程环境或在线HMAC-SHA256工具验证此算法。","enterRound":"输入回合ID","netErr":"网络错误","yesStr":"✅ 是","noStr":"⏳ 否"},"hi":{"back":"← वापस","subtitle":"क्रिप्टोग्राफिक फेयरनेस सिस्टम — हर बेट खुद सत्यापित करें","how":"यह कैसे काम करता है","s1t":"सर्वर सीड","s1d":"हर गेम से पहले सर्वर एक गुप्त रैंडम नंबर बनाता है और केवल उसका SHA-256 हैश देता है।","s2t":"क्लाइंट सीड","s2d":"आप अपना रैंडम नंबर देते हैं (या ऑटोमैटिक उपयोग होता है)। दोनों सीड मिलाए जाते हैं।","s3t":"परिणाम","s3d":"दोनों सीड का HMAC-SHA256 गेम परिणाम निर्धारित करता है। कोई भी इस प्रक्रिया में हेरफेर नहीं कर सकता।","s4t":"सत्यापन","s4d":"गेम के बाद आपको सर्वर सीड मिलेगा — किसी भी SHA-256 टूल से खुद परिणाम सत्यापित करें।","verifyH":"राउंड सत्यापित करें","csLbl":"क्लाइंट सीड (वैकल्पिक)","csPh":"आपका सीड या खाली छोड़ें","nonceLbl":"Nonce","verifyBtn":"🔍 सत्यापित करें","verifiedMsg":"✅ राउंड सत्यापित","gameLbl":"गेम","sHashLbl":"सर्वर हैश","sSeedLbl":"सर्वर सीड","cSeedLbl":"क्लाइंट सीड","nonceLbl2":"Nonce","resultLbl":"परिणाम (0–9999)","formula":"खुद सत्यापित करें: HMAC-SHA256(serverSeed, serverSeed+\"-\"+clientSeed+\"-\"+nonce)","histH":"आपका गेम इतिहास","loginMsg":"गेम इतिहास देखने के लिए लॉगिन करें","dateTh":"तारीख","gameTh":"गेम","roundTh":"Round ID","hashTh":"हैश","revealedTh":"उजागर","noRec":"कोई रिकॉर्ड नहीं","algoH":"एल्गोरिदम (तकनीकी)","algoDesc":"हर गेम परिणाम इस प्रकार गणना किया जाता है:","algoNote":"आप इस एल्गोरिदम को किसी भी प्रोग्रामिंग वातावरण या ऑनलाइन HMAC-SHA256 टूल से सत्यापित कर सकते हैं।","enterRound":"Round ID दर्ज करें","netErr":"नेटवर्क त्रुटि","yesStr":"✅ हाँ","noStr":"⏳ नहीं"},"uk":{"back":"← Назад","subtitle":"Криптографічна система чесності — перевіряйте кожну ставку самі","how":"Як це працює","s1t":"Seed сервера","s1d":"Перед кожною грою сервер генерує секретне випадкове число та надає лише його SHA-256 хеш.","s2t":"Seed клієнта","s2d":"Ви надаєте власне випадкове число (або використовується автоматичне). Обидва сіди об'єднуються.","s3t":"Результат","s3d":"HMAC-SHA256 обох сідів визначає результат гри. Ніхто не може маніпулювати цим процесом.","s4t":"Верифікація","s4d":"Після гри ви отримаєте seed сервера — перевірте результат самі будь-яким SHA-256 інструментом.","verifyH":"Перевірити раунд","csLbl":"Seed клієнта (необов'язково)","csPh":"Ваш seed або залиште порожнім","nonceLbl":"Nonce","verifyBtn":"🔍 Перевірити","verifiedMsg":"✅ Раунд підтверджено","gameLbl":"Гра","sHashLbl":"Хеш сервера","sSeedLbl":"Seed сервера","cSeedLbl":"Seed клієнта","nonceLbl2":"Nonce","resultLbl":"Результат (0–9999)","formula":"Перевірте самі: HMAC-SHA256(serverSeed, serverSeed+\"-\"+clientSeed+\"-\"+nonce)","histH":"Ваша історія ігор","loginMsg":"Увійдіть, щоб переглянути історію ігор","dateTh":"Дата","gameTh":"Гра","roundTh":"Round ID","hashTh":"Хеш","revealedTh":"Розкрито","noRec":"Немає записів","algoH":"Алгоритм (технічно)","algoDesc":"Результат кожної гри обчислюється так:","algoNote":"Цей алгоритм можна перевірити у будь-якому середовищі програмування або онлайн-інструментах HMAC-SHA256.","enterRound":"Введіть Round ID","netErr":"Помилка мережі","yesStr":"✅ Так","noStr":"⏳ Ні"}};
+var LANGS_LIST=[
+  {code:'en',flag:'🇬🇧',name:'EN'},{code:'lt',flag:'🇱🇹',name:'LT'},
+  {code:'ru',flag:'🇷🇺',name:'RU'},{code:'de',flag:'🇩🇪',name:'DE'},
+  {code:'pl',flag:'🇵🇱',name:'PL'},{code:'fr',flag:'🇫🇷',name:'FR'},
+  {code:'tr',flag:'🇹🇷',name:'TR'},{code:'ar',flag:'🇸🇦',name:'AR'},
+  {code:'zh',flag:'🇨🇳',name:'ZH'},{code:'hi',flag:'🇮🇳',name:'HI'},
+  {code:'uk',flag:'🇺🇦',name:'UK'}
+];
+
+var _lc=localStorage.getItem('hrc_lang')||'en';
+function applyLang(code){
+  _lc=code; localStorage.setItem('hrc_lang',code);
+  var t=PAGE_LANGS[code]||PAGE_LANGS.en;
+  document.querySelectorAll('[data-i18n]').forEach(function(el){var k=el.getAttribute('data-i18n');if(t[k]!==undefined)el.textContent=t[k];});
+  document.querySelectorAll('[data-i18n-html]').forEach(function(el){var k=el.getAttribute('data-i18n-html');if(t[k]!==undefined)el.innerHTML=t[k];});
+  document.querySelectorAll('[data-i18n-ph]').forEach(function(el){var k=el.getAttribute('data-i18n-ph');if(t[k]!==undefined)el.placeholder=t[k];});
+  document.documentElement.lang=code;
+  document.documentElement.dir=code==='ar'?'rtl':'ltr';
+  document.querySelectorAll('#langBar .lang-btn').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-lc')===code);});
+}
+function setLang(code){applyLang(code);}
+document.addEventListener('DOMContentLoaded',function(){
+  var bar=document.getElementById('langBar');
+  if(bar){LANGS_LIST.forEach(function(l){var b=document.createElement('button');b.className='lang-btn';b.textContent=l.flag+' '+l.name;b.setAttribute('data-lc',l.code);b.addEventListener('click',function(){setLang(l.code);});bar.appendChild(b);});}
+  applyLang(_lc);
+});
+
 function verifyRound(){
+  var t=PAGE_LANGS[_lc]||PAGE_LANGS.en;
   var roundId=document.getElementById('v-round-id').value.trim();
   var clientSeed=document.getElementById('v-client-seed').value.trim();
   var nonce=parseInt(document.getElementById('v-nonce').value)||0;
   document.getElementById('verify-result').style.display='none';
   document.getElementById('verify-error').style.display='none';
   if(!roundId){
-    document.getElementById('verify-error-msg').textContent='Įveskite Round ID';
+    document.getElementById('verify-error-msg').textContent=t.enterRound;
     document.getElementById('verify-error').style.display='block';
     return;
   }
@@ -151,10 +197,12 @@ function verifyRound(){
       document.getElementById('res-cseed').textContent=d.clientSeed;
       document.getElementById('res-nonce').textContent=d.nonce;
       document.getElementById('res-result').textContent=d.result;
+      document.getElementById('verifiedMsgEl').textContent=t.verifiedMsg;
       document.getElementById('verify-result').style.display='block';
     })
     .catch(function(){
-      document.getElementById('verify-error-msg').textContent='Tinklo klaida';
+      var t2=PAGE_LANGS[_lc]||PAGE_LANGS.en;
+      document.getElementById('verify-error-msg').textContent=t2.netErr;
       document.getElementById('verify-error').style.display='block';
     });
 }
@@ -166,16 +214,18 @@ if(uid){
   fetch('/api/pf/history/'+uid)
     .then(function(r){return r.json();})
     .then(function(rows){
+      var t=PAGE_LANGS[_lc]||PAGE_LANGS.en;
       var tbody=document.getElementById('history-tbody');
       if(!rows.length){
-        tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:rgba(232,226,212,0.3);padding:20px;">Nėra įrašų</td></tr>';
+        tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:rgba(232,226,212,0.3);padding:20px;">'+t.noRec+'</td></tr>';
         return;
       }
       tbody.innerHTML=rows.map(function(r){
         var dateStr=r.created_at?r.created_at.slice(0,16):'';
         var shortId=r.round_id.slice(0,8)+'...';
         var shortHash=r.server_hash?r.server_hash.slice(0,12)+'...':'';
-        var revealedStr=r.revealed?'&#9989; Taip':'&#9203; Ne';
+        var t2=PAGE_LANGS[_lc]||PAGE_LANGS.en;
+        var revealedStr=r.revealed?t2.yesStr:t2.noStr;
         var revealedColor=r.revealed?'#2ecc71':'#888';
         return '<tr><td style="color:rgba(232,226,212,0.5);">'+dateStr+'</td><td>'+r.game+'</td><td style="color:rgba(201,168,76,0.7);font-size:9px;">'+shortId+'</td><td style="font-size:9px;color:rgba(232,226,212,0.4);">'+shortHash+'</td><td style="color:'+revealedColor+'">'+revealedStr+'</td></tr>';
       }).join('');

@@ -114,10 +114,8 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 .game-tag{padding:2px 8px;border-radius:6px;font-size:9px;letter-spacing:1px;font-weight:600;}
 
 /* Play button overlay */
-.game-card::after{content:'ŽAISTI';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  font-family:'Orbitron',monospace;font-size:15px;font-weight:900;letter-spacing:3px;
-  color:rgba(240,192,96,.9);background:rgba(4,4,10,.85);opacity:0;transition:opacity .2s;border-radius:16px;}
-.game-card:not(.locked):hover::after{opacity:1;}
+
+
 
 /* Stats bar */
 .stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:0 24px 32px;padding:20px 24px;
@@ -157,6 +155,16 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
   background:rgba(8,8,18,.97);border:1px solid rgba(240,192,96,.25);font-size:13px;
   z-index:999;opacity:0;transform:translateY(16px);transition:all .3s;pointer-events:none;max-width:320px;}
 .toast.show{opacity:1;transform:translateY(0);}
+
+.lang-wrap{display:flex;align-items:center;}
+.lang-bar{display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end;}
+.lang-btn{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  color:rgba(232,226,212,.5);border-radius:6px;padding:3px 7px;font-size:10px;
+  cursor:pointer;transition:all .15s;font-family:inherit;white-space:nowrap;}
+.lang-btn:hover{background:rgba(255,255,255,.1);color:#e8e2d4;}
+.lang-btn.active{background:rgba(201,168,76,.15);border-color:rgba(201,168,76,.4);color:#f0c060;}
+.game-card::after{content:attr(data-play-text);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:15px;font-weight:900;letter-spacing:3px;color:rgba(240,192,96,.9);background:rgba(4,4,10,.85);opacity:0;transition:opacity .2s;border-radius:16px;pointer-events:none;}
+
 </style>
 </head>
 <body>
@@ -166,20 +174,21 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
   <div class="logo">⬡ HATHOR</div>
   <div class="header-right">
     <div class="balance-chip">🪙 <span class="balance-val" id="balVal">—</span></div>
-    <a class="header-btn kyc-warn" id="kycBtn" href="/kyc.html" style="display:none">
-      <span class="kyc-dot"></span>Patvirtinti
+    <a class="header-btn kyc-warn" id="kycBtn" href="/kyc.html" style="display:none" data-i18n="kycVerify">
+      <span class="kyc-dot"></span><span data-i18n="kycVerify">Verify</span>
     </a>
-    <a class="header-btn" href="/verify.html">🔐 Fair Play</a>
-    <a class="header-btn" href="/admin.html">⚙️ Admin</a>
-    <a class="header-btn" id="logoutBtn" onclick="logout()" href="#">Atsijungti</a>
+    <a class="header-btn" href="/verify.html" data-i18n="fairPlay">🔐 Fair Play</a>
+    <a class="header-btn" href="/admin.html" data-i18n="admin">⚙️ Admin</a>
+    <div class="lang-wrap"><div class="lang-bar" id="langBar"></div></div>
+    <a class="header-btn" id="logoutBtn" onclick="logout()" href="#" data-i18n="logout">Log out</a>
   </div>
 </div>
 
 <!-- Hero -->
 <div class="hero">
-  <div class="hero-badge">✦ LICENZIJUOTA KAZINO PLATFORMA</div>
+  <div class="hero-badge"><span data-i18n="heroBadge">✦ LICENSED CASINO PLATFORM</span></div>
   <h1>HATHOR ROYAL CASINO</h1>
-  <div class="hero-sub">50+ žaidimų, tiesioginės lažybos, kriptovaliutų mokėjimai. Sąžiningumas patvirtinamas kriptografiškai.</div>
+  <div class="hero-sub"><span data-i18n="heroSub">50+ games, live betting, crypto payments. Fairness verified cryptographically.</span></div>
   <div class="jackpot-bar">
     <span class="jackpot-label">JACKPOT</span>
     <span class="jackpot-val" id="jackpotVal">🪙 —</span>
@@ -189,49 +198,49 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 <!-- KYC Banner -->
 <div class="kyc-banner hidden" id="kycBanner">
   <div class="kyc-banner-text">
-    <strong>⚠️ Paskyra nepatvirtinta</strong><br/>
-    Norėdami žaisti, turite patvirtinti tapatybę ir amžių. Tai reikalauja Lietuvos ir ES azartinių lošimų taisyklės.
+    <strong data-i18n="kycBannerTitle">⚠️ Account not verified</strong><br/>
+    <span data-i18n="kycBannerDesc">You must verify your identity and age to play.</span>
   </div>
-  <a class="kyc-link" href="/kyc.html">Patvirtinti dabar →</a>
+  <a class="kyc-link" href="/kyc.html"><span data-i18n="kycBannerBtn">Verify now →</span></a>
 </div>
 
 <!-- Stats bar -->
 <div class="stats-bar">
-  <div class="stat-item"><div class="stat-v">50+</div><div class="stat-l">ŽAIDIMŲ</div></div>
-  <div class="stat-item"><div class="stat-v" id="onlinePlayers">—</div><div class="stat-l">ŽAIDŽIA DABAR</div></div>
-  <div class="stat-item"><div class="stat-v">97%</div><div class="stat-l">VIDUTINIS RTP</div></div>
-  <div class="stat-item"><div class="stat-v">24/7</div><div class="stat-l">PALAIKYMAS</div></div>
+  <div class="stat-item"><div class="stat-v">50+</div><div class="stat-l" data-i18n="gamesLbl">GAMES</div></div>
+  <div class="stat-item"><div class="stat-v" id="onlinePlayers">—</div><div class="stat-l" data-i18n="playingLbl">PLAYING NOW</div></div>
+  <div class="stat-item"><div class="stat-v">97%</div><div class="stat-l" data-i18n="rtpLbl">AVG RTP</div></div>
+  <div class="stat-item"><div class="stat-v">24/7</div><div class="stat-l" data-i18n="supportLbl">SUPPORT</div></div>
 </div>
 
 <!-- Promo -->
 <div class="promo">
   <div class="promo-icon">🎁</div>
   <div class="promo-text">
-    <h3>Sveikiname! Jums 🪙10,000 žetonų</h3>
-    <p>Kiekviena diena — naujas bonusas. Žaiskite, kaupikaite XP, kelkitės į aukštesnius lygius ir atrakinkite VIP privilegijas.</p>
+    <h3 data-i18n="promoH">Welcome! You have 🪙10,000 chips</h3>
+    <p><span data-i18n="promoDesc">Every day — a new bonus. Play, earn XP, level up and unlock VIP privileges.</span></p>
   </div>
-  <a class="promo-btn" href="/">Žaisti dabar</a>
+  <a class="promo-btn" href="/" data-i18n="promoBtn">Play now</a>
 </div>
 
 <!-- Filter -->
 <div class="filter-wrap">
-  <button class="filter-btn active" onclick="filterGames('all',this)">🎰 Visi</button>
-  <button class="filter-btn" onclick="filterGames('popular',this)">🔥 Populiarūs</button>
-  <button class="filter-btn" onclick="filterGames('slots',this)">🎰 Slotai</button>
-  <button class="filter-btn" onclick="filterGames('table',this)">🃏 Stalo</button>
-  <button class="filter-btn" onclick="filterGames('crash',this)">📈 Crash</button>
-  <button class="filter-btn" onclick="filterGames('live',this)">⚽ Sportas</button>
-  <button class="filter-btn" onclick="filterGames('instant',this)">⚡ Greiti</button>
+  <button class="filter-btn active" onclick="filterGames('all',this)" data-i18n="fAll">🎰 All</button>
+  <button class="filter-btn" onclick="filterGames('popular',this)" data-i18n="fPop">🔥 Popular</button>
+  <button class="filter-btn" onclick="filterGames('slots',this)" data-i18n="fSlots">🎰 Slots</button>
+  <button class="filter-btn" onclick="filterGames('table',this)" data-i18n="fTable">🃏 Table</button>
+  <button class="filter-btn" onclick="filterGames('crash',this)" data-i18n="fCrash">📈 Crash</button>
+  <button class="filter-btn" onclick="filterGames('live',this)" data-i18n="fSports">⚽ Sports</button>
+  <button class="filter-btn" onclick="filterGames('instant',this)" data-i18n="fInstant">⚡ Instant</button>
 </div>
 
 <!-- Games -->
 <div class="section-wrap">
 
   <!-- CRASH / ORIGINALS -->
-  <div class="section-title" data-cat="crash">📈 CRASH & ORIGINALS</div>
+  <div class="section-title" data-cat="crash" data-i18n="secCrash">📈 CRASH & ORIGINALS</div>
   <div class="games-grid" id="grid-crash">
 
-    <a href="/crash.html" class="game-card" data-cat="crash popular">
+    <a href="/crash.html" class="game-card" data-cat="crash popular" data-play-text="PLAY">
       <div class="game-badge badge-hot">🔥 HOT</div>
       <div class="game-visual" style="background:linear-gradient(135deg,#060618,#0d0a30);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(0,229,255,.15),transparent 70%);"></div>
@@ -239,23 +248,23 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
       </div>
       <div class="game-info">
         <div class="game-name">CRASH</div>
-        <div class="game-desc">Aviator stiliaus žaidimas. Išimkite iki katastrofos!</div>
+        <div class="game-desc"><span data-i18n="d_crash">Aviator-style game. Cash out before the crash!</span></div>
         <div class="game-tags">
           <span class="game-tag" style="background:rgba(0,229,255,.1);color:var(--neon)">RTP 97%</span>
-          <span class="game-tag" style="background:rgba(255,61,113,.1);color:#ff8ca0">DIDELĖ RIZIKA</span>
+          <span class="game-tag" style="background:rgba(255,61,113,.1);color:#ff8ca0">HIGH RISK</span>
         </div>
       </div>
     </a>
 
-    <a href="/mines.html" class="game-card" data-cat="crash popular instant">
-      <div class="game-badge badge-popular">⭐ POPULIARUS</div>
+    <a href="/mines.html" class="game-card" data-cat="crash popular instant" data-play-text="PLAY">
+      <div class="game-badge badge-popular" data-i18n-attr="badge_pop">⭐ POPULAR</div>
       <div class="game-visual" style="background:linear-gradient(135deg,#060820,#0a0a18);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(255,61,113,.12),transparent 70%);"></div>
         <span class="game-emoji">💣</span>
       </div>
       <div class="game-info">
         <div class="game-name">MINES</div>
-        <div class="game-desc">5×5 lentelė. Raskite deimantus, išvenkite minų!</div>
+        <div class="game-desc"><span data-i18n="d_mines">5×5 grid. Find diamonds, avoid mines!</span></div>
         <div class="game-tags">
           <span class="game-tag" style="background:rgba(0,230,118,.1);color:var(--green)">RTP 97%</span>
           <span class="game-tag" style="background:rgba(255,255,255,.05);color:rgba(232,224,208,.4)">1-20 MINOS</span>
@@ -263,60 +272,60 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
       </div>
     </a>
 
-    <a href="/dice.html" class="game-card" data-cat="crash instant">
+    <a href="/dice.html" class="game-card" data-cat="crash instant" data-play-text="PLAY">
       <div class="game-visual" style="background:linear-gradient(135deg,#080618,#0d0825);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(124,58,237,.15),transparent 70%);"></div>
         <span class="game-emoji">🎲</span>
       </div>
       <div class="game-info">
         <div class="game-name">DICE</div>
-        <div class="game-desc">Meskite kauliukus virš arba žemiau tikslinio skaičiaus</div>
+        <div class="game-desc"><span data-i18n="d_dice">Roll above or below the target number</span></div>
         <div class="game-tags">
           <span class="game-tag" style="background:rgba(0,229,255,.1);color:var(--neon)">RTP 97%</span>
-          <span class="game-tag" style="background:rgba(255,255,255,.05);color:rgba(232,224,208,.4)">REGULIUOJAMA</span>
+          <span class="game-tag" style="background:rgba(255,255,255,.05);color:rgba(232,224,208,.4)">ADJUSTABLE</span>
         </div>
       </div>
     </a>
 
-    <a href="/dice.html#limbo" class="game-card" data-cat="crash instant">
-      <div class="game-badge badge-new">✨ NAUJAS</div>
+    <a href="/dice.html#limbo" class="game-card" data-cat="crash instant" data-play-text="PLAY">
+      <div class="game-badge badge-new">✨ NEW</div>
       <div class="game-visual" style="background:linear-gradient(135deg,#060815,#0a0820);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(0,229,255,.1),transparent 70%);"></div>
         <span class="game-emoji">🚀</span>
       </div>
       <div class="game-info">
         <div class="game-name">LIMBO</div>
-        <div class="game-desc">Nustatykite tikslą — ar raketа pasieks jį?</div>
+        <div class="game-desc"><span data-i18n="d_limbo">Set your target — will the rocket reach it?</span></div>
         <div class="game-tags">
           <span class="game-tag" style="background:rgba(240,192,96,.1);color:var(--gold)">MAX 1000×</span>
         </div>
       </div>
     </a>
 
-    <a href="/dice.html#hilo" class="game-card" data-cat="crash table instant">
+    <a href="/dice.html#hilo" class="game-card" data-cat="crash table instant" data-play-text="PLAY">
       <div class="game-visual" style="background:linear-gradient(135deg,#08060f,#100818);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(124,58,237,.12),transparent 70%);"></div>
         <span class="game-emoji">🃏</span>
       </div>
       <div class="game-info">
         <div class="game-name">HI-LO</div>
-        <div class="game-desc">Aukščiau ar žemiau? Kaupkite streak'ą!</div>
+        <div class="game-desc"><span data-i18n="d_hilo">Higher or lower? Build a streak!</span></div>
         <div class="game-tags">
-          <span class="game-tag" style="background:rgba(0,230,118,.1);color:var(--green)">NERIBOTA</span>
+          <span class="game-tag" style="background:rgba(0,230,118,.1);color:var(--green)">UNLIMITED</span>
         </div>
       </div>
     </a>
 
-    <a href="/wheel.html" class="game-card" data-cat="crash instant popular">
+    <a href="/wheel.html" class="game-card" data-cat="crash instant popular" data-play-text="PLAY">
       <div class="game-visual" style="background:linear-gradient(135deg,#0d0518,#120a20);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(160,80,240,.15),transparent 70%);"></div>
         <span class="game-emoji">🎡</span>
       </div>
       <div class="game-info">
         <div class="game-name">LUCKY WHEEL</div>
-        <div class="game-desc">Sukite ratą — 3 rizikos lygiai, iki 100×!</div>
+        <div class="game-desc"><span data-i18n="d_wheel">Spin the wheel — 3 risk levels, up to 100×!</span></div>
         <div class="game-tags">
-          <span class="game-tag" style="background:rgba(160,80,240,.15);color:#c084fc">3 LYGIAI</span>
+          <span class="game-tag" style="background:rgba(160,80,240,.15);color:#c084fc">3 LEVELS</span>
           <span class="game-tag" style="background:rgba(255,61,113,.1);color:#ff8ca0">MAX 100×</span>
         </div>
       </div>
@@ -325,10 +334,10 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
   </div>
 
   <!-- SLOTS -->
-  <div class="section-title" data-cat="slots">🎰 SLOT MAŠINOS</div>
+  <div class="section-title" data-cat="slots" data-i18n="secSlots">🎰 SLOT MACHINES</div>
   <div class="games-grid" id="grid-slots">
 
-    <a href="/" class="game-card" data-cat="slots popular">
+    <a href="/" class="game-card" data-cat="slots popular" data-play-text="PLAY">
       <div class="game-badge badge-hot">🔥 HOT</div>
       <div class="game-visual" style="background:linear-gradient(135deg,#1a0810,#2a1020);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(240,192,96,.12),transparent 70%);"></div>
@@ -336,93 +345,93 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
       </div>
       <div class="game-info">
         <div class="game-name">CLASSIC FRUITS</div>
-        <div class="game-desc">Klasikinė vaisių mašina, 20 laimėjimo linijų</div>
-        <div class="game-tags"><span class="game-tag" style="background:rgba(240,192,96,.1);color:var(--gold)">RTP 96%</span><span class="game-tag" style="background:rgba(255,255,255,.05);color:rgba(232,224,208,.4)">20 LINIJŲ</span></div>
+        <div class="game-desc"><span data-i18n="d_fruits">Classic fruit machine, 20 winning lines</span></div>
+        <div class="game-tags"><span class="game-tag" style="background:rgba(240,192,96,.1);color:var(--gold)">RTP 96%</span><span class="game-tag" style="background:rgba(255,255,255,.05);color:rgba(232,224,208,.4)">20 LINES</span></div>
       </div>
     </a>
 
-    <a href="/" class="game-card" data-cat="slots popular">
-      <div class="game-badge badge-popular">⭐ POPULIARUS</div>
+    <a href="/" class="game-card" data-cat="slots popular" data-play-text="PLAY">
+      <div class="game-badge badge-popular" data-i18n-attr="badge_pop">⭐ POPULAR</div>
       <div class="game-visual" style="background:linear-gradient(135deg,#1a1200,#2a1e00);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(240,160,0,.1),transparent 70%);"></div>
         <span class="game-emoji">🏺</span>
       </div>
       <div class="game-info">
         <div class="game-name">EGYPTIAN GOLD</div>
-        <div class="game-desc">Egipto lobiai, laukiniai simboliai, free spins</div>
+        <div class="game-desc"><span data-i18n="d_egyptian">Egyptian treasures, wilds, free spins</span></div>
         <div class="game-tags"><span class="game-tag" style="background:rgba(240,192,96,.1);color:var(--gold)">RTP 97%</span><span class="game-tag" style="background:rgba(0,229,255,.08);color:var(--neon)">FREE SPINS</span></div>
       </div>
     </a>
 
-    <a href="/" class="game-card" data-cat="slots">
+    <a href="/" class="game-card" data-cat="slots" data-play-text="PLAY">
       <div class="game-visual" style="background:linear-gradient(135deg,#000820,#001030);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(0,100,255,.1),transparent 70%);"></div>
         <span class="game-emoji">🚀</span>
       </div>
       <div class="game-info">
         <div class="game-name">SPACE FORTUNE</div>
-        <div class="game-desc">Kosmoso avantūra su dideliais koeficientais</div>
+        <div class="game-desc"><span data-i18n="d_space">Space adventure with high multipliers</span></div>
         <div class="game-tags"><span class="game-tag" style="background:rgba(0,229,255,.1);color:var(--neon)">RTP 96.5%</span></div>
       </div>
     </a>
 
-    <a href="/" class="game-card" data-cat="slots popular">
+    <a href="/" class="game-card" data-cat="slots popular" data-play-text="PLAY">
       <div class="game-visual" style="background:linear-gradient(135deg,#08001a,#120028);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(160,80,240,.12),transparent 70%);"></div>
         <span class="game-emoji">💎</span>
       </div>
       <div class="game-info">
         <div class="game-name">DIAMOND VIP</div>
-        <div class="game-desc">Prabangios deimantų mašinos su mega jackpot</div>
+        <div class="game-desc"><span data-i18n="d_diamond">Luxury diamond slots with mega jackpot</span></div>
         <div class="game-tags"><span class="game-tag" style="background:rgba(160,80,240,.15);color:#c084fc">VIP</span><span class="game-tag" style="background:rgba(240,192,96,.1);color:var(--gold)">JACKPOT</span></div>
       </div>
     </a>
 
-    <a href="/" class="game-card" data-cat="slots">
-      <div class="game-badge badge-new">✨ NAUJAS</div>
+    <a href="/" class="game-card" data-cat="slots" data-play-text="PLAY">
+      <div class="game-badge badge-new">✨ NEW</div>
       <div class="game-visual" style="background:linear-gradient(135deg,#0a1800,#0d2000);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(0,200,50,.08),transparent 70%);"></div>
         <span class="game-emoji">🌿</span>
       </div>
       <div class="game-info">
         <div class="game-name">JUNGLE SPIRIT</div>
-        <div class="game-desc">Džiunglių dvasia, daugintojai iki ×25</div>
+        <div class="game-desc"><span data-i18n="d_jungle">Jungle spirit, multipliers up to ×25</span></div>
         <div class="game-tags"><span class="game-tag" style="background:rgba(0,230,118,.1);color:var(--green)">RTP 97.5%</span></div>
       </div>
     </a>
 
-    <a href="/" class="game-card" data-cat="slots">
+    <a href="/" class="game-card" data-cat="slots" data-play-text="PLAY">
       <div class="game-visual" style="background:linear-gradient(135deg,#1a0000,#2a0808);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(255,50,0,.08),transparent 70%);"></div>
         <span class="game-emoji">🐉</span>
       </div>
       <div class="game-info">
         <div class="game-name">DRAGON'S TREASURE</div>
-        <div class="game-desc">Drakono ola su paslėptais lobiais</div>
+        <div class="game-desc"><span data-i18n="d_dragon">Dragon's cave with hidden treasures</span></div>
         <div class="game-tags"><span class="game-tag" style="background:rgba(255,61,113,.1);color:#ff8ca0">MAX ×500</span></div>
       </div>
     </a>
 
-    <a href="/" class="game-card" data-cat="slots">
+    <a href="/" class="game-card" data-cat="slots" data-play-text="PLAY">
       <div class="game-visual" style="background:linear-gradient(135deg,#001520,#002030);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(0,180,255,.08),transparent 70%);"></div>
         <span class="game-emoji">🧜</span>
       </div>
       <div class="game-info">
         <div class="game-name">OCEAN DEPTHS</div>
-        <div class="game-desc">Povandeninė nuotykis su 243 laimėjimo būdais</div>
+        <div class="game-desc"><span data-i18n="d_ocean">Underwater adventure with 243 ways to win</span></div>
         <div class="game-tags"><span class="game-tag" style="background:rgba(0,229,255,.1);color:var(--neon)">243 WAYS</span></div>
       </div>
     </a>
 
-    <a href="/" class="game-card" data-cat="slots">
+    <a href="/" class="game-card" data-cat="slots" data-play-text="PLAY">
       <div class="game-visual" style="background:linear-gradient(135deg,#180010,#200018);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(200,0,150,.08),transparent 70%);"></div>
         <span class="game-emoji">🌙</span>
       </div>
       <div class="game-info">
         <div class="game-name">MOON MAGIC</div>
-        <div class="game-desc">Magiška nakties mašina su expanding wilds</div>
+        <div class="game-desc"><span data-i18n="d_moon">Magic night slot with expanding wilds</span></div>
         <div class="game-tags"><span class="game-tag" style="background:rgba(160,80,240,.12);color:#c084fc">EXPANDING WILDS</span></div>
       </div>
     </a>
@@ -430,23 +439,23 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
   </div>
 
   <!-- TABLE GAMES -->
-  <div class="section-title" data-cat="table">🃏 STALO ŽAIDIMAI</div>
+  <div class="section-title" data-cat="table" data-i18n="secTable">🃏 TABLE GAMES</div>
   <div class="games-grid" id="grid-table">
 
-    <a href="/baccarat.html" class="game-card" data-cat="table popular">
-      <div class="game-badge badge-popular">⭐ POPULIARUS</div>
+    <a href="/baccarat.html" class="game-card" data-cat="table popular" data-play-text="PLAY">
+      <div class="game-badge badge-popular" data-i18n-attr="badge_pop">⭐ POPULAR</div>
       <div class="game-visual" style="background:linear-gradient(135deg,#040d06,#081508);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(0,150,50,.1),transparent 70%);"></div>
         <span class="game-emoji">🃏</span>
       </div>
       <div class="game-info">
         <div class="game-name">BACCARAT</div>
-        <div class="game-desc">Klasikinis baccarat — Player, Banker ar Tie</div>
+        <div class="game-desc"><span data-i18n="d_baccarat">Classic baccarat — Player, Banker or Tie</span></div>
         <div class="game-tags"><span class="game-tag" style="background:rgba(0,230,118,.1);color:var(--green)">RTP 98.7%</span></div>
       </div>
     </a>
 
-    <a href="/" class="game-card" data-cat="table popular">
+    <a href="/" class="game-card" data-cat="table popular" data-play-text="PLAY">
       <div class="game-badge badge-hot">🔥 HOT</div>
       <div class="game-visual" style="background:linear-gradient(135deg,#040c06,#081208);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(0,200,60,.08),transparent 70%);"></div>
@@ -454,80 +463,80 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
       </div>
       <div class="game-info">
         <div class="game-name">BLACKJACK</div>
-        <div class="game-desc">21 — klasikinis blackjack prieš dilerį</div>
+        <div class="game-desc"><span data-i18n="d_blackjack">21 — classic blackjack vs dealer</span></div>
         <div class="game-tags"><span class="game-tag" style="background:rgba(0,230,118,.1);color:var(--green)">RTP 99.5%</span><span class="game-tag" style="background:rgba(255,255,255,.05);color:rgba(232,224,208,.4)">DOUBLE DOWN</span></div>
       </div>
     </a>
 
-    <a href="/videopoker.html" class="game-card" data-cat="table">
-      <div class="game-badge badge-new">✨ NAUJAS</div>
+    <a href="/videopoker.html" class="game-card" data-cat="table" data-play-text="PLAY">
+      <div class="game-badge badge-new">✨ NEW</div>
       <div class="game-visual" style="background:linear-gradient(135deg,#06040f,#0a0618);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(124,58,237,.1),transparent 70%);"></div>
         <span class="game-emoji">🎴</span>
       </div>
       <div class="game-info">
         <div class="game-name">VIDEO POKER</div>
-        <div class="game-desc">Jacks or Better — laikykite, pakeiskite, laimėkite!</div>
+        <div class="game-desc"><span data-i18n="d_vpoker">Jacks or Better — hold, draw, win!</span></div>
         <div class="game-tags"><span class="game-tag" style="background:rgba(0,230,118,.1);color:var(--green)">RTP 99.5%</span><span class="game-tag" style="background:rgba(240,192,96,.1);color:var(--gold)">MAX 800×</span></div>
       </div>
     </a>
 
-    <a href="/" class="game-card" data-cat="table popular">
+    <a href="/" class="game-card" data-cat="table popular" data-play-text="PLAY">
       <div class="game-visual" style="background:linear-gradient(135deg,#0a0800,#141000);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(200,160,0,.08),transparent 70%);"></div>
         <span class="game-emoji">♠️</span>
       </div>
       <div class="game-info">
         <div class="game-name">TEXAS HOLD'EM</div>
-        <div class="game-desc">Multiplayer pokeris su botais ir gyvais žaidėjais</div>
+        <div class="game-desc"><span data-i18n="d_texas">Multiplayer poker with bots and live players</span></div>
         <div class="game-tags"><span class="game-tag" style="background:rgba(240,192,96,.1);color:var(--gold)">MULTIPLAYER</span><span class="game-tag" style="background:rgba(0,229,255,.08);color:var(--neon)">LIVE BOTS</span></div>
       </div>
     </a>
 
-    <a href="/keno.html" class="game-card" data-cat="table instant">
+    <a href="/keno.html" class="game-card" data-cat="table instant" data-play-text="PLAY">
       <div class="game-visual" style="background:linear-gradient(135deg,#000818,#001020);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(0,100,200,.08),transparent 70%);"></div>
         <span class="game-emoji">🎱</span>
       </div>
       <div class="game-info">
         <div class="game-name">KENO</div>
-        <div class="game-desc">80 kamuolių loterija — pasirinkite iki 10 skaičių</div>
-        <div class="game-tags"><span class="game-tag" style="background:rgba(0,229,255,.1);color:var(--neon)">RTP 95%</span><span class="game-tag" style="background:rgba(255,255,255,.05);color:rgba(232,224,208,.4)">20 KAMUOLIŲ</span></div>
+        <div class="game-desc"><span data-i18n="d_keno">80-ball lottery — pick up to 10 numbers</span></div>
+        <div class="game-tags"><span class="game-tag" style="background:rgba(0,229,255,.1);color:var(--neon)">RTP 95%</span><span class="game-tag" style="background:rgba(255,255,255,.05);color:rgba(232,224,208,.4)">20 BALLS</span></div>
       </div>
     </a>
 
-    <a href="/" class="game-card" data-cat="table">
+    <a href="/" class="game-card" data-cat="table" data-play-text="PLAY">
       <div class="game-visual" style="background:linear-gradient(135deg,#0a0500,#150800);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(255,120,0,.06),transparent 70%);"></div>
         <span class="game-emoji">🎰</span>
       </div>
       <div class="game-info">
         <div class="game-name">3 CARD POKER</div>
-        <div class="game-desc">Trijų kortelių pokeris — greitas ir linksmas</div>
+        <div class="game-desc"><span data-i18n="d_3card">Three card poker — fast and fun</span></div>
         <div class="game-tags"><span class="game-tag" style="background:rgba(255,61,113,.1);color:#ff8ca0">RTP 97.7%</span></div>
       </div>
     </a>
 
-    <a href="/" class="game-card" data-cat="table">
+    <a href="/" class="game-card" data-cat="table" data-play-text="PLAY">
       <div class="game-visual" style="background:linear-gradient(135deg,#040a04,#060e06);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(0,180,30,.06),transparent 70%);"></div>
         <span class="game-emoji">🎯</span>
       </div>
       <div class="game-info">
         <div class="game-name">EUROPEAN ROULETTE</div>
-        <div class="game-desc">Europietiška ruletė su vienu nuliu</div>
+        <div class="game-desc"><span data-i18n="d_euroulette">European roulette with single zero</span></div>
         <div class="game-tags"><span class="game-tag" style="background:rgba(0,230,118,.1);color:var(--green)">RTP 97.3%</span></div>
       </div>
     </a>
 
-    <a href="/" class="game-card" data-cat="table">
+    <a href="/" class="game-card" data-cat="table" data-play-text="PLAY">
       <div class="game-visual" style="background:linear-gradient(135deg,#0a0004,#150008);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(200,0,50,.06),transparent 70%);"></div>
         <span class="game-emoji">🎡</span>
       </div>
       <div class="game-info">
         <div class="game-name">AMERICAN ROULETTE</div>
-        <div class="game-desc">Amerikietiška ruletė su dviguba nuliu</div>
+        <div class="game-desc"><span data-i18n="d_amroulette">American roulette with double zero</span></div>
         <div class="game-tags"><span class="game-tag" style="background:rgba(255,61,113,.1);color:#ff8ca0">RTP 94.7%</span></div>
       </div>
     </a>
@@ -535,54 +544,54 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
   </div>
 
   <!-- INSTANT / SPORTS -->
-  <div class="section-title" data-cat="live">⚽ SPORTO LAŽYBOS</div>
+  <div class="section-title" data-cat="live" data-i18n="secSports">⚽ SPORTS BETTING</div>
   <div class="games-grid" id="grid-live">
 
-    <a href="/" class="game-card" data-cat="live popular">
+    <a href="/" class="game-card" data-cat="live popular" data-play-text="PLAY">
       <div class="game-badge badge-hot">🔥 LIVE</div>
       <div class="game-visual" style="background:linear-gradient(135deg,#031a06,#052a0a);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(0,200,50,.08),transparent 70%);"></div>
         <span class="game-emoji">⚽</span>
       </div>
       <div class="game-info">
-        <div class="game-name">FUTBOLAS</div>
-        <div class="game-desc">Premier League, La Liga, Champions League ir dar daugiau</div>
-        <div class="game-tags"><span class="game-tag" style="background:rgba(0,230,118,.15);color:var(--green)">LIVE ODDS</span><span class="game-tag" style="background:rgba(255,255,255,.05);color:rgba(232,224,208,.4)">20+ LYGŲ</span></div>
+        <div class="game-name">FOOTBALL</div>
+        <div class="game-desc"><span data-i18n="d_football">Premier League, La Liga, Champions League and more</span></div>
+        <div class="game-tags"><span class="game-tag" style="background:rgba(0,230,118,.15);color:var(--green)">LIVE ODDS</span><span class="game-tag" style="background:rgba(255,255,255,.05);color:rgba(232,224,208,.4)">20+ LEAGUES</span></div>
       </div>
     </a>
 
-    <a href="/" class="game-card" data-cat="live popular">
+    <a href="/" class="game-card" data-cat="live popular" data-play-text="PLAY">
       <div class="game-visual" style="background:linear-gradient(135deg,#081520,#0d2030);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(255,120,0,.06),transparent 70%);"></div>
         <span class="game-emoji">🏀</span>
       </div>
       <div class="game-info">
-        <div class="game-name">KREPŠINIS</div>
-        <div class="game-desc">NBA, Eurolyga, LKL rungtynės su live koeficientais</div>
+        <div class="game-name">BASKETBALL</div>
+        <div class="game-desc"><span data-i18n="d_basketball">NBA, EuroLeague, live odds</span></div>
         <div class="game-tags"><span class="game-tag" style="background:rgba(255,120,0,.15);color:#ff9a3c">NBA LIVE</span></div>
       </div>
     </a>
 
-    <a href="/" class="game-card" data-cat="live">
+    <a href="/" class="game-card" data-cat="live" data-play-text="PLAY">
       <div class="game-visual" style="background:linear-gradient(135deg,#050a1a,#080f28);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(0,50,200,.06),transparent 70%);"></div>
         <span class="game-emoji">🎾</span>
       </div>
       <div class="game-info">
-        <div class="game-name">TENISAS</div>
-        <div class="game-desc">ATP, WTA turnyrai, Grand Slam</div>
+        <div class="game-name">TENNIS</div>
+        <div class="game-desc"><span data-i18n="d_tennis">ATP, WTA tournaments, Grand Slam</span></div>
         <div class="game-tags"><span class="game-tag" style="background:rgba(0,229,255,.1);color:var(--neon)">LIVE</span></div>
       </div>
     </a>
 
-    <a href="/" class="game-card" data-cat="live">
+    <a href="/" class="game-card" data-cat="live" data-play-text="PLAY">
       <div class="game-visual" style="background:linear-gradient(135deg,#0a1020,#101828);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(200,200,255,.04),transparent 70%);"></div>
         <span class="game-emoji">🏒</span>
       </div>
       <div class="game-info">
-        <div class="game-name">LEDO RITULYS</div>
-        <div class="game-desc">NHL, Lietuvos čempionatas ir Europos lygos</div>
+        <div class="game-name">ICE HOCKEY</div>
+        <div class="game-desc"><span data-i18n="d_hockey">NHL, European leagues</span></div>
         <div class="game-tags"><span class="game-tag" style="background:rgba(255,255,255,.07);color:rgba(232,224,208,.4)">NHL</span></div>
       </div>
     </a>
@@ -590,53 +599,53 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
   </div>
 
   <!-- INSTANT -->
-  <div class="section-title" data-cat="instant">⚡ GREITI ŽAIDIMAI</div>
+  <div class="section-title" data-cat="instant" data-i18n="secInstant">⚡ INSTANT GAMES</div>
   <div class="games-grid" id="grid-instant">
 
-    <a href="/wheel.html" class="game-card" data-cat="instant popular">
+    <a href="/wheel.html" class="game-card" data-cat="instant popular" data-play-text="PLAY">
       <div class="game-visual" style="background:linear-gradient(135deg,#0d0520,#160830);">
         <span class="game-emoji">🎡</span>
       </div>
       <div class="game-info">
         <div class="game-name">LUCKY WHEEL</div>
-        <div class="game-desc">Sukite ir laimėkite iki 100×</div>
+        <div class="game-desc"><span data-i18n="d_wheel2">Spin and win up to 100×</span></div>
         <div class="game-tags"><span class="game-tag" style="background:rgba(160,80,240,.12);color:#c084fc">INSTANT WIN</span></div>
       </div>
     </a>
 
-    <a href="/" class="game-card" data-cat="instant">
-      <div class="game-badge badge-new">✨ NAUJAS</div>
+    <a href="/" class="game-card" data-cat="instant" data-play-text="PLAY">
+      <div class="game-badge badge-new">✨ NEW</div>
       <div class="game-visual" style="background:linear-gradient(135deg,#100820,#180c30);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(150,0,255,.08),transparent 70%);"></div>
         <span class="game-emoji">🔮</span>
       </div>
       <div class="game-info">
         <div class="game-name">CRYSTAL BALL</div>
-        <div class="game-desc">Paskutinė kristalo rutulio loterija</div>
+        <div class="game-desc"><span data-i18n="d_crystal">Crystal ball lottery</span></div>
         <div class="game-tags"><span class="game-tag" style="background:rgba(160,80,240,.12);color:#c084fc">JACKPOT</span></div>
       </div>
     </a>
 
-    <a href="/" class="game-card" data-cat="instant">
+    <a href="/" class="game-card" data-cat="instant" data-play-text="PLAY">
       <div class="game-visual" style="background:linear-gradient(135deg,#050f08,#081508);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(0,180,50,.06),transparent 70%);"></div>
         <span class="game-emoji">🍀</span>
       </div>
       <div class="game-info">
         <div class="game-name">LUCKY CLOVER</div>
-        <div class="game-desc">Ieškokite keturialapio dobilas</div>
+        <div class="game-desc"><span data-i18n="d_clover">Find the lucky four-leaf clover</span></div>
         <div class="game-tags"><span class="game-tag" style="background:rgba(0,230,118,.1);color:var(--green)">INSTANT</span></div>
       </div>
     </a>
 
-    <a href="/" class="game-card" data-cat="instant">
+    <a href="/" class="game-card" data-cat="instant" data-play-text="PLAY">
       <div class="game-visual" style="background:linear-gradient(135deg,#1a0a00,#251200);">
         <div class="game-visual-bg" style="background:radial-gradient(ellipse at center,rgba(255,150,0,.06),transparent 70%);"></div>
         <span class="game-emoji">🎰</span>
       </div>
       <div class="game-info">
         <div class="game-name">SPIN & WIN</div>
-        <div class="game-desc">Greitasis lošimas be jokių taisyklių</div>
+        <div class="game-desc"><span data-i18n="d_spinwin">Quick game, no complicated rules</span></div>
         <div class="game-tags"><span class="game-tag" style="background:rgba(240,192,96,.1);color:var(--gold)">GREITAS</span></div>
       </div>
     </a>
@@ -648,18 +657,16 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 <!-- Footer -->
 <div class="footer">
   <div class="footer-links">
-    <a href="/kyc.html">KYC Patikrinimas</a>
-    <a href="/verify.html">Provably Fair</a>
-    <a href="#">Atsakingas Lošimas</a>
-    <a href="#">Privatumo Politika</a>
-    <a href="#">Taisyklės ir Sąlygos</a>
-    <a href="#">Pagalba</a>
+    <a href="/kyc.html" data-i18n="fKyc">KYC Verification</a>
+    <a href="/verify.html" data-i18n="fFair">Provably Fair</a>
+    <a href="#" data-i18n="fResp">Responsible Gaming</a>
+    <a href="#" data-i18n="fPriv">Privacy Policy</a>
+    <a href="#" data-i18n="fTerms">Terms & Conditions</a>
+    <a href="#" data-i18n="fHelp">Help</a>
   </div>
   <p>
     <span class="age-badge">🔞 18+</span><br/><br/>
-    HATHOR Royal Casino. Lošimas gali sukelti priklausomybę — lošk atsakingai.<br/>
-    Jei turite lošimo problemų, kreipkitės į pagalbos linija: <strong>116 123</strong><br/>
-    © 2025–2026 HATHOR Royal Casino. Visos teisės saugomos.
+    <span data-i18n-html="footerText">HATHOR Royal Casino. Gambling can be addictive — play responsibly.<br/>If you have gambling problems, contact the helpline: <strong>116 123</strong><br/>© 2025–2026 HATHOR Royal Casino. All rights reserved.</span>
   </p>
 </div>
 
