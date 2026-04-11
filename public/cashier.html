@@ -108,14 +108,15 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 
 <div class="wrap">
   <div class="page-title">💳 Cashier</div>
-  <div class="page-sub">DEPOSIT & WITHDRAW · CRYPTO PAYMENTS</div>
+  <div class="page-sub">DEPOSIT & WITHDRAW · CRYPTO & CARD PAYMENTS</div>
 
   <div id="demoBanner" class="demo-banner" style="display:none;">
     ⚠️ Demo režimas — mokėjimai neaktyvūs. Tikri mokėjimai bus prieinami netrukus kai sistema bus paleista.
   </div>
 
   <div class="tabs">
-    <div class="tab active" onclick="showTab('deposit',this)">⬇️ Deposit</div>
+    <div class="tab active" onclick="showTab('deposit',this)">⬇️ Crypto</div>
+    <div class="tab" onclick="showTab('card',this)">💳 Card</div>
     <div class="tab" onclick="showTab('withdraw',this)">⬆️ Withdraw</div>
     <div class="tab" onclick="showTab('history',this)">📋 History</div>
   </div>
@@ -186,6 +187,57 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
     </div>
   </div>
 
+  <!-- CARD DEPOSIT (Stripe) -->
+  <div id="tab-card" style="display:none;">
+    <div class="card" id="stripeDepositForm">
+      <h3>💳 Card Deposit</h3>
+      <div class="warn-box">
+        <strong>🔒 Secure payment:</strong> Card data is processed directly by <strong>Stripe</strong> — the world's most trusted payment provider. Your card details never touch our servers.
+      </div>
+      <label class="label">Deposit Amount (EUR)</label>
+      <div class="preset-row" style="margin-bottom:12px;">
+        <div class="preset" onclick="setCardAmt(10)">€10</div>
+        <div class="preset" onclick="setCardAmt(25)">€25</div>
+        <div class="preset" onclick="setCardAmt(50)">€50</div>
+        <div class="preset" onclick="setCardAmt(100)">€100</div>
+        <div class="preset" onclick="setCardAmt(200)">€200</div>
+      </div>
+      <div class="inp-row">
+        <div>
+          <label class="label">EUR Amount</label>
+          <input class="inp" id="cardEurInp" type="number" min="5" max="1000" placeholder="50" value="50" oninput="updateCardTokens()"/>
+        </div>
+        <div class="arrow">→</div>
+        <div>
+          <label class="label">You Receive</label>
+          <input class="inp" id="cardTokensOut" readonly placeholder="5,000 tokens"/>
+        </div>
+      </div>
+      <div style="font-size:11px;color:rgba(232,224,208,.3);text-align:center;margin-bottom:20px;font-family:'DM Mono',monospace;">
+        Rate: €1 = 100 tokens · Min: €5 · Max: €1,000
+      </div>
+      <div id="stripeElementWrap" style="margin-bottom:20px;display:none;">
+        <label class="label">Card Details</label>
+        <div id="stripe-payment-element" style="background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:16px;min-height:48px;"></div>
+        <div id="stripe-error" style="color:#ff8ca0;font-size:12px;margin-top:8px;display:none;"></div>
+      </div>
+      <div id="cardDemoNotice" class="demo-banner" style="display:none;margin-bottom:16px;">
+        🧪 Test mode — no real charge. Card will be simulated automatically.
+      </div>
+      <button class="btn btn-primary" id="cardPayBtn" onclick="cardPay()">Continue to Card Payment →</button>
+      <div id="cardResult" style="margin-top:14px;font-size:13px;text-align:center;"></div>
+    </div>
+    <div id="stripeSuccess" style="display:none;">
+      <div class="card" style="text-align:center;">
+        <div style="font-size:64px;margin-bottom:16px;">✅</div>
+        <h3 style="text-align:center;font-size:24px;margin-bottom:8px;">Payment Successful!</h3>
+        <div style="color:rgba(232,224,208,.5);font-size:13px;margin-bottom:20px;">Tokens have been added to your account.</div>
+        <div class="amount-big" id="stripeSuccessTokens">+0 tokens</div>
+        <button class="btn btn-ghost" onclick="resetStripe()" style="margin-top:24px;width:auto;padding:10px 28px;">Make Another Deposit</button>
+      </div>
+    </div>
+  </div>
+
   <!-- WITHDRAW -->
   <div id="tab-withdraw" style="display:none;">
     <div class="card">
@@ -223,6 +275,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
   </div>
 </div>
 
+<script src="https://js.stripe.com/v3/"></script>
 <script>
 const uid = localStorage.getItem('hrc_uid');
 const userName = localStorage.getItem('hrc_name');
@@ -450,10 +503,185 @@ async function loadHistory() {
 function showTab(name, el) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
-  ['deposit','withdraw','history'].forEach(t=>document.getElementById('tab-'+t).style.display='none');
+  ['deposit','card','withdraw','history'].forEach(t=>document.getElementById('tab-'+t).style.display='none');
   document.getElementById('tab-'+name).style.display='block';
   if(name==='history') loadHistory();
 }
+
+// ── STRIPE CARD PAYMENT ───────────────────────────────────
+let stripeInstance = null;
+let stripePubKey = '';
+// Fetch Stripe config on load
+fetch('/api/stripe/config').then(r=>r.json()).then(d=>{ stripePubKey = d.publishableKey || ''; }).catch(()=>{});
+let stripeElements = null;
+let stripePaymentElement = null;
+let cardClientSecret = null;
+let cardTokensPending = 0;
+let cardEurPending = 0;
+let stripeIsDemo = false;
+
+const EUR_TO_TOKENS = 100;
+
+function updateCardTokens() {
+  const eur = parseFloat(document.getElementById('cardEurInp').value) || 0;
+  const tokens = Math.floor(eur * EUR_TO_TOKENS);
+  document.getElementById('cardTokensOut').value = tokens > 0 ? tokens.toLocaleString() + ' tokens' : '';
+}
+
+function setCardAmt(eur) {
+  document.getElementById('cardEurInp').value = eur;
+  updateCardTokens();
+}
+
+async function cardPay() {
+  const eur = parseFloat(document.getElementById('cardEurInp').value) || 0;
+  if(eur < 5) { alert('Minimum deposit is €5'); return; }
+  if(eur > 1000) { alert('Maximum deposit is €1,000'); return; }
+
+  const btn = document.getElementById('cardPayBtn');
+  const errEl = document.getElementById('stripe-error');
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Preparing...';
+
+  try {
+    const r = await fetch('/api/stripe/create-payment-intent', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ uid, amountEur: eur })
+    });
+    const d = await r.json();
+    if(d.error) { alert('Error: ' + d.error); btn.disabled=false; btn.textContent='Continue to Card Payment →'; return; }
+
+    cardClientSecret = d.clientSecret;
+    cardTokensPending = d.tokens;
+    cardEurPending = eur;
+    stripeIsDemo = d.demo;
+
+    if(stripeIsDemo) {
+      // Demo mode — show notice and confirm immediately
+      document.getElementById('cardDemoNotice').style.display = 'block';
+      document.getElementById('stripeElementWrap').style.display = 'none';
+      btn.textContent = '✅ Confirm Demo Payment';
+      btn.disabled = false;
+      btn.onclick = confirmDemoPayment;
+      return;
+    }
+
+    // Real Stripe — show card element
+    if(!stripeInstance) {
+      if(typeof Stripe === 'undefined') { alert('Stripe.js failed to load. Check your internet connection.'); btn.disabled=false; btn.textContent='Continue to Card Payment →'; return; }
+      // Stripe publishable key from meta tag or env
+      if(!stripePubKey) { alert('Stripe publishable key not configured. Add STRIPE_PUBLISHABLE_KEY to environment variables.'); btn.disabled=false; btn.textContent='Continue to Card Payment →'; return; }
+      stripeInstance = Stripe(stripePubKey);
+    }
+
+    stripeElements = stripeInstance.elements({ clientSecret: cardClientSecret, appearance: {
+      theme: 'night',
+      variables: { colorPrimary: '#f0c060', colorBackground: '#0a0a14', colorText: '#e8e0d0',
+        colorDanger: '#ff3d71', fontFamily: 'Space Grotesk, sans-serif', borderRadius: '10px' }
+    }});
+    stripePaymentElement = stripeElements.create('payment');
+    stripePaymentElement.mount('#stripe-payment-element');
+    document.getElementById('stripeElementWrap').style.display = 'block';
+    btn.textContent = '🔒 Pay €' + eur.toFixed(2);
+    btn.disabled = false;
+    btn.onclick = submitStripePayment;
+
+  } catch(e) {
+    alert('Error: ' + e.message);
+    btn.disabled = false;
+    btn.textContent = 'Continue to Card Payment →';
+  }
+}
+
+async function submitStripePayment() {
+  const btn = document.getElementById('cardPayBtn');
+  const errEl = document.getElementById('stripe-error');
+  btn.disabled = true;
+  btn.textContent = 'Processing...';
+  errEl.style.display = 'none';
+
+  const { error } = await stripeInstance.confirmPayment({
+    elements: stripeElements,
+    confirmParams: { return_url: window.location.origin + '/cashier.html?stripe=success' },
+    redirect: 'if_required'
+  });
+
+  if(error) {
+    errEl.textContent = error.message;
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '🔒 Pay €' + cardEurPending.toFixed(2);
+    return;
+  }
+
+  // Payment succeeded (no redirect needed)
+  showStripeSuccess(cardTokensPending);
+}
+
+async function confirmDemoPayment() {
+  const btn = document.getElementById('cardPayBtn');
+  btn.disabled = true;
+  btn.textContent = 'Processing...';
+  try {
+    const r = await fetch('/api/stripe/demo-confirm', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ uid, tokens: cardTokensPending, amountEur: cardEurPending })
+    });
+    const d = await r.json();
+    if(d.ok) {
+      showStripeSuccess(cardTokensPending);
+      loadBalance();
+    } else {
+      alert('Error: ' + (d.error||'Unknown'));
+      btn.disabled = false;
+      btn.textContent = '✅ Confirm Demo Payment';
+    }
+  } catch(e) {
+    alert('Connection error');
+    btn.disabled = false;
+  }
+}
+
+function showStripeSuccess(tokens) {
+  document.getElementById('stripeDepositForm').style.display = 'none';
+  document.getElementById('stripeSuccess').style.display = 'block';
+  document.getElementById('stripeSuccessTokens').textContent = '+' + Number(tokens).toLocaleString() + ' tokens';
+  loadBalance();
+}
+
+function resetStripe() {
+  document.getElementById('stripeDepositForm').style.display = 'block';
+  document.getElementById('stripeSuccess').style.display = 'none';
+  document.getElementById('stripeElementWrap').style.display = 'none';
+  document.getElementById('cardDemoNotice').style.display = 'none';
+  document.getElementById('cardPayBtn').textContent = 'Continue to Card Payment →';
+  document.getElementById('cardPayBtn').onclick = cardPay;
+  document.getElementById('cardPayBtn').disabled = false;
+  document.getElementById('cardEurInp').value = '50';
+  updateCardTokens();
+  stripePaymentElement = null;
+  stripeElements = null;
+  cardClientSecret = null;
+}
+
+// Handle Stripe return redirect
+(function(){
+  const p = new URLSearchParams(location.search);
+  if(p.get('stripe') === 'success') {
+    history.replaceState({}, '', '/cashier.html');
+    loadBalance();
+    setTimeout(()=>{
+      showTab('card', document.querySelector('[onclick*="card"]'));
+      showStripeSuccess(parseInt(localStorage.getItem('_stripe_tokens_pending')||'0'));
+    }, 500);
+  }
+})();
+
+// Init card amount display
+document.addEventListener('DOMContentLoaded', function() { updateCardTokens(); });
 </script>
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
 </body>

@@ -2463,4 +2463,106 @@ app.post('/api/push/register', express.json(), async (req,res) => {
   }
 });
 
+// ── STRIPE CARD PAYMENTS ─────────────────────────────────
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || '';
+const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
+const STRIPE_ENABLED = !!STRIPE_SECRET_KEY;
+
+let stripe = null;
+if(STRIPE_ENABLED) {
+  try { stripe = require('stripe')(STRIPE_SECRET_KEY); } catch(e) { console.error('Stripe init failed:', e.message); }
+}
+
+// Tokens per EUR (1 EUR = 100 tokens)
+const EUR_TO_TOKENS = 100;
+
+// Expose publishable key to frontend
+app.get('/api/stripe/config', (req, res) => {
+  const pubKey = process.env.STRIPE_PUBLISHABLE_KEY || '';
+  res.json({ publishableKey: pubKey, enabled: STRIPE_ENABLED && !!pubKey });
+});
+
+// Create Stripe PaymentIntent
+app.post('/api/stripe/create-payment-intent', express.json(), async (req, res) => {
+  try {
+    const { uid, amountEur } = req.body;
+    if(!uid) return res.status(400).json({ error: 'Missing uid' });
+    const eur = parseFloat(amountEur) || 0;
+    if(eur < 5) return res.status(400).json({ error: 'Minimum deposit is €5' });
+    if(eur > 1000) return res.status(400).json({ error: 'Maximum deposit is €1,000' });
+
+    const tokens = Math.floor(eur * EUR_TO_TOKENS);
+    const amountCents = Math.round(eur * 100);
+
+    if(!STRIPE_ENABLED || !stripe) {
+      // Demo mode — simulate payment intent
+      const demoClientSecret = 'demo_pi_' + Date.now() + '_secret_demo';
+      return res.json({ clientSecret: demoClientSecret, tokens, amountEur: eur, demo: true });
+    }
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amountCents,
+      currency: 'eur',
+      metadata: { uid, tokens: String(tokens) },
+      description: `HATHOR Casino deposit — ${tokens} tokens`,
+      automatic_payment_methods: { enabled: true },
+    });
+
+    res.json({ clientSecret: paymentIntent.client_secret, tokens, amountEur: eur, demo: false });
+  } catch(e) {
+    console.error('Stripe PI error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Stripe webhook — called by Stripe when payment succeeds
+app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+  if(!STRIPE_ENABLED || !stripe) return res.json({ received: true });
+
+  let event;
+  try {
+    if(STRIPE_WEBHOOK_SECRET) {
+      event = stripe.webhooks.constructEvent(req.body, req.headers['stripe-signature'], STRIPE_WEBHOOK_SECRET);
+    } else {
+      event = JSON.parse(req.body);
+    }
+  } catch(e) {
+    console.error('Stripe webhook error:', e.message);
+    return res.status(400).send(`Webhook Error: ${e.message}`);
+  }
+
+  if(event.type === 'payment_intent.succeeded') {
+    const pi = event.data.object;
+    const uid = pi.metadata?.uid;
+    const tokens = parseInt(pi.metadata?.tokens || '0');
+    if(uid && tokens > 0) {
+      try {
+        db.prepare('UPDATE users SET tokens = tokens + ? WHERE uid = ?').run(tokens, uid);
+        io.to(uid).emit('depositConfirmed', { tokens, currency: 'EUR', method: 'card' });
+        const txId = 'stripe_' + pi.id;
+        db.prepare(`INSERT OR IGNORE INTO transactions(id,uid,type,currency,amount_crypto,amount_tokens,status,payment_id,payment_address)
+          VALUES(?,?,?,?,?,?,?,?,?)`).run(txId, uid, 'deposit', 'EUR', pi.amount/100, tokens, 'finished', pi.id, 'card');
+        console.log(`Stripe deposit confirmed: uid=${uid} tokens=${tokens}`);
+      } catch(e) { console.error('Stripe webhook DB error:', e.message); }
+    }
+  }
+  res.json({ received: true });
+});
+
+// Stripe demo confirm (test mode — simulate successful payment)
+app.post('/api/stripe/demo-confirm', express.json(), (req, res) => {
+  try {
+    const { uid, tokens, amountEur } = req.body;
+    if(!uid || !tokens) return res.status(400).json({ error: 'Missing fields' });
+    db.prepare('UPDATE users SET tokens = tokens + ? WHERE uid = ?').run(parseInt(tokens), uid);
+    io.to(uid).emit('depositConfirmed', { tokens: parseInt(tokens), currency: 'EUR', method: 'card' });
+    const txId = 'demo_card_' + Date.now();
+    db.prepare(`INSERT OR IGNORE INTO transactions(id,uid,type,currency,amount_crypto,amount_tokens,status,payment_id,payment_address)
+      VALUES(?,?,?,?,?,?,?,?,?)`).run(txId, uid, 'deposit', 'EUR', parseFloat(amountEur)||0, parseInt(tokens), 'finished', txId, 'card_demo');
+    res.json({ ok: true, tokens: parseInt(tokens) });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 server.listen(PORT,()=>console.log(`🎰 HATHOR Royal Casino v2 → http://localhost:${PORT}`));
