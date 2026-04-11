@@ -3300,8 +3300,8 @@ function CookieBanner(){
   return(
     <div style={{position:'fixed',bottom:0,left:0,right:0,background:'rgba(14,12,8,0.97)',borderTop:'1px solid rgba(201,168,76,0.2)',padding:'14px 20px',display:'flex',alignItems:'center',gap:16,zIndex:9998,flexWrap:'wrap'}}>
       <div style={{flex:1,fontSize:12,color:'rgba(232,226,212,0.7)',minWidth:200}}>
-        Naudojame slapukus geriausiai patirčiai. Tesdami naudojimasi sutinkate su{' '}
-        <a href="/privacy.html" style={{color:'#c9a84c'}}>privatumo politika</a>.
+        We use cookies for the best experience. By continuing you agree to our{' '}
+        <a href="/privacy.html" style={{color:'#c9a84c'}}>privacy policy</a>.
       </div>
       <div style={{display:'flex',gap:8}}>
         <button onClick={function(){localStorage.setItem('cookies_accepted','1');setShow(false);}}
@@ -3478,7 +3478,7 @@ function Auth({onLogin,t=LANGS.en}){
         </div>
         <div style={{textAlign:'center',padding:'20px',color:'rgba(232,224,208,.5)',fontSize:13}}>
           <div style={{fontSize:28,marginBottom:12}}>⬡</div>
-          Tikrinamas prisijungimas...
+          Verifying session...
         </div>
       </div>
     </div>
@@ -6108,6 +6108,7 @@ const LANGS = {
       premiumPoker:{title:'Premium Poker',desc:"Texas Hold'em · AI bots · Viktor, Elena, Marco, Sophia"},
     },
     footer:{terms:'Terms & Conditions',privacy:'Privacy Policy',responsible:'Responsible Gambling',provably:'Provably Fair'},
+    vip:'VIP', support:'Support',
     viktor:{greeting:'Welcome! I am Viktor, your personal croupier. Ask me anything!'},
     disclaimer:'VIRTUAL TOKENS ONLY · ENTERTAINMENT ONLY · NO REAL MONEY',
   },
@@ -6156,6 +6157,7 @@ const LANGS = {
       premiumPoker:{title:'Premium Pokeris',desc:"Texas Hold'em · AI botai · Viktor, Elena, Marco, Sophia"},
     },
     footer:{terms:'Taisyklės ir Sąlygos',privacy:'Privatumo Politika',responsible:'Atsakingas Lošimas',provably:'Provably Fair'},
+    vip:'VIP', support:'Palaikymas',
     viktor:{greeting:'Sveiki! Aš esu Viktoras, jūsų asmeninis krupjė. Klauskite viską!'},
     disclaimer:'TIK VIRTUALŪS ŽETONAI · TIK PRAMOGA · BE REALIŲ PINIGŲ',
   },
@@ -6204,6 +6206,7 @@ const LANGS = {
       premiumPoker:{title:'Премиум Покер',desc:"Техасский холдем · ИИ боты · Виктор, Елена, Марко, Sophia"},
     },
     footer:{terms:'Правила и Условия',privacy:'Политика конфиденциальности',responsible:'Ответственная игра',provably:'Provably Fair'},
+    vip:'VIP', support:'Поддержка',
     viktor:{greeting:'Добро пожаловать! Я Виктор, ваш личный крупье. Спрашивайте всё!'},
     disclaimer:'ТОЛЬКО ВИРТУАЛЬНЫЕ ЖЕТОНЫ · ТОЛЬКО РАЗВЛЕЧЕНИЕ · БЕЗ РЕАЛЬНЫХ ДЕНЕГ',
   },
@@ -6252,6 +6255,7 @@ const LANGS = {
       premiumPoker:{title:'Premium Poker',desc:"Texas Hold'em · KI-Bots · Viktor, Elena, Marco, Sophia"},
     },
     footer:{terms:'AGB & Bedingungen',privacy:'Datenschutzerklärung',responsible:'Verantwortungsvolles Spielen',provably:'Provably Fair'},
+    vip:'VIP', support:'Support',
     viktor:{greeting:'Willkommen! Ich bin Viktor, Ihr persönlicher Croupier. Fragen Sie alles!'},
     disclaimer:'NUR VIRTUELLE CHIPS · NUR UNTERHALTUNG · KEIN ECHTES GELD',
   },
@@ -6301,6 +6305,7 @@ const LANGS = {
       premiumPoker:{title:'Premium Poker',desc:"Texas Hold'em · boty AI · Viktor, Elena, Marco, Sophia"},
     },
     footer:{terms:'Regulamin',privacy:'Polityka prywatności',responsible:'Odpowiedzialny hazard',provably:'Provably Fair'},
+    vip:'VIP', support:'Wsparcie',
     viktor:{greeting:'Witaj! Jestem Viktor, Twój osobisty krupier. Zapytaj mnie o cokolwiek!'},
     disclaimer:'TYLKO WIRTUALNE ŻETONY · TYLKO ROZRYWKA · BEZ PRAWDZIWYCH PIENIĘDZY',
   },
@@ -6349,6 +6354,7 @@ const LANGS = {
       premiumPoker:{title:'Premium Poker',desc:"Texas Hold'em · IA bots · Viktor, Elena, Marco, Sophia"},
     },
     footer:{terms:'Conditions Générales',privacy:'Politique de confidentialité',responsible:'Jeu responsable',provably:'Provably Fair'},
+    vip:'VIP', support:'Support',
     viktor:{greeting:'Bienvenue! Je suis Viktor, votre croupier personnel. Posez-moi vos questions!'},
     disclaimer:'JETONS VIRTUELS UNIQUEMENT · DIVERTISSEMENT UNIQUEMENT · SANS ARGENT RÉEL',
   },
@@ -6397,6 +6403,7 @@ const LANGS = {
       premiumPoker:{title:'Premium Poker',desc:"Texas Hold'em · AI botlar · Viktor, Elena, Marco, Sophia"},
     },
     footer:{terms:'Şartlar ve Koşullar',privacy:'Gizlilik Politikası',responsible:'Sorumlu Kumar',provably:'Provably Fair'},
+    vip:'VIP', support:'Destek',
     viktor:{greeting:'Hoş geldiniz! Ben Viktor, kişisel krupiyenizim. Her şeyi sorabilirsiniz!'},
     disclaimer:'SADECE SANAL JETONLAR · SADECE EĞLENCE · GERÇEK PARA YOK',
   },
@@ -6445,6 +6452,7 @@ const LANGS = {
       premiumPoker:{title:'بوكر بريميوم',desc:'تكساس هولدم · روبوتات ذكاء اصطناعي · Viktor'},
     },
     footer:{terms:'الشروط والأحكام',privacy:'سياسة الخصوصية',responsible:'المقامرة المسؤولة',provably:'Provably Fair'},
+    vip:'VIP', support:'الدعم',
     viktor:{greeting:'مرحباً! أنا فيكتور، كروبييرك الشخصي. اسألني عن أي شيء!'},
     disclaimer:'رموز افتراضية فقط · للترفيه فقط · لا أموال حقيقية',
   },
@@ -6493,6 +6501,7 @@ const LANGS = {
       premiumPoker:{title:'高级扑克',desc:'德州扑克 · AI机器人 · Viktor、Elena、Marco'},
     },
     footer:{terms:'条款和条件',privacy:'隐私政策',responsible:'负责任博彩',provably:'Provably Fair'},
+    vip:'VIP', support:'客服',
     viktor:{greeting:'欢迎！我是维克托，您的专属荷官。有任何问题请随时问我！'},
     disclaimer:'仅限虚拟代币 · 仅供娱乐 · 无真实金钱',
   },
@@ -6528,6 +6537,7 @@ const LANGS = {
       premiumPoker:{title:'प्रीमियम पोकर',desc:"Texas Hold'em · AI बॉट्स · Viktor, Elena"},
     },
     footer:{terms:'नियम एवं शर्तें',privacy:'गोपनीयता नीति',responsible:'जिम्मेदार जुआ',provably:'Provably Fair'},
+    vip:'VIP', support:'सहायता',
     viktor:{greeting:'स्वागत है! मैं विक्टर हूँ, आपका निजी क्रूपियर। कुछ भी पूछें!'},
     disclaimer:'केवल वर्चुअल टोकन · केवल मनोरंजन · कोई वास्तविक पैसा नहीं',
   },
@@ -6576,6 +6586,7 @@ const LANGS = {
       premiumPoker:{title:'Преміум Покер',desc:"Техаський Холдем · AI боти · Віктор, Олена, Марко"},
     },
     footer:{terms:'Умови та Положення',privacy:'Політика Конфіденційності',responsible:'Відповідальна Гра',provably:'Provably Fair'},
+    vip:'VIP', support:'Підтримка',
     viktor:{greeting:'Вітаємо! Я Віктор, ваш особистий круп’є. Запитуйте будь-що!'},
     disclaimer:'ЛИШЕ ВІРТУАЛЬНІ ЖЕТОНИ · ЛИШЕ РОЗВАГИ · БЕЗ РЕАЛЬНИХ ГРОШЕЙ',
   },
@@ -7078,8 +7089,8 @@ function SupportChat({user, t=LANGS.en, open:openProp, onClose}) {
           <div className="support-header">
             <div className="support-avatar">🎧</div>
             <div>
-              <div className="support-name">HATHOR Palaikymas</div>
-              <div className="support-status">● ONLINE — atsakome iš karto</div>
+              <div className="support-name">HATHOR {t&&t.support||'Support'}</div>
+              <div className="support-status">● ONLINE</div>
             </div>
             <button className="btn btn-ghost btn-sm" style={{marginLeft:'auto'}} onClick={()=>setOpen(false)}>✕</button>
           </div>
@@ -7810,9 +7821,9 @@ function App(){
     {id:'stats',icon:'📊',label:t.stats||'Stats'},
     {id:'cashier',icon:'💳',label:t.cashier||'Cashier'},
     {id:'__div4'},
-    {id:'vip',icon:'🌟',label:'VIP Programa',badge:'NEW',badgeCls:'new'},
+    {id:'vip',icon:'🌟',label:t.vip||'VIP',badge:'NEW',badgeCls:'new'},
     {id:'viktor',icon:'🎩',label:'Viktor AI',badge:'AI',badgeCls:'live'},
-    {id:'support',icon:'🎧',label:'Palaikymas',badge:'●',badgeCls:'live'},
+    {id:'support',icon:'🎧',label:t.support||'Support',badge:'●',badgeCls:'live'},
   ];
 
   return(
