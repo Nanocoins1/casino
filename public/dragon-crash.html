@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
 <title>HATHOR — Dragon Crash</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/css/game-ui.css"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
@@ -129,14 +130,29 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 .aval-inp:focus{border-color:rgba(0,229,255,.4);}
 .arow-lbl{font-size:11px;color:rgba(232,224,208,.4);}
 
-.bet-btn{width:100%;padding:14px;border-radius:12px;border:none;cursor:pointer;
-  font-family:'Orbitron',monospace;font-size:13px;font-weight:900;letter-spacing:1px;transition:all .2s;}
-.bet-btn.idle{background:linear-gradient(135deg,#c9a84c,#f0c060,#a07830);color:#060400;}
-.bet-btn.idle:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(240,192,96,.4);}
-.bet-btn.pend{background:rgba(0,229,255,.12);border:1px solid rgba(0,229,255,.3);color:var(--neon);}
-.bet-btn.cash{background:linear-gradient(135deg,#b84400,#ff6600,#ffaa00);color:#1a0500;}
-.bet-btn.cash:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(255,102,0,.5);}
-.bet-btn:disabled{opacity:.38;cursor:not-allowed;transform:none!important;box-shadow:none!important;}
+/* bet-btn — layout wrapper; colors handled by game-ui.css btn-* classes */
+.bet-btn-wrap{width:100%;}
+
+/* 🔥 Fire/Cashout button — Dragon Crash exclusive */
+.btn-fire {
+  background: linear-gradient(180deg, #ffcc60 0%, #ff8800 18%, #cc4400 55%, #881800 80%, #660000 100%);
+  color: #fff; font-weight: 900; letter-spacing: 1.5px;
+  text-shadow: 0 1px 0 rgba(255,200,80,.4);
+  border-top: 1px solid rgba(255,200,100,.6); border-bottom: 1px solid rgba(50,0,0,.8);
+  box-shadow: 0 5px 0 #440800, 0 7px 16px rgba(0,0,0,.65),
+    0 0 20px rgba(200,80,0,.2), inset 0 1px 0 rgba(255,220,100,.5),
+    inset 0 -2px 4px rgba(0,0,0,.2);
+}
+.btn-fire:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 0 #440800, 0 12px 28px rgba(220,100,0,.55),
+    0 0 40px rgba(255,150,0,.35), inset 0 1px 0 rgba(255,235,100,.65);
+}
+.btn-fire:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 #440800, 0 2px 8px rgba(0,0,0,.5),
+    inset 0 2px 4px rgba(0,0,0,.3);
+}
 
 .sep{height:1px;background:var(--border);margin:2px 0;}
 
@@ -250,7 +266,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
             <span class="arow-lbl">x</span>
           </div>
         </div>
-        <button class="bet-btn idle" id="btnA" onclick="handleBetA()">&#128009; BET A</button>
+        <button class="btn btn-full btn-lg btn-gold" id="btnA" onclick="handleBetA()">&#128009; BET A</button>
         <div class="sep"></div>
         <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(232,224,208,.35);">
           <span>Potential payout:</span>
@@ -287,7 +303,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
             <span class="arow-lbl">x</span>
           </div>
         </div>
-        <button class="bet-btn idle" id="btnB" onclick="handleBetB()">&#128009; BET B</button>
+        <button class="btn btn-full btn-lg btn-gold" id="btnB" onclick="handleBetB()">&#128009; BET B</button>
       </div>
     </div>
 
@@ -362,6 +378,7 @@ var dragonX=0, dragonY=0;
 var dragonSize=60;
 var wingPhase=0;
 var ab={on:false,left:0};
+var lastTickMult=1.0;
 
 var canvas=document.getElementById('gc');
 var ctx=canvas.getContext('2d');
@@ -1159,25 +1176,39 @@ function updateBtns(){
 
 function updBtn(b,lbl,btn,potEl){
   if(!btn)return;
+  var BASE='btn btn-full btn-lg';
   if(state===ST.WAIT){
-    if(b.pending){btn.className='bet-btn pend';btn.textContent='CANCEL '+lbl+' ('+fmt(b.pending)+')';btn.disabled=false;}
-    else{btn.className='bet-btn idle';btn.innerHTML='&#128009; BET '+lbl;btn.disabled=false;}
-  }else if(state===ST.FLY){
+    if(b.pending){
+      btn.className=BASE+' btn-glass';
+      btn.textContent='✕ CANCEL '+lbl+' ('+fmt(b.pending)+')';
+      btn.disabled=false;
+    } else {
+      btn.className=BASE+' btn-gold';
+      btn.innerHTML='&#128009; BET '+lbl;
+      btn.disabled=false;
+    }
+  } else if(state===ST.FLY){
     if(b.placed&&!b.cashedOut){
       var pot=Math.floor(b.amount*mult)-b.amount;
-      btn.className='bet-btn cash';
-      btn.innerHTML='&#128293; CASHOUT '+lbl+' <span style="font-size:11px;opacity:.75">+'+fmt(pot)+'</span>';
+      btn.className=BASE+' btn-fire';
+      btn.innerHTML='&#128293; CASHOUT '+lbl+' <span style="font-size:11px;opacity:.8">+'+fmt(pot)+'</span>';
       btn.disabled=false;
-    }else if(b.cashedOut){
-      btn.className='bet-btn idle';btn.textContent='CASHED '+lbl+' ('+b.mult.toFixed(2)+'x)';btn.disabled=true;
-    }else{
-      btn.className='bet-btn idle';btn.textContent='FLYING...';btn.disabled=true;
+    } else if(b.cashedOut){
+      btn.className=BASE+' btn-glass';
+      btn.textContent='✓ CASHED '+lbl+' ('+b.mult.toFixed(2)+'×)';
+      btn.disabled=true;
+    } else {
+      btn.className=BASE+' btn-gold';
+      btn.textContent='FLYING...';
+      btn.disabled=true;
     }
-  }else{
-    btn.className='bet-btn idle';btn.innerHTML='&#128009; BET '+lbl;btn.disabled=true;
+  } else {
+    btn.className=BASE+' btn-gold';
+    btn.innerHTML='&#128009; BET '+lbl;
+    btn.disabled=true;
   }
   if(potEl){
-    potEl.textContent=(state===ST.FLY&&b.placed&&!b.cashedOut)?('&#129689;'+fmt(Math.floor(b.amount*mult))):'&#8212;';
+    potEl.textContent=(state===ST.FLY&&b.placed&&!b.cashedOut)?('&#129689; '+fmt(Math.floor(b.amount*mult))):'—';
   }
 }
 
@@ -1198,7 +1229,8 @@ function cashoutBet(b,lbl){
   var profit=won-b.amount;
   sess.wins++;sess.profit+=profit;
   saveTokens();
-  showToast(lbl+': x'+mult.toFixed(2)+' +'+fmt(profit),'win');
+  showToast(lbl+': ×'+mult.toFixed(2)+' +'+fmt(profit),'win');
+  if(profit>=b.amount*2) playBigWin(); else playCashout();
   logGame(b.amount,won);
   updateSess();
   var ov=document.getElementById('wfOv');
@@ -1272,7 +1304,7 @@ function startWait(){
 function startFly(){
   clearInterval(flyInt);flyInt=null;
   if(state!==ST.WAIT)return;
-  state=ST.FLY;crashPt=genCrash();mult=1.0;gPts=[1.0];elapsed=0;
+  state=ST.FLY;crashPt=genCrash();mult=1.0;gPts=[1.0];elapsed=0;lastTickMult=1.0;
   updateBtns();
 
   flyInt=setInterval(function(){
@@ -1296,6 +1328,9 @@ function startFly(){
     var atB=document.getElementById('autoTogB').checked;
     var avB=parseFloat(document.getElementById('autoValB').value)||5.0;
     if(atB&&bB.placed&&!bB.cashedOut&&mult>=avB)cashoutBet(bB,'B');
+
+    // Tick sound every 0.1× increment
+    if(Math.floor(mult*10)>Math.floor(lastTickMult*10)){lastTickMult=mult;playTick();}
 
     updateMultDisp();updateBtns();renderBots();
 
@@ -1344,7 +1379,8 @@ function doCrash(){
   },100);
 
   document.getElementById('crashBanner').style.display='flex';
-  document.getElementById('crashTxt').textContent='CRASHED @ '+crashPt.toFixed(2)+'x';
+  document.getElementById('crashTxt').textContent='CRASHED @ '+crashPt.toFixed(2)+'×';
+  playCrash();
 
   if(bA.placed&&!bA.cashedOut){
     sess.losses++;sess.profit-=bA.amount;
@@ -1387,6 +1423,7 @@ function handleBetA(){
     if(amt>50000){amt=50000;document.getElementById('amtA').value=50000;}
     if(amt>tokens){showToast('Not enough tokens','loss');return;}
     bA.pending=amt;updateBtns();
+    playBet();if(navigator.vibrate)navigator.vibrate(15);
   }
 }
 
@@ -1399,6 +1436,7 @@ function handleBetB(){
     if(amt>50000){amt=50000;document.getElementById('amtB').value=50000;}
     if(amt>tokens){showToast('Not enough tokens','loss');return;}
     bB.pending=amt;updateBtns();
+    playBet();if(navigator.vibrate)navigator.vibrate(15);
   }
 }
 
@@ -1435,6 +1473,62 @@ function dv(id){var el=document.getElementById(id);el.value=Math.min(tokens,pars
 function sv(id,v){document.getElementById(id).value=v;}
 function svMax(id){document.getElementById(id).value=Math.min(tokens,50000);}
 
+// ─── WEB AUDIO ────────────────────────────────────────────
+var _AC=null;
+function getAC(){
+  if(!_AC){try{_AC=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+  return _AC;
+}
+function playTone(freq,type,dur,vol,atk){
+  try{
+    var ac=getAC(); if(!ac)return;
+    var osc=ac.createOscillator(), gain=ac.createGain();
+    osc.connect(gain); gain.connect(ac.destination);
+    osc.type=type||'sine'; osc.frequency.setValueAtTime(freq,ac.currentTime);
+    gain.gain.setValueAtTime(0,ac.currentTime);
+    gain.gain.linearRampToValueAtTime(vol||0.25,ac.currentTime+(atk||0.008));
+    gain.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+dur);
+    osc.start(); osc.stop(ac.currentTime+dur+0.02);
+  }catch(e){}
+}
+function playBet(){
+  playTone(700,'sine',0.1,0.18,0.005);
+  setTimeout(function(){playTone(900,'sine',0.08,0.12,0.005);},60);
+}
+function playTick(){
+  var f=mult<2?1000:(mult<5?1300:(mult<10?1700:2200));
+  playTone(f,'square',0.04,0.06);
+}
+function playCashout(){
+  [523,659,784,1047,1319].forEach(function(f,i){
+    setTimeout(function(){playTone(f,'sine',0.2,0.22);},i*70);
+  });
+  if(navigator.vibrate)navigator.vibrate([30,20,80]);
+}
+function playBigWin(){
+  [523,659,784,1047,1319,1568].forEach(function(f,i){
+    setTimeout(function(){playTone(f,'sine',0.35,0.28);},i*55);
+  });
+  if(navigator.vibrate)navigator.vibrate([50,30,100,30,200]);
+}
+function playCrash(){
+  try{
+    var ac=getAC(); if(!ac)return;
+    var bufLen=Math.floor(ac.sampleRate*0.55);
+    var buf=ac.createBuffer(1,bufLen,ac.sampleRate);
+    var d=buf.getChannelData(0);
+    for(var i=0;i<bufLen;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/bufLen,0.6);
+    var src=ac.createBufferSource(); src.buffer=buf;
+    var gain=ac.createGain();
+    gain.gain.setValueAtTime(0.7,ac.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.5);
+    src.connect(gain); gain.connect(ac.destination); src.start();
+  }catch(e){}
+  playTone(55,'sawtooth',0.5,0.5,0.01);
+  if(navigator.vibrate)navigator.vibrate([80,40,160,40,80]);
+}
+
+// ─── INIT ─────────────────────────────────────────────────
 resize();
 window.addEventListener('resize',resize);
 document.getElementById('balEl').textContent=fmt(tokens);

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="lt">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,13 +21,23 @@
   }
 
   body {
-    background: var(--bg);
+    background: #04040a url('/img/keno-bg.png') center/cover no-repeat fixed;
     color: var(--text);
     font-family: 'Segoe UI', system-ui, sans-serif;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    position: relative;
   }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(4,4,10,0.72);
+    z-index: 0;
+    pointer-events: none;
+  }
+  header, .main { position: relative; z-index: 1; }
 
   /* HEADER */
   header {
@@ -392,37 +402,12 @@
   }
 
   /* DRAW BUTTON */
-  .draw-btn {
-    width: 100%;
-    background: linear-gradient(135deg, #1a6b3a, #0d4a28);
-    border: 2px solid var(--green);
-    color: var(--green);
-    padding: 14px;
-    border-radius: 12px;
-    font-size: 17px;
-    font-weight: 800;
-    cursor: pointer;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    transition: all 0.2s;
-    box-shadow: 0 0 20px rgba(0,230,118,0.15);
-  }
-  .draw-btn:hover:not(:disabled) {
-    background: linear-gradient(135deg, #1f7d44, #0f5530);
-    box-shadow: 0 0 30px rgba(0,230,118,0.35);
-    transform: translateY(-1px);
-  }
-  .draw-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-    transform: none;
-  }
-  .draw-btn.drawing {
-    animation: drawPulse 0.5s ease infinite alternate;
-  }
+  /* draw-btn — 3D handled by game-ui.css btn-green */
+  .draw-btn { font-size: 16px !important; letter-spacing: 2px !important; }
+  .draw-btn.drawing { animation: drawPulse 0.5s ease infinite alternate; }
   @keyframes drawPulse {
-    from { box-shadow: 0 0 10px rgba(0,230,118,0.2); }
-    to { box-shadow: 0 0 30px rgba(0,230,118,0.6); }
+    from { box-shadow: 0 5px 0 #085028, 0 0 12px rgba(56,184,112,.2) !important; }
+    to { box-shadow: 0 5px 0 #085028, 0 0 40px rgba(56,184,112,.6) !important; }
   }
 
   /* PICK STATUS */
@@ -651,6 +636,7 @@
     100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
   }
 </style>
+<link rel="stylesheet" href="/css/game-ui.css"/>
 </head>
 <body>
 
@@ -661,7 +647,7 @@
     <span class="balance-icon">🪙</span>
     <div>
       <div class="balance-amount" id="balanceDisplay">0</div>
-      <div class="balance-label">Žetonai</div>
+      <div class="balance-label">Tokens</div>
     </div>
   </div>
 </header>
@@ -675,7 +661,7 @@
         <span class="picks-count" id="picksCount">0</span>
         <span class="picks-max">/ 10</span>
       </div>
-      <button class="clear-btn" id="clearBtn" onclick="clearPicks()">✕ Išvalyti</button>
+      <button class="clear-btn" id="clearBtn" onclick="clearPicks()">✕ Clear</button>
     </div>
 
     <div class="keno-grid" id="kenoGrid"></div>
@@ -685,12 +671,12 @@
       <div class="win-label" id="winLabel">Rezultatas</div>
       <div class="win-amount" id="winAmount">0</div>
       <div id="winDetail"></div>
-      <button class="play-again-btn" onclick="resetGame()">🎱 Žaisti dar kartą</button>
+      <button class="play-again-btn" onclick="resetGame()">🎱 Play Again</button>
     </div>
 
     <!-- Drawn numbers -->
     <div class="panel-card" id="drawnCard" style="display:none;">
-      <div class="panel-title">Ištraukti skaičiai (20)</div>
+      <div class="panel-title">Drawn Numbers (20)</div>
       <div class="drawn-row" id="drawnRow"></div>
     </div>
   </div>
@@ -734,23 +720,23 @@
     </div>
 
     <!-- Draw button -->
-    <button class="draw-btn" id="drawBtn" onclick="startDraw()">
+    <button class="btn btn-full btn-lg btn-green draw-btn" id="drawBtn" onclick="startDraw()">
       🎱 TRAUKTI
     </button>
 
     <!-- Payout table -->
     <div class="panel-card">
-      <div class="panel-title">Išmokų lentelė</div>
+      <div class="panel-title">Payout Table</div>
       <table class="payout-table" id="payoutTable">
         <thead>
           <tr>
             <th>Pataikyta</th>
             <th>Daugiklis</th>
-            <th>Laimėjimas</th>
+            <th>Payout</th>
           </tr>
         </thead>
         <tbody id="payoutBody">
-          <tr><td colspan="3" style="color:var(--muted);text-align:center;padding:8px;">Pasirinkite skaičius</td></tr>
+          <tr><td colspan="3" style="color:var(--muted);text-align:center;padding:8px;">Pick your numbers</td></tr>
         </tbody>
       </table>
     </div>
@@ -761,15 +747,15 @@
       <div class="stats-grid">
         <div class="stat-box">
           <div class="stat-val gold" id="statGamesPlayed">0</div>
-          <div class="stat-lbl">Žaidimai</div>
+          <div class="stat-lbl">Games</div>
         </div>
         <div class="stat-box">
           <div class="stat-val green" id="statWins">0</div>
-          <div class="stat-lbl">Laimėjimai</div>
+          <div class="stat-lbl">Wins</div>
         </div>
         <div class="stat-box">
           <div class="stat-val green" id="statTotalWon">0</div>
-          <div class="stat-lbl">Laimėta</div>
+          <div class="stat-lbl">Won</div>
         </div>
         <div class="stat-box">
           <div class="stat-val red" id="statTotalLost">0</div>
@@ -895,7 +881,7 @@ function updatePayoutTable(hitCount = null) {
   const bet = getBet();
 
   if (picks === 0) {
-    tbody.innerHTML = '<tr><td colspan="3" style="color:var(--muted);text-align:center;padding:8px;">Pasirinkite skaičius</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="3" style="color:var(--muted);text-align:center;padding:8px;">Pick your numbers</td></tr>';
     return;
   }
 
@@ -1040,6 +1026,7 @@ function showResults(bet) {
   const winDetailEl = document.getElementById('winDetail');
 
   if (won > 0) {
+    won = Math.min(won, 500000); // safety cap
     balance += won;
     saveBalance();
     updateBalanceDisplay();

@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="lt">
+<html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
 <title>HATHOR — Limbo</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/css/game-ui.css"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
@@ -103,12 +104,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 
 .win-chance{font-size:11px;color:rgba(0,229,255,.5);text-align:center;margin-top:6px;font-family:'DM Mono',monospace;}
 
-/* Spin btn */
-.spin-btn{margin:0 16px 12px;padding:14px;border-radius:10px;border:none;cursor:pointer;font-family:'Orbitron',monospace;
-  font-size:13px;font-weight:900;letter-spacing:2px;background:linear-gradient(135deg,var(--neon),#0099cc);
-  color:#000;transition:all .2s;}
-.spin-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,229,255,.4);}
-.spin-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+/* .spin-btn — 3D handled by btn-teal in game-ui.css (neon/cyan theme) */
+.spin-btn{margin:0 16px 12px;font-family:'Orbitron',monospace;font-size:13px;letter-spacing:2px;}
 
 /* Auto bet */
 .auto-row{display:flex;align-items:center;gap:8px;}
@@ -224,7 +221,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         <div class="slider-wrap">
           <input type="range" id="targetSlider" min="1.01" max="50" step="0.01" value="2" oninput="onSliderChange()"/>
         </div>
-        <div class="win-chance">Laimėjimo tikimybė: <span id="winChance">48.5%</span></div>
+        <div class="win-chance">Win chance: <span id="winChance">48.5%</span></div>
       </div>
 
       <!-- Auto bet -->
@@ -233,10 +230,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         <div class="auto-row">
           <label class="sw"><input type="checkbox" id="autoTog" onchange="onAutoToggle()"/><span class="sw-t"></span><span class="sw-k"></span></label>
           <select class="auto-sel" id="autoSel">
-            <option value="10">10 kartų</option>
-            <option value="25">25 kartų</option>
-            <option value="50">50 kartų</option>
-            <option value="100">100 kartų</option>
+            <option value="10">10 rounds</option>
+            <option value="25">25 rounds</option>
+            <option value="50">50 rounds</option>
+            <option value="100">100 rounds</option>
             <option value="999">∞ Begaliniai</option>
           </select>
         </div>
@@ -247,25 +244,25 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       <div>
         <div class="inp-lbl">Sesijos statistika</div>
         <div class="stats-grid">
-          <div class="sb"><div class="sv" id="stBets">0</div><div class="sl">Statymų</div></div>
-          <div class="sb"><div class="sv" id="stWins">0</div><div class="sl">Laimėjimų</div></div>
+          <div class="sb"><div class="sv" id="stBets">0</div><div class="sl">Bets</div></div>
+          <div class="sb"><div class="sv" id="stWins">0</div><div class="sl">Wins</div></div>
           <div class="sb"><div class="sv" id="stProfit">0</div><div class="sl">Pelnas</div></div>
         </div>
       </div>
 
       <!-- Payout info -->
       <div style="background:rgba(0,229,255,.03);border:1px solid rgba(0,229,255,.08);border-radius:9px;padding:12px;">
-        <div class="inp-lbl" style="margin-bottom:8px;">Kaip žaisti</div>
+        <div class="inp-lbl" style="margin-bottom:8px;">How to play</div>
         <div style="font-size:11px;color:rgba(232,224,208,.4);line-height:1.8;">
-          Nustatyk tikslą (pvz. <span style="color:var(--neon);">3.00x</span>)<br/>
-          Jei atsitiktinis skaičius ≥ taikiniui — laimi!<br/>
-          Daugiau rizikos = mažesnė tikimybė = didesnis koeficientas
+          Set a target (e.g. <span style="color:var(--neon);">3.00x</span>)<br/>
+          If the random result ≥ target — you win!<br/>
+          Higher risk = lower chance = bigger multiplier
         </div>
       </div>
 
     </div>
 
-    <button class="spin-btn" id="spinBtn" onclick="doSpin()">▶ STATYTI</button>
+    <button class="btn btn-full btn-lg btn-teal spin-btn" id="spinBtn" onclick="doSpin()">▶ STATYTI</button>
   </div>
 </div>
 </div>

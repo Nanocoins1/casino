@@ -8,20 +8,20 @@
   "background_color": "#04040a",
   "theme_color": "#04040a",
   "orientation": "portrait-primary",
-  "lang": "lt",
+  "lang": "en",
   "categories": ["games", "entertainment"],
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%2304040a' rx='38'/%3E%3Ccircle cx='96' cy='82' r='50' fill='none' stroke='%23f0c060' stroke-width='5' opacity='.4'/%3E%3Ctext y='106' x='96' font-size='62' text-anchor='middle' font-family='serif'%3E%F0%9F%8E%B0%3C/text%3E%3Crect x='28' y='140' width='136' height='28' rx='8' fill='%23f0c060' opacity='.12'/%3E%3Ctext y='160' x='96' font-size='18' text-anchor='middle' fill='%23f0c060' font-family='Arial,sans-serif' font-weight='700' letter-spacing='3'%3EHATHOR%3C/text%3E%3C/svg%3E",
+      "src": "/img/favicon.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%2304040a' rx='100'/%3E%3Ccircle cx='256' cy='210' r='140' fill='none' stroke='%23f0c060' stroke-width='12' opacity='.35'/%3E%3Ccircle cx='256' cy='210' r='110' fill='none' stroke='%23f0c060' stroke-width='4' opacity='.15'/%3E%3Ctext y='265' x='256' font-size='160' text-anchor='middle' font-family='serif'%3E%F0%9F%8E%B0%3C/text%3E%3Crect x='60' y='365' width='392' height='80' rx='20' fill='%23f0c060' opacity='.1'/%3E%3Ctext y='420' x='256' font-size='52' text-anchor='middle' fill='%23f0c060' font-family='Arial,sans-serif' font-weight='700' letter-spacing='8'%3EHATHOR%3C/text%3E%3C/svg%3E",
+      "src": "/img/favicon.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ],
@@ -29,33 +29,37 @@
     {
       "name": "Crash",
       "short_name": "Crash",
-      "description": "Aviator stiliaus — išimk laiku!",
-      "url": "/crash.html?s=pwa"
+      "description": "Aviator-style — cash out in time!",
+      "url": "/crash.html?s=pwa",
+      "icons": [{"src": "/img/icon-crash.png", "sizes": "96x96"}]
     },
     {
       "name": "Blackjack",
       "short_name": "Blackjack",
-      "description": "21 — įveik kasininką",
-      "url": "/blackjack.html?s=pwa"
+      "description": "Beat the dealer to 21",
+      "url": "/blackjack.html?s=pwa",
+      "icons": [{"src": "/img/icon-blackjack.png", "sizes": "96x96"}]
     },
     {
       "name": "Roulette",
-      "short_name": "Ruletė",
-      "description": "Europinė ruletė",
-      "url": "/roulette.html?s=pwa"
+      "short_name": "Roulette",
+      "description": "European roulette — spin & win",
+      "url": "/roulette.html?s=pwa",
+      "icons": [{"src": "/img/icon-roulette.png", "sizes": "96x96"}]
     },
     {
       "name": "Mines",
       "short_name": "Mines",
-      "description": "5x5 deimantai ir minos",
-      "url": "/mines.html?s=pwa"
+      "description": "5×5 grid — diamonds vs mines",
+      "url": "/mines.html?s=pwa",
+      "icons": [{"src": "/img/icon-mines.png", "sizes": "96x96"}]
     }
   ],
   "screenshots": [
     {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 390 844'%3E%3Crect width='390' height='844' fill='%2304040a'/%3E%3Ctext y='422' x='195' font-size='40' text-anchor='middle' fill='%23f0c060' font-family='Arial,sans-serif'%3EHATHOR Casino%3C/text%3E%3C/svg%3E",
-      "sizes": "390x844",
-      "type": "image/svg+xml",
+      "src": "/img/loading-screen.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
       "form_factor": "narrow",
       "label": "HATHOR Casino Lobby"
     }

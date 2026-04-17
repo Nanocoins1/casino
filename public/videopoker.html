@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="lt">
+<html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
 <title>HATHOR — Video Poker</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/css/game-ui.css"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
@@ -32,7 +33,9 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 @media(max-width:750px){.main{grid-template-columns:1fr;grid-template-rows:auto auto;overflow:visible;height:auto;}}
 
 /* ── Game area ── */
-.game-area{display:flex;flex-direction:column;align-items:center;justify-content:space-between;background:#060610;padding:20px 24px;overflow:hidden;gap:12px;}
+.game-area{display:flex;flex-direction:column;align-items:center;justify-content:space-between;background:#060610 url('/img/videopoker-bg.png') center/cover no-repeat;padding:20px 24px;overflow:hidden;gap:12px;position:relative;}
+.game-area::before{content:'';position:absolute;inset:0;background:rgba(4,4,16,0.70);pointer-events:none;z-index:0;}
+.game-area>*{position:relative;z-index:1;}
 
 /* Result banner */
 .result-banner{height:54px;display:flex;align-items:center;justify-content:center;gap:16px;width:100%;}
@@ -117,17 +120,9 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
   display:flex;align-items:center;justify-content:center;
 }
 
-/* Controls row */
+/* Controls row — gradients handled by btn-gold / btn-green in game-ui.css */
 .controls-row{display:flex;gap:12px;align-items:center;justify-content:center;width:100%;flex-wrap:wrap;}
-.action-btn{
-  padding:13px 36px;border-radius:12px;border:none;cursor:pointer;
-  font-family:'Orbitron',monospace;font-size:14px;font-weight:900;letter-spacing:1px;
-  background:linear-gradient(135deg,#c9a84c,#f0c060,#a07830);
-  color:#080600;transition:all .2s;
-}
-.action-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(240,192,96,.4);}
-.action-btn:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none;}
-.action-btn.draw-btn{background:linear-gradient(135deg,#0d5c2e,#00e676,#0a4422);color:#001a0a;}
+.action-btn{font-family:'Orbitron',monospace;font-size:14px;letter-spacing:1px;padding:13px 36px;}
 
 /* ── Side panel ── */
 .side-panel{background:rgba(8,8,18,.95);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;padding:16px;gap:14px;}
@@ -226,8 +221,8 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 
     <!-- Buttons -->
     <div class="controls-row">
-      <button class="action-btn" id="dealBtn" onclick="handleDeal()">DALINTI</button>
-      <button class="action-btn draw-btn" id="drawBtn" onclick="handleDraw()" disabled>KEISTI</button>
+      <button class="btn btn-lg btn-gold action-btn" id="dealBtn" onclick="handleDeal()">🃏 DALINTI</button>
+      <button class="btn btn-lg btn-green action-btn draw-btn" id="drawBtn" onclick="handleDraw()" disabled>🔄 KEISTI</button>
     </div>
   </div>
 
@@ -240,7 +235,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
         <div class="coin-display" id="coinDisplay"></div>
         <div style="flex:1"></div>
         <div>
-          <div class="coin-label">MONETŲ</div>
+          <div class="coin-label">COINS</div>
           <div class="bet-amount" id="betAmount">1</div>
         </div>
       </div>
@@ -254,14 +249,14 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
     </div>
 
     <div class="panel-section">
-      <div class="panel-title">Išmokos (1 moneta)</div>
+      <div class="panel-title">Payouts (1 coin)</div>
       <table class="payout-table" id="payoutTable">
-        <tr data-hand="Royal Flush">     <td>Karališka spalva</td><td>800×</td></tr>
-        <tr data-hand="Straight Flush">  <td>Eilutė + spalva</td><td>50×</td></tr>
+        <tr data-hand="Royal Flush">     <td>Royal Flush</td><td>800×</td></tr>
+        <tr data-hand="Straight Flush">  <td>Straight Flush</td><td>50×</td></tr>
         <tr data-hand="Four of a Kind">  <td>Keturios vienodos</td><td>25×</td></tr>
         <tr data-hand="Full House">      <td>Full House</td><td>9×</td></tr>
         <tr data-hand="Flush">           <td>Spalva (Flush)</td><td>6×</td></tr>
-        <tr data-hand="Straight">        <td>Eilutė (Straight)</td><td>4×</td></tr>
+        <tr data-hand="Straight">        <td>Straight</td><td>4×</td></tr>
         <tr data-hand="Three of a Kind"> <td>Trys vienodos</td><td>3×</td></tr>
         <tr data-hand="Two Pair">        <td>Dvi poros</td><td>2×</td></tr>
         <tr data-hand="Jacks or Better"> <td>Valetas ar geriau</td><td>1×</td></tr>
@@ -272,10 +267,10 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
     <div class="panel-section">
       <div class="panel-title">Statistika</div>
       <div class="stats-grid">
-        <div class="stat-box"><div class="stat-val" id="statGames">0</div><div class="stat-lbl">Žaidimai</div></div>
-        <div class="stat-box"><div class="stat-val green" id="statWins">0</div><div class="stat-lbl">Laimėjimai</div></div>
+        <div class="stat-box"><div class="stat-val" id="statGames">0</div><div class="stat-lbl">Games</div></div>
+        <div class="stat-box"><div class="stat-val green" id="statWins">0</div><div class="stat-lbl">Wins</div></div>
         <div class="stat-box"><div class="stat-val" id="statBet">0</div><div class="stat-lbl">Pastatyta</div></div>
-        <div class="stat-box"><div class="stat-val green" id="statWon">0</div><div class="stat-lbl">Laimėta</div></div>
+        <div class="stat-box"><div class="stat-val green" id="statWon">0</div><div class="stat-lbl">Won</div></div>
       </div>
     </div>
 
@@ -358,12 +353,12 @@ const PAYOUTS={
   'Nothing':0
 };
 const HAND_LT={
-  'Royal Flush':'Karališka spalva',
-  'Straight Flush':'Eilutė + spalva',
+  'Royal Flush':'Royal Flush',
+  'Straight Flush':'Straight Flush',
   'Four of a Kind':'Keturios vienodos',
   'Full House':'Full House',
   'Flush':'Spalva (Flush)',
-  'Straight':'Eilutė (Straight)',
+  'Straight':'Straight',
   'Three of a Kind':'Trys vienodos',
   'Two Pair':'Dvi poros',
   'Jacks or Better':'Valetas ar geriau',
@@ -540,11 +535,7 @@ function finishRound(){
 
   const handName=evaluate(hand);
   const mult=(handName==='Royal Flush'&&bet===5)?4000/5:PAYOUTS[handName];
-  const won=mult*bet;
-
-  // Special Royal Flush max bet: 4000 total (800×5 = 4000)
-  // Actually at max bet Royal Flush = 4000, which is mult=800 for 5 coins = 4000
-  // Standard formula: won = PAYOUTS[hand] * bet. At bet=5 Royal Flush = 800*5=4000. Correct.
+  const won=Math.min(mult*bet, 500000); // safety cap
 
   balance+=won;
   saveBalance();

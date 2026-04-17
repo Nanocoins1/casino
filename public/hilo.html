@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="lt">
+<html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
 <title>HATHOR — HiLo</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/css/game-ui.css"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{--bg:#04040a;--gold:#f0c060;--gold2:#ffd980;--green:#00e676;--red:#ff3d71;
@@ -32,8 +33,9 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 
 /* Game area */
 .game-area{display:flex;flex-direction:column;align-items:center;justify-content:center;
-  background:radial-gradient(ellipse at center,#0d0d22 0%,#04040a 100%);
+  background:#04040a url('/img/hilo-bg.png') center/cover no-repeat;
   padding:20px;gap:24px;position:relative;overflow:hidden;}
+.game-area::before{content:'';position:absolute;inset:0;background:rgba(4,4,10,.62);pointer-events:none;z-index:0;}
 
 /* Stars bg */
 .stars{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
@@ -141,17 +143,8 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
   color:rgba(232,224,208,.5);font-size:10px;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;}
 .qb:hover{border-color:rgba(240,192,96,.3);color:var(--gold);}
 
-.deal-btn{width:100%;padding:13px;border-radius:11px;border:none;cursor:pointer;
-  font-family:'Orbitron',monospace;font-size:13px;font-weight:900;letter-spacing:1px;
-  background:linear-gradient(135deg,#c9a84c,#f0c060,#a07830);color:#060400;transition:all .2s;}
-.deal-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(240,192,96,.4);}
-.deal-btn:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none;}
-
-.cashout-btn{width:100%;padding:13px;border-radius:11px;border:none;cursor:pointer;
-  font-family:'Orbitron',monospace;font-size:13px;font-weight:900;letter-spacing:1px;
-  background:linear-gradient(135deg,#00b894,#00e676);color:#001810;transition:all .2s;}
-.cashout-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,230,118,.4);}
-.cashout-btn:disabled{opacity:.35;cursor:not-allowed;}
+/* deal-btn / cashout-btn — 3D handled by btn-gold / btn-green in game-ui.css */
+.deal-btn,.cashout-btn{font-family:'Orbitron',monospace;font-size:13px;letter-spacing:1px;}
 
 .sep{height:1px;background:var(--border);}
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
@@ -237,7 +230,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
     <!-- Multiplier -->
     <div class="mult-area">
       <div class="mult-num inactive" id="multEl">1.00&#215;</div>
-      <div class="mult-sub" id="multSub">PRADĖKITE ŽAISTI</div>
+      <div class="mult-sub" id="multSub">START PLAYING</div>
       <div class="streak-row" id="streakRow"></div>
     </div>
 
@@ -245,7 +238,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
     <div class="choice-row" id="choiceRow">
       <button class="choice-btn btn-hi" id="btnHi" onclick="guess('hi')" disabled>
         <span class="choice-icon">&#9650;</span>
-        <span>AUKŠTESNIS</span>
+        <span>HIGHER</span>
         <span class="choice-odds" id="oddsHi">&#8212;</span>
       </button>
       <button class="choice-btn btn-same" id="btnSame" onclick="guess('same')" disabled>
@@ -255,7 +248,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
       </button>
       <button class="choice-btn btn-lo" id="btnLo" onclick="guess('lo')" disabled>
         <span class="choice-icon">&#9660;</span>
-        <span>ŽEMESNIS</span>
+        <span>LOWER</span>
         <span class="choice-odds" id="oddsLo">&#8212;</span>
       </button>
     </div>
@@ -271,7 +264,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
     <div class="panel-title">&#128200; HI-LO</div>
 
     <div>
-      <div class="inp-lbl">Statymų suma</div>
+      <div class="inp-lbl">Bet Amount</div>
       <input class="bet-inp" id="betInp" type="number" value="100" min="10"/>
       <div class="qgrid">
         <button class="qb" onclick="qadd(50)">+50</button>
@@ -285,21 +278,21 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
       </div>
     </div>
 
-    <button class="deal-btn" id="dealBtn" onclick="startRound()">DALINTI KORTĄ</button>
+    <button class="btn btn-full btn-lg btn-gold deal-btn" id="dealBtn" onclick="startRound()">🃏 DEAL CARD</button>
 
     <div class="pot-box" id="potBox" style="display:none;">
-      <span class="pot-lbl">Išimti dabar:</span>
+      <span class="pot-lbl">Cash out now:</span>
       <span class="pot-val" id="potEl">&#129689; 0</span>
     </div>
 
-    <button class="cashout-btn" id="cashoutBtn" onclick="cashout()" style="display:none;" disabled>
-      IŠIMTI
+    <button class="btn btn-full btn-lg btn-green cashout-btn" id="cashoutBtn" onclick="cashout()" style="display:none;" disabled>
+      💰 CASH OUT
     </button>
 
     <div class="sep"></div>
 
     <div class="stats-grid">
-      <div class="sb"><div class="sb-v pos" id="stW">0</div><div class="sb-l">LAIMĖTA</div></div>
+      <div class="sb"><div class="sb-v pos" id="stW">0</div><div class="sb-l">WON</div></div>
       <div class="sb"><div class="sb-v neg" id="stL">0</div><div class="sb-l">PRARASTA</div></div>
       <div class="sb"><div class="sb-v" id="stStr">0</div><div class="sb-l">SERIJA</div></div>
       <div class="sb"><div class="sb-v" id="stBest">0</div><div class="sb-l">GERIAUSIA</div></div>
@@ -309,10 +302,10 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 
     <div class="info-box">
       <p>
-        &#9650; Aukštesnis — kita korta didesnė vertė<br/>
-        &#9660; Žemesnis — kita korta mažesnė vertė<br/>
-        &#9866; Lygus — ta pati vertė (didelė išmoka!)<br/>
-        Kuo daugiau iš eilės — tuo didesnis koeficientas
+        &#9650; Higher — next card has greater value<br/>
+        &#9660; Lower — next card has smaller value<br/>
+        &#9866; Equal — same value (big payout!)<br/>
+        The longer the streak — the bigger the multiplier
       </p>
     </div>
   </div>
@@ -442,7 +435,7 @@ function updateMult(){
   if(playing){
     var pot = Math.floor(betAmt * mult);
     document.getElementById('potEl').textContent = '&#129689; '+fmt(pot);
-    document.getElementById('cashoutBtn').textContent = 'IŠIMTI &#129689;'+fmt(pot);
+    document.getElementById('cashoutBtn').textContent = 'CASH OUT &#129689;'+fmt(pot);
   }
 }
 
@@ -539,7 +532,7 @@ function guess(dir){
     document.getElementById('dealBtn').disabled = false;
     document.getElementById('multEl').className = 'mult-num inactive';
     document.getElementById('multEl').textContent = '1.00x';
-    document.getElementById('multSub').textContent = 'NETEISINGA — PRALAIMĖTA';
+    document.getElementById('multSub').textContent = 'NETEISINGA — PRAWON';
     stats.l++;
     showFlash('NETEISINGA!', 'wrong');
     showToast('Neteisinga! Pralaimėta &#129689;'+fmt(betAmt),'loss');

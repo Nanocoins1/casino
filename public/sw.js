@@ -1,25 +1,60 @@
-// HATHOR Casino — Service Worker v1.4
-var CACHE = 'hathor-v1.4';
+// HATHOR Casino — Service Worker v2.0
+var CACHE = 'hathor-v2.0';
 var STATIC = [
   '/',
   '/manifest.json',
-  'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@700;900&family=DM+Mono:wght@400;500&display=swap'
+  'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@700;900&family=DM+Mono:wght@400;500&display=swap'
+];
+
+// Key images to pre-cache for instant lobby loading
+var IMG_CACHE = [
+  '/img/favicon.png',
+  '/img/loading-screen.png',
+  '/img/win-celebration.png',
+  '/img/bonus-bg.png',
+  '/img/vip-card-bg.png',
+  '/img/cashier-hero.png',
+  '/img/cat-all.png',
+  '/img/cat-tables.png',
+  '/img/cat-slots.png',
+  '/img/cat-crash.png',
+  '/img/cat-sports.png',
+  '/img/icon-slots.png',
+  '/img/icon-roulette.png',
+  '/img/icon-blackjack.png',
+  '/img/icon-crash.png',
+  '/img/icon-dragon.png',
+  '/img/icon-mines.png',
+  '/img/icon-dice.png',
+  '/img/icon-pyramid.png',
+  '/img/av-lion.png',
+  '/img/av-tiger.png',
+  '/img/av-wolf.png',
+  '/img/av-eagle.png',
+  '/img/av-dragon.png',
+  '/img/av-king.png',
+  '/img/av-queen.png',
 ];
 
 // Pages that should always come from network (live game data)
 var NETWORK_FIRST = ['/api/', '/socket.io/', '/admin', '/kyc-file/'];
 
-// Pages that work offline (static pages)
+// Pages that work offline (static compliance pages)
 var CACHE_FIRST = [
   '/terms.html', '/privacy.html', '/responsible.html',
-  '/provably-fair.html', '/aml.html', '/login.html'
+  '/provably-fair.html', '/aml.html', '/login.html', '/404.html'
 ];
 
 self.addEventListener('install', function(e) {
   self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE).then(function(cache) {
-      return cache.addAll(STATIC).catch(function() {});
+      // Cache static + key images (ignore failures for optional images)
+      return cache.addAll(STATIC).catch(function() {}).then(function() {
+        return Promise.all(IMG_CACHE.map(function(url) {
+          return cache.add(url).catch(function() {});
+        }));
+      });
     })
   );
 });
@@ -72,7 +107,7 @@ self.addEventListener('fetch', function(e) {
     return;
   }
 
-  // Stale-while-revalidate for main pages
+  // Stale-while-revalidate for everything else
   e.respondWith(
     caches.match(e.request).then(function(cached) {
       var fetchPromise = fetch(e.request).then(function(res) {
@@ -92,17 +127,17 @@ self.addEventListener('fetch', function(e) {
 self.addEventListener('push', function(e) {
   var data = {};
   try { data = e.data.json(); } catch(err) {
-    data = { title: 'HATHOR Casino', body: e.data ? e.data.text() : 'Naujas pranešimas!' };
+    data = { title: 'HATHOR Casino', body: e.data ? e.data.text() : 'New notification!' };
   }
   var options = {
     body: data.body || '',
-    icon: data.icon || '/icon-192.png',
-    badge: '/icon-192.png',
+    icon: data.icon || '/img/favicon.png',
+    badge: '/img/favicon.png',
     vibrate: [200, 100, 200],
     data: { url: data.url || '/' },
     actions: [
-      { action: 'open', title: 'Atidaryti' },
-      { action: 'close', title: 'Uždaryti' }
+      { action: 'open',  title: 'Open' },
+      { action: 'close', title: 'Dismiss' }
     ],
     tag: 'hathor-notification',
     renotify: true

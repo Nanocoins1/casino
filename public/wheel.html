@@ -6,10 +6,12 @@
 <title>NEXUS WHEEL — HATHOR Casino</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/game-ui.css"/>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  html,body{width:100%;height:100%;overflow:hidden;background:#000005;font-family:'Space Grotesk',sans-serif}
-  #canvas-wrap{position:fixed;inset:0;z-index:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:#000005 url('/img/wheel-bg.png') center/cover no-repeat;font-family:'Space Grotesk',sans-serif}
+  body::before{content:'';position:fixed;inset:0;background:rgba(0,0,5,0.55);z-index:0;pointer-events:none;}
+  #canvas-wrap{position:fixed;inset:0;z-index:1}
   canvas{display:block!important;width:100%!important;height:100%!important}
 
   .hdr{
@@ -71,22 +73,8 @@
   }
   #bet-input:focus{border-color:rgba(240,192,96,0.75)}
 
-  #spin-btn{
-    font-family:'Orbitron',monospace;font-size:18px;font-weight:900;letter-spacing:4px;
-    color:#000;background:linear-gradient(135deg,#ffd700,#f0c060,#cc8800);
-    border:none;padding:15px 64px;border-radius:50px;cursor:pointer;
-    box-shadow:0 0 30px rgba(240,192,96,0.5),0 4px 20px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.3);
-    transition:all .2s;position:relative;overflow:hidden;
-  }
-  #spin-btn::before{
-    content:'';position:absolute;inset:0;
-    background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.35) 50%,transparent 100%);
-    transform:translateX(-150%);transition:transform .5s;
-  }
-  #spin-btn:hover::before{transform:translateX(150%)}
-  #spin-btn:hover{transform:translateY(-2px) scale(1.04);box-shadow:0 0 55px rgba(240,192,96,0.75),0 6px 30px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.3)}
-  #spin-btn:active{transform:translateY(1px) scale(0.97)}
-  #spin-btn:disabled{opacity:0.38;cursor:not-allowed;transform:none!important;box-shadow:0 0 10px rgba(240,192,96,0.2)}
+  /* #spin-btn — 3D handled by game-ui.css btn-gold */
+  #spin-btn{font-family:'Orbitron',monospace;letter-spacing:4px;padding:15px 64px;border-radius:50px;}
 
   #result-overlay{
     position:fixed;inset:0;z-index:200;
@@ -174,7 +162,7 @@
     <button class="qbtn" id="dblBtn">2×</button>
     <button class="qbtn" id="maxBtn">MAX</button>
   </div>
-  <button id="spin-btn">SPIN</button>
+  <button id="spin-btn" class="btn btn-gold">SPIN</button>
 </div>
 
 <div id="result-overlay">

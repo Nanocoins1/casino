@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
 <title>HATHOR — Coin Flip</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/css/game-ui.css"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{--bg:#04040a;--gold:#f0c060;--gold2:#ffd980;--green:#00e676;--red:#ff3d71;
@@ -29,8 +30,9 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 
 /* Game area */
 .game-area{display:flex;flex-direction:column;align-items:center;justify-content:center;
-  background:radial-gradient(ellipse at center,#0d0d22 0%,#04040a 100%);
+  background:#04040a url('/img/coinflip-bg.png') center/cover no-repeat;
   padding:20px;gap:22px;position:relative;overflow:hidden;}
+.game-area::before{content:'';position:absolute;inset:0;background:rgba(4,4,10,.65);pointer-events:none;z-index:0;}
 
 /* Stars */
 .stars{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
@@ -135,11 +137,8 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
   color:rgba(232,224,208,.5);font-size:10px;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;}
 .qb:hover{border-color:rgba(240,192,96,.3);color:var(--gold);}
 
-.flip-btn{width:100%;padding:13px;border-radius:11px;border:none;cursor:pointer;
-  font-family:'Orbitron',monospace;font-size:14px;font-weight:900;letter-spacing:1px;
-  background:linear-gradient(135deg,#c9a84c,#f0c060,#a07830);color:#060400;transition:all .2s;}
-.flip-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(240,192,96,.4);}
-.flip-btn:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none;}
+/* .flip-btn — 3D handled by btn-gold in game-ui.css */
+.flip-btn{font-family:'Orbitron',monospace;font-size:14px;letter-spacing:1px;}
 
 .sep{height:1px;background:var(--border);}
 
@@ -277,7 +276,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
       <span class="pot-val" id="potWin">&#8212;</span>
     </div>
 
-    <button class="flip-btn" id="flipBtn" onclick="doFlip()">FLIP COIN</button>
+    <button class="btn btn-full btn-lg btn-gold flip-btn" id="flipBtn" onclick="doFlip()">🪙 FLIP COIN</button>
 
     <div class="sep"></div>
 

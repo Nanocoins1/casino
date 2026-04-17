@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="lt">
+<html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
 <title>HATHOR — Baccarat</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/css/game-ui.css"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
@@ -38,13 +39,15 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 
 /* ── Table area ── */
 .table-area{display:flex;flex-direction:column;align-items:center;justify-content:center;
-  background:radial-gradient(ellipse 80% 60% at 50% 50%,#0d3a1a,#04040a);
+  background:#04040a url('/img/baccarat-bg.png') center/cover no-repeat;
   padding:20px;gap:16px;overflow:hidden;position:relative;}
+.table-area::after{content:'';position:absolute;inset:0;
+  background:rgba(0,0,0,.60);pointer-events:none;}
 
 /* Felt table */
 .felt-table{width:100%;max-width:700px;background:var(--felt);border-radius:20px;
   border:2px solid rgba(255,255,255,0.1);box-shadow:0 0 60px rgba(0,0,0,.8),inset 0 0 40px rgba(0,0,0,.4);
-  padding:20px;display:flex;flex-direction:column;gap:16px;position:relative;}
+  padding:20px;display:flex;flex-direction:column;gap:16px;position:relative;z-index:1;}
 .felt-table::before{content:'';position:absolute;inset:4px;border-radius:16px;
   border:1px solid rgba(255,255,255,0.06);pointer-events:none;}
 
@@ -164,15 +167,8 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
   text-align:center;transition:all .2s;letter-spacing:0.5px;}
 .qbtn:hover{color:var(--cream);border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.06);}
 
-/* Deal button */
-.deal-btn{width:100%;padding:14px;border-radius:10px;border:none;cursor:pointer;
-  font-family:'Orbitron',monospace;font-size:14px;font-weight:900;letter-spacing:2px;
-  background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;
-  transition:all .2s;box-shadow:0 4px 20px rgba(240,192,96,.3);}
-.deal-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 28px rgba(240,192,96,.45);}
-.deal-btn:active:not(:disabled){transform:translateY(0);}
-.deal-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
-.deal-btn.dealing{background:linear-gradient(135deg,#555,#666);color:rgba(255,255,255,.6);}
+/* Deal button — handled by game-ui.css btn-gold / btn-glass */
+.deal-btn { font-family: 'Orbitron', monospace !important; letter-spacing: 2px !important; }
 
 /* Current bet display */
 .current-bet-info{display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
@@ -288,7 +284,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
       <div class="hands-row">
         <!-- Player hand -->
         <div class="hand-zone" id="playerZone">
-          <div class="hand-label" id="playerLabel">ŽAIDĖJAS</div>
+          <div class="hand-label" id="playerLabel">PLAYER</div>
           <div class="cards-row" id="playerCards"></div>
           <div class="hand-score" id="playerScore">—</div>
         </div>
@@ -308,13 +304,13 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 
       <!-- Status -->
       <div class="status-bar">
-        <div class="status-msg" id="statusMsg">Pasirinkite lažybą ir spauskite DALINTI</div>
+        <div class="status-msg" id="statusMsg">Place your bet and click DEAL</div>
       </div>
 
       <!-- Betting areas on felt -->
       <div class="bet-areas-row">
         <div class="bet-area player-area" id="feltPlayer" onclick="selectBetType('player')">
-          <div class="bet-area-name">ŽAIDĖJAS</div>
+          <div class="bet-area-name">PLAYER</div>
           <div class="bet-area-odds">1:1</div>
           <div class="bet-area-chip" id="chipPlayer">●</div>
         </div>
@@ -336,9 +332,9 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
   <div class="right-panel">
     <!-- Bet type -->
     <div class="panel-section">
-      <div class="panel-title">LAŽYBOS TIPAS</div>
+      <div class="panel-title">BET TYPE</div>
       <div class="bet-type-tabs">
-        <div class="btt player" id="tabPlayer" onclick="selectBetType('player')">ŽAIDĖJAS</div>
+        <div class="btt player" id="tabPlayer" onclick="selectBetType('player')">PLAYER</div>
         <div class="btt tie" id="tabTie" onclick="selectBetType('tie')">LYGIOSIOS</div>
         <div class="btt banker" id="tabBanker" onclick="selectBetType('banker')">BANKININKAS</div>
       </div>
@@ -368,14 +364,14 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 
     <!-- Deal -->
     <div class="panel-section">
-      <button class="deal-btn" id="dealBtn" onclick="startRound()">DALINTI</button>
+      <button class="btn btn-full btn-lg btn-gold deal-btn" id="dealBtn" onclick="startRound()">🃏 DALINTI</button>
     </div>
 
     <!-- History -->
     <div class="panel-section">
       <div class="panel-title">PASKUTINIAI 10</div>
       <div class="history-pills" id="historyPills">
-        <span style="font-size:11px;color:rgba(232,224,208,.2)">Nėra istorijos</span>
+        <span style="font-size:11px;color:rgba(232,224,208,.2)">No history</span>
       </div>
     </div>
 
@@ -385,7 +381,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
       <div class="stats-grid">
         <div class="stat-box">
           <div class="stat-val p" id="statP">0</div>
-          <div class="stat-label">ŽAIDĖJAS</div>
+          <div class="stat-label">PLAYER</div>
         </div>
         <div class="stat-box">
           <div class="stat-val t" id="statT">0</div>
@@ -403,19 +399,19 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 <!-- Win popup -->
 <div class="overlay-bg" id="overlayBg" onclick="closePopup()"></div>
 <div class="win-popup" id="winPopup">
-  <div class="wp-label" id="wpLabel">LAIMĖJOTE</div>
+  <div class="wp-label" id="wpLabel">YOU WIN</div>
   <div class="wp-amount" id="wpAmount">+0</div>
   <div class="wp-sub" id="wpSub"></div>
 </div>
 
 <script>
 // ── Auth guard ──
-const uid = localStorage.getItem('casino_uid');
-const tokens = parseFloat(localStorage.getItem('tokens') || '10000');
+var uid = localStorage.getItem('casino_uid');
 if (!uid) { localStorage.setItem('login_return', location.href); location.href = '/login.html'; }
 
 // ── State ──
-let balance = tokens;
+var balance = parseInt(localStorage.getItem('casino_tokens') || '10000');
+var MAX_BET = 50000;
 let betType = null;       // 'player' | 'tie' | 'banker'
 let betAmount = 10;
 let isDealing = false;
@@ -425,7 +421,7 @@ let deck = [];
 
 // ── Balance display ──
 function renderBalance() {
-  document.getElementById('balanceDisplay').textContent = balance.toLocaleString('lt-LT', {minimumFractionDigits:2, maximumFractionDigits:2});
+  document.getElementById('balanceDisplay').textContent = Math.round(balance).toLocaleString('lt-LT');
 }
 renderBalance();
 
@@ -542,7 +538,7 @@ function doubleBet() {
   updateChips();
 }
 function maxBet() {
-  document.getElementById('betAmount').value = Math.floor(balance);
+  document.getElementById('betAmount').value = Math.min(Math.floor(balance), MAX_BET);
   updateChips();
 }
 
@@ -600,12 +596,13 @@ async function startRound() {
 
   if (!betType) { setStatus('Pasirinkite lažybos tipą!', 'active'); return; }
   if (betAmount < 1) { setStatus('Minimalus statymas yra 1!', 'active'); return; }
-  if (betAmount > balance) { setStatus('Nepakanka lėšų!', 'active'); return; }
+  if (betAmount > MAX_BET) { betAmount = MAX_BET; document.getElementById('betAmount').value = MAX_BET; }
+  if (betAmount > balance) { setStatus('Nepakanka žetonų!', 'active'); return; }
 
   isDealing = true;
-  const btn = document.getElementById('dealBtn');
+  var btn = document.getElementById('dealBtn');
   btn.disabled = true;
-  btn.classList.add('dealing');
+  btn.className = 'btn btn-full btn-lg btn-glass deal-btn';
   btn.textContent = 'DALINAMAS...';
 
   balance -= betAmount;
@@ -626,10 +623,15 @@ async function startRound() {
   setStatus('Dalinami korteliai...', 'active');
 
   // Deal animation: p1, b1, p2, b2
+  sfxDeal(); sfxCardFlip(0);
   const elP1 = await dealCardTo(pContainer, pCard1, false, 'player', 0);
+  sfxCardFlip(220);
   const elB1 = await dealCardTo(bContainer, bCard1, false, 'banker', 220);
+  sfxCardFlip(440);
   const elP2 = await dealCardTo(pContainer, pCard2, false, 'player', 440);
+  sfxCardFlip(660);
   const elB2 = await dealCardTo(bContainer, bCard2, false, 'banker', 660);
+  if(navigator.vibrate) navigator.vibrate(15);
 
   await delay(900);
 
@@ -648,6 +650,7 @@ async function startRound() {
   // Natural check
   if (pNatural || bNatural) {
     setStatus('NATURALI RANKA!', 'natural');
+    sfxNatural();
     await delay(800);
     await resolveRound(playerCards, bankerCards);
     return;
@@ -721,12 +724,13 @@ async function resolveRound(playerCards, bankerCards) {
   renderStats();
 
   // Payout
-  let won = 0;
-  let userWon = false;
+  var won = 0;
+  var userWon = false;
   if (betType === result) {
     if (result === 'player') won = betAmount * 2;
-    else if (result === 'banker') won = betAmount + Math.floor(betAmount * 0.95 * 100) / 100;
+    else if (result === 'banker') won = betAmount + Math.floor(betAmount * 0.95);
     else if (result === 'tie') won = betAmount * 9;
+    won = Math.min(Math.round(won), 500000); // safety cap
     userWon = true;
   } else if (result === 'tie' && betType !== 'tie') {
     // Push: return bet on tie
@@ -748,23 +752,26 @@ async function resolveRound(playerCards, bankerCards) {
   }
 
   // Status message
-  const statusMap = {player:'ŽAIDĖJAS LAIMI!', banker:'BANKININKAS LAIMI!', tie:'LYGIOSIOS!'};
+  const statusMap = {player:'PLAYER LAIMI!', banker:'BANKININKAS LAIMI!', tie:'LYGIOSIOS!'};
   const statusClassMap = {player:'win', banker:'lose', tie:'tie'};
   setStatus(statusMap[result], statusClassMap[result]);
 
   // API log
   logGame(betType, result, won > 0 ? won - (result !== 'tie' || betType === 'tie' ? betAmount : 0) : -betAmount);
 
-  // Show popup
+  // Sound & popup
+  if (userWon) sfxWin();
+  else if (result === 'tie' && betType !== 'tie') sfxTie();
+  else sfxLose();
   await delay(600);
   showResultPopup(userWon, won, result, betType, pFinal, bFinal);
 
   // Reset dealing state
   isDealing = false;
-  const btn = document.getElementById('dealBtn');
+  var btn = document.getElementById('dealBtn');
   btn.disabled = false;
-  btn.classList.remove('dealing');
-  btn.textContent = 'DALINTI';
+  btn.className = 'btn btn-full btn-lg btn-gold deal-btn';
+  btn.innerHTML = '🃏 DALINTI';
 }
 
 function showResultPopup(userWon, won, result, myBet, pScore, bScore) {
@@ -781,19 +788,19 @@ function showResultPopup(userWon, won, result, myBet, pScore, bScore) {
   if (result === 'tie' && myBet !== 'tie') {
     // Push
     label.textContent = 'LYGIOSIOS — GRĄŽINTA';
-    amount.textContent = `${won.toFixed(2)} ₮`;
+    amount.textContent = `${Math.round(won).toLocaleString('lt-LT')} 🪙`;
     amount.className = 'wp-amount';
     sub.textContent = `Žaidėjas: ${pScore} | Bankininkas: ${bScore}`;
   } else if (userWon) {
-    label.textContent = 'LAIMĖJOTE!';
-    const profit = won - betAmount;
-    amount.textContent = `+${profit.toFixed(2)} ₮`;
+    label.textContent = '🏆 LAIMĖJAI!';
+    var profit = won - betAmount;
+    amount.textContent = `+${Math.round(profit).toLocaleString('lt-LT')} 🪙`;
     amount.className = 'wp-amount';
     sub.textContent = `${resultName[result]} laimėjo! (${pScore} vs ${bScore})`;
   } else {
     popup.classList.add('lose-popup');
-    label.textContent = 'PRALAIMĖJOTE';
-    amount.textContent = `-${betAmount.toFixed(2)} ₮`;
+    label.textContent = 'PRALAIMĖJAI';
+    amount.textContent = `-${Math.round(betAmount).toLocaleString('lt-LT')} 🪙`;
     amount.className = 'wp-amount lose';
     sub.textContent = `${resultName[result]} laimėjo! (${pScore} vs ${bScore})`;
   }
@@ -813,7 +820,7 @@ function closePopup() {
 function renderHistory() {
   const container = document.getElementById('historyPills');
   if (history.length === 0) {
-    container.innerHTML = '<span style="font-size:11px;color:rgba(232,224,208,.2)">Nėra istorijos</span>';
+    container.innerHTML = '<span style="font-size:11px;color:rgba(232,224,208,.2)">No history</span>';
     return;
   }
   container.innerHTML = history.map(r =>
@@ -829,7 +836,8 @@ function renderStats() {
 
 // ── Balance persistence ──
 function saveBalance() {
-  localStorage.setItem('tokens', balance.toFixed(2));
+  localStorage.setItem('casino_tokens', Math.round(balance));
+  document.getElementById('balanceDisplay').textContent = Math.round(balance).toLocaleString('lt-LT');
 }
 
 // ── API logging ──
@@ -852,11 +860,53 @@ async function logGame(betType, result, netWon) {
 // ── Utility ──
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+// ── Web Audio ──
+var _BAC_AC = null;
+function getBacAC(){
+  if(!_BAC_AC){try{_BAC_AC=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+  return _BAC_AC;
+}
+function bacTone(freq,type,dur,vol,atk){
+  try{
+    var ac=getBacAC(); if(!ac)return;
+    var o=ac.createOscillator(),g=ac.createGain();
+    o.connect(g);g.connect(ac.destination);
+    o.type=type||'sine';o.frequency.setValueAtTime(freq,ac.currentTime);
+    g.gain.setValueAtTime(0,ac.currentTime);
+    g.gain.linearRampToValueAtTime(vol||0.22,ac.currentTime+(atk||0.01));
+    g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+dur);
+    o.start();o.stop(ac.currentTime+dur+0.02);
+  }catch(e){}
+}
+function sfxDeal(){ bacTone(680,'sine',0.1,0.18); }
+function sfxCardFlip(delay2){ setTimeout(function(){bacTone(900,'sine',0.08,0.14);},delay2); }
+function sfxNatural(){
+  [440,554,659,880].forEach(function(f,i){
+    setTimeout(function(){bacTone(f,'sine',0.25,0.22);},i*90);
+  });
+}
+function sfxWin(){
+  [523,659,784,1047,1319].forEach(function(f,i){
+    setTimeout(function(){bacTone(f,'sine',0.3,0.25);},i*75);
+  });
+  if(navigator.vibrate)navigator.vibrate([50,20,100]);
+}
+function sfxLose(){
+  bacTone(330,'sawtooth',0.3,0.3);
+  setTimeout(function(){bacTone(220,'sawtooth',0.35,0.25);},200);
+  if(navigator.vibrate)navigator.vibrate([80,30,80]);
+}
+function sfxTie(){
+  [523,523,659].forEach(function(f,i){
+    setTimeout(function(){bacTone(f,'triangle',0.2,0.2);},i*120);
+  });
+}
+
 // ── Init ──
 buildDeck();
 renderHistory();
 renderStats();
-setStatus('Pasirinkite lažybą ir spauskite DALINTI');
+setStatus('Place your bet and click DEAL');
 </script>
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
 </body>

@@ -213,7 +213,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
     <div class="tab-content on" id="tcA">
       <div class="pinner">
         <div>
-          <div class="inp-lbl">Statymų suma</div>
+          <div class="inp-lbl">Bet Amount</div>
           <input class="amt-inp" id="amtA" type="number" value="100" min="10"/>
           <div class="qgrid">
             <button class="qb" onclick="qa('amtA',50)">+50</button>
@@ -227,7 +227,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
           </div>
         </div>
         <div>
-          <div class="inp-lbl">Automatinis išėmimas</div>
+          <div class="inp-lbl">Auto Cash Out</div>
           <div class="arow">
             <label class="sw"><input type="checkbox" id="autoTogA"/><div class="sw-t"></div><div class="sw-k"></div></label>
             <span class="arow-lbl">Ties</span>
@@ -238,7 +238,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
         <button class="bet-btn idle" id="btnA" onclick="handleBetA()">STATYTI A</button>
         <div class="sep"></div>
         <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(232,224,208,.35);">
-          <span>Potenciali išmoka:</span>
+          <span>Potential payout:</span>
           <span id="potA" style="font-family:'DM Mono',monospace;color:var(--gold);">&#8212;</span>
         </div>
       </div>
@@ -247,10 +247,10 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
     <div class="tab-content" id="tcB">
       <div class="pinner">
         <div style="padding:8px 10px;background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.15);border-radius:8px;font-size:11px;color:rgba(232,224,208,.5);">
-          &#128161; Strategija: A išima anksti (2x), B laukia ilgiau (5x+)
+          💡 Strategy: A cashes out early (2x), B waits longer (5x+)
         </div>
         <div>
-          <div class="inp-lbl">Statymų suma B</div>
+          <div class="inp-lbl">Bet Amount B</div>
           <input class="amt-inp" id="amtB" type="number" value="200" min="10"/>
           <div class="qgrid">
             <button class="qb" onclick="qa('amtB',50)">+50</button>
@@ -264,7 +264,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
           </div>
         </div>
         <div>
-          <div class="inp-lbl">Automatinis išėmimas B</div>
+          <div class="inp-lbl">Auto Cash Out B</div>
           <div class="arow">
             <label class="sw"><input type="checkbox" id="autoTogB"/><div class="sw-t"></div><div class="sw-k"></div></label>
             <span class="arow-lbl">Ties</span>
@@ -283,7 +283,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
           <div class="pf-hash" id="pfHash">&#8212;</div>
         </div>
         <div>
-          <div class="lv-lbl">ŽAIDĖJAI ŠIO RAUNDO</div>
+          <div class="lv-lbl">PLAYERS THIS ROUND</div>
           <div id="liveList"></div>
         </div>
       </div>
@@ -295,14 +295,14 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
         <label class="sw"><input type="checkbox" id="abToggle" onchange="toggleAutoBet()"/><div class="sw-t"></div><div class="sw-k"></div></label>
         <span class="ab-lbl">Raundai:</span>
         <input class="ab-inp" id="abRounds" type="number" value="10" min="1" max="999"/>
-        <button class="ab-btn" id="abStartBtn" onclick="startAutoBet()">PRADĖTI</button>
+        <button class="ab-btn" id="abStartBtn" onclick="startAutoBet()">START</button>
         <span class="ab-ctr" id="abCtr"></span>
       </div>
     </div>
 
     <div class="sess-bar">
       <div class="sess-grid">
-        <div class="sb"><div class="sb-v pos" id="sWins">0</div><div class="sb-l">LAIMĖTA</div></div>
+        <div class="sb"><div class="sb-v pos" id="sWins">0</div><div class="sb-l">WON</div></div>
         <div class="sb"><div class="sb-v neg" id="sLoss">0</div><div class="sb-l">PRARASTA</div></div>
         <div class="sb"><div class="sb-v" id="sProfit">0</div><div class="sb-l">PELNAS</div></div>
       </div>

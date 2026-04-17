@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="lt">
+<html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
 <title>HATHOR — Dice</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/css/game-ui.css"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{--bg:#04040a;--gold:#f0c060;--gold2:#ffd980;--green:#00e676;--red:#ff3d71;--neon:#00e5ff;--cream:#e8e0d0;--border:rgba(255,255,255,0.08);--glass:rgba(255,255,255,0.04);}
@@ -33,7 +34,9 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 /* ─── DICE ─── */
 .dice-layout{flex:1;display:grid;grid-template-columns:1fr 280px;overflow:hidden;}
 @media(max-width:750px){.dice-layout{grid-template-columns:1fr;grid-template-rows:auto auto;overflow:visible;}}
-.dice-area{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#060610;padding:24px;gap:28px;}
+.dice-area{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#060610 url('/img/dice-bg.png') center/cover no-repeat;padding:24px;gap:28px;position:relative;}
+.dice-area::before{content:'';position:absolute;inset:0;background:rgba(4,4,16,0.68);pointer-events:none;z-index:0;}
+.dice-area>*{position:relative;z-index:1;}
 
 .result-num{font-family:'Orbitron',monospace;font-size:80px;font-weight:900;transition:all .3s;text-shadow:0 0 40px currentColor;}
 .result-num.win{color:var(--green);}
@@ -76,9 +79,8 @@ input[type=range]{position:absolute;width:100%;opacity:0;height:40px;cursor:poin
 .dir-btn{padding:10px;border-radius:9px;border:2px solid var(--border);background:var(--glass);font-size:13px;font-weight:700;cursor:pointer;text-align:center;transition:all .2s;color:rgba(232,224,208,.5);}
 .dir-btn.active-over{border-color:rgba(255,61,113,.5);background:rgba(255,61,113,.1);color:var(--red);}
 .dir-btn.active-under{border-color:rgba(0,230,118,.5);background:rgba(0,230,118,.1);color:var(--green);}
-.roll-btn{width:100%;padding:14px;border-radius:12px;border:none;cursor:pointer;font-family:'Orbitron',monospace;font-size:14px;font-weight:900;letter-spacing:1px;background:linear-gradient(135deg,#c9a84c,#f0c060,#a07830);color:#080600;transition:all .2s;}
-.roll-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(240,192,96,.4);}
-.roll-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+/* .roll-btn — colors handled by btn-gold/btn-purple/btn-blue from game-ui.css */
+.roll-btn{font-family:'Orbitron',monospace;font-size:14px;letter-spacing:1px;}
 .hist-row{display:flex;gap:4px;flex-wrap:wrap;}
 .hist-pill{padding:3px 7px;border-radius:8px;font-family:'DM Mono',monospace;font-size:10px;font-weight:700;}
 .stats-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
@@ -87,7 +89,9 @@ input[type=range]{position:absolute;width:100%;opacity:0;height:40px;cursor:poin
 .stat-l{font-size:9px;letter-spacing:1px;color:rgba(232,224,208,.25);margin-top:2px;}
 
 /* ─── LIMBO ─── */
-.limbo-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#060610;padding:24px;gap:24px;}
+.limbo-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#060610 url('/img/dice-bg.png') center/cover no-repeat;padding:24px;gap:24px;position:relative;}
+.limbo-area::before{content:'';position:absolute;inset:0;background:rgba(4,4,16,0.68);pointer-events:none;z-index:0;}
+.limbo-area>*{position:relative;z-index:1;}
 .limbo-display{text-align:center;}
 .limbo-val{font-family:'Orbitron',monospace;font-size:72px;font-weight:900;transition:all .3s;}
 .limbo-val.win{color:var(--green);text-shadow:0 0 40px rgba(0,230,118,.5);}
@@ -192,17 +196,17 @@ input[type=range]{position:absolute;width:100%;opacity:0;height:40px;cursor:poin
           </div>
           <div class="target-display">
             <div class="target-val" id="targetVal">50</div>
-            <div class="target-sub" id="targetSub">RIEDĖTI VIRŠ</div>
+            <div class="target-sub" id="targetSub">ROLL OVER</div>
           </div>
           <div class="info-chips">
             <div class="chip"><div class="chip-v gold" id="dWin">2.00×</div><div class="chip-l">KOEFICIENTAS</div></div>
-            <div class="chip"><div class="chip-v green" id="dChance">49%</div><div class="chip-l">TIKIMYBĖ</div></div>
+            <div class="chip"><div class="chip-v green" id="dChance">49%</div><div class="chip-l">WIN CHANCE</div></div>
           </div>
         </div>
         <div class="side-panel">
           <div class="panel-title">🎲 DICE</div>
           <div>
-            <div class="bet-label">Statymų suma</div>
+            <div class="bet-label">Bet Amount</div>
             <input class="bet-inp" id="diceBet" type="number" value="100" min="10"/>
             <div class="bet-quick">
               <button class="bq" onclick="dab(50)">+50</button>
@@ -214,14 +218,14 @@ input[type=range]{position:absolute;width:100%;opacity:0;height:40px;cursor:poin
           <div>
             <div class="bet-label">Kryptis</div>
             <div class="dir-btns">
-              <div class="dir-btn active-over" id="dirOver" onclick="setDir('over')">📈 Virš</div>
-              <div class="dir-btn" id="dirUnder" onclick="setDir('under')">📉 Žemiau</div>
+              <div class="dir-btn active-over" id="dirOver" onclick="setDir('over')">📈 Over</div>
+              <div class="dir-btn" id="dirUnder" onclick="setDir('under')">📉 Under</div>
             </div>
           </div>
-          <button class="roll-btn" id="rollBtn" onclick="rollDice()">MESTI 🎲</button>
+          <button class="btn btn-full btn-lg btn-gold roll-btn" id="rollBtn" onclick="rollDice()">MESTI 🎲</button>
           <div><div class="bet-label">Istorija</div><div class="hist-row" id="diceHist"></div></div>
           <div class="stats-row">
-            <div class="stat-box"><div class="stat-v" id="dWins">0</div><div class="stat-l">LAIMĖTA</div></div>
+            <div class="stat-box"><div class="stat-v" id="dWins">0</div><div class="stat-l">WON</div></div>
             <div class="stat-box"><div class="stat-v" id="dLosses">0</div><div class="stat-l">PRARASTA</div></div>
           </div>
         </div>
@@ -242,7 +246,7 @@ input[type=range]{position:absolute;width:100%;opacity:0;height:40px;cursor:poin
         <div class="side-panel">
           <div class="panel-title">🚀 LIMBO</div>
           <div>
-            <div class="bet-label">Statymų suma</div>
+            <div class="bet-label">Bet Amount</div>
             <input class="bet-inp" id="limboBet" type="number" value="100" min="10"/>
             <div class="bet-quick">
               <button class="bq" onclick="lab(50)">+50</button>
@@ -253,12 +257,12 @@ input[type=range]{position:absolute;width:100%;opacity:0;height:40px;cursor:poin
           </div>
           <div class="info-chips" style="justify-content:flex-start;gap:8px;flex-wrap:wrap;">
             <div class="chip"><div class="chip-v gold" id="limboMult">2.00×</div><div class="chip-l">TIKSLAS</div></div>
-            <div class="chip"><div class="chip-v green" id="limboChance">48.5%</div><div class="chip-l">TIKIMYBĖ</div></div>
+            <div class="chip"><div class="chip-v green" id="limboChance">48.5%</div><div class="chip-l">WIN CHANCE</div></div>
           </div>
-          <button class="roll-btn" id="limboBtn" onclick="playLimbo()">PALEISTI 🚀</button>
+          <button class="btn btn-full btn-lg btn-purple roll-btn" id="limboBtn" onclick="playLimbo()">PALEISTI 🚀</button>
           <div><div class="bet-label">Istorija</div><div class="hist-row" id="limboHist"></div></div>
           <div class="stats-row">
-            <div class="stat-box"><div class="stat-v" id="lWins">0</div><div class="stat-l">LAIMĖTA</div></div>
+            <div class="stat-box"><div class="stat-v" id="lWins">0</div><div class="stat-l">WON</div></div>
             <div class="stat-box"><div class="stat-v" id="lLosses">0</div><div class="stat-l">PRARASTA</div></div>
           </div>
         </div>
@@ -276,21 +280,21 @@ input[type=range]{position:absolute;width:100%;opacity:0;height:40px;cursor:poin
           </div>
           <div class="hilo-streak">
             <div class="hilo-streak-val" id="hiloStreak">0</div>
-            <div class="hilo-streak-label">IŠ EILĖS</div>
+            <div class="hilo-streak-label">STREAK</div>
           </div>
           <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;">
-            <button class="hilo-btn higher" id="hiloHigher" onclick="hiloGuess('higher')">📈 AUKŠČIAU</button>
-            <button class="hilo-btn lower" id="hiloLower" onclick="hiloGuess('lower')">📉 ŽEMIAU</button>
+            <button class="hilo-btn higher" id="hiloHigher" onclick="hiloGuess('higher')">📈 HIGHER</button>
+            <button class="hilo-btn lower" id="hiloLower" onclick="hiloGuess('lower')">📉 LOWER</button>
           </div>
           <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center;">
             <div class="chip"><div class="chip-v gold" id="hiloPot">0</div><div class="chip-l">POTENCIALAS 🪙</div></div>
-            <button class="hilo-cashout" id="hiloCashout" onclick="hiloCashout()" disabled>IŠIMTI</button>
+            <button class="hilo-cashout" id="hiloCashout" onclick="hiloCashout()" disabled>CASH OUT</button>
           </div>
         </div>
         <div class="side-panel">
           <div class="panel-title">🃏 HI-LO</div>
           <div>
-            <div class="bet-label">Statymų suma</div>
+            <div class="bet-label">Bet Amount</div>
             <input class="bet-inp" id="hiloBet" type="number" value="100" min="10"/>
             <div class="bet-quick">
               <button class="bq" onclick="hab(50)">+50</button>
@@ -299,10 +303,10 @@ input[type=range]{position:absolute;width:100%;opacity:0;height:40px;cursor:poin
               <button class="bq" onclick="hdb()">×2</button>
             </div>
           </div>
-          <button class="roll-btn" id="hiloStartBtn" onclick="startHilo()">PRADĖTI 🃏</button>
+          <button class="btn btn-full btn-lg btn-blue roll-btn" id="hiloStartBtn" onclick="startHilo()">START 🃏</button>
           <div><div class="bet-label">Istorija</div><div class="hist-row" id="hiloHist"></div></div>
           <div class="stats-row">
-            <div class="stat-box"><div class="stat-v" id="hWins">0</div><div class="stat-l">LAIMĖTA</div></div>
+            <div class="stat-box"><div class="stat-v" id="hWins">0</div><div class="stat-l">WON</div></div>
             <div class="stat-box"><div class="stat-v" id="hLosses">0</div><div class="stat-l">PRARASTA</div></div>
           </div>
         </div>
@@ -358,7 +362,7 @@ function setDir(dir){
   diceDir=dir;
   document.getElementById('dirOver').className='dir-btn'+(dir==='over'?' active-over':'');
   document.getElementById('dirUnder').className='dir-btn'+(dir==='under'?' active-under':'');
-  document.getElementById('targetSub').textContent=dir==='over'?'RIEDĖTI VIRŠ':'RIEDĖTI ŽEMIAU';
+  document.getElementById('targetSub').textContent=dir==='over'?'ROLL OVER':'RIEDĖTI ŽEMIAU';
   sliderMove();
 }
 
@@ -380,7 +384,7 @@ function rollDice(){
   if(diceDir==='over'){chance=(100-target)/100;} else {chance=(target-1)/100;}
   mult=chance>0?parseFloat((0.97/chance).toFixed(2)):99;
   tokens-=bet;
-  if(won){const w=Math.floor(bet*mult*(_diceRTP/100));tokens+=w;showToast(`🎲 ${roll} — LAIMĖJOTE! ×${mult} → +🪙${fmt(w-bet)}`,'win');diceWins++;}
+  if(won){const w=Math.min(Math.floor(bet*mult*(_diceRTP/100)),500000);tokens+=w;showToast(`🎲 ${roll} — LAIMĖJOTE! ×${mult} → +🪙${fmt(w-bet)}`,'win');diceWins++;}
   else{showToast(`🎲 ${roll} — Pralaimėjote 🪙${fmt(bet)}`,'loss');diceLosses++;}
   saveT();
   const el=document.getElementById('diceResult');
@@ -434,7 +438,7 @@ function playLimbo(){
     else{
       el.textContent=result.toFixed(2)+'×';
       el.className='limbo-val '+(won?'win':'loss');
-      if(won){const w=Math.floor(bet*target);tokens+=w;showToast(`🚀 ${result.toFixed(2)}× ≥ ${target}× — +🪙${fmt(w-bet)}`,'win');limboWins++;}
+      if(won){const w=Math.min(Math.floor(bet*target),500000);tokens+=w;showToast(`🚀 ${result.toFixed(2)}× ≥ ${target}× — +🪙${fmt(w-bet)}`,'win');limboWins++;}
       else{showToast(`🚀 ${result.toFixed(2)}× < ${target}× — Pralaimėjote`,'loss');limboLosses++;}
       saveT();
       document.getElementById('lWins').textContent=limboWins;

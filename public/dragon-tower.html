@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
 <title>HATHOR — Dragon Tower</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/css/game-ui.css"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
@@ -32,8 +33,9 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 
 /* ── Tower Area ── */
 .game-area{display:flex;flex-direction:column;align-items:center;justify-content:center;
-  background:radial-gradient(ellipse at 50% 20%,#110820 0%,#04040a 70%);
+  background:#04040a url('/img/dragon-tower-bg.png') center/cover no-repeat;
   padding:16px;position:relative;overflow:hidden;}
+.game-area::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,.62);pointer-events:none;z-index:0;}
 
 /* Particle / glow bg */
 .bg-glow{position:absolute;pointer-events:none;}
@@ -152,14 +154,8 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 .sv{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;color:var(--gold);}
 .sl{font-size:9px;letter-spacing:1px;color:rgba(232,224,208,.25);margin-top:2px;}
 
-/* Buttons */
-.main-btn{width:100%;padding:14px;border-radius:12px;border:none;cursor:pointer;
-  font-family:'Orbitron',monospace;font-size:13px;font-weight:900;letter-spacing:1px;transition:all .2s;}
-.main-btn.start{background:linear-gradient(135deg,#c9a84c,#f0c060,#a07830);color:#060400;}
-.main-btn.start:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(240,192,96,.4);}
-.main-btn.cashout{background:linear-gradient(135deg,#00b894,#00e676);color:#001810;}
-.main-btn.cashout:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,230,118,.4);}
-.main-btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;box-shadow:none!important;}
+/* Buttons — gradient handled by btn-gold / btn-green in game-ui.css */
+.main-btn{font-family:'Orbitron',monospace;font-size:13px;letter-spacing:1px;}
 
 /* Win / Loss overlay */
 .result-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;
@@ -322,8 +318,8 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
     <div class="divider"></div>
 
     <!-- Buttons -->
-    <button class="main-btn start" id="startBtn" onclick="startGame()">START CLIMB</button>
-    <button class="main-btn cashout" id="cashoutBtn" onclick="cashOut()" disabled>CASH OUT</button>
+    <button class="btn btn-full btn-lg btn-gold main-btn start" id="startBtn" onclick="startGame()">🐉 START CLIMB</button>
+    <button class="btn btn-full btn-lg btn-green main-btn cashout" id="cashoutBtn" onclick="cashOut()" disabled>💰 CASH OUT</button>
 
     <div class="divider"></div>
 

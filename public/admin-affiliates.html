@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Affiliate Management — Hathor Casino</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #e8c96a;
+    --gold-dark: #9a7a30;
+    --bg: #0e0e12;
+    --bg2: #13131a;
+    --bg3: #1a1a24;
+    --card: rgba(255,255,255,0.04);
+    --card-border: rgba(201,168,76,0.15);
+    --text: #e8e8f0;
+    --text-muted: #8888a0;
+    --green: #4caf82;
+    --red: #e05555;
+    --blue: #5577e0;
+    --orange: #e08830;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* Auth bar */
+  .auth-bar {
+    background: var(--bg2); border-bottom: 1px solid var(--card-border);
+    padding: 12px 32px; display: flex; align-items: center; gap: 16px;
+  }
+  .auth-bar label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; }
+  .auth-bar input {
+    background: var(--bg3); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px; padding: 8px 14px; color: var(--text); font-size: 13px;
+    font-family: 'Inter', sans-serif; outline: none; width: 240px;
+  }
+  .auth-bar input:focus { border-color: var(--gold); }
+  .btn-sm {
+    padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px;
+    font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: opacity 0.2s;
+  }
+  .btn-gold { background: linear-gradient(135deg, var(--gold-dark), var(--gold)); color: #0e0e12; }
+  .btn-gold:hover { opacity: 0.85; }
+  .btn-outline {
+    background: transparent; border: 1px solid var(--card-border); color: var(--text-muted);
+    transition: all 0.2s;
+  }
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-danger { background: rgba(224,85,85,0.15); border: 1px solid rgba(224,85,85,0.3); color: var(--red); }
+  .auth-status { font-size: 13px; }
+  .auth-ok { color: var(--green); }
+  .auth-fail { color: var(--red); }
+
+  /* Header */
+  .header {
+    background: var(--bg2); border-bottom: 1px solid var(--card-border);
+    padding: 0 32px; display: flex; align-items: center; height: 60px; gap: 24px;
+  }
+  .header-logo { font-family: 'Cinzel', serif; font-size: 18px; color: var(--gold); letter-spacing: 2px; }
+  .header-sub { font-size: 13px; color: var(--text-muted); }
+
+  /* Main */
+  .main { max-width: 1600px; margin: 0 auto; padding: 28px 32px; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; margin-bottom: 28px; border-bottom: 1px solid var(--card-border); }
+  .tab {
+    padding: 10px 22px; font-size: 14px; font-weight: 500; color: var(--text-muted);
+    cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s;
+  }
+  .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+  .tab:hover:not(.active) { color: var(--text); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* Filters */
+  .filters-bar {
+    background: var(--card); border: 1px solid var(--card-border);
+    border-radius: 12px; padding: 16px 20px; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .filters-bar label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+  .filters-bar input, .filters-bar select {
+    background: var(--bg3); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px; padding: 8px 12px; color: var(--text); font-size: 13px;
+    font-family: 'Inter', sans-serif; outline: none;
+  }
+  .filters-bar select option { background: var(--bg3); }
+
+  /* Deal form */
+  .deal-form {
+    background: var(--card); border: 1px solid var(--card-border);
+    border-radius: 12px; padding: 24px; margin-bottom: 24px;
+  }
+  .deal-form h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--gold); margin-bottom: 20px; }
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
+  .form-field label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 7px; }
+  .form-field input, .form-field select, .form-field textarea {
+    width: 100%; background: var(--bg3); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px; padding: 10px 14px; color: var(--text); font-size: 13px;
+    font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s;
+  }
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus { border-color: var(--gold); }
+  .form-field select option { background: var(--bg3); }
+  .form-field textarea { resize: vertical; min-height: 72px; }
+  .search-user-row { display: flex; gap: 10px; margin-bottom: 16px; }
+  .search-user-row input { flex: 1; }
+  .user-result {
+    background: var(--bg3); border: 1px solid var(--card-border);
+    border-radius: 8px; padding: 10px 14px; margin-top: -6px; margin-bottom: 16px; display: none;
+  }
+  .user-result-item {
+    padding: 8px 10px; cursor: pointer; border-radius: 6px; transition: background 0.15s; font-size: 13px;
+  }
+  .user-result-item:hover { background: rgba(201,168,76,0.08); }
+  .selected-user {
+    background: rgba(201,168,76,0.08); border: 1px solid var(--card-border);
+    border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px;
+    display: none;
+  }
+  .selected-user span { color: var(--gold); font-weight: 600; }
+
+  /* Section header */
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+  .section-header h2 { font-size: 16px; font-weight: 600; }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--card-border); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { background: rgba(201,168,76,0.06); }
+  thead th {
+    padding: 12px 14px; text-align: left; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.8px; color: var(--text-muted); font-weight: 600; white-space: nowrap;
+  }
+  tbody tr { border-top: 1px solid rgba(255,255,255,0.04); transition: background 0.15s; }
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
+  tbody td { padding: 10px 14px; color: var(--text); white-space: nowrap; }
+  .td-gold { color: var(--gold); font-weight: 600; }
+  .td-green { color: var(--green); font-weight: 600; }
+  .td-red { color: var(--red); }
+  .td-muted { color: var(--text-muted); }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .badge-cpa { background: rgba(85,119,224,0.15); color: var(--blue); }
+  .badge-rs { background: rgba(76,175,130,0.15); color: var(--green); }
+  .badge-hybrid { background: rgba(201,168,76,0.15); color: var(--gold); }
+  .badge-active { background: rgba(76,175,130,0.15); color: var(--green); }
+  .badge-paused { background: rgba(224,85,85,0.15); color: var(--red); }
+
+  .loading, .empty { text-align: center; padding: 48px; color: var(--text-muted); font-size: 14px; }
+
+  /* Edit deal button */
+  .btn-edit {
+    background: transparent; border: 1px solid var(--card-border);
+    border-radius: 5px; padding: 4px 10px; color: var(--gold); font-size: 11px;
+    cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s;
+  }
+  .btn-edit:hover { background: rgba(201,168,76,0.1); }
+
+  @media (max-width: 768px) {
+    .main { padding: 16px; }
+    .auth-bar { padding: 12px 16px; flex-wrap: wrap; }
+    .header { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Auth Bar -->
+<div class="auth-bar">
+  <label>Admin Key</label>
+  <input type="password" id="admin-key" placeholder="Enter admin password" autocomplete="off">
+  <button class="btn-sm btn-gold" id="auth-btn">Authenticate</button>
+  <span class="auth-status" id="auth-status"></span>
+</div>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-logo">HATHOR</div>
+  <div class="header-sub">Affiliate Management</div>
+</header>
+
+<main class="main">
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" data-tab="affiliates">Affiliates</div>
+    <div class="tab" data-tab="players">Players</div>
+    <div class="tab" data-tab="campaigns">Campaigns</div>
+  </div>
+
+  <!-- ── Affiliates Tab ── -->
+  <div class="tab-panel active" id="tab-affiliates">
+    <!-- Deal Form -->
+    <div class="deal-form">
+      <h3>Create / Edit Affiliate Deal</h3>
+
+      <div class="search-user-row">
+        <input type="text" id="user-search" placeholder="Search user by name or UID...">
+        <button class="btn-sm btn-outline" id="search-user-btn">Search</button>
+      </div>
+      <div class="user-result" id="user-result"></div>
+      <div class="selected-user" id="selected-user-box">
+        Selected: <span id="selected-user-name">—</span>
+        <span style="color:var(--text-muted);margin-left:8px;font-size:11px" id="selected-user-uid"></span>
+      </div>
+      <input type="hidden" id="deal-uid">
+
+      <div class="form-grid">
+        <div class="form-field">
+          <label>Deal Type</label>
+          <select id="deal-type">
+            <option value="hybrid">Hybrid (CPA + RevShare)</option>
+            <option value="cpa">CPA Only</option>
+            <option value="revshare">RevShare Only</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>CPA Amount (tokens)</label>
+          <input type="number" id="deal-cpa-amount" value="50" min="0">
+        </div>
+        <div class="form-field">
+          <label>RevShare %</label>
+          <input type="number" id="deal-rs-percent" value="25" min="0" max="100" step="0.1">
+        </div>
+        <div class="form-field">
+          <label>Min Deposit for CPA (tokens)</label>
+          <input type="number" id="deal-min-deposit" value="0" min="0">
+        </div>
+        <div class="form-field">
+          <label>Status</label>
+          <select id="deal-status">
+            <option value="active">Active</option>
+            <option value="paused">Paused</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-field" style="margin-bottom:16px">
+        <label>Notes</label>
+        <textarea id="deal-notes" placeholder="Internal notes..."></textarea>
+      </div>
+      <button class="btn-sm btn-gold" id="save-deal-btn">Save Deal</button>
+      <span id="deal-save-msg" style="margin-left:12px;font-size:13px;color:var(--green);display:none">Saved!</span>
+    </div>
+
+    <!-- Affiliate report filters -->
+    <div class="filters-bar">
+      <label>From</label>
+      <input type="date" id="aff-from">
+      <label>To</label>
+      <input type="date" id="aff-to">
+      <button class="btn-sm btn-gold" id="aff-filter-btn">Apply</button>
+      <button class="btn-sm btn-outline" id="aff-clear-btn">Clear</button>
+    </div>
+
+    <div class="section-header">
+      <h2>All Affiliates</h2>
+      <button class="btn-sm btn-outline" id="export-aff-csv">Export CSV</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Ref Code</th>
+            <th>Deal</th>
+            <th>Status</th>
+            <th>Regs</th>
+            <th>FTDs</th>
+            <th>FTD Amount</th>
+            <th>CPA Paid</th>
+            <th>RS Amount</th>
+            <th>Total Deposits</th>
+            <th>GGR</th>
+            <th>NGR</th>
+            <th>Commission</th>
+            <th>Casino Net</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="affiliates-body">
+          <tr><td colspan="15" class="loading">Authenticate to load data.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── Players Tab ── -->
+  <div class="tab-panel" id="tab-players">
+    <div class="filters-bar">
+      <label>From</label>
+      <input type="date" id="p-from">
+      <label>To</label>
+      <input type="date" id="p-to">
+      <label>Affiliate</label>
+      <select id="p-aff-filter"><option value="">All Affiliates</option></select>
+      <label>Player</label>
+      <input type="text" id="p-player-filter" placeholder="UID or name" style="width:160px">
+      <button class="btn-sm btn-gold" id="p-filter-btn">Apply</button>
+      <button class="btn-sm btn-outline" id="p-clear-btn">Clear</button>
+    </div>
+
+    <div class="section-header">
+      <h2>Referred Players</h2>
+      <button class="btn-sm btn-outline" id="export-players-csv">Export CSV</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Player ID</th>
+            <th>Username</th>
+            <th>Affiliate</th>
+            <th>Campaign</th>
+            <th>Country</th>
+            <th>Reg Date</th>
+            <th>FTD Date</th>
+            <th>FTD Amount</th>
+            <th>Total Deposits</th>
+            <th>CPA</th>
+            <th>RevShare</th>
+            <th>GGR</th>
+            <th>NGR</th>
+            <th>Casino Net</th>
+            <th>Deal</th>
+          </tr>
+        </thead>
+        <tbody id="players-body">
+          <tr><td colspan="15" class="loading">Authenticate to load data.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── Campaigns Tab ── -->
+  <div class="tab-panel" id="tab-campaigns">
+    <div class="filters-bar">
+      <label>From</label>
+      <input type="date" id="c-from">
+      <label>To</label>
+      <input type="date" id="c-to">
+      <button class="btn-sm btn-gold" id="c-filter-btn">Apply</button>
+      <button class="btn-sm btn-outline" id="c-clear-btn">Clear</button>
+    </div>
+
+    <div class="section-header">
+      <h2>Campaigns</h2>
+      <button class="btn-sm btn-outline" id="export-campaigns-csv">Export CSV</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Campaign Name</th>
+            <th>Affiliate</th>
+            <th>Code</th>
+            <th>Clicks</th>
+            <th>Registrations</th>
+            <th>FTDs</th>
+            <th>FTD Amount</th>
+            <th>CPA</th>
+            <th>Total Deposits</th>
+            <th>GGR</th>
+            <th>NGR</th>
+            <th>Casino Net</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody id="campaigns-body">
+          <tr><td colspan="13" class="loading">Authenticate to load data.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script>
+let ADMIN_KEY = sessionStorage.getItem('admin_key') || '';
+let affiliatesList = [];
+
+function fmtNum(n) { return Number(n||0).toLocaleString(); }
+function fmtDate(d) { if(!d) return '—'; return new Date(d).toLocaleDateString('en-GB'); }
+function adminHeaders() { return { 'x-admin-key': ADMIN_KEY, 'Content-Type': 'application/json' }; }
+
+function dealBadge(type) {
+  if(!type) return '<span class="badge badge-paused">None</span>';
+  if(type==='cpa') return '<span class="badge badge-cpa">CPA</span>';
+  if(type==='revshare') return '<span class="badge badge-rs">RevShare</span>';
+  return '<span class="badge badge-hybrid">Hybrid</span>';
+}
+
+// ── Auth ──
+if(ADMIN_KEY) tryAuth(true);
+
+document.getElementById('auth-btn').addEventListener('click', () => tryAuth(false));
+document.getElementById('admin-key').addEventListener('keydown', e => { if(e.key==='Enter') tryAuth(false); });
+
+async function tryAuth(silent) {
+  const key = document.getElementById('admin-key').value || ADMIN_KEY;
+  if(!key && !silent) { setAuthStatus('Enter admin key', 'fail'); return; }
+  const useKey = key || ADMIN_KEY;
+  try {
+    const r = await fetch('/api/admin/affiliates', { headers: { 'x-admin-key': useKey } });
+    if(r.ok) {
+      ADMIN_KEY = useKey;
+      sessionStorage.setItem('admin_key', ADMIN_KEY);
+      setAuthStatus('Authenticated', 'ok');
+      loadAll();
+    } else {
+      setAuthStatus('Invalid key', 'fail');
+    }
+  } catch(e) { setAuthStatus('Connection error', 'fail'); }
+}
+
+function setAuthStatus(msg, type) {
+  const el = document.getElementById('auth-status');
+  el.textContent = msg;
+  el.className = 'auth-status auth-' + type;
+}
+
+// ── Tabs ──
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-'+tab.dataset.tab).classList.add('active');
+  });
+});
+
+function loadAll() {
+  loadAffiliates();
+  loadPlayers();
+  loadCampaigns();
+}
+
+// ── User Search for Deal Form ──
+document.getElementById('search-user-btn').addEventListener('click', searchUser);
+document.getElementById('user-search').addEventListener('keydown', e => { if(e.key==='Enter') searchUser(); });
+
+async function searchUser() {
+  const q = document.getElementById('user-search').value.trim();
+  if(!q) return;
+  const r = await fetch(`/api/admin/players?search=${encodeURIComponent(q)}&limit=5`, { headers: adminHeaders() });
+  if(!r.ok) {
+    // Fallback: search from affiliates list
+    const matches = affiliatesList.filter(a => (a.name||'').toLowerCase().includes(q.toLowerCase()) || (a.uid||'').includes(q));
+    showUserResults(matches.map(a => ({uid:a.uid, name:a.name})));
+    return;
+  }
+  const data = await r.json();
+  showUserResults(Array.isArray(data) ? data : (data.players || []));
+}
+
+function showUserResults(users) {
+  const box = document.getElementById('user-result');
+  if(!users||!users.length) { box.innerHTML='<div style="color:var(--text-muted);font-size:13px;padding:8px">No users found.</div>'; box.style.display='block'; return; }
+  box.innerHTML = users.slice(0,8).map(u =>
+    `<div class="user-result-item" onclick="selectUser('${u.uid}','${(u.name||'').replace(/'/g,"\\'")}')">
+      <strong>${u.name||'Unknown'}</strong>
+      <span style="color:var(--text-muted);margin-left:8px;font-size:11px">${u.uid}</span>
+    </div>`
+  ).join('');
+  box.style.display='block';
+}
+
+function selectUser(uid, name) {
+  document.getElementById('deal-uid').value = uid;
+  document.getElementById('selected-user-name').textContent = name;
+  document.getElementById('selected-user-uid').textContent = uid;
+  document.getElementById('selected-user-box').style.display='block';
+  document.getElementById('user-result').style.display='none';
+  // Pre-fill if deal exists
+  const existing = affiliatesList.find(a => a.uid === uid);
+  if(existing) {
+    if(existing.deal_type) document.getElementById('deal-type').value = existing.deal_type;
+    if(existing.cpa_amount) document.getElementById('deal-cpa-amount').value = existing.cpa_amount;
+    if(existing.rs_percent) document.getElementById('deal-rs-percent').value = existing.rs_percent;
+    if(existing.status) document.getElementById('deal-status').value = existing.status;
+  }
+}
+
+document.getElementById('save-deal-btn').addEventListener('click', async () => {
+  const uid = document.getElementById('deal-uid').value;
+  if(!uid) { alert('Select a user first.'); return; }
+  const payload = {
+    uid,
+    deal_type: document.getElementById('deal-type').value,
+    cpa_amount: parseInt(document.getElementById('deal-cpa-amount').value)||50,
+    rs_percent: parseFloat(document.getElementById('deal-rs-percent').value)||25,
+    cpa_min_deposit: parseInt(document.getElementById('deal-min-deposit').value)||0,
+    status: document.getElementById('deal-status').value,
+    notes: document.getElementById('deal-notes').value
+  };
+  const r = await fetch('/api/admin/affiliates/deal', {
+    method:'POST', headers: adminHeaders(), body: JSON.stringify(payload)
+  });
+  const data = await r.json();
+  if(data.ok) {
+    const msg = document.getElementById('deal-save-msg');
+    msg.style.display='inline'; setTimeout(()=>{ msg.style.display='none'; }, 2500);
+    loadAffiliates();
+  } else {
+    alert('Error: ' + (data.error||'Unknown'));
+  }
+});
+
+// Edit deal from table
+function editDeal(uid, name) {
+  selectUser(uid, name);
+  document.getElementById('user-search').value = name;
+  document.querySelector('.deal-form').scrollIntoView({behavior:'smooth'});
+  document.querySelector('[data-tab="affiliates"]').click();
+}
+
+// ── Affiliates Report ──
+document.getElementById('aff-filter-btn').addEventListener('click', loadAffiliates);
+document.getElementById('aff-clear-btn').addEventListener('click', () => {
+  document.getElementById('aff-from').value='';
+  document.getElementById('aff-to').value='';
+  loadAffiliates();
+});
+
+async function loadAffiliates() {
+  if(!ADMIN_KEY) return;
+  const from = document.getElementById('aff-from').value;
+  const to = document.getElementById('aff-to').value;
+  const params = new URLSearchParams();
+  if(from) params.set('from', from);
+  if(to) params.set('to', to);
+  const r = await fetch('/api/admin/affiliates/report?' + params.toString(), { headers: adminHeaders() });
+  if(!r.ok) { document.getElementById('affiliates-body').innerHTML='<tr><td colspan="15" class="empty">Error loading data.</td></tr>'; return; }
+  const rows = await r.json();
+  affiliatesList = rows;
+  // Populate affiliate dropdown in Players tab
+  const sel = document.getElementById('p-aff-filter');
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">All Affiliates</option>' +
+    rows.map(a => `<option value="${a.uid}">${a.name||a.uid}</option>`).join('');
+  if(prev) sel.value=prev;
+
+  const tbody = document.getElementById('affiliates-body');
+  if(!rows.length) { tbody.innerHTML='<tr><td colspan="15" class="empty">No affiliates yet.</td></tr>'; return; }
+  tbody.innerHTML = rows.map(a => {
+    const deal = a.deal_type ? `${a.deal_type==='cpa'?'CPA '+a.cpa_amount:a.deal_type==='revshare'?'RS '+a.rs_percent+'%':'CPA '+a.cpa_amount+'+RS'+a.rs_percent+'%'}` : '—';
+    return `<tr>
+      <td><strong>${a.name||'—'}</strong></td>
+      <td class="td-gold">${a.ref_code||'—'}</td>
+      <td>${dealBadge(a.deal_type)} <span style="font-size:11px;margin-left:4px">${deal}</span></td>
+      <td><span class="badge badge-${a.status==='active'?'active':'paused'}">${a.status||'none'}</span></td>
+      <td>${fmtNum(a.registrations)}</td>
+      <td class="td-gold">${fmtNum(a.ftd_count)}</td>
+      <td>${fmtNum(a.ftd_amount)}</td>
+      <td class="td-green">${fmtNum(a.cpa_amount)}</td>
+      <td class="td-green">${fmtNum(a.rs_amount)}</td>
+      <td>${fmtNum(a.total_deposits)}</td>
+      <td>${fmtNum(a.ggr)}</td>
+      <td>${fmtNum(a.ngr)}</td>
+      <td class="td-gold">${fmtNum(a.total_commission)}</td>
+      <td class="${a.casino_net>=0?'td-green':'td-red'}">${fmtNum(a.casino_net)}</td>
+      <td><button class="btn-edit" onclick="editDeal('${a.uid}','${(a.name||'').replace(/'/g,"\\'")}')">Edit Deal</button></td>
+    </tr>`;
+  }).join('');
+}
+
+document.getElementById('export-aff-csv').addEventListener('click', () => {
+  const from = document.getElementById('aff-from').value;
+  const to = document.getElementById('aff-to').value;
+  const params = new URLSearchParams();
+  if(from) params.set('from', from);
+  if(to) params.set('to', to);
+  params.set('key', ADMIN_KEY);
+  window.location = '/api/admin/affiliates/report/csv?' + params.toString();
+});
+
+// ── Players Report ──
+document.getElementById('p-filter-btn').addEventListener('click', loadPlayers);
+document.getElementById('p-clear-btn').addEventListener('click', () => {
+  document.getElementById('p-from').value='';
+  document.getElementById('p-to').value='';
+  document.getElementById('p-aff-filter').value='';
+  document.getElementById('p-player-filter').value='';
+  loadPlayers();
+});
+
+async function loadPlayers() {
+  if(!ADMIN_KEY) return;
+  const params = new URLSearchParams();
+  const from = document.getElementById('p-from').value;
+  const to = document.getElementById('p-to').value;
+  const aff = document.getElementById('p-aff-filter').value;
+  const player = document.getElementById('p-player-filter').value.trim();
+  if(from) params.set('from', from);
+  if(to) params.set('to', to);
+  if(aff) params.set('aff_uid', aff);
+  if(player) params.set('player_uid', player);
+  const r = await fetch('/api/admin/affiliates/players?' + params.toString(), { headers: adminHeaders() });
+  if(!r.ok) { document.getElementById('players-body').innerHTML='<tr><td colspan="15" class="empty">Error loading data.</td></tr>'; return; }
+  const rows = await r.json();
+  const tbody = document.getElementById('players-body');
+  if(!rows.length) { tbody.innerHTML='<tr><td colspan="15" class="empty">No players found.</td></tr>'; return; }
+  tbody.innerHTML = rows.map(p => `<tr>
+    <td class="td-muted" style="font-family:monospace;font-size:11px">${(p.player_uid||'').slice(0,8)}…</td>
+    <td>${p.player_name||'—'}</td>
+    <td>${p.aff_name||'—'}</td>
+    <td>${p.campaign_name||'—'}</td>
+    <td>${p.country||'—'}</td>
+    <td class="td-muted">${fmtDate(p.reg_date)}</td>
+    <td>${p.ftd_date ? `<span style="color:var(--green)">${fmtDate(p.ftd_date)}</span>` : '<span class="td-muted">—</span>'}</td>
+    <td>${fmtNum(p.ftd_amount)}</td>
+    <td class="td-gold">${fmtNum(p.total_deposits)}</td>
+    <td class="td-green">${fmtNum(p.cpa_amount)}</td>
+    <td class="td-green">${fmtNum(p.rs_amount)}</td>
+    <td>${fmtNum(p.casino_ggr)}</td>
+    <td>${fmtNum(p.casino_ngr)}</td>
+    <td class="${(p.casino_net||0)>=0?'td-green':'td-red'}">${fmtNum(p.casino_net)}</td>
+    <td><span style="font-size:11px;color:var(--text-muted)">${p.deal_structure||'N/A'}</span></td>
+  </tr>`).join('');
+}
+
+document.getElementById('export-players-csv').addEventListener('click', () => {
+  const params = new URLSearchParams();
+  const from = document.getElementById('p-from').value;
+  const to = document.getElementById('p-to').value;
+  const aff = document.getElementById('p-aff-filter').value;
+  const player = document.getElementById('p-player-filter').value.trim();
+  if(from) params.set('from', from);
+  if(to) params.set('to', to);
+  if(aff) params.set('aff_uid', aff);
+  if(player) params.set('player_uid', player);
+  params.set('key', ADMIN_KEY);
+  window.location = '/api/admin/affiliates/players/csv?' + params.toString();
+});
+
+// ── Campaigns Report ──
+document.getElementById('c-filter-btn').addEventListener('click', loadCampaigns);
+document.getElementById('c-clear-btn').addEventListener('click', () => {
+  document.getElementById('c-from').value='';
+  document.getElementById('c-to').value='';
+  loadCampaigns();
+});
+
+async function loadCampaigns() {
+  if(!ADMIN_KEY) return;
+  const from = document.getElementById('c-from').value;
+  const to = document.getElementById('c-to').value;
+  const params = new URLSearchParams();
+  if(from) params.set('from', from);
+  if(to) params.set('to', to);
+  const r = await fetch('/api/admin/affiliates/campaigns?' + params.toString(), { headers: adminHeaders() });
+  if(!r.ok) { document.getElementById('campaigns-body').innerHTML='<tr><td colspan="13" class="empty">Error loading data.</td></tr>'; return; }
+  const rows = await r.json();
+  const tbody = document.getElementById('campaigns-body');
+  if(!rows.length) { tbody.innerHTML='<tr><td colspan="13" class="empty">No campaigns found.</td></tr>'; return; }
+  tbody.innerHTML = rows.map(c => `<tr>
+    <td><strong>${c.name||'—'}</strong></td>
+    <td>${c.aff_name||'—'}</td>
+    <td class="td-gold">${c.code||'—'}</td>
+    <td>${fmtNum(c.clicks)}</td>
+    <td>${fmtNum(c.registrations)}</td>
+    <td class="td-gold">${fmtNum(c.ftd_count)}</td>
+    <td>${fmtNum(c.ftd_amount)}</td>
+    <td class="td-green">${fmtNum(c.cpa_amount)}</td>
+    <td>${fmtNum(c.total_deposits)}</td>
+    <td>${fmtNum(c.casino_ggr)}</td>
+    <td>${fmtNum(c.casino_ngr)}</td>
+    <td class="${(c.casino_net||0)>=0?'td-green':'td-red'}">${fmtNum(c.casino_net)}</td>
+    <td class="td-muted">${fmtDate(c.created_at)}</td>
+  </tr>`).join('');
+}
+
+document.getElementById('export-campaigns-csv').addEventListener('click', () => {
+  const from = document.getElementById('c-from').value;
+  const to = document.getElementById('c-to').value;
+  const params = new URLSearchParams();
+  if(from) params.set('from', from);
+  if(to) params.set('to', to);
+  params.set('key', ADMIN_KEY);
+  window.location = '/api/admin/affiliates/campaigns/csv?' + params.toString();
+});
+</script>
+</body>
+</html>
