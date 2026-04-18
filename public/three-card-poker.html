@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>HATHOR — Three Card Poker</title>
+<meta name="description" content="Premium Three Card Poker — Ante, Play and Pair Plus side bets."/>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Space+Grotesk:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="icon" type="image/png" href="/img/favicon.png"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#04040a;--bg2:#080812;
+  --gold:#f0c060;--gold2:#ffd700;--gold3:#c9a84c;--gold4:#8a6020;
+  --green:#00e676;--red:#ff3d71;
+  --cream:#e8e0d0;--dim:rgba(232,224,208,0.5);--dimmer:rgba(232,224,208,0.25);
+  --border:rgba(255,255,255,0.07);--glass:rgba(255,255,255,0.03);
+  --felt:#071a0e;--felt2:#040f08;
+  --card-w:72px;--card-h:106px;
+}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cream);display:flex;flex-direction:column;}
+
+/* ─── HEADER ─── */
+.hdr{
+  height:52px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;background:rgba(4,4,10,.98);
+  border-bottom:1px solid var(--border);flex-shrink:0;z-index:50;
+}
+.hdr-logo{
+  font-family:'Orbitron',monospace;font-size:13px;font-weight:900;letter-spacing:3px;
+  background:linear-gradient(135deg,var(--gold3),var(--gold2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hdr-title{font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:2px;color:rgba(232,224,208,.35);}
+.hdr-right{display:flex;align-items:center;gap:14px;}
+.hdr-bal{font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:var(--gold);display:flex;align-items:center;gap:5px;}
+.back-btn{
+  padding:6px 14px;border-radius:7px;border:1px solid var(--border);
+  background:var(--glass);color:var(--dimmer);font-size:11px;cursor:pointer;
+  text-decoration:none;transition:all .2s;letter-spacing:.5px;
+}
+.back-btn:hover{color:var(--cream);border-color:rgba(255,255,255,.15);}
+
+/* ─── LAYOUT ─── */
+.main{flex:1;display:grid;grid-template-columns:1fr 280px;overflow:hidden;}
+
+/* ─── TABLE ─── */
+.table-area{
+  position:relative;overflow:hidden;display:flex;flex-direction:column;
+  align-items:center;justify-content:space-between;
+  background:var(--felt);padding:16px 16px 10px;
+}
+.table-area::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 40%,rgba(0,50,20,.6) 0%,rgba(4,15,8,.9) 70%,rgba(4,4,10,1) 100%);
+  pointer-events:none;z-index:0;
+}
+.table-area::after{
+  content:'';position:absolute;inset:12px;
+  border:1px solid rgba(255,255,255,.04);border-radius:24px;
+  box-shadow:inset 0 0 80px rgba(0,0,0,.5);pointer-events:none;z-index:0;
+}
+.table-glow{
+  position:absolute;width:600px;height:300px;
+  background:radial-gradient(ellipse,rgba(0,80,30,.07) 0%,transparent 70%);
+  border-radius:50%;pointer-events:none;top:50%;left:50%;transform:translate(-50%,-50%);z-index:0;
+}
+.game-col{
+  position:relative;z-index:2;width:100%;max-width:560px;
+  display:flex;flex-direction:column;align-items:center;gap:0;flex:1;justify-content:space-between;
+}
+.zone{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;padding:10px 0;}
+.zone-lbl{font-size:9px;letter-spacing:4px;color:rgba(255,255,255,.2);text-transform:uppercase;font-weight:700;}
+.cards-row{display:flex;gap:10px;min-height:var(--card-h);align-items:center;justify-content:center;}
+
+/* ─── CARDS ─── */
+.card{
+  width:var(--card-w);height:var(--card-h);border-radius:9px;
+  background:#fdf8f0;position:relative;flex-shrink:0;
+  box-shadow:0 6px 20px rgba(0,0,0,.75),0 1px 3px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.9);
+  font-family:'Space Grotesk',sans-serif;
+  animation:cardDeal .32s cubic-bezier(.34,1.4,.64,1) both;
+}
+@keyframes cardDeal{
+  from{transform:translateY(-60px) rotate(-8deg) scale(.6);opacity:0}
+  to{transform:translateY(0) rotate(0) scale(1);opacity:1}
+}
+.card-inner{
+  position:absolute;inset:0;border-radius:9px;
+  display:flex;flex-direction:column;justify-content:space-between;padding:5px 6px;
+}
+.card-tl{display:flex;flex-direction:column;align-items:flex-start;line-height:1.05;}
+.card-br{display:flex;flex-direction:column;align-items:flex-end;line-height:1.05;transform:rotate(180deg);}
+.card-rank{font-size:16px;font-weight:900;line-height:1;}
+.card-suit-sm{font-size:12px;line-height:1;}
+.card-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:32px;line-height:1;}
+.card.red .card-rank,.card.red .card-suit-sm,.card.red .card-center{color:#cc2222;}
+.card.blk .card-rank,.card.blk .card-suit-sm,.card.blk .card-center{color:#1a1a2e;}
+
+/* Card back */
+.card.back{background:linear-gradient(135deg,#12003a,#0a0022);box-shadow:0 6px 20px rgba(0,0,0,.75),0 0 0 2px rgba(201,168,76,.12);}
+.card-back-pat{
+  position:absolute;inset:5px;border-radius:6px;
+  border:1px solid rgba(201,168,76,.18);
+  background:repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(201,168,76,.06) 4px,rgba(201,168,76,.06) 5px);
+}
+.card-back-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:26px;opacity:.12;}
+
+/* 3D flip */
+.card-flip-wrapper{width:var(--card-w);height:var(--card-h);perspective:700px;flex-shrink:0;}
+.card-flip-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.4,0,.2,1);}
+.card-flip-inner.flipped{transform:rotateY(180deg);}
+.card-flip-front,.card-flip-back{position:absolute;inset:0;border-radius:9px;backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.card-flip-back{transform:rotateY(180deg);}
+
+/* Card slot placeholder */
+.card-slot{
+  width:var(--card-w);height:var(--card-h);border-radius:9px;
+  border:1px dashed rgba(255,255,255,.08);background:rgba(0,0,0,.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;color:rgba(255,255,255,.05);
+}
+
+/* ─── DIVIDER ─── */
+.table-div{
+  width:100%;max-width:540px;height:1px;
+  background:linear-gradient(to right,transparent,rgba(255,255,255,.07),transparent);
+  margin:2px 0;flex-shrink:0;position:relative;z-index:2;
+}
+
+/* ─── BET INFO BAR ─── */
+.bet-info-bar{
+  position:relative;z-index:2;
+  display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;
+  padding:6px 12px;
+}
+.bet-pill{
+  display:flex;align-items:center;gap:6px;
+  padding:5px 12px;border-radius:20px;
+  background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.07);
+}
+.bet-pill-lbl{font-size:9px;letter-spacing:2px;color:var(--dimmer);font-weight:700;}
+.bet-pill-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:var(--gold);}
+.bet-pill-val.zero{color:rgba(255,255,255,.2);}
+.bet-pill.active{border-color:rgba(240,192,96,.3);background:rgba(240,192,96,.06);}
+
+/* ─── RESULT OVERLAY ─── */
+.result-ov{
+  position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+  z-index:40;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);
+}
+.result-ov.show{display:flex;}
+.result-box{
+  padding:26px 42px;border-radius:20px;text-align:center;
+  animation:resPop .4s cubic-bezier(.34,1.56,.64,1) forwards;
+  min-width:280px;
+}
+@keyframes resPop{from{transform:scale(.5) translateY(24px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.result-box.win{background:rgba(0,20,10,.97);border:2px solid rgba(0,230,118,.4);}
+.result-box.lose{background:rgba(20,0,8,.97);border:2px solid rgba(255,61,113,.35);}
+.result-box.push{background:rgba(10,10,22,.97);border:2px solid rgba(240,192,96,.35);}
+.res-title{font-family:'Orbitron',monospace;font-size:24px;font-weight:900;letter-spacing:2px;}
+.res-title.win{color:var(--green);text-shadow:0 0 28px rgba(0,230,118,.5);}
+.res-title.lose{color:var(--red);text-shadow:0 0 28px rgba(255,61,113,.4);}
+.res-title.push{color:var(--gold);}
+.res-hand{font-size:11px;color:var(--dimmer);letter-spacing:2px;margin-top:4px;text-transform:uppercase;}
+.res-detail{margin-top:12px;display:flex;flex-direction:column;gap:4px;}
+.res-line{font-family:'DM Mono',monospace;font-size:12px;}
+.res-line.pos{color:var(--green);}
+.res-line.neg{color:var(--red);}
+.res-line.neu{color:var(--gold);}
+.res-total{font-family:'DM Mono',monospace;font-size:19px;font-weight:700;margin-top:10px;}
+.res-total.pos{color:var(--green);}
+.res-total.neg{color:var(--red);}
+.res-total.neu{color:var(--gold);}
+.res-next-btn{
+  margin-top:18px;padding:10px 28px;border-radius:10px;border:none;cursor:pointer;
+  font-family:'Orbitron',monospace;font-size:11px;font-weight:900;letter-spacing:2px;
+  background:linear-gradient(135deg,var(--gold3),var(--gold2));color:#060400;
+  transition:all .2s;
+}
+.res-next-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(240,192,96,.35);}
+
+/* ─── HINT BANNER ─── */
+.hint-bar{
+  position:relative;z-index:2;
+  padding:7px 20px;border-radius:12px;border:1px solid transparent;
+  font-size:12px;font-weight:600;letter-spacing:1px;text-align:center;
+  transition:all .3s;min-height:32px;
+}
+.hint-bar.play{border-color:rgba(0,230,118,.25);background:rgba(0,230,118,.07);color:var(--green);}
+.hint-bar.fold{border-color:rgba(255,61,113,.25);background:rgba(255,61,113,.07);color:var(--red);}
+.hint-bar.empty{border-color:transparent;background:transparent;color:transparent;}
+
+/* ─── BOTTOM CONTROLS ─── */
+.controls{
+  position:relative;z-index:3;width:100%;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  padding:10px 0 6px;
+}
+.bet-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;}
+.bet-group{display:flex;flex-direction:column;align-items:center;gap:5px;}
+.bet-group-lbl{font-size:8px;letter-spacing:3px;color:var(--dimmer);font-weight:700;text-transform:uppercase;}
+.bet-row{display:flex;align-items:center;gap:6px;}
+.adj-btn{
+  width:34px;height:34px;border-radius:8px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);color:var(--cream);font-size:17px;font-weight:700;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;
+  flex-shrink:0;
+}
+.adj-btn:hover:not(:disabled){background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);}
+.adj-btn:disabled{opacity:.3;cursor:not-allowed;}
+.bet-val{
+  font-family:'DM Mono',monospace;font-size:15px;font-weight:700;color:var(--gold);
+  min-width:66px;text-align:center;
+}
+.action-btns{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center;}
+.btn-deal{
+  padding:11px 32px;border-radius:12px;border:none;cursor:pointer;
+  font-family:'Orbitron',monospace;font-size:12px;font-weight:900;letter-spacing:2px;
+  background:linear-gradient(135deg,var(--gold3),var(--gold2));color:#060400;
+  transition:all .2s;box-shadow:0 4px 16px rgba(201,168,76,.3);
+}
+.btn-deal:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 24px rgba(201,168,76,.4);}
+.btn-deal:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-play{
+  padding:11px 28px;border-radius:12px;border:none;cursor:pointer;
+  font-family:'Orbitron',monospace;font-size:12px;font-weight:900;letter-spacing:2px;
+  background:linear-gradient(135deg,#00802a,var(--green));color:#001a08;
+  transition:all .2s;box-shadow:0 4px 16px rgba(0,230,118,.2);
+}
+.btn-play:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,230,118,.35);}
+.btn-fold{
+  padding:11px 28px;border-radius:12px;border:1px solid rgba(255,61,113,.35);cursor:pointer;
+  font-family:'Orbitron',monospace;font-size:12px;font-weight:900;letter-spacing:2px;
+  background:rgba(255,61,113,.1);color:var(--red);
+  transition:all .2s;
+}
+.btn-fold:hover:not(:disabled){background:rgba(255,61,113,.18);border-color:rgba(255,61,113,.5);}
+.btn-play:disabled,.btn-fold:disabled{opacity:0;pointer-events:none;}
+.hidden{display:none!important;}
+
+/* ─── RIGHT PANEL ─── */
+.side-panel{
+  background:rgba(4,4,10,.98);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;gap:0;overflow-y:auto;
+  scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.07) transparent;
+}
+.side-panel::-webkit-scrollbar{width:4px;}
+.side-panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.07);border-radius:4px;}
+.panel-section{padding:14px 16px;border-bottom:1px solid var(--border);}
+.panel-lbl{font-size:9px;letter-spacing:2.5px;color:var(--dimmer);font-weight:700;margin-bottom:8px;text-transform:uppercase;}
+.panel-title{font-family:'Orbitron',monospace;font-size:13px;font-weight:900;color:var(--gold);letter-spacing:1px;margin-bottom:8px;}
+
+/* Stats */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.stat-card{
+  background:var(--glass);border:1px solid var(--border);border-radius:10px;
+  padding:10px 12px;display:flex;flex-direction:column;gap:3px;
+}
+.stat-lbl{font-size:8px;letter-spacing:2px;color:var(--dimmer);font-weight:700;}
+.stat-val{font-family:'DM Mono',monospace;font-size:15px;font-weight:700;color:var(--cream);}
+.stat-val.pos{color:var(--green);}
+.stat-val.neg{color:var(--red);}
+.stat-val.neu{color:var(--gold);}
+
+/* Payouts table */
+.pay-table{width:100%;border-collapse:collapse;}
+.pay-table th{font-size:8px;letter-spacing:2px;color:var(--dimmer);font-weight:700;padding:4px 0;text-align:left;border-bottom:1px solid var(--border);}
+.pay-table th:last-child{text-align:right;}
+.pay-table td{font-size:11px;padding:5px 0;color:var(--cream);opacity:.8;border-bottom:1px solid rgba(255,255,255,.03);}
+.pay-table td:last-child{text-align:right;font-family:'DM Mono',monospace;color:var(--gold);}
+.pay-table tr.hi td{opacity:1;font-weight:600;}
+
+/* History */
+.hist-list{display:flex;flex-direction:column;gap:5px;}
+.hist-item{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 8px;border-radius:8px;
+  background:var(--glass);border:1px solid var(--border);font-size:11px;
+}
+.hist-ico{font-size:14px;flex-shrink:0;}
+.hist-name{flex:1;color:var(--dim);font-size:10px;letter-spacing:.5px;}
+.hist-amt{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;}
+.hist-amt.pos{color:var(--green);}
+.hist-amt.neg{color:var(--red);}
+.hist-amt.neu{color:var(--gold);}
+
+/* ─── MOBILE ─── */
+@media(max-width:700px){
+  .main{grid-template-columns:1fr;grid-template-rows:1fr auto;}
+  .side-panel{display:none;}
+  :root{--card-w:62px;--card-h:92px;}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div style="display:flex;align-items:center;gap:16px;">
+    <span class="hdr-logo">HATHOR</span>
+    <span class="hdr-title">THREE CARD POKER</span>
+  </div>
+  <div class="hdr-right">
+    <div class="hdr-bal"><span>⬡</span><span id="balDisp">10,000</span></div>
+    <a href="/lobby.html" class="back-btn">← LOBBY</a>
+  </div>
+</header>
+
+<div class="main">
+  <!-- TABLE -->
+  <div class="table-area">
+    <div class="table-glow"></div>
+    <div class="result-ov" id="resultOv">
+      <div class="result-box" id="resultBox">
+        <div class="res-title" id="resTitle">WIN</div>
+        <div class="res-hand" id="resHand"></div>
+        <div class="res-detail" id="resDetail"></div>
+        <div class="res-total" id="resTotal"></div>
+        <button class="res-next-btn" onclick="nextHand()">NEXT HAND</button>
+      </div>
+    </div>
+
+    <div class="game-col">
+      <!-- DEALER -->
+      <div class="zone">
+        <div class="zone-lbl">Dealer</div>
+        <div class="cards-row" id="dealerCards">
+          <div class="card-slot">♠</div>
+          <div class="card-slot">♠</div>
+          <div class="card-slot">♠</div>
+        </div>
+        <div id="dealerStatus" style="font-size:10px;letter-spacing:2px;color:var(--dimmer);min-height:16px;"></div>
+      </div>
+
+      <div class="table-div"></div>
+
+      <!-- BET INFO -->
+      <div class="bet-info-bar">
+        <div class="bet-pill" id="antePill">
+          <span class="bet-pill-lbl">ANTE</span>
+          <span class="bet-pill-val zero" id="antePillVal">—</span>
+        </div>
+        <div class="bet-pill" id="playPill">
+          <span class="bet-pill-lbl">PLAY</span>
+          <span class="bet-pill-val zero" id="playPillVal">—</span>
+        </div>
+        <div class="bet-pill" id="ppPill">
+          <span class="bet-pill-lbl">PAIR +</span>
+          <span class="bet-pill-val zero" id="ppPillVal">—</span>
+        </div>
+      </div>
+
+      <div class="table-div"></div>
+
+      <!-- PLAYER -->
+      <div class="zone">
+        <div class="cards-row" id="playerCards">
+          <div class="card-slot">♠</div>
+          <div class="card-slot">♠</div>
+          <div class="card-slot">♠</div>
+        </div>
+        <div class="zone-lbl">Your Hand</div>
+        <div id="playerHandName" style="font-size:11px;letter-spacing:2px;color:var(--gold);min-height:16px;font-weight:600;"></div>
+      </div>
+
+      <!-- HINT -->
+      <div class="hint-bar empty" id="hintBar"></div>
+
+      <!-- CONTROLS -->
+      <div class="controls">
+        <div class="bet-controls" id="betControls">
+          <div class="bet-group">
+            <div class="bet-group-lbl">Ante</div>
+            <div class="bet-row">
+              <button class="adj-btn" id="anteMinus" onclick="adjBet('ante',-1)">−</button>
+              <div class="bet-val" id="anteDisplay">100</div>
+              <button class="adj-btn" id="antePlus" onclick="adjBet('ante',1)">+</button>
+            </div>
+          </div>
+          <div class="bet-group">
+            <div class="bet-group-lbl">Pair Plus</div>
+            <div class="bet-row">
+              <button class="adj-btn" id="ppMinus" onclick="adjBet('pp',-1)">−</button>
+              <div class="bet-val" id="ppDisplay">0</div>
+              <button class="adj-btn" id="ppPlus" onclick="adjBet('pp',1)">+</button>
+            </div>
+          </div>
+        </div>
+        <div class="action-btns">
+          <button class="btn-deal" id="dealBtn" onclick="deal()">DEAL</button>
+          <button class="btn-play btn-play hidden" id="playBtn" onclick="play()">PLAY ✓</button>
+          <button class="btn-fold btn-fold hidden" id="foldBtn" onclick="fold()">FOLD</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="side-panel">
+    <!-- Session Stats -->
+    <div class="panel-section">
+      <div class="panel-title">Session Stats</div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-lbl">PROFIT</div>
+          <div class="stat-val neu" id="statProfit">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-lbl">HANDS</div>
+          <div class="stat-val" id="statHands">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-lbl">WIN RATE</div>
+          <div class="stat-val" id="statWinRate">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-lbl">BEST WIN</div>
+          <div class="stat-val pos" id="statBest">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ante Bonus -->
+    <div class="panel-section">
+      <div class="panel-lbl">Ante Bonus</div>
+      <table class="pay-table">
+        <tr><th>Hand</th><th>Pays</th></tr>
+        <tr class="hi"><td>Straight Flush</td><td>5:1</td></tr>
+        <tr class="hi"><td>Three of a Kind</td><td>4:1</td></tr>
+        <tr><td>Straight</td><td>1:1</td></tr>
+      </table>
+    </div>
+
+    <!-- Pair Plus -->
+    <div class="panel-section">
+      <div class="panel-lbl">Pair Plus Pays</div>
+      <table class="pay-table">
+        <tr><th>Hand</th><th>Pays</th></tr>
+        <tr class="hi"><td>Mini Royal</td><td>50:1</td></tr>
+        <tr class="hi"><td>Straight Flush</td><td>40:1</td></tr>
+        <tr class="hi"><td>Three of a Kind</td><td>30:1</td></tr>
+        <tr><td>Straight</td><td>6:1</td></tr>
+        <tr><td>Flush</td><td>3:1</td></tr>
+        <tr><td>Pair</td><td>1:1</td></tr>
+        <tr><td>High Card</td><td>Lose</td></tr>
+      </table>
+    </div>
+
+    <!-- History -->
+    <div class="panel-section">
+      <div class="panel-lbl">Last Hands</div>
+      <div class="hist-list" id="histList">
+        <div style="font-size:10px;color:var(--dimmer);text-align:center;padding:10px 0;">No hands yet</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ─── BALANCE ─── */
+let bal = parseInt(localStorage.getItem('casino_tokens')) || 10000;
+function saveBal(){localStorage.setItem('casino_tokens', bal);}
+function updateBalDisp(){document.getElementById('balDisp').textContent = bal.toLocaleString();}
+updateBalDisp();
+
+/* ─── SOUND ─── */
+function tone(freq, vol, dur){
+  try{
+    const ac = new (window.AudioContext||window.webkitAudioContext)();
+    const o = ac.createOscillator(); const g = ac.createGain();
+    o.connect(g); g.connect(ac.destination);
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime+dur);
+    o.start(); o.stop(ac.currentTime+dur);
+  } catch(e){}
+}
+function sfxDeal(){tone(440,.06,.08); setTimeout(()=>tone(554,.05,.08),80); setTimeout(()=>tone(660,.04,.1),160);}
+function sfxWin(){tone(660,.07,.1); setTimeout(()=>tone(880,.07,.1),120); setTimeout(()=>tone(1100,.05,.2),240);}
+function sfxLose(){tone(200,.06,.15); setTimeout(()=>tone(150,.05,.2),160);}
+function sfxClick(){tone(800,.04,.06);}
+function sfxFlip(){tone(300,.04,.1); setTimeout(()=>tone(400,.03,.08),80);}
+
+/* ─── DECK ─── */
+const RANKS = ['2','3','4','5','6','7','8','9','T','J','Q','K','A'];
+const SUITS = ['s','h','d','c'];
+const SUIT_SYM = {s:'♠',h:'♥',d:'♦',c:'♣'};
+const RANK_VAL = {2:2,3:3,4:4,5:5,6:6,7:7,8:8,9:9,T:10,J:11,Q:12,K:13,A:14};
+
+function makeDeck(){
+  const d = [];
+  for(const r of RANKS) for(const s of SUITS) d.push({r,s});
+  return d;
+}
+function shuffle(d){
+  for(let i=d.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[d[i],d[j]]=[d[j],d[i]];}
+  return d;
+}
+
+/* ─── HAND EVALUATOR (3-card) ─── */
+// rank: 6=MiniRoyal/SF, 5=SF, 4=Trips, 3=Straight, 2=Flush, 1=Pair, 0=HighCard
+function rank3(hand){
+  const vals = hand.map(c=>RANK_VAL[c.r]).sort((a,b)=>b-a);
+  const suits = hand.map(c=>c.s);
+  const isFlush = suits[0]===suits[1] && suits[1]===suits[2];
+  // Check straight: sorted descending
+  const isStraight = (vals[0]-vals[1]===1 && vals[1]-vals[2]===1) ||
+                     (vals[0]===14 && vals[1]===3 && vals[2]===2); // A-2-3 wheel
+  const isTrips = vals[0]===vals[1] && vals[1]===vals[2];
+  const isPair = vals[0]===vals[1] || vals[1]===vals[2];
+
+  // Mini Royal: A-K-Q same suit
+  const isMiniRoyal = isFlush && vals[0]===14 && vals[1]===13 && vals[2]===12;
+
+  if(isMiniRoyal) return {rank:6, name:'Mini Royal', isMiniRoyal:true};
+  if(isFlush && isStraight) return {rank:5, name:'Straight Flush', isMiniRoyal:false};
+  if(isTrips) return {rank:4, name:'Three of a Kind', isMiniRoyal:false};
+  if(isStraight) return {rank:3, name:'Straight', isMiniRoyal:false};
+  if(isFlush) return {rank:2, name:'Flush', isMiniRoyal:false};
+  if(isPair) return {rank:1, name:'Pair', isMiniRoyal:false};
+  return {rank:0, name:'High Card', isMiniRoyal:false};
+}
+
+function compare3(a, b){
+  const ra = rank3(a), rb = rank3(b);
+  if(ra.rank !== rb.rank) return ra.rank - rb.rank;
+  const avs = a.map(c=>RANK_VAL[c.r]).sort((x,y)=>y-x);
+  const bvs = b.map(c=>RANK_VAL[c.r]).sort((x,y)=>y-x);
+  for(let i=0;i<3;i++){
+    if(avs[i]!==bvs[i]) return avs[i]-bvs[i];
+  }
+  return 0;
+}
+
+// Dealer qualifies with Q-high or better
+function dealerQualifies(hand){
+  const h = rank3(hand);
+  if(h.rank > 0) return true; // any pair or better
+  // high card: check if highest card >= Q (12)
+  const maxVal = Math.max(...hand.map(c=>RANK_VAL[c.r]));
+  return maxVal >= 12;
+}
+
+/* ─── OPTIMAL HINT ─── */
+// Basic strategy: play Q-6-4 or better
+function shouldPlay(hand){
+  const h = rank3(hand);
+  if(h.rank >= 1) return true; // pair or better always play
+  // High card: need Q or better as highest card
+  const vals = hand.map(c=>RANK_VAL[c.r]).sort((a,b)=>b-a);
+  if(vals[0] < 12) return false; // below Q — fold
+  if(vals[0] > 12) return true;  // K or A high — play
+  // Q-high: need second card >= 6, if equal then third >= 4
+  if(vals[1] < 6) return false;
+  if(vals[1] > 6) return true;
+  return vals[2] >= 4;
+}
+
+/* ─── ANTE/PP BONUSES ─── */
+function anteBonus(hand, ante){
+  const h = rank3(hand);
+  if(h.rank===6 || h.rank===5) return ante * 5;   // SF (incl Mini Royal)
+  if(h.rank===4) return ante * 4;                  // Trips
+  if(h.rank===3) return ante * 1;                  // Straight
+  return 0;
+}
+
+function ppBonus(hand, pp){
+  if(!pp) return 0;
+  const h = rank3(hand);
+  if(h.isMiniRoyal) return pp * 50;
+  if(h.rank===5) return pp * 40;
+  if(h.rank===4) return pp * 30;
+  if(h.rank===3) return pp * 6;
+  if(h.rank===2) return pp * 3;
+  if(h.rank===1) return pp * 1;
+  return -pp;
+}
+
+/* ─── BET STEPS ─── */
+const BET_STEPS = [10,20,25,50,75,100,150,200,250,500,750,1000,2000,5000,10000];
+function snapBet(v){ return BET_STEPS.reduce((a,b)=>Math.abs(b-v)<Math.abs(a-v)?b:a); }
+function nextStep(v,dir){
+  const idx = BET_STEPS.indexOf(snapBet(v));
+  const ni = Math.max(0, Math.min(BET_STEPS.length-1, idx+dir));
+  return BET_STEPS[ni];
+}
+
+/* ─── STATE ─── */
+let anteBet = 100, ppBet = 0;
+let playerHand = [], dealerHand = [];
+let phase = 'bet'; // 'bet','decision','done'
+let session = {profit:0, hands:0, wins:0, bestWin:0};
+let history = [];
+
+function adjBet(type, dir){
+  sfxClick();
+  if(type==='ante'){
+    anteBet = nextStep(anteBet, dir);
+    anteBet = Math.max(10, Math.min(10000, anteBet));
+    document.getElementById('anteDisplay').textContent = anteBet.toLocaleString();
+  } else {
+    if(dir===-1 && ppBet===0) return;
+    ppBet = ppBet===0 && dir===1 ? 10 : nextStep(ppBet, dir);
+    ppBet = Math.max(0, Math.min(10000, ppBet));
+    document.getElementById('ppDisplay').textContent = ppBet===0 ? '0' : ppBet.toLocaleString();
+  }
+}
+
+/* ─── CARD RENDERING ─── */
+function isRed(s){ return s==='h'||s==='d'; }
+
+function buildCard(card, delay=0){
+  const c = document.createElement('div');
+  c.className = 'card ' + (isRed(card.s)?'red':'blk');
+  c.style.animationDelay = delay+'ms';
+  const sym = SUIT_SYM[card.s];
+  const rank = card.r;
+  c.innerHTML = `<div class="card-inner">
+    <div class="card-tl"><span class="card-rank">${rank}</span><span class="card-suit-sm">${sym}</span></div>
+    <div class="card-center">${sym}</div>
+    <div class="card-br"><span class="card-rank">${rank}</span><span class="card-suit-sm">${sym}</span></div>
+  </div>`;
+  return c;
+}
+
+function buildBackCard(delay=0){
+  const c = document.createElement('div');
+  c.className = 'card back';
+  c.style.animationDelay = delay+'ms';
+  c.innerHTML = `<div class="card-back-pat"></div><div class="card-back-icon">⬡</div>`;
+  return c;
+}
+
+function buildFlipWrapper(card, delay=0){
+  const w = document.createElement('div');
+  w.className = 'card-flip-wrapper';
+  const inner = document.createElement('div');
+  inner.className = 'card-flip-inner';
+  // Front = card back (face-down)
+  const front = document.createElement('div');
+  front.className = 'card-flip-front';
+  const backCard = buildBackCard(delay);
+  backCard.style.animationDelay = '0ms'; // already positioned
+  front.appendChild(backCard);
+  // Back = face-up card
+  const back = document.createElement('div');
+  back.className = 'card-flip-back';
+  const faceCard = buildCard(card, 0);
+  faceCard.style.animation='none';
+  back.appendChild(faceCard);
+  inner.appendChild(front);
+  inner.appendChild(back);
+  w.appendChild(inner);
+  w._flipInner = inner;
+  return w;
+}
+
+function revealFlipWrappers(container){
+  const wrappers = container.querySelectorAll('.card-flip-wrapper');
+  wrappers.forEach((w, i)=>{
+    setTimeout(()=>{ sfxFlip(); w._flipInner.classList.add('flipped'); }, i*200);
+  });
+}
+
+/* ─── PILL UPDATES ─── */
+function updatePills(){
+  const av = document.getElementById('antePillVal');
+  const pv = document.getElementById('playPillVal');
+  const ppv = document.getElementById('ppPillVal');
+  if(anteBet){
+    av.textContent = anteBet.toLocaleString();
+    av.classList.remove('zero');
+    document.getElementById('antePill').classList.add('active');
+  } else {
+    av.textContent='—'; av.classList.add('zero');
+    document.getElementById('antePill').classList.remove('active');
+  }
+  // Play pill shown after player chooses play
+  if(phase==='done' && window._playPlaced){
+    pv.textContent = anteBet.toLocaleString();
+    pv.classList.remove('zero');
+    document.getElementById('playPill').classList.add('active');
+  } else {
+    pv.textContent='—'; pv.classList.add('zero');
+    document.getElementById('playPill').classList.remove('active');
+  }
+  if(ppBet){
+    ppv.textContent = ppBet.toLocaleString();
+    ppv.classList.remove('zero');
+    document.getElementById('ppPill').classList.add('active');
+  } else {
+    ppv.textContent='—'; ppv.classList.add('zero');
+    document.getElementById('ppPill').classList.remove('active');
+  }
+}
+
+/* ─── DEAL ─── */
+function deal(){
+  const totalBet = anteBet + ppBet;
+  if(bal < totalBet){ alert('Insufficient balance!'); return; }
+  if(anteBet < 10){ alert('Minimum ante is 10!'); return; }
+
+  sfxDeal();
+  phase = 'decision';
+  window._playPlaced = false;
+
+  bal -= totalBet;
+  saveBal(); updateBalDisp();
+
+  // Build deck and deal
+  const deck = shuffle(makeDeck());
+  playerHand = [deck[0], deck[1], deck[2]];
+  dealerHand = [deck[3], deck[4], deck[5]];
+
+  // Render player cards with stagger
+  const pc = document.getElementById('playerCards');
+  pc.innerHTML = '';
+  playerHand.forEach((card, i)=>{
+    pc.appendChild(buildCard(card, i*100));
+  });
+
+  // Render dealer cards face-down with flip wrapper
+  const dc = document.getElementById('dealerCards');
+  dc.innerHTML = '';
+  dealerHand.forEach((card, i)=>{
+    dc.appendChild(buildFlipWrapper(card, i*100));
+  });
+
+  // Show dealer status placeholder
+  document.getElementById('dealerStatus').textContent = '';
+
+  // Evaluate player hand
+  const ph = rank3(playerHand);
+  document.getElementById('playerHandName').textContent = ph.name.toUpperCase();
+
+  // Show hint
+  const hint = document.getElementById('hintBar');
+  if(shouldPlay(playerHand)){
+    hint.className = 'hint-bar play';
+    hint.textContent = 'Strategy: PLAY \u2713 — hand is strong enough';
+  } else {
+    hint.className = 'hint-bar fold';
+    hint.textContent = 'Strategy: FOLD — hand is too weak';
+  }
+
+  // Show Play/Fold buttons, hide Deal/Bet controls
+  document.getElementById('betControls').classList.add('hidden');
+  document.getElementById('dealBtn').classList.add('hidden');
+  document.getElementById('playBtn').classList.remove('hidden');
+  document.getElementById('foldBtn').classList.remove('hidden');
+
+  updatePills();
+}
+
+/* ─── PLAY ─── */
+function play(){
+  if(bal < anteBet){ alert('Not enough balance for Play bet!'); return; }
+  sfxClick();
+  bal -= anteBet;
+  saveBal(); updateBalDisp();
+  window._playPlaced = true;
+  resolve(false);
+}
+
+/* ─── FOLD ─── */
+function fold(){
+  sfxClick();
+  window._playPlaced = false;
+  resolve(true);
+}
+
+/* ─── RESOLVE ─── */
+function resolve(folded){
+  phase = 'done';
+
+  // Reveal dealer cards
+  revealFlipWrappers(document.getElementById('dealerCards'));
+
+  setTimeout(()=>{
+    const ph = rank3(playerHand);
+    const dh = rank3(dealerHand);
+    const qualifies = dealerQualifies(dealerHand);
+
+    let totalDelta = 0;
+    let resLines = [];
+    let outcomeType = 'push';
+
+    // Pair Plus — always resolved
+    if(ppBet > 0){
+      const ppWin = ppBonus(playerHand, ppBet);
+      if(ppWin > 0){
+        totalDelta += ppWin + ppBet; // return bet + winnings
+        resLines.push({cls:'pos', txt:`Pair+ ${ph.name}: +${ppWin.toLocaleString()}`});
+      } else {
+        // already deducted, just show
+        resLines.push({cls:'neg', txt:`Pair+ ${ph.name}: -${ppBet.toLocaleString()}`});
+      }
+    }
+
+    if(folded){
+      // Ante is already lost. No play bet placed.
+      resLines.push({cls:'neg', txt:`Folded — Ante lost: -${anteBet.toLocaleString()}`});
+      // Pair plus still resolved above
+      outcomeType = 'lose';
+    } else {
+      // Ante bonus — pays regardless of dealer qualify
+      const ab = anteBonus(playerHand, anteBet);
+      if(ab > 0){
+        totalDelta += ab;
+        resLines.push({cls:'pos', txt:`Ante Bonus (${ph.name}): +${ab.toLocaleString()}`});
+      }
+
+      if(!qualifies){
+        // Dealer doesn't qualify: Ante 1:1, Play pushes (returned)
+        totalDelta += anteBet * 2; // ante win + ante back
+        totalDelta += anteBet;     // play bet returned
+        resLines.push({cls:'pos', txt:`Dealer no qualify — Ante wins: +${anteBet.toLocaleString()}`});
+        resLines.push({cls:'neu', txt:`Play bet returned: ${anteBet.toLocaleString()}`});
+        outcomeType = 'win';
+        document.getElementById('dealerStatus').textContent = 'NO QUALIFY';
+      } else {
+        const cmp = compare3(playerHand, dealerHand);
+        if(cmp > 0){
+          // Player wins
+          totalDelta += anteBet * 2; // ante 1:1 + ante back
+          totalDelta += anteBet * 2; // play 1:1 + play back
+          resLines.push({cls:'pos', txt:`Ante wins: +${anteBet.toLocaleString()}`});
+          resLines.push({cls:'pos', txt:`Play wins: +${anteBet.toLocaleString()}`});
+          outcomeType = 'win';
+          document.getElementById('dealerStatus').textContent = dh.name.toUpperCase() + ' — QUALIFIES';
+        } else if(cmp < 0){
+          // Dealer wins — ante and play both lost (already deducted)
+          resLines.push({cls:'neg', txt:`Dealer wins (${dh.name}) — Ante: -${anteBet.toLocaleString()}`});
+          resLines.push({cls:'neg', txt:`Play: -${anteBet.toLocaleString()}`});
+          outcomeType = 'lose';
+          document.getElementById('dealerStatus').textContent = dh.name.toUpperCase() + ' — QUALIFIES';
+        } else {
+          // Tie — push both
+          totalDelta += anteBet; // ante back
+          totalDelta += anteBet; // play back
+          resLines.push({cls:'neu', txt:`Tie — Ante push`});
+          resLines.push({cls:'neu', txt:`Tie — Play push`});
+          outcomeType = 'push';
+          document.getElementById('dealerStatus').textContent = dh.name.toUpperCase() + ' — TIE';
+        }
+      }
+    }
+
+    // Net delta
+    // totalDelta = money returned to balance (wins + returned bets)
+    // We already subtracted ante+pp on deal, and play on play()
+    const totalDeducted = anteBet + ppBet + (window._playPlaced ? anteBet : 0);
+    const netResult = totalDelta - totalDeducted;
+
+    bal += totalDelta;
+    saveBal(); updateBalDisp();
+
+    // Session
+    session.hands++;
+    session.profit += netResult;
+    if(outcomeType==='win') session.wins++;
+    if(netResult > session.bestWin) session.bestWin = netResult;
+    updateStats();
+
+    // History
+    addHistory(outcomeType, ph.name, netResult);
+
+    // Show result
+    showResult(outcomeType, ph.name, dh.name, resLines, netResult);
+
+    if(outcomeType==='win') sfxWin();
+    else if(outcomeType==='lose') sfxLose();
+    else tone(440,.04,.15);
+
+    updatePills();
+  }, 700);
+}
+
+/* ─── RESULT DISPLAY ─── */
+function showResult(type, playerName, dealerName, lines, net){
+  const ov = document.getElementById('resultOv');
+  const box = document.getElementById('resultBox');
+  const title = document.getElementById('resTitle');
+  const hand = document.getElementById('resHand');
+  const detail = document.getElementById('resDetail');
+  const total = document.getElementById('resTotal');
+
+  box.className = 'result-box ' + type;
+  title.className = 'res-title ' + type;
+  title.textContent = type==='win' ? 'YOU WIN' : type==='lose' ? 'YOU LOSE' : 'PUSH';
+  hand.textContent = playerName + (dealerName && type!=='win' ? ' vs ' + dealerName : '');
+
+  detail.innerHTML = '';
+  lines.forEach(l=>{
+    const d = document.createElement('div');
+    d.className = 'res-line ' + l.cls;
+    d.textContent = l.txt;
+    detail.appendChild(d);
+  });
+
+  total.className = 'res-total ' + (net>0?'pos':net<0?'neg':'neu');
+  total.textContent = (net>0?'+':'')+net.toLocaleString() + ' tokens';
+
+  ov.classList.add('show');
+}
+
+/* ─── NEXT HAND ─── */
+function nextHand(){
+  phase = 'bet';
+  window._playPlaced = false;
+  document.getElementById('resultOv').classList.remove('show');
+  document.getElementById('playerCards').innerHTML = '<div class="card-slot">♠</div><div class="card-slot">♠</div><div class="card-slot">♠</div>';
+  document.getElementById('dealerCards').innerHTML = '<div class="card-slot">♠</div><div class="card-slot">♠</div><div class="card-slot">♠</div>';
+  document.getElementById('playerHandName').textContent = '';
+  document.getElementById('dealerStatus').textContent = '';
+  document.getElementById('hintBar').className = 'hint-bar empty';
+  document.getElementById('hintBar').textContent = '';
+  document.getElementById('betControls').classList.remove('hidden');
+  document.getElementById('dealBtn').classList.remove('hidden');
+  document.getElementById('playBtn').classList.add('hidden');
+  document.getElementById('foldBtn').classList.add('hidden');
+  updatePills();
+  sfxClick();
+}
+
+/* ─── STATS ─── */
+function updateStats(){
+  const p = session.profit;
+  const profitEl = document.getElementById('statProfit');
+  profitEl.textContent = (p>=0?'+':'')+p.toLocaleString();
+  profitEl.className = 'stat-val ' + (p>0?'pos':p<0?'neg':'neu');
+  document.getElementById('statHands').textContent = session.hands;
+  const wr = session.hands ? Math.round(session.wins/session.hands*100)+'%' : '—';
+  document.getElementById('statWinRate').textContent = wr;
+  const bw = document.getElementById('statBest');
+  bw.textContent = '+'+session.bestWin.toLocaleString();
+}
+
+/* ─── HISTORY ─── */
+function addHistory(type, name, net){
+  const ico = type==='win'?'✅':type==='lose'?'❌':'➖';
+  const cls = type==='win'?'pos':type==='lose'?'neg':'neu';
+  history.unshift({ico, name, net, cls});
+  if(history.length > 8) history.pop();
+  renderHistory();
+}
+function renderHistory(){
+  const el = document.getElementById('histList');
+  if(!history.length){ el.innerHTML='<div style="font-size:10px;color:var(--dimmer);text-align:center;padding:10px 0;">No hands yet</div>'; return; }
+  el.innerHTML = history.map(h=>`
+    <div class="hist-item">
+      <span class="hist-ico">${h.ico}</span>
+      <span class="hist-name">${h.name}</span>
+      <span class="hist-amt ${h.cls}">${h.net>=0?'+':''}${h.net.toLocaleString()}</span>
+    </div>
+  `).join('');
+}
+
+/* ─── INIT ─── */
+updatePills();
+</script>
+</body>
+</html>
