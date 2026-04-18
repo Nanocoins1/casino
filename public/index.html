@@ -3554,14 +3554,14 @@ body { color: #e8e2d4 !important; }
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 360px;
-  padding: 16px;
+  min-height: 380px;
+  padding: 0;
 }
 
 /* ── THE OVAL TABLE ── */
 .pp-table {
-  width: min(380px, 82vw);
-  height: min(210px, 44vw);
+  width: min(420px, 74vw);
+  height: min(230px, 46vw);
   border-radius: 50%;
   background:
     radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.55) 100%),
@@ -3620,8 +3620,8 @@ body { color: #e8e2d4 !important; }
 .pp-dealer-btn {
   position: absolute;
   z-index: 20;
-  top: calc(50% - 100px);
-  right: calc(50% - 160px);
+  top: calc(50% - min(23vw, 115px) + 10px);
+  right: calc(50% - min(37vw, 210px) + 18px);
   width: 22px; height: 22px; border-radius: 50%;
   background: #fff; color: #000; font-size: 9px; font-weight: 900;
   display: flex; align-items: center; justify-content: center;
@@ -3639,7 +3639,7 @@ body { color: #e8e2d4 !important; }
   backdrop-filter: blur(14px);
   box-shadow: 0 4px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04);
   transition: border-color 0.3s, background 0.3s, box-shadow 0.3s, opacity 0.3s;
-  min-width: 84px; z-index: 10;
+  min-width: 68px; z-index: 10;
 }
 .pp-seat-active {
   border-color: rgba(201,168,76,0.7) !important;
@@ -3681,15 +3681,42 @@ body { color: #e8e2d4 !important; }
   50%       { opacity: 0.35; box-shadow: none; }
 }
 
-/* Seat positions around the table zone */
-/* Viktor (bi=0, seat-1): bottom-left */
-.pp-seat-1 { bottom: 18px; left: 10px; }
-/* Elena (bi=1, seat-2): top-left */
-.pp-seat-2 { top: 16px; left: 10px; }
-/* Marco (bi=2, seat-3): top-center */
-.pp-seat-3 { top: 8px; left: 50%; transform: translateX(-50%); }
-/* Sophia (bi=3, seat-4): top-right */
-.pp-seat-4 { top: 16px; right: 10px; }
+/* ═══════════════════════════════════════════
+   Seat positions — around the oval table
+   Table: 74vw × 46vw, centered in zone
+   Half-W = 37vw,  Half-H = 23vw
+   Seats overlap the table edge slightly — looks like sitting at table
+
+   Diamond Ray  (seat-1): LEFT  side  — 9 o'clock
+   The Phantom  (seat-2): TOP-LEFT    — 10:30 o'clock
+   Crown Vic    (seat-3): TOP-CENTER  — 12 o'clock
+   Lady Noir    (seat-4): RIGHT side  — 3 o'clock
+   YOU (human)           : BOTTOM     — 6 o'clock (in human-strip)
+═══════════════════════════════════════════ */
+
+/* LEFT — Diamond Ray */
+.pp-seat-1 {
+  top: 50%;
+  left: calc(50% - min(37vw, 210px) - 56px);
+  transform: translateY(-50%);
+}
+/* TOP-LEFT — The Phantom */
+.pp-seat-2 {
+  top: calc(50% - min(23vw, 115px) - 70px);
+  left: calc(50% - min(30vw, 168px));
+}
+/* TOP-CENTER — Crown Vic */
+.pp-seat-3 {
+  top: calc(50% - min(23vw, 115px) - 70px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+/* RIGHT — Lady Noir */
+.pp-seat-4 {
+  top: 50%;
+  right: calc(50% - min(37vw, 210px) - 56px);
+  transform: translateY(-50%);
+}
 
 /* ── HUMAN STRIP ── */
 .pp-human-strip {
@@ -3929,18 +3956,20 @@ body { color: #e8e2d4 !important; }
 
 /* ── MOBILE OVERRIDES (≤ 600px) ── */
 @media (max-width: 600px) {
-  .pp-table-zone { min-height: 300px; padding: 12px 6px 6px; }
-  .pp-table {
-    width: 88vw !important; height: 44vw !important;
-  }
-  .pp-seat { min-width: 64px; padding: 5px 7px; border-radius: 10px; }
-  .pp-seat-1 { bottom: 12px; left: 6px; }
-  .pp-seat-2 { top: 10px; left: 6px; }
-  .pp-seat-3 { top: 4px; left: 50%; transform: translateX(-50%); }
-  .pp-seat-4 { top: 10px; right: 6px; }
+  .pp-table-zone { min-height: 340px; padding: 0; }
+  .pp-table { width: 72vw !important; height: 46vw !important; }
+  .pp-seat { min-width: 62px; padding: 5px 7px; border-radius: 10px; }
+  /* LEFT — Diamond Ray */
+  .pp-seat-1 { top: 50%; left: calc(50% - 36vw - 50px); transform: translateY(-50%); }
+  /* TOP-LEFT — The Phantom */
+  .pp-seat-2 { top: calc(50% - 23vw - 64px); left: calc(50% - 28vw); }
+  /* TOP-CENTER — Crown Vic */
+  .pp-seat-3 { top: calc(50% - 23vw - 64px); left: 50%; transform: translateX(-50%); }
+  /* RIGHT — Lady Noir */
+  .pp-seat-4 { top: 50%; right: calc(50% - 36vw - 50px); transform: translateY(-50%); }
   .pp-seat-emoji { font-size: 14px; }
-  .pp-seat-av { width: 30px; height: 30px; }
-  .pp-seat-name { font-size: 9px; max-width: 56px; }
+  .pp-seat-av { width: 28px; height: 28px; }
+  .pp-seat-name { font-size: 9px; max-width: 54px; }
   .pp-seat-chips { font-size: 8px; }
   .pp-btn { font-size: 11px; padding: 11px 4px; }
   .pp-btn-deal { font-size: 14px; padding: 13px; }
@@ -3953,15 +3982,17 @@ body { color: #e8e2d4 !important; }
   .pp-chat-panel { width: calc(100vw - 24px); right: 12px; bottom: 130px; }
   .pp-pot-val { font-size: 13px; }
   .pp-comm-row { gap: 3px; }
-  .pp-dealer-btn { top: calc(50% - 85px); right: calc(50% - 130px); }
+  .pp-dealer-btn { top: calc(50% - 23vw - 10px); right: calc(50% - 36vw - 10px); }
 }
 
 /* ── VERY SMALL (≤ 380px) ── */
 @media (max-width: 380px) {
-  .pp-table { width: 92vw !important; height: 48vw !important; }
-  .pp-table-zone { min-height: 260px; }
+  .pp-table { width: 70vw !important; height: 46vw !important; }
+  .pp-table-zone { min-height: 300px; }
   .pp-seat { min-width: 56px; padding: 4px 5px; }
-  .pp-seat-name { max-width: 48px; font-size: 8px; }
+  .pp-seat-1 { left: calc(50% - 35vw - 48px); }
+  .pp-seat-4 { right: calc(50% - 35vw - 48px); }
+  .pp-seat-name { max-width: 44px; font-size: 8px; }
   .pp-btn-row { gap: 4px; }
   .pp-btn { font-size: 10px; padding: 10px 2px; }
 }
