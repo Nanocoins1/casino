@@ -1182,10 +1182,10 @@ function onAllStopped(bet, totalWin, wins, grid) {
   }
 
   // win UI
-  if (totalWin >= bet * 50) {
+  if (totalWin >= bet * 100) {
     showWinOverlay(totalWin, wins, 'MEGA WIN');
     launchParticles(true);
-  } else if (totalWin >= bet * 10) {
+  } else if (totalWin >= bet * 30) {
     showWinOverlay(totalWin, wins, 'BIG WIN');
     launchParticles(false);
   } else if (totalWin > 0) {
@@ -1404,18 +1404,17 @@ function launchParticles(mega) {
   pCanvas.height = window.innerHeight;
   pCtx = pCanvas.getContext('2d');
   pParticles = [];
-  var count = mega ? 160 : 90;
-  var colors = ['#f0c060','#ffd700','#ff44cc','#00e5ff','#00ff88','#ff4466','#aa44ff','#ffe033','#ffffff'];
+  var count = mega ? 120 : 70;
+  // Premium gold-only palette — no birthday confetti colours
+  var colors = ['#ffd700','#f0c060','#ffe566','#fff4b0','#ffa500','#ffffff'];
   for (var i = 0; i < count; i++) {
     pParticles.push({
       x: Math.random() * pCanvas.width,
       y: -10 - Math.random() * 100,
-      vx: (Math.random() - 0.5) * 4,
-      vy: 2 + Math.random() * 5,
-      size: 4 + Math.random() * 8,
+      vx: (Math.random() - 0.5) * 3,
+      vy: 1.5 + Math.random() * 4,
+      r: 3 + Math.random() * 5,        // radius (circle = coin silhouette)
       color: colors[Math.floor(Math.random() * colors.length)],
-      rot: Math.random() * Math.PI * 2,
-      rotV: (Math.random() - 0.5) * 0.2,
       alpha: 1
     });
   }
@@ -1424,16 +1423,18 @@ function launchParticles(mega) {
     var alive = false;
     for (var i = 0; i < pParticles.length; i++) {
       var p = pParticles[i];
-      p.x += p.vx; p.y += p.vy; p.rot += p.rotV;
-      if (p.y > pCanvas.height) p.alpha -= 0.04;
+      p.x += p.vx; p.y += p.vy;
+      if (p.y > pCanvas.height) p.alpha -= 0.05;
       if (p.alpha > 0) {
         alive = true;
         pCtx.save();
         pCtx.globalAlpha = p.alpha;
         pCtx.fillStyle = p.color;
-        pCtx.translate(p.x, p.y);
-        pCtx.rotate(p.rot);
-        pCtx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+        pCtx.shadowColor = p.color;
+        pCtx.shadowBlur = 6;
+        pCtx.beginPath();
+        pCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        pCtx.fill();
         pCtx.restore();
       }
     }

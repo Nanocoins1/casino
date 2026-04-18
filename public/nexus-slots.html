@@ -1401,9 +1401,9 @@ function evaluateWin() {
 
   if (isJackpot()) {
     triggerJackpot(totalWin);
-  } else if (multiplier >= 15) {
+  } else if (multiplier >= 30) {
     triggerBigWin(totalWin);
-  } else if (multiplier >= 5) {
+  } else if (multiplier >= 10) {
     triggerMedWin(totalWin);
   } else if (totalWin > 0) {
     triggerSmallWin(totalWin);
@@ -1479,7 +1479,6 @@ function isJackpot() {
 function triggerSmallWin(amount) {
   gameState = STATE_WIN_ANIM;
   showWinDisplay('WIN!', amount, '#ffd700');
-  spawnCoins(20, W/2, H/2);
   flashScreen('flash-gold', 150);
   animCountUp(amount);
   setTimeout(function() {
@@ -1695,7 +1694,7 @@ function spawnCoinsRain(count) {
 }
 
 function spawnFirework(x, y) {
-  var colors = ['#ffd700','#00e5ff','#ffffff','#ff4444','#cc44ff','#ffa500'];
+  var colors = ['#ffd700','#f0c060','#ffe566','#ffa500','#ffffff','#fff4b0'];
   for (var i = 0; i < 30; i++) {
     var angle = (i / 30) * Math.PI * 2;
     var speed = Math.random() * 5 + 2;
