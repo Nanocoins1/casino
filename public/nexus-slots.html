@@ -225,13 +225,37 @@ body.shake-big{animation:shakeBig 0.7s ease;}
   transition:box-shadow 0.2s;
 }
 
-@media(max-width:480px){
-  #spinBtn{width:110px;height:50px;font-size:13px;}
+@media(max-width:600px){
+  #controls{padding:8px 10px 12px;}
+  .ctrl-row-top{gap:5px;margin-bottom:7px;}
+  .bet-adj{width:30px;height:36px;font-size:16px;}
+  .bet-display{font-size:13px;min-width:54px;height:36px;line-height:36px;}
   .quick-bet{padding:5px 8px;font-size:11px;}
-  .bet-display{font-size:14px;min-width:64px;}
-  #paytableBtn{left:8px;}
-  #winTitle{font-size:32px;}
-  #winAmount{font-size:26px;}
+  #spinBtn{width:110px;height:48px;font-size:13px;letter-spacing:2px;}
+  .auto-group{padding:5px 8px;}
+  #winTitle{font-size:36px;}
+  #winAmount{font-size:28px;}
+}
+@media(max-width:420px){
+  #controls{padding:7px 8px 12px;}
+  .ctrl-row-top{gap:4px;margin-bottom:6px;}
+  .bet-label{display:none;}
+  .bet-adj{width:28px;height:34px;font-size:15px;}
+  .bet-display{font-size:12px;min-width:46px;height:34px;line-height:34px;padding:0 6px;}
+  .quick-bet{padding:4px 6px;font-size:10px;}
+  #spinBtn{width:96px;height:44px;font-size:12px;letter-spacing:1px;}
+  .auto-group{padding:4px 7px;gap:5px;}
+  .auto-label{font-size:9px;}
+  #winTitle{font-size:30px;}
+  #winAmount{font-size:24px;}
+  #paytableBtn{left:6px;}
+  #toast{font-size:12px;padding:8px 14px;}
+}
+@media(max-width:360px){
+  #qb10,#qb25{display:none;}
+  .quick-bet{padding:4px 7px;font-size:10px;}
+  #spinBtn{width:88px;height:42px;font-size:11px;}
+  .bet-display{min-width:42px;font-size:12px;}
 }
 </style>
 </head>
@@ -284,8 +308,8 @@ body.shake-big{animation:shakeBig 0.7s ease;}
       <div class="bet-display" id="betDisplay">100</div>
       <button class="bet-adj" onclick="adjustBet(1)">+</button>
     </div>
-    <button class="quick-bet" onclick="setQuickBet(10)">10</button>
-    <button class="quick-bet" onclick="setQuickBet(25)">25</button>
+    <button class="quick-bet" id="qb10" onclick="setQuickBet(10)">10</button>
+    <button class="quick-bet" id="qb25" onclick="setQuickBet(25)">25</button>
     <button class="quick-bet" onclick="setQuickBet(100)">100</button>
     <button class="quick-bet" onclick="setQuickBet(500)">500</button>
     <button class="quick-bet qb-max" onclick="setQuickBet(50000)">MAX</button>
@@ -433,8 +457,9 @@ function resize() {
   canvas.width = W;
   canvas.height = H;
 
-  // Machine dimensions
-  var availH = H - 52 - 110; // header + controls
+  // Machine dimensions — measure controls height dynamically (mobile panels are taller)
+  var ctrlH = (document.getElementById('controls') || {offsetHeight:110}).offsetHeight || 110;
+  var availH = H - 52 - ctrlH; // header + actual controls height
   var maxMW = Math.min(W * 0.85, 480);
   var maxMH = Math.min(availH * 0.88, 400);
 
@@ -449,7 +474,7 @@ function resize() {
   MH = REEL_H + 100;
 
   MX = (W - MW) / 2;
-  MY = 52 + (H - 52 - 110 - MH) / 2;
+  MY = 52 + (H - 52 - ctrlH - MH) / 2;
 
   reelWindowH = REEL_H;
   reelY = MY + 70;
