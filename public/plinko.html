@@ -486,12 +486,15 @@ const BALL_R = 9;
 const PEG_SPACING_Y = BOARD_H / (ROWS + 1);
 
 // Multipliers calibrated for BINOMIAL bucket distribution (14 rows, 15 buckets).
-// Expected value ≈ 1.0 under binomial weights → after _plinkoRTP scaling → ~93% RTP.
-// Formula: E = Σ C(14,k)/2^14 * mult[k]  should ≈ 1.0
+// E_raw = Σ C(14,k)/2^14 * mult[k]
+// LOW   E_raw≈1.010 × 97% RTP  → ~98% actual RTP (low volatility)
+// MEDIUM E_raw≈0.981 × 93% RTP → ~91% actual RTP
+// HIGH   E_raw≈0.907 × 93% RTP → ~84% actual RTP (high house edge, high volatility)
+// MAX WIN capped at 500 000 tokens.
 const MULTIPLIERS = {
   low:    [130, 16, 5.5, 2.8, 1.5, 1.0, 0.65, 0.55, 0.65, 1.0, 1.5, 2.8, 5.5, 16, 130],
   medium: [480, 50, 14,  4.5, 1.5, 0.6, 0.30, 0.20, 0.30, 0.6, 1.5, 4.5, 14,  50, 480],
-  high:   [800, 100, 21, 4,  0.9, 0.3, 0.20, 0.20, 0.20, 0.3, 0.9, 4,  21,  100, 800]
+  high:   [500, 80, 20,  4,  0.9, 0.3, 0.20, 0.20, 0.20, 0.3, 0.9,  4,  20,  80, 500]
 };
 
 let riskMode = 'low';
@@ -983,16 +986,17 @@ function landBall(ball, bucketIdx) {
 
   const mult = MULTIPLIERS[riskMode][bucketIdx];
   const win = Math.min(Math.round(ball.bet * mult * (_plinkoRTP / 100)), 500000);
-  const profit = win - ball.bet;
-  balance += profit;
+  // bet was already deducted on drop → add back win only (not profit, avoids double-deduction)
+  balance += win;
   updateBalance();
   saveTokens();
   sfx.land();
+  const profit = win - ball.bet;
   if(mult >= 2){ sfx.bigWin(mult); if(navigator.vibrate) navigator.vibrate([40,20,100]); }
   else if(profit < 0){ sfx.lose(); if(navigator.vibrate) navigator.vibrate(25); }
 
   const textColor = profit >= 0 ? '#00ff88' : '#ff3366';
-  const textStr = profit >= 0 ? `+${win} 🪙` : `-${ball.bet} 🪙`;
+  const textStr = profit >= 0 ? `+${profit} 🪙` : `${profit} 🪙`;
   spawnFloatingText(bx, by - 30, textStr, textColor);
 
   // Log game
@@ -1017,7 +1021,7 @@ function landBall(ball, bucketIdx) {
 
   // Toast
   if (mult >= 5) {
-    showToast(`🎉 ${mult}x – Laimėjai ${win} žetonų!`, profit >= 0 ? '#00ff88' : '#ff3366');
+    showToast(`🎉 ${mult}x – ${profit >= 0 ? '+' + profit : profit} žetonų!`, profit >= 0 ? '#00ff88' : '#ff3366');
   }
 
   updateQueueInfo();

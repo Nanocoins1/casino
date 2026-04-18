@@ -382,7 +382,10 @@ var canCashOut = false;
 var tokens = 10000;
 var stats = {wins:0, losses:0, best:1};
 
-var MULT_PER_FLOOR = {easy:1.35, medium:2.5, hard:2.5};
+// Easy:   1 dragon/3 eggs, P=2/3, mult=1.35 → P×mult=0.90 (10% house edge per floor)
+// Medium: 2 dragons/3 eggs, P=1/3, mult=2.5  → P×mult=0.833 (17% house edge per floor, max jackpot)
+// Hard:   2 dragons/3 eggs, P=1/3, mult=2.1  → P×mult=0.700 (30% house edge per floor, very volatile)
+var MULT_PER_FLOOR = {easy:1.35, medium:2.5, hard:2.1};
 var DRAGONS_PER_FLOOR = {easy:1, medium:2, hard:2};
 
 // ── Init ────────────────────────────────────────────
