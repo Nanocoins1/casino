@@ -11163,36 +11163,74 @@ function GlobalChat({user}) {
 // ═══════════════════════════════════════════════════
 function SocialWins({t={}}) {
   const [wins, setWins] = React.useState([]);
-  const FAKE_NAMES = ['Raimis','Markas','Sasha','Klaus','Pedro','Viktor','Laima','Anna','Dmitri','Hans'];
-  const FAKE_GAMES = ['🎰 Slots','🎡 Roulette','♠ Poker','🃏 Blackjack','⚽ Sports'];
+  const FAKE_NAMES = ['CryptoKing','VikingX','NightRider','GoldPanda','RoyalFlush','AceHunter','SkyWalker','DiamondX'];
+  const FAKE_GAMES = ['🎰 Slots','♠ Casino Hold\'em','🐉 Dragon Tower','🎲 Plinko','🎡 Roulette'];
+
+  // Gold coin shower — premium, no birthday confetti
+  const spawnGoldShower = () => {
+    const c = document.createElement('canvas');
+    c.style.cssText='position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:450;';
+    c.width=window.innerWidth; c.height=window.innerHeight;
+    document.body.appendChild(c);
+    const ctx=c.getContext('2d');
+    const cols=['#ffd700','#f0c060','#ffa500','#ffe566','#fff4b0','#ffffff'];
+    const coins=Array.from({length:80},()=>({
+      x:Math.random()*c.width, y:-15-Math.random()*120,
+      vx:(Math.random()-0.5)*2.5, vy:1.8+Math.random()*4,
+      r:3+Math.random()*6, color:cols[Math.floor(Math.random()*cols.length)],
+      sq:Math.random(), sqV:0.025+Math.random()*0.04
+    }));
+    const t0=Date.now();
+    function draw(){
+      ctx.clearRect(0,0,c.width,c.height);
+      const age=Date.now()-t0;
+      const fade=age>2200?Math.max(0,1-(age-2200)/900):1;
+      if(fade<=0){c.remove();return;}
+      for(const p of coins){
+        p.x+=p.vx; p.y+=p.vy; p.sq=(p.sq+p.sqV)%1;
+        if(p.y>c.height+20)continue;
+        const cw=Math.max(0.5,p.r*Math.abs(Math.cos(p.sq*Math.PI)));
+        ctx.save();
+        ctx.globalAlpha=fade;
+        ctx.fillStyle=p.color;
+        ctx.shadowColor=p.color; ctx.shadowBlur=7;
+        ctx.beginPath();
+        ctx.ellipse(p.x,p.y,cw,p.r,0,0,Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+      }
+      requestAnimationFrame(draw);
+    }
+    draw();
+  };
 
   React.useEffect(()=>{
-    // Listen for real wins
-    socket.on('bigWin', ({name, amount, game}) => {
-      const id = Date.now();
-      setWins(w=>[...w, {id, name, amount, game}]);
-      setTimeout(()=>setWins(w=>w.filter(x=>x.id!==id)), 4000);
+    socket.on('bigWin',({name,amount,game})=>{
+      const id=Date.now();
+      setWins(w=>[...w,{id,name,amount,game}]);
+      if(amount>=50000) spawnGoldShower();
+      setTimeout(()=>setWins(w=>w.filter(x=>x.id!==id)),5000);
     });
-    // Simulate social activity every 15-45 seconds
-    const sim = () => {
-      const name = FAKE_NAMES[Math.floor(Math.random()*FAKE_NAMES.length)];
-      const amount = (Math.floor(Math.random()*50)+5)*1000;
-      const game = FAKE_GAMES[Math.floor(Math.random()*FAKE_GAMES.length)];
-      const id = Date.now();
-      setWins(w=>[...w, {id, name, amount, game}]);
-      setTimeout(()=>setWins(w=>w.filter(x=>x.id!==id)), 4000);
+    // Big wins only, every ~5 minutes
+    const sim=()=>{
+      const name=FAKE_NAMES[Math.floor(Math.random()*FAKE_NAMES.length)];
+      const amount=(Math.floor(Math.random()*450)+50)*1000; // 50k – 500k
+      const game=FAKE_GAMES[Math.floor(Math.random()*FAKE_GAMES.length)];
+      const id=Date.now();
+      setWins(w=>[...w,{id,name,amount,game}]);
+      spawnGoldShower();
+      setTimeout(()=>setWins(w=>w.filter(x=>x.id!==id)),5000);
     };
-    const t = setInterval(sim, 15000+Math.random()*30000);
-    // First one after 8 seconds
-    const first = setTimeout(sim, 8000);
-    return()=>{ socket.off('bigWin'); clearInterval(t); clearTimeout(first); };
+    const iv=setInterval(sim, 270000+Math.random()*60000); // 4.5 – 5.5 min
+    const first=setTimeout(sim, 90000); // first after 1.5 min
+    return()=>{ socket.off('bigWin'); clearInterval(iv); clearTimeout(first); };
   },[]);
 
   return(
     <div style={{position:'fixed',bottom:90,left:24,zIndex:400,display:'flex',flexDirection:'column',gap:8}}>
       {wins.slice(-2).map(w=>(
         <div className="social-win" key={w.id}>
-          <div className="sw-name">🎉 {w.name}</div>
+          <div className="sw-name">🏆 {w.name}</div>
           <div className="sw-msg">{w.game} {t.won||'won'}</div>
           <div className="sw-amount">+{w.amount.toLocaleString()} 🪙</div>
         </div>
