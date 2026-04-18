@@ -7042,7 +7042,7 @@ function GrandFortune({user,setUser,t=LANGS.en}){
             setWinType(wt);setShowWin(true);
             winTimerRef.current=setTimeout(()=>setShowWin(false),wt==='jackpot'?5500:3200);
             if(wt==='jackpot'){sfx.jackpot();setJpFill(16);}else sfx.win();
-            if(wt!=='small') fireParticles(wt); // no particles on ordinary wins
+            fireParticles(wt);
             socket.emit('addXP',{xp:Math.min(100,totalMult)});
             socket.emit('saveTokens',{tokens:user.tokens-betSnap+won});
           }else{
@@ -13999,6 +13999,7 @@ function App(){
 
       <JackpotTicker/>
       <AICroupier user={user} currentPage={page} t={t} open={viktorOpen} onClose={()=>setViktorOpen(false)}/>
+      <SocialWins t={t}/>
       <GlobalChat user={user}/>
       {user&&<SupportChat user={user} t={t} open={supportOpen} onClose={()=>setSupportOpen(false)}/>}
       {user&&<MissionsPanel user={user} missions={missions}/>}
