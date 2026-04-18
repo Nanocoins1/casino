@@ -3637,6 +3637,13 @@ body { color: #e8e2d4 !important; }
 
 .pp-seat-top { display: flex; align-items: center; gap: 5px; }
 .pp-seat-emoji { font-size: 18px; line-height: 1; }
+.pp-seat-av {
+  width: 30px; height: 30px; border-radius: 50%;
+  object-fit: cover; object-position: center top;
+  border: 1px solid rgba(255,255,255,0.15);
+  box-shadow: 0 0 8px rgba(0,0,0,0.6);
+  flex-shrink: 0;
+}
 .pp-seat-info { display: flex; flex-direction: column; gap: 1px; }
 .pp-seat-name { font-size: 10px; font-weight: 700; max-width: 68px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pp-seat-chips { font-size: 9px; color: rgba(201,168,76,0.65); }
@@ -3918,6 +3925,7 @@ body { color: #e8e2d4 !important; }
   .pp-seat-3 { top: 4px; left: 50%; transform: translateX(-50%); }
   .pp-seat-4 { top: 10px; right: 6px; }
   .pp-seat-emoji { font-size: 14px; }
+  .pp-seat-av { width: 24px; height: 24px; }
   .pp-seat-name { font-size: 9px; max-width: 56px; }
   .pp-seat-chips { font-size: 8px; }
   .pp-btn { font-size: 11px; padding: 11px 4px; }
@@ -7348,10 +7356,10 @@ function ppBestHand(hole,comm){
 
 // ── AI bots ───────────────────────────────────────────
 const PP_BOTS=[
-  {id:'diamond_ray',name:'Diamond Ray',emoji:'💎',pers:'aggressive',color:'#00e5ff'},
-  {id:'the_phantom',name:'The Phantom',emoji:'🎭',pers:'balanced',  color:'#aa44ff'},
-  {id:'crown_vic',  name:'Crown Vic',  emoji:'👑',pers:'passive',   color:'#f0c060'},
-  {id:'lady_noir',  name:'Lady Noir',  emoji:'🖤',pers:'balanced',  color:'#ff66bb'}
+  {id:'diamond_ray',name:'Diamond Ray',emoji:'💎',av:'/img/av-diamond-ray.png',pers:'aggressive',color:'#00e5ff'},
+  {id:'the_phantom',name:'The Phantom',emoji:'🎭',av:'/img/av-the-phantom.png',pers:'balanced',  color:'#aa44ff'},
+  {id:'crown_vic',  name:'Crown Vic',  emoji:'👑',av:'/img/av-crown-vic.png',  pers:'passive',   color:'#f0c060'},
+  {id:'lady_noir',  name:'Lady Noir',  emoji:'🖤',av:'/img/av-lady-noir.png',  pers:'balanced',  color:'#ff66bb'}
 ];
 
 const PP_BOT_CHAT={
@@ -7932,7 +7940,12 @@ function PremiumPoker({user,setUser,t}){
               {isActNow&&<div className="pp-pulse-ring"/>}
               {isWinner&&<span className="pp-seat-crown">{String.fromCodePoint(0x1F451)}</span>}
               <div className="pp-seat-top">
-                <span className="pp-seat-emoji">{bot.emoji}</span>
+                {bot.av
+                  ? <img src={bot.av} className="pp-seat-av" alt={bot.name}
+                      onError={e=>{e.target.style.display='none';e.target.nextSibling.style.display='inline';}}
+                    /><span className="pp-seat-emoji" style={{display:'none'}}>{bot.emoji}</span>
+                  : <span className="pp-seat-emoji">{bot.emoji}</span>
+                }
                 <div className="pp-seat-info">
                   <span className="pp-seat-name" style={{color:bot.color}}>{bot.name}</span>
                   <span className="pp-seat-chips">{fmt(bot.chips)}</span>
