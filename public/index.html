@@ -3485,9 +3485,9 @@ body { color: #e8e2d4 !important; }
   min-height: calc(100svh - 62px);
   background:
     linear-gradient(180deg, rgba(2,3,6,0.82) 0%, rgba(2,3,6,0.70) 40%, rgba(2,3,6,0.88) 100%),
-    url('/img/pp-room-bg.jpg') center center / cover no-repeat;
+    url('/img/pp-room-bg.jpg?v=3') center center / cover no-repeat;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   user-select: none;
   -webkit-user-select: none;
 }
@@ -3565,7 +3565,7 @@ body { color: #e8e2d4 !important; }
   border-radius: 50%;
   background:
     radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.55) 100%),
-    url('/img/pp-felt.jpg') center center / cover no-repeat;
+    url('/img/pp-felt.jpg?v=3') center center / cover no-repeat;
   border: 3px solid rgba(201,168,76,0.75);
   box-shadow:
     0 0 0 1px rgba(201,168,76,0.1),
@@ -3582,6 +3582,7 @@ body { color: #e8e2d4 !important; }
   justify-content: center;
   gap: 7px;
   z-index: 5;
+  overflow: visible;
   transition: box-shadow 0.4s;
 }
 /* Felt inner ring */
