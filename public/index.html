@@ -3555,7 +3555,7 @@ body { color: #e8e2d4 !important; }
   align-items: center;
   justify-content: center;
   min-height: 380px;
-  padding: 0;
+  padding: 0 0 80px 0; /* bottom space for player cards below table */
 }
 
 /* ── THE OVAL TABLE ── */
@@ -3718,6 +3718,34 @@ body { color: #e8e2d4 !important; }
   transform: translateY(-50%);
 }
 
+/* ── PLAYER CARDS ON TABLE ── */
+.pp-on-table-player {
+  position: absolute;
+  bottom: -68px;
+  left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  z-index: 20;
+  pointer-events: none;
+}
+.pp-on-table-label {
+  font-size: 9px; font-weight: 700; color: rgba(201,168,76,0.8);
+  letter-spacing: 1.5px; text-transform: uppercase;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  white-space: nowrap;
+}
+.pp-on-table-bet { color: #f0c060; }
+.pp-on-table-cards {
+  display: flex; gap: 8px;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.7)) drop-shadow(0 0 8px rgba(201,168,76,0.25));
+}
+.pp-on-table-hand {
+  font-size: 9px; color: #f0c060; font-weight: 700;
+  letter-spacing: 1px; text-shadow: 0 0 8px rgba(240,192,96,0.5);
+}
+.pp-on-table-folded {
+  font-size: 9px; color: rgba(255,100,100,0.7); letter-spacing: 2px;
+}
+
 /* ── HUMAN STRIP ── */
 .pp-human-strip {
   display: flex; align-items: center;
@@ -3767,27 +3795,87 @@ body { color: #e8e2d4 !important; }
 }
 .pp-btn-row { display: flex; gap: 7px; }
 .pp-btn {
-  flex: 1; padding: 13px 6px; border: none; border-radius: 10px;
+  flex: 1; padding: 13px 6px;
+  border: none; border-radius: 10px;
   font-weight: 700; font-size: 12px; letter-spacing: 0.3px;
   cursor: pointer; font-family: 'Space Grotesk',sans-serif;
-  transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
   line-height: 1.2; text-align: center;
+  position: relative;
+  /* 3D effect */
+  transform: translateY(0px);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.08s ease;
 }
-.pp-btn:active { transform: scale(0.93); opacity: 0.82; }
+.pp-btn:active {
+  transform: translateY(3px) !important;
+  filter: brightness(0.88);
+}
+.pp-btn:hover { filter: brightness(1.12); }
+
+/* DEAL — gold 3D */
 .pp-btn-deal {
-  background: linear-gradient(135deg, #d4a840 0%, #b08030 50%, #c9a84c 100%);
-  color: #0a0704; font-size: 15px; padding: 15px;
+  background: linear-gradient(180deg, #f0d060 0%, #c9a030 40%, #a07820 100%);
+  color: #2a1800; font-size: 15px; padding: 15px;
   font-family: 'Cinzel',serif; letter-spacing: 2.5px; font-weight: 900;
-  box-shadow: 0 4px 28px rgba(201,168,76,0.45), 0 0 0 1px rgba(255,215,0,0.2);
-  border: 1px solid rgba(255,215,0,0.35);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  border-top: 1px solid rgba(255,240,120,0.6);
+  border-bottom: 4px solid #7a5810;
+  box-shadow: 0 6px 24px rgba(201,168,76,0.5), 0 2px 0 rgba(255,220,80,0.3);
+  text-shadow: 0 1px 0 rgba(255,255,255,0.3);
 }
-.pp-btn-deal:hover { box-shadow: 0 6px 36px rgba(201,168,76,0.6), 0 0 0 1px rgba(255,215,0,0.3); }
-.pp-btn-fold  { background: linear-gradient(135deg, #b03044, #8a1f30); color: #fff; box-shadow: 0 3px 14px rgba(176,48,68,0.35); }
-.pp-btn-check { background: linear-gradient(135deg, #27784a, #1a5534); color: #fff; box-shadow: 0 3px 14px rgba(39,120,74,0.35); }
-.pp-btn-call  { background: linear-gradient(135deg, #1258aa, #0c3d7a); color: #fff; box-shadow: 0 3px 14px rgba(18,88,170,0.35); }
-.pp-btn-raise { background: linear-gradient(135deg, #b84800, #8a3400); color: #fff; box-shadow: 0 3px 14px rgba(184,72,0,0.35); }
-.pp-btn-allin { background: linear-gradient(135deg, #6a1b9a, #4a0f72); color: #fff; box-shadow: 0 3px 14px rgba(106,27,154,0.4); border: 1px solid rgba(180,80,255,0.2); }
+.pp-btn-deal:active { border-bottom-width: 1px; }
+
+/* FOLD — red 3D */
+.pp-btn-fold {
+  background: linear-gradient(180deg, #d94058 0%, #9e2035 100%);
+  color: #fff;
+  border-top: 1px solid rgba(255,120,140,0.4);
+  border-bottom: 4px solid #5c1020;
+  box-shadow: 0 4px 16px rgba(176,48,68,0.4);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+.pp-btn-fold:active { border-bottom-width: 1px; }
+
+/* CHECK — green 3D */
+.pp-btn-check {
+  background: linear-gradient(180deg, #30a060 0%, #1a6a3a 100%);
+  color: #fff;
+  border-top: 1px solid rgba(80,220,120,0.35);
+  border-bottom: 4px solid #0e3d20;
+  box-shadow: 0 4px 16px rgba(39,120,74,0.4);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+.pp-btn-check:active { border-bottom-width: 1px; }
+
+/* CALL — blue 3D */
+.pp-btn-call {
+  background: linear-gradient(180deg, #1e72cc 0%, #0c4490 100%);
+  color: #fff;
+  border-top: 1px solid rgba(80,160,255,0.35);
+  border-bottom: 4px solid #062855;
+  box-shadow: 0 4px 16px rgba(18,88,170,0.4);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+.pp-btn-call:active { border-bottom-width: 1px; }
+
+/* RAISE — orange 3D */
+.pp-btn-raise {
+  background: linear-gradient(180deg, #d46000 0%, #8a3800 100%);
+  color: #fff;
+  border-top: 1px solid rgba(255,160,60,0.35);
+  border-bottom: 4px solid #4e2000;
+  box-shadow: 0 4px 16px rgba(184,72,0,0.4);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+.pp-btn-raise:active { border-bottom-width: 1px; }
+
+/* ALL IN — purple 3D */
+.pp-btn-allin {
+  background: linear-gradient(180deg, #8030c0 0%, #4e1080 100%);
+  color: #fff;
+  border-top: 1px solid rgba(180,80,255,0.35);
+  border-bottom: 4px solid #2c0850;
+  box-shadow: 0 4px 16px rgba(106,27,154,0.45);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
 
 .pp-raise-row {
   display: flex; align-items: center; gap: 9px; padding: 0 2px;
@@ -3956,7 +4044,9 @@ body { color: #e8e2d4 !important; }
 
 /* ── MOBILE OVERRIDES (≤ 600px) ── */
 @media (max-width: 600px) {
-  .pp-table-zone { min-height: 340px; padding: 0; }
+  .pp-table-zone { min-height: 340px; padding: 0 0 72px 0; }
+  .pp-on-table-player { bottom: -62px; }
+  .pp-on-table-cards { gap: 6px; }
   .pp-table { width: 72vw !important; height: 46vw !important; }
   .pp-seat { min-width: 62px; padding: 5px 7px; border-radius: 10px; }
   /* LEFT — Diamond Ray */
@@ -8019,26 +8109,36 @@ function PremiumPoker({user,setUser,t,setPage}){
           {!gs.msg&&gs.phase==='idle'&&(
             <div className="pp-table-idle">♛ VIP TABLE — Press DEAL</div>
           )}
+          {/* PLAYER CARDS ON TABLE — bottom edge */}
+          {gs.phase!=='idle'&&(
+            <div className="pp-on-table-player">
+              <div className="pp-on-table-label">
+                {gs.winners.includes('human')?'👑':isMyTurn?'▶':''} {human?human.name:'YOU'}
+                {human&&human.bet>0&&<span className="pp-on-table-bet"> · BET {fmt(human.bet)}</span>}
+              </div>
+              <div className="pp-on-table-cards">
+                <PPCard card={human&&human.hole[0]||null} hidden={false}/>
+                <PPCard card={human&&human.hole[1]||null} hidden={false}/>
+              </div>
+              {myHand&&<div className="pp-on-table-hand">{myHand.name}</div>}
+              {human&&human.folded&&<div className="pp-on-table-folded">FOLDED</div>}
+            </div>
+          )}
         </div>
 
       </div>
 
-      {/* HUMAN STRIP */}
+      {/* HUMAN STRIP — compact info only, cards moved to table */}
       <div className={'pp-human-strip'+(isMyTurn?' pp-human-active':'')}>
-        <div className="pp-human-left">
-          <div className={'pp-human-avatar'+(isMyTurn?' pp-human-glow':'')}>
-            {gs.winners.includes('human')?String.fromCodePoint(0x1F451):String.fromCodePoint(0x1F464)}
-          </div>
-          <div className="pp-human-meta">
-            <span className="pp-human-name">{human?human.name:'You'}</span>
-            <span className="pp-human-chips">{String.fromCodePoint(0x1F4B0)} {human?fmt(human.chips):0}</span>
-          </div>
-          {human&&human.bet>0&&<div className="pp-human-bet">BET {fmt(human.bet)}</div>}
+        <div className={'pp-human-avatar'+(isMyTurn?' pp-human-glow':'')}>
+          {gs.winners.includes('human')?String.fromCodePoint(0x1F451):String.fromCodePoint(0x1F464)}
         </div>
-        <div className="pp-human-cards">
-          <PPCard card={human&&human.hole[0]||null} hidden={false}/>
-          <PPCard card={human&&human.hole[1]||null} hidden={false}/>
+        <div className="pp-human-meta" style={{flex:1}}>
+          <span className="pp-human-name">{human?human.name:'You'}</span>
+          <span className="pp-human-chips">{String.fromCodePoint(0x1F4B0)} {human?fmt(human.chips):0}</span>
         </div>
+        {human&&human.bet>0&&<div className="pp-human-bet">BET {fmt(human.bet)}</div>}
+        {myHand&&gs.phase!=='idle'&&<div className="pp-hand-pill" style={{minWidth:'unset'}}>{myHand.name}</div>}
       </div>
 
       {/* ACTION BAR */}

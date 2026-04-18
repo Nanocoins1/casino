@@ -381,10 +381,12 @@ body::before {
 }
 .win-kind.mega {
   font-size: 16px; letter-spacing: 4px;
-  animation: rainbow 1s linear infinite;
+  animation: goldShimmer 1.4s ease-in-out infinite alternate;
 }
-@keyframes rainbow {
-  0%{color:#ff4466}16%{color:#ff8820}33%{color:#ffe033}50%{color:#00ff88}66%{color:#00e5ff}83%{color:#aa44ff}100%{color:#ff4466}
+@keyframes goldShimmer {
+  0%  { color: #ffd700; text-shadow: 0 0 18px rgba(255,215,0,0.9), 0 0 40px rgba(255,180,0,0.5); }
+  50% { color: #fff4b0; text-shadow: 0 0 28px rgba(255,244,176,1),  0 0 60px rgba(255,215,0,0.7); }
+  100%{ color: #f0a800; text-shadow: 0 0 18px rgba(240,168,0,0.9),  0 0 40px rgba(255,140,0,0.5); }
 }
 .win-amount {
   font-family: 'Orbitron', monospace; font-weight: 900;
