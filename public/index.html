@@ -3475,16 +3475,28 @@ body { color: #e8e2d4 !important; }
 ═══════════════════════════════════════════════════ */
 
 /* Arena wrapper */
+/* ═══════════════════════════════════════════════════
+   PREMIUM POKER — ULTRA VIP REDESIGN
+═══════════════════════════════════════════════════ */
 .pp-arena {
   display: flex;
   flex-direction: column;
   width: 100%;
   min-height: calc(100svh - 62px);
-  background: radial-gradient(ellipse at 50% 15%, #101828 0%, #070b14 60%, #030508 100%);
+  background:
+    radial-gradient(ellipse 100% 70% at 50% 40%, rgba(4,18,8,0.95) 0%, transparent 65%),
+    radial-gradient(ellipse 140% 100% at 50% 100%, #020608 0%, #020406 100%);
   position: relative;
   overflow: hidden;
   user-select: none;
   -webkit-user-select: none;
+}
+.pp-arena::before {
+  content: '';
+  position: absolute; top: 28%; left: 50%; transform: translate(-50%,-50%);
+  width: 600px; height: 340px;
+  background: radial-gradient(ellipse, rgba(0,90,30,0.10) 0%, transparent 68%);
+  pointer-events: none; z-index: 0;
 }
 
 /* ── TOP BAR ── */
@@ -3492,30 +3504,34 @@ body { color: #e8e2d4 !important; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 9px 16px;
-  background: rgba(0,0,0,0.5);
-  border-bottom: 1px solid rgba(201,168,76,0.18);
+  padding: 10px 18px;
+  background: linear-gradient(180deg, rgba(4,4,12,0.96) 0%, rgba(2,2,8,0.92) 100%);
+  border-bottom: 1px solid rgba(201,168,76,0.22);
+  box-shadow: 0 1px 0 rgba(201,168,76,0.06), 0 4px 20px rgba(0,0,0,0.4);
   flex-shrink: 0;
   gap: 8px;
 }
 .pp-phase-pill {
-  font-size: 10px; letter-spacing: 2px; color: rgba(201,168,76,0.55);
+  font-size: 10px; letter-spacing: 2.5px; color: rgba(201,168,76,0.6);
   text-transform: uppercase; font-family: 'Cinzel',serif;
-  background: rgba(201,168,76,0.07); border: 1px solid rgba(201,168,76,0.18);
-  padding: 3px 10px; border-radius: 20px; white-space: nowrap;
+  background: rgba(201,168,76,0.06); border: 1px solid rgba(201,168,76,0.2);
+  padding: 4px 12px; border-radius: 20px; white-space: nowrap;
+  box-shadow: inset 0 0 8px rgba(201,168,76,0.04);
 }
 .pp-pot-chip {
   display: flex; align-items: center; gap: 6px;
-  background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.3);
-  padding: 5px 14px; border-radius: 20px;
-  box-shadow: 0 0 12px rgba(201,168,76,0.12);
+  background: linear-gradient(135deg, rgba(201,168,76,0.14), rgba(201,168,76,0.07));
+  border: 1px solid rgba(201,168,76,0.38);
+  padding: 6px 16px; border-radius: 22px;
+  box-shadow: 0 0 16px rgba(201,168,76,0.16), inset 0 1px 0 rgba(255,255,255,0.05);
 }
 .pp-pot-label { font-size: 9px; letter-spacing: 2px; color: rgba(201,168,76,0.5); font-weight: 700; }
-.pp-pot-val { font-size: 15px; font-weight: 900; color: #f0c060; font-family: 'Cinzel',serif; }
+.pp-pot-val { font-size: 16px; font-weight: 900; color: #f0c060; font-family: 'Cinzel',serif; text-shadow: 0 0 12px rgba(240,192,96,0.4); }
 .pp-hand-pill {
   font-size: 11px; font-weight: 700; color: #c9a84c;
   min-width: 80px; text-align: right; white-space: nowrap;
   overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 0 8px rgba(201,168,76,0.3);
 }
 
 /* ── TABLE ZONE ── */
@@ -3535,15 +3551,17 @@ body { color: #e8e2d4 !important; }
   height: min(210px, 44vw);
   border-radius: 50%;
   background:
-    radial-gradient(ellipse at 38% 38%, #20724a 0%, #124d30 35%, #0a2f1c 65%, #041509 100%);
-  border: 3px solid rgba(201,168,76,0.55);
+    radial-gradient(ellipse at 35% 35%, #26814f 0%, #155e36 28%, #0d3c22 55%, #061a0e 85%, #030d07 100%);
+  border: 3px solid rgba(201,168,76,0.7);
   box-shadow:
-    0 0 0 5px rgba(5,5,12,0.9),
-    0 0 0 6px rgba(201,168,76,0.15),
-    0 0 40px rgba(201,168,76,0.18),
-    0 0 80px rgba(0,0,0,0.9),
-    inset 0 0 60px rgba(0,0,0,0.45),
-    inset 0 2px 0 rgba(255,255,255,0.04);
+    0 0 0 1px rgba(201,168,76,0.08),
+    0 0 0 6px rgba(5,5,12,0.95),
+    0 0 0 8px rgba(201,168,76,0.12),
+    0 0 50px rgba(201,168,76,0.22),
+    0 0 100px rgba(0,0,0,0.95),
+    inset 0 0 70px rgba(0,0,0,0.5),
+    inset 0 3px 0 rgba(255,255,255,0.05),
+    inset 0 -2px 0 rgba(0,0,0,0.4);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -3581,8 +3599,8 @@ body { color: #e8e2d4 !important; }
   to   { transform: scale(1);   opacity: 1; }
 }
 .pp-table-idle {
-  font-size: 11px; color: rgba(201,168,76,0.3); letter-spacing: 1px;
-  font-family: 'Cinzel',serif;
+  font-size: 11px; color: rgba(201,168,76,0.38); letter-spacing: 2px;
+  font-family: 'Cinzel',serif; text-shadow: 0 0 10px rgba(201,168,76,0.15);
 }
 
 /* Dealer button */
@@ -3602,19 +3620,20 @@ body { color: #e8e2d4 !important; }
 .pp-seat {
   position: absolute;
   display: flex; flex-direction: column; align-items: center;
-  gap: 3px; padding: 7px 9px; border-radius: 12px;
-  background: rgba(6,8,18,0.82);
-  border: 1px solid rgba(255,255,255,0.09);
-  backdrop-filter: blur(10px);
+  gap: 3px; padding: 8px 10px; border-radius: 13px;
+  background: linear-gradient(160deg, rgba(8,10,24,0.93) 0%, rgba(4,5,14,0.88) 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04);
   transition: border-color 0.3s, background 0.3s, box-shadow 0.3s, opacity 0.3s;
   min-width: 74px; z-index: 10;
 }
 .pp-seat-active {
-  border-color: rgba(201,168,76,0.65) !important;
-  background: rgba(201,168,76,0.1) !important;
-  box-shadow: 0 0 18px rgba(201,168,76,0.28) !important;
+  border-color: rgba(201,168,76,0.7) !important;
+  background: linear-gradient(160deg, rgba(201,168,76,0.13), rgba(201,168,76,0.06)) !important;
+  box-shadow: 0 0 24px rgba(201,168,76,0.32), 0 4px 20px rgba(0,0,0,0.6) !important;
 }
-.pp-seat-folded { opacity: 0.32; }
+.pp-seat-folded { opacity: 0.28; }
 
 .pp-seat-top { display: flex; align-items: center; gap: 5px; }
 .pp-seat-emoji { font-size: 18px; line-height: 1; }
@@ -3654,27 +3673,30 @@ body { color: #e8e2d4 !important; }
 /* ── HUMAN STRIP ── */
 .pp-human-strip {
   display: flex; align-items: center;
-  padding: 10px 16px; gap: 12px;
-  background: rgba(6,6,14,0.92);
-  border-top: 1px solid rgba(201,168,76,0.13);
+  padding: 11px 18px; gap: 12px;
+  background: linear-gradient(180deg, rgba(5,5,14,0.96) 0%, rgba(3,3,10,0.98) 100%);
+  border-top: 1px solid rgba(201,168,76,0.15);
+  box-shadow: 0 -2px 20px rgba(0,0,0,0.5);
   transition: border-color 0.3s, background 0.3s;
   flex-shrink: 0;
 }
 .pp-human-active {
-  border-top-color: rgba(201,168,76,0.45) !important;
-  background: rgba(201,168,76,0.06) !important;
+  border-top-color: rgba(201,168,76,0.5) !important;
+  background: linear-gradient(180deg, rgba(201,168,76,0.07), rgba(201,168,76,0.03)) !important;
 }
 .pp-human-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
 .pp-human-avatar {
-  width: 40px; height: 40px; border-radius: 50%;
-  background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.25);
+  width: 42px; height: 42px; border-radius: 50%;
+  background: linear-gradient(135deg, rgba(201,168,76,0.18), rgba(201,168,76,0.06));
+  border: 1px solid rgba(201,168,76,0.3);
   display: flex; align-items: center; justify-content: center;
-  font-size: 20px; flex-shrink: 0;
+  font-size: 21px; flex-shrink: 0;
   transition: box-shadow 0.3s;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4);
 }
 .pp-human-glow {
-  box-shadow: 0 0 16px rgba(201,168,76,0.5), 0 0 32px rgba(201,168,76,0.2) !important;
-  border-color: rgba(201,168,76,0.6) !important;
+  box-shadow: 0 0 20px rgba(201,168,76,0.55), 0 0 40px rgba(201,168,76,0.22) !important;
+  border-color: rgba(201,168,76,0.7) !important;
 }
 .pp-human-meta { display: flex; flex-direction: column; gap: 2px; }
 .pp-human-name { font-size: 12px; font-weight: 700; color: #c9a84c; }
@@ -3689,60 +3711,83 @@ body { color: #e8e2d4 !important; }
 /* ── ACTION BAR ── */
 .pp-action-bar {
   display: flex; flex-direction: column; gap: 8px;
-  padding: 10px 14px 14px;
-  background: rgba(3,3,8,0.97);
-  border-top: 1px solid rgba(201,168,76,0.1);
+  padding: 11px 14px 16px;
+  background: linear-gradient(180deg, rgba(3,3,10,0.98) 0%, rgba(2,2,7,1) 100%);
+  border-top: 1px solid rgba(201,168,76,0.12);
+  box-shadow: 0 -4px 30px rgba(0,0,0,0.7);
   flex-shrink: 0;
 }
 .pp-btn-row { display: flex; gap: 7px; }
 .pp-btn {
-  flex: 1; padding: 13px 6px; border: none; border-radius: 9px;
+  flex: 1; padding: 13px 6px; border: none; border-radius: 10px;
   font-weight: 700; font-size: 12px; letter-spacing: 0.3px;
   cursor: pointer; font-family: 'Space Grotesk',sans-serif;
-  transition: opacity 0.15s, transform 0.1s;
+  transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
   line-height: 1.2; text-align: center;
 }
-.pp-btn:active { transform: scale(0.94); opacity: 0.85; }
+.pp-btn:active { transform: scale(0.93); opacity: 0.82; }
 .pp-btn-deal {
-  background: linear-gradient(135deg, #c9a84c 0%, #a07828 100%);
-  color: #fff; font-size: 16px; padding: 15px;
-  font-family: 'Cinzel',serif; letter-spacing: 2px;
-  box-shadow: 0 4px 24px rgba(201,168,76,0.35);
-  border: 1px solid rgba(255,215,0,0.3);
+  background: linear-gradient(135deg, #d4a840 0%, #b08030 50%, #c9a84c 100%);
+  color: #0a0704; font-size: 15px; padding: 15px;
+  font-family: 'Cinzel',serif; letter-spacing: 2.5px; font-weight: 900;
+  box-shadow: 0 4px 28px rgba(201,168,76,0.45), 0 0 0 1px rgba(255,215,0,0.2);
+  border: 1px solid rgba(255,215,0,0.35);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
-.pp-btn-fold  { background: #c0394c; color: #fff; }
-.pp-btn-check { background: #2e8b57; color: #fff; }
-.pp-btn-call  { background: #1565c0; color: #fff; }
-.pp-btn-raise { background: #c45200; color: #fff; }
-.pp-btn-allin { background: #6a1b9a; color: #fff; }
+.pp-btn-deal:hover { box-shadow: 0 6px 36px rgba(201,168,76,0.6), 0 0 0 1px rgba(255,215,0,0.3); }
+.pp-btn-fold  { background: linear-gradient(135deg, #b03044, #8a1f30); color: #fff; box-shadow: 0 3px 14px rgba(176,48,68,0.35); }
+.pp-btn-check { background: linear-gradient(135deg, #27784a, #1a5534); color: #fff; box-shadow: 0 3px 14px rgba(39,120,74,0.35); }
+.pp-btn-call  { background: linear-gradient(135deg, #1258aa, #0c3d7a); color: #fff; box-shadow: 0 3px 14px rgba(18,88,170,0.35); }
+.pp-btn-raise { background: linear-gradient(135deg, #b84800, #8a3400); color: #fff; box-shadow: 0 3px 14px rgba(184,72,0,0.35); }
+.pp-btn-allin { background: linear-gradient(135deg, #6a1b9a, #4a0f72); color: #fff; box-shadow: 0 3px 14px rgba(106,27,154,0.4); border: 1px solid rgba(180,80,255,0.2); }
 
 .pp-raise-row {
   display: flex; align-items: center; gap: 9px; padding: 0 2px;
 }
 .pp-raise-label {
-  font-size: 9px; color: rgba(201,168,76,0.5); letter-spacing: 1.5px;
-  font-weight: 700; flex-shrink: 0; min-width: 36px;
+  font-size: 9px; color: rgba(201,168,76,0.55); letter-spacing: 1.5px;
+  font-weight: 700; flex-shrink: 0; min-width: 38px; text-transform: uppercase;
 }
 .pp-slider {
   flex: 1; -webkit-appearance: none; appearance: none;
-  height: 4px; border-radius: 2px;
-  background: linear-gradient(to right, rgba(201,168,76,0.5), rgba(201,168,76,0.15));
+  height: 5px; border-radius: 3px;
+  background: linear-gradient(to right, rgba(201,168,76,0.55), rgba(201,168,76,0.12));
   outline: none; cursor: pointer;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
 }
 .pp-slider::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
-  background: linear-gradient(135deg, #f0c060, #c9a84c);
-  cursor: pointer; box-shadow: 0 0 8px rgba(201,168,76,0.6);
-  border: 2px solid rgba(255,255,255,0.15);
+  -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%;
+  background: linear-gradient(135deg, #ffe080, #c9a84c);
+  cursor: pointer; box-shadow: 0 0 12px rgba(201,168,76,0.7), 0 2px 6px rgba(0,0,0,0.5);
+  border: 2px solid rgba(255,255,255,0.2);
 }
 .pp-slider::-moz-range-thumb {
-  width: 20px; height: 20px; border-radius: 50%;
-  background: linear-gradient(135deg, #f0c060, #c9a84c);
-  cursor: pointer; border: 2px solid rgba(255,255,255,0.15);
+  width: 22px; height: 22px; border-radius: 50%;
+  background: linear-gradient(135deg, #ffe080, #c9a84c);
+  cursor: pointer; border: 2px solid rgba(255,255,255,0.2);
+  box-shadow: 0 0 10px rgba(201,168,76,0.65);
 }
 .pp-raise-val {
-  font-size: 12px; color: #f0c060; font-weight: 700;
-  min-width: 50px; text-align: right;
+  font-size: 13px; color: #f0c060; font-weight: 700;
+  min-width: 54px; text-align: right;
+  text-shadow: 0 0 8px rgba(240,192,96,0.4);
+}
+
+/* ── QUICK RAISE PRESETS ── */
+.pp-preset-row {
+  display: flex; align-items: center; gap: 5px; padding: 0 2px;
+}
+.pp-preset-btn {
+  padding: 5px 10px; border: 1px solid rgba(201,168,76,0.3);
+  border-radius: 7px; background: rgba(201,168,76,0.07);
+  color: #d4a840; font-size: 10px; font-weight: 700; cursor: pointer;
+  font-family: 'Space Grotesk',sans-serif; letter-spacing: 0.5px;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.pp-preset-btn:hover, .pp-preset-btn:active {
+  background: rgba(201,168,76,0.2); border-color: rgba(201,168,76,0.6);
+  color: #f0c060;
 }
 
 .pp-waiting-txt {
@@ -3878,8 +3923,10 @@ body { color: #e8e2d4 !important; }
   .pp-btn { font-size: 11px; padding: 11px 4px; }
   .pp-btn-deal { font-size: 14px; padding: 13px; }
   .pp-human-strip { padding: 8px 12px; gap: 8px; }
-  .pp-human-avatar { width: 34px; height: 34px; font-size: 17px; }
-  .pp-action-bar { padding: 8px 10px 12px; gap: 7px; }
+  .pp-human-avatar { width: 36px; height: 36px; font-size: 18px; }
+  .pp-action-bar { padding: 8px 10px 12px; gap: 6px; }
+  .pp-preset-btn { font-size: 9px; padding: 4px 7px; }
+  .pp-preset-row { gap: 4px; }
   .pp-chat-fab { bottom: 76px; right: 12px; width: 44px; height: 44px; font-size: 18px; }
   .pp-chat-panel { width: calc(100vw - 24px); right: 12px; bottom: 130px; }
   .pp-pot-val { font-size: 13px; }
@@ -7301,48 +7348,60 @@ function ppBestHand(hole,comm){
 
 // ── AI bots ───────────────────────────────────────────
 const PP_BOTS=[
-  {id:'viktor',name:'Viktor',emoji:'🎩',pers:'aggressive',color:'#ff6644'},
-  {id:'elena', name:'Elena', emoji:'💃',pers:'balanced',  color:'#ff88cc'},
-  {id:'marco', name:'Marco', emoji:'🤌',pers:'passive',   color:'#44aaff'},
-  {id:'sophia',name:'Sophia',emoji:'🌹',pers:'balanced',  color:'#cc88ff'}
+  {id:'diamond_ray',name:'Diamond Ray',emoji:'💎',pers:'aggressive',color:'#00e5ff'},
+  {id:'the_phantom',name:'The Phantom',emoji:'🎭',pers:'balanced',  color:'#aa44ff'},
+  {id:'crown_vic',  name:'Crown Vic',  emoji:'👑',pers:'passive',   color:'#f0c060'},
+  {id:'lady_noir',  name:'Lady Noir',  emoji:'🖤',pers:'balanced',  color:'#ff66bb'}
 ];
 
 const PP_BOT_CHAT={
   raise:[
-    'All in your face!',
-    'Time to pay up.',
-    "You can't handle this.",
-    'Raise or fold, your choice.'
+    'The price of admission just went up.',
+    'Let\'s see if your courage matches your cards.',
+    'I raise because I can — and because I should.',
+    'Fortunes favor the bold. Raise.',
+    'The table belongs to those who take it.',
+    'Pressure builds diamonds. Feeling it yet?'
   ],
   fold:[
-    'Not worth it.',
-    "I'll wait for better cards.",
-    'Discretion is the better part of valor.',
-    'Folding is also a strategy.'
+    'Patience is its own form of power.',
+    'Even kings choose their battles wisely.',
+    'I\'ll fold this one and own the next.',
+    'Not every war is worth fighting.',
+    'Discretion. The mark of a true professional.',
+    'Live to play another round.'
   ],
   call:[
-    "I'll see that bet.",
-    'Staying in the game.',
-    'Calling your bluff.',
-    "Let's see what you've got."
+    'I\'m in. Let\'s see what you\'re really holding.',
+    'Your bet is matched. Show me something.',
+    'Interesting... I\'ll call that.',
+    'I never fold a good feeling.',
+    'Matching your bet — and your confidence.',
+    'We proceed. On equal terms.'
   ],
   check:[
-    'Checking it over.',
-    "I'll check.",
-    'No bet from me.',
-    'Check.'
+    'Checking. The board speaks for itself.',
+    'I\'ll let the cards do the talking.',
+    'No rush. Check.',
+    'Patience. I\'m watching.',
+    'Check — for now.',
+    'The best move is sometimes no move.'
   ],
   win:[
-    'Easy money!',
-    'Thanks for the chips!',
-    'Better luck next time!',
-    "That's how it's done."
+    'The chips know where they belong.',
+    'Well executed. The table rewards precision.',
+    'That\'s how it\'s done at this level.',
+    'A clean win. As expected.',
+    'The house of cards falls — yours, not mine.',
+    'Excellence doesn\'t apologize.'
   ],
   lose:[
-    'Well played...',
-    "You got lucky this time.",
-    "I'll get you back.",
-    'Nicely done.'
+    'A masterful play. I tip my hat.',
+    'You read me perfectly. Well done.',
+    'This round is yours. I\'ll remember that.',
+    'Exceptional. You earned every chip.',
+    'The student becomes the master... briefly.',
+    'Respect. You outplayed me this time.'
   ]
 };
 
@@ -7446,9 +7505,9 @@ function ppBtn(col){
 
 // ── PremiumPoker main component ───────────────────────
 function PremiumPoker({user,setUser,t}){
-  const BUY_IN=1000;
-  const SB=25;
-  const BB=50;
+  const BUY_IN=10000;
+  const SB=100;
+  const BB=200;
 
   const mkPlayer=(id,name,emoji,color,isHuman,chips)=>({
     id,name,emoji,color,isHuman,
@@ -7470,7 +7529,7 @@ function PremiumPoker({user,setUser,t}){
   }
 
   const [gs,setGs]=useState(()=>initGs());
-  const [chat,setChat]=useState([{id:0,name:'System',text:'Welcome to Texas Hold\'em! Press DEAL to start.',sys:true,color:'#c9a84c'}]);
+  const [chat,setChat]=useState([{id:0,name:'System',text:'Welcome to the VIP Table. Blinds: '+fmt(SB)+' / '+fmt(BB)+'. Press ♛ DEAL to begin.',sys:true,color:'#c9a84c'}]);
   const [chatInp,setChatInp]=useState('');
   const [lastChat,setLastChat]=useState(0);
   const [raiseAmt,setRaiseAmt]=useState(100);
@@ -7848,12 +7907,12 @@ function PremiumPoker({user,setUser,t}){
 
       {/* TOP INFO BAR */}
       <div className="pp-topbar">
-        <div className="pp-phase-pill">{phaseLabel[gs.phase]||gs.phase}</div>
+        <div className="pp-phase-pill">♛ {phaseLabel[gs.phase]||gs.phase}</div>
         <div className="pp-pot-chip">
-          <span className="pp-pot-label">POT</span>
+          <span className="pp-pot-label">💰 POT</span>
           <span className="pp-pot-val">{fmt(gs.pot)}</span>
         </div>
-        <div className="pp-hand-pill">{myHand?myHand.name:String.fromCharCode(160)}</div>
+        <div className="pp-hand-pill">{myHand?myHand.name:'VIP TABLE'}</div>
       </div>
 
       {/* TABLE ZONE */}
@@ -7899,7 +7958,7 @@ function PremiumPoker({user,setUser,t}){
           </div>
           {gs.msg&&<div className="pp-win-msg">{gs.msg}</div>}
           {!gs.msg&&gs.phase==='idle'&&(
-            <div className="pp-table-idle">Press DEAL to start</div>
+            <div className="pp-table-idle">♛ VIP TABLE — Press DEAL</div>
           )}
         </div>
 
@@ -7928,15 +7987,32 @@ function PremiumPoker({user,setUser,t}){
         {gs.phase==='idle'?(
           <button className="pp-btn pp-btn-deal"
             onClick={()=>{sfx.click();startHand();}}>
-            DEAL CARDS
+            ♛ DEAL CARDS
           </button>
         ):isMyTurn?(
           <>
+            <div className="pp-preset-row">
+              <span className="pp-raise-label">QUICK</span>
+              {[
+                {label:'2BB', calc:()=>BB*2},
+                {label:'3BB', calc:()=>BB*3},
+                {label:'POT', calc:()=>gs.pot||BB*2},
+                {label:'½ STACK', calc:()=>Math.floor((human?human.chips:BUY_IN)/2)}
+              ].map(({label,calc})=>{
+                const v=Math.max(gs.curBet+BB, Math.min(calc(), human?human.chips:BUY_IN));
+                return(
+                  <button key={label} className="pp-preset-btn"
+                    onClick={()=>setRaiseAmt(v)}>
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
             <div className="pp-raise-row">
               <span className="pp-raise-label">RAISE</span>
               <input type="range"
                 min={Math.min(gs.curBet+BB, human?human.chips:BB)}
-                max={human?human.chips:1000}
+                max={human?human.chips:BUY_IN}
                 value={raiseAmt}
                 onChange={e=>setRaiseAmt(Number(e.target.value))}
                 className="pp-slider"
@@ -9548,7 +9624,7 @@ const LANGS = {
       dice:{title:'Dice / Limbo',desc:'3 games in one'},
       crash:{title:'Crash',desc:'Aviator style · cash out in time!'},
       mines:{title:'Mines',desc:'5×5 grid · diamonds or mines?'},
-      premiumPoker:{title:'Premium Poker',desc:"Texas Hold'em · AI bots · Viktor, Elena, Marco, Sophia"},
+      premiumPoker:{title:'♛ VIP Poker',desc:"Texas Hold'em · Ultra VIP · Diamond Ray, The Phantom, Crown Vic, Lady Noir"},
     },
     footer:{terms:'Terms & Conditions',privacy:'Privacy Policy',responsible:'Responsible Gambling',provably:'Provably Fair'},
     yourLevel:'Your level',
@@ -9630,7 +9706,7 @@ const LANGS = {
       dice:{title:'Kauliukai / Limbo',desc:'3 žaidimai viename'},
       crash:{title:'Crash',desc:'Aviator stilius · išimk laiku!'},
       mines:{title:'Minos',desc:'5×5 tinklelis · deimantai ar minos?'},
-      premiumPoker:{title:'Premium Pokeris',desc:"Texas Hold'em · AI botai · Viktor, Elena, Marco, Sophia"},
+      premiumPoker:{title:'♛ VIP Pokeris',desc:"Texas Hold'em · Ultra VIP · Diamond Ray, The Phantom, Crown Vic, Lady Noir"},
     },
     footer:{terms:'Taisyklės ir Sąlygos',privacy:'Privatumo Politika',responsible:'Atsakingas Lošimas',provably:'Provably Fair'},
     yourLevel:'Jūsų lygis',
@@ -9793,7 +9869,7 @@ const LANGS = {
       dice:{title:'Würfel / Limbo',desc:'3 Spiele in einem'},
       crash:{title:'Crash',desc:'Aviator-Stil · rechtzeitig auscashen!'},
       mines:{title:'Minen',desc:'5×5-Gitter · Diamanten oder Minen?'},
-      premiumPoker:{title:'Premium Poker',desc:"Texas Hold'em · KI-Bots · Viktor, Elena, Marco, Sophia"},
+      premiumPoker:{title:'♛ VIP Poker',desc:"Texas Hold'em · Ultra VIP · Diamond Ray, The Phantom, Crown Vic, Lady Noir"},
     },
     footer:{terms:'AGB & Bedingungen',privacy:'Datenschutzerklärung',responsible:'Verantwortungsvolles Spielen',provably:'Provably Fair'},
     yourLevel:'Dein Level',
@@ -9870,7 +9946,7 @@ const LANGS = {
       dice:{title:'Kości / Limbo',desc:'3 gry w jednym'},
       crash:{title:'Crash',desc:'Styl Aviator · wypłać w porę!'},
       mines:{title:'Miny',desc:'Siatka 5×5 · diamenty czy miny?'},
-      premiumPoker:{title:'Premium Poker',desc:"Texas Hold'em · boty AI · Viktor, Elena, Marco, Sophia"},
+      premiumPoker:{title:'♛ VIP Poker',desc:"Texas Hold'em · Ultra VIP · Diamond Ray, The Phantom, Crown Vic, Lady Noir"},
     },
     footer:{terms:'Regulamin',privacy:'Polityka prywatności',responsible:'Odpowiedzialny hazard',provably:'Provably Fair'},
     yourLevel:'Twój poziom',
@@ -9946,7 +10022,7 @@ const LANGS = {
       dice:{title:'Dés / Limbo',desc:'3 jeux en un'},
       crash:{title:'Crash',desc:"Style Aviateur · encaissez à temps !"},
       mines:{title:'Mines',desc:'Grille 5×5 · diamants ou mines ?'},
-      premiumPoker:{title:'Premium Poker',desc:"Texas Hold'em · IA bots · Viktor, Elena, Marco, Sophia"},
+      premiumPoker:{title:'♛ VIP Poker',desc:"Texas Hold'em · Ultra VIP · Diamond Ray, The Phantom, Crown Vic, Lady Noir"},
     },
     footer:{terms:'Conditions Générales',privacy:'Politique de confidentialité',responsible:'Jeu responsable',provably:'Provably Fair'},
     yourLevel:'Votre niveau',
@@ -10022,7 +10098,7 @@ const LANGS = {
       dice:{title:'Zar / Limbo',desc:'Bir arada 3 oyun'},
       crash:{title:'Crash',desc:'Aviator tarzı · zamanında çek!'},
       mines:{title:'Mayın',desc:'5×5 ızgara · elmas mı mayın mı?'},
-      premiumPoker:{title:'Premium Poker',desc:"Texas Hold'em · AI botlar · Viktor, Elena, Marco, Sophia"},
+      premiumPoker:{title:'♛ VIP Poker',desc:"Texas Hold'em · Ultra VIP · Diamond Ray, The Phantom, Crown Vic, Lady Noir"},
     },
     footer:{terms:'Şartlar ve Koşullar',privacy:'Gizlilik Politikası',responsible:'Sorumlu Kumar',provably:'Provably Fair'},
     yourLevel:'Seviyeniz',
@@ -12667,7 +12743,7 @@ function CursorTrail() {
 function getGames(t){
   const g=t.games||{};
   return[
-  {name:(g.premiumPoker&&g.premiumPoker.title)||'Premium Poker',desc:(g.premiumPoker&&g.premiumPoker.desc)||"Texas Hold'em · AI bots · Viktor, Elena, Marco, Sophia",icon:'♠',thumb:'prempoker',badge:'✨ NEW',cat:'stalai',page:'prempoker',color:'linear-gradient(135deg,#0e0a02,#1e1806)'},
+  {name:(g.premiumPoker&&g.premiumPoker.title)||'♛ VIP Poker',desc:(g.premiumPoker&&g.premiumPoker.desc)||"Texas Hold'em · Ultra VIP · Diamond Ray, The Phantom, Crown Vic, Lady Noir",icon:'♛',thumb:'prempoker',badge:'👑 VIP',cat:'stalai',page:'prempoker',color:'linear-gradient(135deg,#0e0a02,#1e1806)'},
   {name:(g.poker&&g.poker.title)||'Poker',desc:(g.poker&&g.poker.desc)||'Live multiplayer',icon:'♠️',thumb:'poker',badge:'🔴 LIVE',cat:'stalai',page:'poker',color:'linear-gradient(135deg,#140e04,#2a2008)'},
   {name:(g.blackjack&&g.blackjack.title)||'Blackjack',desc:(g.blackjack&&g.blackjack.desc)||'Beat the dealer · Hit, Stand, Double',icon:'🃏',thumb:'blackjack',badge:'🔥 HOT',cat:'stalai',href:'/blackjack.html',color:'linear-gradient(135deg,#0a2a14,#1a5c30)'},
   {name:(g.roulette&&g.roulette.title)||'Roulette',desc:(g.roulette&&g.roulette.desc)||'European wheel · 37 numbers',icon:'🎡',thumb:'roulette',badge:'🔴 LIVE',cat:'stalai',href:'/roulette.html',color:'linear-gradient(135deg,#1a0a00,#5c2a00)'},
@@ -13269,7 +13345,7 @@ function App(){
       {av:'/img/av-tiger.png',  name:'NightFox',      game:'Blackjack',      amt:3200},
       {av:'/img/av-wolf.png',   name:'StormRider',    game:'Mines',          amt:8800},
       {av:'/img/av-eagle.png',  name:'GoldenEagle',   game:'Roulette',       amt:5600},
-      {av:'/img/av-dragon.png', name:'DragonHunter',  game:'Premium Poker',  amt:21500},
+      {av:'/img/av-dragon.png', name:'DragonHunter',  game:'VIP Poker',  amt:21500},
       {av:'/img/av-king.png',   name:'RoyalBluff',    game:'HiLo',           amt:4100},
       {av:'/img/av-queen.png',  name:'DiamondLady',   game:'Baccarat',       amt:7300},
       {av:'/img/av-phantom.png',name:'MidnightGhost', game:'Limbo',          amt:9900},
@@ -13422,7 +13498,7 @@ function App(){
     {id:'lobby',icon:'🏠',label:t.lobby||'Lobby'},
     {id:'__div1'},
     {id:'__label1',label:t.sbCasino||'CASINO'},
-    {id:'prempoker',icon:'♠',label:(t.games&&t.games.premiumPoker&&t.games.premiumPoker.title)||'Premium Poker',badge:'NEW',badgeCls:'new'},
+    {id:'prempoker',icon:'♛',label:(t.games&&t.games.premiumPoker&&t.games.premiumPoker.title)||'VIP Poker',badge:'VIP',badgeCls:'new'},
     {id:'slots',icon:'🎰',label:t.slots||'Slots',badge:'HOT',badgeCls:'hot'},
     {id:'__link_blackjack',icon:'🃏',label:t.bj||'Blackjack',href:'/blackjack.html',badge:'HOT',badgeCls:'hot'},
     {id:'__link_roulette',icon:'⭕',label:t.roulette||'Roulette',href:'/roulette.html',badge:'LIVE',badgeCls:'live'},
