@@ -1475,53 +1475,98 @@ body {
 @keyframes goldShift { 0%,100%{background-position:0%} 50%{background-position:100%} }
 .sports-scene { padding:0; max-width:1280px; margin:0 auto; position:relative; z-index:1; }
 
-/* Hero Banner */
+/* ── Sports Hero — Full Image Banner ── */
+@keyframes heroShimmer {
+  0%   { transform:translateX(-100%); }
+  100% { transform:translateX(300%); }
+}
 .sports-hero {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:24px 36px 18px; flex-wrap:wrap; gap:12px;
-  background:linear-gradient(135deg,rgba(4,16,8,.95) 0%,rgba(6,10,6,.8) 50%,rgba(8,8,18,.95) 100%);
-  border-bottom:1px solid rgba(76,175,80,.12); position:relative; overflow:hidden;
+  display:flex; align-items:flex-end; justify-content:space-between;
+  min-height:200px; padding:0 36px 22px; flex-wrap:wrap; gap:16px;
+  background-image:url('/img/sports-hero.jpg');
+  background-size:cover; background-position:center 28%;
+  border-bottom:1px solid rgba(201,168,76,.18);
+  position:relative; overflow:hidden;
 }
+/* Dark gradient overlay — bottom-heavy so text pops */
 .sports-hero::before {
-  content:''; position:absolute; top:0; left:0; right:0; bottom:0;
-  background:radial-gradient(ellipse at 8% 60%,rgba(76,175,80,.07) 0%,transparent 55%);
-  pointer-events:none;
+  content:''; position:absolute; inset:0; pointer-events:none; z-index:0;
+  background:
+    linear-gradient(180deg, rgba(3,3,8,.08) 0%, rgba(5,5,10,.6) 45%, rgba(5,5,10,.95) 100%),
+    linear-gradient(90deg, rgba(0,0,0,.55) 0%, transparent 50%, rgba(0,0,0,.4) 100%);
 }
-.sports-hero-left { display:flex; align-items:center; gap:16px; position:relative; }
-.sports-brand { display:flex; align-items:center; gap:14px; }
-.sports-brand-icon { font-size:30px; }
-.sports-brand-name { font-family:'Orbitron',monospace; font-size:20px; font-weight:900; color:var(--gold); letter-spacing:4px; }
-.sports-brand-sub { font-size:9px; color:rgba(76,200,80,.5); letter-spacing:5px; text-transform:uppercase; margin-top:3px; }
-.sports-hero-right { display:flex; align-items:center; gap:20px; position:relative; }
+/* Gold glow at bottom */
+.sports-hero::after {
+  content:''; position:absolute; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 115%, rgba(201,168,76,.12) 0%, transparent 60%),
+    radial-gradient(ellipse 20% 35% at 4% 100%, rgba(76,175,80,.08) 0%, transparent 45%);
+}
+/* Shimmer sweep — subtle luxury animation */
+.sports-hero-shimmer {
+  position:absolute; top:0; bottom:0; width:25%; pointer-events:none; z-index:1;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,.025), transparent);
+  animation:heroShimmer 5s ease-in-out infinite;
+}
+
+.sports-hero-left { display:flex; align-items:center; gap:16px; position:relative; z-index:2; }
+.sports-brand { display:flex; align-items:center; gap:16px; }
+.sports-brand-icon {
+  width:56px; height:56px; border-radius:16px; flex-shrink:0;
+  background:linear-gradient(135deg,rgba(201,168,76,.22),rgba(240,192,96,.06));
+  border:1px solid rgba(240,192,96,.28);
+  display:flex; align-items:center; justify-content:center; font-size:28px;
+  box-shadow:0 4px 24px rgba(201,168,76,.18), inset 0 1px 0 rgba(255,255,255,.06);
+}
+.sports-brand-name {
+  font-family:'Orbitron',monospace; font-size:27px; font-weight:900;
+  background:linear-gradient(135deg,#c9a84c 0%,#f0c060 50%,#ffd680 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text; letter-spacing:5px; line-height:1;
+  filter:drop-shadow(0 2px 16px rgba(201,168,76,.4));
+}
+.sports-brand-sub {
+  font-size:8.5px; color:rgba(76,200,80,.65); letter-spacing:5px;
+  text-transform:uppercase; margin-top:5px; font-weight:600;
+}
+
+.sports-hero-right { display:flex; align-items:center; gap:20px; position:relative; z-index:2; }
 
 .live-counter {
-  display:flex; align-items:center; gap:7px; padding:6px 14px; border-radius:100px;
-  background:rgba(255,60,60,.07); border:1px solid rgba(255,60,60,.22);
-  font-size:10px; font-weight:700; color:#ff6b6b; letter-spacing:2px;
+  display:flex; align-items:center; gap:7px; padding:7px 16px; border-radius:100px;
+  background:rgba(255,40,40,.09); border:1px solid rgba(255,60,60,.32);
+  font-size:10px; font-weight:700; color:#ff7070; letter-spacing:2px;
+  box-shadow:0 0 18px rgba(255,60,60,.1);
 }
 .live-dot { width:7px; height:7px; border-radius:50%; background:#ff4444; animation:pulse 1.2s infinite; flex-shrink:0; }
 
-.sports-stats-bar { display:flex; align-items:center; }
-.sport-stat { text-align:center; padding:0 18px; }
+.sports-stats-bar { display:flex; align-items:center; background:rgba(0,0,0,.35); border-radius:12px; border:1px solid rgba(255,255,255,.06); padding:2px 0; }
+.sport-stat { text-align:center; padding:5px 18px; }
 .sport-stat-val { font-family:'Orbitron',monospace; font-size:20px; font-weight:900; color:var(--gold); }
-.sport-stat-lbl { font-size:8px; letter-spacing:2px; color:rgba(232,224,208,.2); margin-top:2px; }
-.sport-stat-sep { width:1px; height:32px; background:var(--border); }
+.sport-stat-lbl { font-size:8px; letter-spacing:2px; color:rgba(232,224,208,.22); margin-top:2px; }
+.sport-stat-sep { width:1px; height:32px; background:rgba(255,255,255,.07); }
 
-/* Sport Tabs — underline style */
+/* Sport Tabs — icon + label style */
 .sport-tabs-row {
   display:flex; gap:0; margin-bottom:0; flex-wrap:nowrap; overflow-x:auto;
-  padding:0 28px; background:rgba(4,4,10,.85); border-bottom:1px solid var(--border);
+  padding:0 20px; background:rgba(4,4,12,.92); border-bottom:1px solid var(--border);
   scrollbar-width:none;
 }
 .sport-tabs-row::-webkit-scrollbar { display:none; }
 .s-tab {
-  padding:11px 16px; border-radius:0; cursor:pointer; font-size:10px; font-weight:700;
+  display:flex; align-items:center; gap:6px;
+  padding:10px 14px; border-radius:0; cursor:pointer; font-size:10px; font-weight:700;
   background:none; border:none; border-bottom:2px solid transparent;
-  color:rgba(232,224,208,.32); transition:all .2s; white-space:nowrap; flex-shrink:0;
+  color:rgba(232,224,208,.3); transition:all .2s; white-space:nowrap; flex-shrink:0;
   letter-spacing:.5px;
 }
 .s-tab:hover { color:rgba(232,224,208,.65); }
 .s-tab.active { border-bottom-color:var(--gold); color:var(--gold); background:rgba(240,192,96,.05); }
+/* Sport icon in tab */
+.s-tab-img { width:18px; height:18px; object-fit:contain; flex-shrink:0;
+  filter:grayscale(100%) brightness(.7); transition:all .25s; }
+.s-tab:hover .s-tab-img { filter:grayscale(60%) brightness(.85); }
+.s-tab.active .s-tab-img { filter:none drop-shadow(0 0 5px rgba(240,192,96,.5)) brightness(1.1); }
 
 /* Main Grid */
 .sports-body { display:grid; grid-template-columns:1fr 320px; min-height:500px; }
@@ -1684,8 +1729,9 @@ body {
 .no-api-box a { color:var(--gold); }
 
 @media(max-width:900px){
-  .sports-hero { padding:14px 16px; }
-  .sports-brand-name { font-size:15px; }
+  .sports-hero { min-height:150px; padding:0 16px 16px; background-position:center 20%; }
+  .sports-brand-name { font-size:18px; letter-spacing:3px; }
+  .sports-brand-icon { width:44px; height:44px; font-size:22px; border-radius:12px; }
   .sports-stats-bar { display:none; }
   .sport-tabs-row { padding:0 8px; }
   .sports-body { grid-template-columns:1fr !important; }
@@ -1693,9 +1739,11 @@ body {
   .bet-slip-panel { position:static; max-height:none; border-left:none; border-top:1px solid var(--border); }
 }
 @media(max-width:480px){
-  .sports-hero { padding:12px; }
+  .sports-hero { min-height:120px; padding:0 12px 14px; }
+  .sports-brand-name { font-size:15px; letter-spacing:2px; }
   .live-counter { font-size:9px; padding:5px 10px; }
-  .s-tab { padding:9px 11px; font-size:9px; }
+  .s-tab { padding:9px 10px; font-size:9px; gap:4px; }
+  .s-tab-img { width:14px; height:14px; }
   .match-list { padding:8px; }
   .team-name { font-size:12px; }
 }
@@ -2073,13 +2121,17 @@ body {
   .card.sm { width: 34px !important; height: 48px !important; }
 
   /* Sports */
-  .sports-scene { padding: 12px !important; }
+  .sports-scene { padding: 0 !important; }
+  .sports-hero { min-height: 110px !important; padding: 0 12px 12px !important; }
+  .sports-brand-name { font-size: 14px !important; letter-spacing: 2px !important; }
+  .sports-brand-icon { width: 38px !important; height: 38px !important; font-size: 18px !important; }
   .sports-hdr { flex-direction: column !important; gap: 10px !important; }
   .sports-hdr h2 { font-size: 20px !important; }
   .api-row { width: 100% !important; }
   .api-inp { width: 100% !important; }
-  .sport-tabs-row { gap: 5px !important; }
-  .s-tab { font-size: 10px !important; padding: 6px 10px !important; }
+  .sport-tabs-row { gap: 0 !important; padding: 0 4px !important; }
+  .s-tab { font-size: 9px !important; padding: 8px 9px !important; gap: 3px !important; }
+  .s-tab-img { width: 13px !important; height: 13px !important; }
   .sports-body { grid-template-columns: 1fr !important; }
   .match-card { padding: 12px !important; }
   .team { font-size: 12px !important; }
@@ -9107,20 +9159,41 @@ function SportsBetting({user,setUser,t=LANGS.en}){
 
   const slipCount=slip.length;
 
+  // Sport icon mapping: key prefix → image path
+  const SPORT_ICON_MAP={
+    soccer:          '/img/sport-icon-soccer.png',
+    basketball:      '/img/sport-icon-basketball.png',
+    tennis:          '/img/sport-icon-tennis.png',
+    icehockey:       '/img/sport-icon-hockey.png',
+    americanfootball:'/img/sport-icon-football.png',
+    baseball:        '/img/sport-icon-baseball.png',
+    mma:             '/img/sport-icon-mma.png',
+  };
+  const getSportImg=key=>{
+    for(const[prefix,img] of Object.entries(SPORT_ICON_MAP)){
+      if(key.startsWith(prefix))return img;
+    }
+    return null;
+  };
+
   return(
     <div className="sports-scene">
 
-      {/* ── SPORTS HERO BANNER ── */}
+      {/* ── SPORTS HERO BANNER — DALL-E 3 stadium background ── */}
       <div className="sports-hero">
+        {/* Shimmer sweep animation */}
+        <div className="sports-hero-shimmer"/>
+
         <div className="sports-hero-left">
           <div className="sports-brand">
-            <span className="sports-brand-icon">⚡</span>
+            <div className="sports-brand-icon">⚡</div>
             <div>
               <div className="sports-brand-name">HATHOR SPORT</div>
-              <div className="sports-brand-sub">Premium Sports Betting</div>
+              <div className="sports-brand-sub">Premium Live Betting</div>
             </div>
           </div>
         </div>
+
         <div className="sports-hero-right">
           {liveCount>0&&(
             <div className="live-counter">
@@ -9147,14 +9220,19 @@ function SportsBetting({user,setUser,t=LANGS.en}){
         </div>
       </div>
 
-      {/* ── SPORT TABS ── */}
+      {/* ── SPORT TABS — with DALL-E 3 sport icons ── */}
       <div className="sport-tabs-row">
-        {SPORT_TABS.map(tab=>(
-          <button key={tab.key} className={`s-tab${sport===tab.key?' active':''}`}
-            onClick={()=>{sfx.click();setSport(tab.key);}}>
-            {tab.label}
-          </button>
-        ))}
+        {SPORT_TABS.map(tab=>{
+          const icon=getSportImg(tab.key);
+          const labelClean=tab.label.replace(/[⚽🏀🎾🏒🏈⚾🥊🏐🏉]/gu,'').trim();
+          return(
+            <button key={tab.key} className={`s-tab${sport===tab.key?' active':''}`}
+              onClick={()=>{sfx.click();setSport(tab.key);}}>
+              {icon&&<img src={icon} className="s-tab-img" alt="" draggable="false"/>}
+              <span>{labelClean}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* ── MAIN GRID ── */}

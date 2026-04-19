@@ -1,5 +1,5 @@
-// HATHOR Casino — Service Worker v3.3
-var CACHE = 'hathor-v3.3';
+// HATHOR Casino — Service Worker v3.4
+var CACHE = 'hathor-v3.4';
 var STATIC = [
   '/',
   '/manifest.json',
@@ -41,6 +41,15 @@ var IMG_CACHE = [
   '/img/nav-poker.png',
   '/img/nav-pyramid.png',
   '/img/nav-cashier.png',
+  // Sports hero + sport tab icons (DALL-E 3)
+  '/img/sports-hero.jpg',
+  '/img/sport-icon-soccer.png',
+  '/img/sport-icon-basketball.png',
+  '/img/sport-icon-tennis.png',
+  '/img/sport-icon-hockey.png',
+  '/img/sport-icon-football.png',
+  '/img/sport-icon-mma.png',
+  '/img/sport-icon-baseball.png',
 ];
 
 // Pages that should always come from network (live game data)
