@@ -1,5 +1,5 @@
-// HATHOR Casino — Service Worker v3.4
-var CACHE = 'hathor-v3.4';
+// HATHOR Casino — Service Worker v3.5
+var CACHE = 'hathor-v3.5';
 var STATIC = [
   '/',
   '/manifest.json',
@@ -9,6 +9,8 @@ var STATIC = [
 // Key images to pre-cache for instant lobby loading
 var IMG_CACHE = [
   '/img/favicon.png',
+  '/img/hathor-logo-mark.png',
+  '/img/hathor-logo-topbar.png',
   '/img/loading-screen.png',
   '/img/win-celebration.png',
   '/img/bonus-bg.png',

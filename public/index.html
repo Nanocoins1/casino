@@ -778,6 +778,18 @@ body {
 }
 @keyframes loadFill { from{width:0%} to{width:100%} }
 .hathor-loading-logo {
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+}
+.hathor-loading-mark {
+  width: 90px; height: 90px; border-radius: 22px;
+  box-shadow: 0 0 50px rgba(201,168,76,0.45), 0 0 100px rgba(201,168,76,0.12);
+  animation: loadGlow 2s ease-in-out infinite alternate;
+}
+@keyframes loadGlow {
+  from { box-shadow: 0 0 40px rgba(201,168,76,.4), 0 0 80px rgba(201,168,76,.1); }
+  to   { box-shadow: 0 0 70px rgba(201,168,76,.7), 0 0 140px rgba(201,168,76,.2); }
+}
+.hathor-loading-wordmark {
   font-family: 'Cinzel Decorative', serif; font-size: 32px;
   color: #c9a84c; letter-spacing: 4px;
   text-shadow: 0 0 30px rgba(201,168,76,0.5);
@@ -2046,15 +2058,14 @@ body {
   .mobile-nav-btn .icon { font-size: 20px; }
   /* AI-generated nav icons */
   .nav-icon-img {
-    width: 30px; height: 30px; border-radius: 9px; object-fit: cover;
-    opacity: 0.45; transition: all 0.25s;
-    filter: brightness(0.75) saturate(0.5) grayscale(0.3);
+    width: 32px; height: 32px; border-radius: 10px; object-fit: cover;
+    opacity: 0.55; transition: all 0.25s;
+    filter: brightness(0.85) saturate(0.6);
   }
   .mobile-nav-btn.active .nav-icon-img {
     opacity: 1;
-    filter: brightness(1.15) saturate(1.4) drop-shadow(0 0 7px rgba(240,192,96,0.65));
-    border-radius: 9px;
-    box-shadow: 0 0 0 1.5px rgba(240,192,96,0.35);
+    filter: brightness(1.2) saturate(1.5) drop-shadow(0 0 8px rgba(240,192,96,0.7));
+    box-shadow: 0 0 0 1.5px rgba(240,192,96,0.4), 0 0 12px rgba(240,192,96,0.2);
   }
 
   /* Add bottom padding so content isn't hidden by nav */
@@ -2914,8 +2925,15 @@ body { color: #e8e2d4 !important; }
   background:linear-gradient(135deg,#a07828 0%,#c9a84c 25%,#f0c060 50%,#ffd680 65%,#c9a84c 85%,#a07828 100%);
   -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
   white-space:nowrap; flex-shrink:0; cursor:pointer;
-  display:flex; flex-direction:column; gap:1px;
+  display:flex; flex-direction:row; align-items:center; gap:10px;
 }
+.topbar-logo-img {
+  width:38px; height:38px; border-radius:10px; flex-shrink:0; object-fit:cover;
+  filter:drop-shadow(0 0 10px rgba(201,168,76,.55));
+  transition:filter .3s;
+}
+.topbar-logo:hover .topbar-logo-img { filter:drop-shadow(0 0 16px rgba(201,168,76,.85)); }
+.topbar-logo-text { display:flex; flex-direction:column; gap:1px; }
 .topbar-logo span {
   font-family:'Cinzel',serif; font-size:7px; letter-spacing:6px;
   color:rgba(201,168,76,.3); display:block;
@@ -3663,7 +3681,8 @@ body { color: #e8e2d4 !important; }
 }
 @media(max-width:480px){
   .topbar { padding:0 14px !important; height:64px !important; }
-  .topbar-logo { font-size:14px !important; }
+  .topbar-logo { font-size:14px !important; gap:7px !important; }
+  .topbar-logo-img { width:30px !important; height:30px !important; border-radius:8px !important; }
   .topbar-logo span { display:none; }
   .tb-bal-label { display:none !important; }
   .tb-balance { padding:6px 12px !important; }
@@ -4682,6 +4701,8 @@ body {
   background-clip: text !important;
   font-size: 16px !important;
   letter-spacing: 3px !important;
+  flex-direction: row !important;
+  align-items: center !important;
 }
 .topbar-logo span {
   -webkit-text-fill-color: rgba(245,158,11,0.4) !important;
@@ -5673,6 +5694,8 @@ body { background: var(--ds-bg) !important; color: var(--ds-text) !important; }
   -webkit-text-fill-color: transparent !important;
   background-clip: text !important;
   font-weight: 700 !important;
+  flex-direction: row !important;
+  align-items: center !important;
 }
 .topbar-logo span {
   display: none !important;
@@ -6403,7 +6426,10 @@ body { background: var(--ds-bg) !important; color: var(--ds-text) !important; }
 <body>
 <!-- HATHOR Loading Screen -->
 <div id="hathor-loading">
-  <div class="hathor-loading-logo">HATHOR</div>
+  <div class="hathor-loading-logo">
+    <img src="/img/hathor-logo-mark.png" class="hathor-loading-mark" alt="HATHOR" draggable="false"/>
+    <div class="hathor-loading-wordmark">HATHOR</div>
+  </div>
   <div class="hathor-loading-sub">Royal Casino</div>
   <div class="hathor-loading-bar"><div class="hathor-loading-bar-fill"></div></div>
 </div>
@@ -14245,7 +14271,10 @@ function App(){
         <button className={'ham-btn'+(sbOpen?' open':'')} onClick={()=>setSbOpen(o=>!o)} aria-label="Menu">
           <span/><span/><span/>
         </button>
-        <div className="topbar-logo" onClick={()=>nav('lobby')}>⬡ HATHOR<span>ROYAL CASINO</span></div>
+        <div className="topbar-logo" onClick={()=>nav('lobby')}>
+          <img src="/img/hathor-logo-topbar.png" className="topbar-logo-img" alt="" draggable="false"/>
+          <div className="topbar-logo-text">HATHOR<span>ROYAL CASINO</span></div>
+        </div>
         <div className="topbar-right">
           <LangDrop lang={lang} setLang={setLang}/>
           <LvPill xp={user.xp||0} levelInfo={lv} nextLevel={nextLv}/>
