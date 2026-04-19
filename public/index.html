@@ -778,21 +778,25 @@ body {
 }
 @keyframes loadFill { from{width:0%} to{width:100%} }
 .hathor-loading-logo {
-  display: flex; flex-direction: column; align-items: center;
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
 }
-/* 3D DALL-E full logo on loading screen */
-.hathor-loading-full-img {
-  height: 88px; width: auto;
-  filter: drop-shadow(0 0 28px rgba(201,168,76,.55)) drop-shadow(0 0 60px rgba(201,168,76,.15));
+.hathor-loading-mark {
+  width: 96px; height: 96px; border-radius: 24px;
+  filter: drop-shadow(0 0 30px rgba(201,168,76,.6)) drop-shadow(0 0 60px rgba(201,168,76,.15));
+  animation: loadGlow 2s ease-in-out infinite alternate;
+}
+.hathor-loading-text-img {
+  height: 38px; width: auto;
+  filter: drop-shadow(0 0 16px rgba(201,168,76,.5));
   animation: loadGlow 2s ease-in-out infinite alternate;
 }
 @keyframes loadGlow {
-  from { filter: drop-shadow(0 0 20px rgba(201,168,76,.4)) drop-shadow(0 0 50px rgba(201,168,76,.1)); }
-  to   { filter: drop-shadow(0 0 40px rgba(201,168,76,.75)) drop-shadow(0 0 90px rgba(201,168,76,.22)); }
+  from { filter: drop-shadow(0 0 18px rgba(201,168,76,.4)) drop-shadow(0 0 40px rgba(201,168,76,.08)); }
+  to   { filter: drop-shadow(0 0 38px rgba(201,168,76,.8)) drop-shadow(0 0 80px rgba(201,168,76,.22)); }
 }
 .hathor-loading-sub {
   font-size: 10px; letter-spacing: 5px; color: rgba(201,168,76,0.28);
-  font-family: 'Space Grotesk', sans-serif; margin-top: 14px; text-transform: uppercase;
+  font-family: 'Space Grotesk', sans-serif; margin-top: 4px; text-transform: uppercase;
 }
 
 .levelup-banner {
@@ -2907,30 +2911,41 @@ body { color: #e8e2d4 !important; }
 ══════════════════════════════════════════ */
 .topbar {
   height:72px; display:flex; align-items:center;
-  background:rgba(6,5,3,.97);
-  border-bottom:1px solid rgba(201,168,76,.1);
-  box-shadow:0 1px 0 rgba(201,168,76,.05), 0 8px 32px rgba(0,0,0,.6);
+  /* Gold coins background — dark overlay so UI stays readable */
+  background:
+    linear-gradient(180deg, rgba(4,3,8,.82) 0%, rgba(5,4,10,.90) 100%),
+    url('/img/topbar-bg.jpg') center/cover no-repeat;
+  border-bottom:1px solid rgba(201,168,76,.22);
+  box-shadow:0 1px 0 rgba(201,168,76,.12), 0 8px 32px rgba(0,0,0,.7);
   position:sticky; top:0; z-index:200;
-  backdrop-filter:blur(32px) saturate(200%);
-  -webkit-backdrop-filter:blur(32px) saturate(200%);
+  backdrop-filter:blur(8px) saturate(140%);
+  -webkit-backdrop-filter:blur(8px) saturate(140%);
   padding:0 28px; flex-shrink:0;
 }
 .topbar-logo {
   flex-shrink:0; cursor:pointer;
-  display:flex; align-items:center;
+  display:flex; align-items:center; gap:10px;
 }
-/* Full 3D DALL-E logo image (mark + wordmark combined) */
-.topbar-logo-full-img {
-  height:50px; width:auto; object-fit:contain;
-  filter:drop-shadow(0 2px 12px rgba(201,168,76,.45));
+/* Hathor goddess icon */
+.topbar-logo-img {
+  width:44px; height:44px; border-radius:12px; flex-shrink:0;
+  object-fit:cover;
+  filter:drop-shadow(0 0 10px rgba(201,168,76,.6));
   transition:filter .3s, transform .25s;
 }
-.topbar-logo:hover .topbar-logo-full-img {
-  filter:drop-shadow(0 2px 20px rgba(201,168,76,.75)) drop-shadow(0 0 6px rgba(201,168,76,.3));
-  transform:scale(1.03);
+/* 3D HATHOR wordmark text */
+.topbar-text-img {
+  height:44px; width:auto; object-fit:contain;
+  filter:drop-shadow(0 1px 10px rgba(201,168,76,.45));
+  transition:filter .3s, transform .25s;
 }
-/* Keep old classes for theme overrides */
-.topbar-logo-img { display:none; }
+.topbar-logo:hover .topbar-logo-img,
+.topbar-logo:hover .topbar-text-img {
+  filter:drop-shadow(0 0 18px rgba(201,168,76,.8)) drop-shadow(0 0 5px rgba(201,168,76,.3));
+  transform:scale(1.04);
+}
+/* compat */
+.topbar-logo-full-img { display:none; }
 .topbar-logo-text { display:none; }
 .topbar-logo span { display:none; }
 /* CENTER nav — absolute center of topbar */
@@ -3675,7 +3690,9 @@ body { color: #e8e2d4 !important; }
 }
 @media(max-width:480px){
   .topbar { padding:0 14px !important; height:64px !important; }
-  .topbar-logo-full-img { height:40px !important; }
+  .topbar-logo { gap:7px !important; }
+  .topbar-logo-img { width:36px !important; height:36px !important; border-radius:9px !important; }
+  .topbar-text-img { height:36px !important; }
   .tb-bal-label { display:none !important; }
   .tb-balance { padding:6px 12px !important; }
   .tb-bal-amount { font-size:13px !important; }
@@ -6419,7 +6436,8 @@ body { background: var(--ds-bg) !important; color: var(--ds-text) !important; }
 <!-- HATHOR Loading Screen -->
 <div id="hathor-loading">
   <div class="hathor-loading-logo">
-    <img src="/img/hathor-logo-loading.png" class="hathor-loading-full-img" alt="HATHOR Royal Casino" draggable="false"/>
+    <img src="/img/hathor-logo-mark.png" class="hathor-loading-mark" alt="" draggable="false"/>
+    <img src="/img/hathor-text-3d.png" class="hathor-loading-text-img" alt="HATHOR" draggable="false"/>
   </div>
   <div class="hathor-loading-sub">Royal Casino</div>
   <div class="hathor-loading-bar"><div class="hathor-loading-bar-fill"></div></div>
@@ -14263,7 +14281,8 @@ function App(){
           <span/><span/><span/>
         </button>
         <div className="topbar-logo" onClick={()=>nav('lobby')}>
-          <img src="/img/hathor-logo-full.png" className="topbar-logo-full-img" alt="HATHOR" draggable="false"/>
+          <img src="/img/hathor-logo-topbar.png" className="topbar-logo-img" alt="" draggable="false"/>
+          <img src="/img/hathor-text-3d.png" className="topbar-text-img" alt="HATHOR" draggable="false"/>
         </div>
         <div className="topbar-right">
           <LangDrop lang={lang} setLang={setLang}/>
