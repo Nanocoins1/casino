@@ -2911,15 +2911,15 @@ body { color: #e8e2d4 !important; }
 ══════════════════════════════════════════ */
 .topbar {
   height:72px; display:flex; align-items:center;
-  /* Gold coins background — dark overlay so UI stays readable */
+  /* Gold coins background — lighter overlay so coins are clearly visible */
   background:
-    linear-gradient(180deg, rgba(4,3,8,.82) 0%, rgba(5,4,10,.90) 100%),
+    linear-gradient(180deg, rgba(4,3,8,.52) 0%, rgba(5,4,10,.60) 100%),
     url('/img/topbar-bg.jpg') center/cover no-repeat;
-  border-bottom:1px solid rgba(201,168,76,.22);
-  box-shadow:0 1px 0 rgba(201,168,76,.12), 0 8px 32px rgba(0,0,0,.7);
+  border-bottom:1px solid rgba(201,168,76,.28);
+  box-shadow:0 1px 0 rgba(201,168,76,.18), 0 8px 32px rgba(0,0,0,.6);
   position:sticky; top:0; z-index:200;
-  backdrop-filter:blur(8px) saturate(140%);
-  -webkit-backdrop-filter:blur(8px) saturate(140%);
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
   padding:0 28px; flex-shrink:0;
 }
 .topbar-logo {
@@ -2930,21 +2930,28 @@ body { color: #e8e2d4 !important; }
 .topbar-logo-img {
   width:44px; height:44px; border-radius:12px; flex-shrink:0;
   object-fit:cover;
-  filter:drop-shadow(0 0 10px rgba(201,168,76,.6));
+  filter:drop-shadow(0 0 12px rgba(201,168,76,.7));
   transition:filter .3s, transform .25s;
 }
-/* 3D HATHOR wordmark text */
-.topbar-text-img {
-  height:44px; width:auto; object-fit:contain;
-  filter:drop-shadow(0 1px 10px rgba(201,168,76,.45));
-  transition:filter .3s, transform .25s;
+/* HATHOR text — CSS gold gradient (correct proportions, always readable) */
+.topbar-logo-wordmark {
+  font-family:'Cinzel Decorative',serif;
+  font-size:20px; font-weight:900; letter-spacing:3px;
+  background:linear-gradient(180deg, #ffd680 0%, #f0c060 35%, #c9a84c 65%, #b8920e 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  white-space:nowrap;
+  filter:drop-shadow(0 1px 6px rgba(201,168,76,.4));
+  transition:filter .3s;
 }
-.topbar-logo:hover .topbar-logo-img,
-.topbar-logo:hover .topbar-text-img {
-  filter:drop-shadow(0 0 18px rgba(201,168,76,.8)) drop-shadow(0 0 5px rgba(201,168,76,.3));
-  transform:scale(1.04);
+.topbar-logo-sub {
+  font-family:'Cinzel',serif; font-size:7px; letter-spacing:5px;
+  color:rgba(201,168,76,.4); -webkit-text-fill-color:rgba(201,168,76,.4);
+  white-space:nowrap; display:block; margin-top:2px;
 }
-/* compat */
+.topbar-logo:hover .topbar-logo-img { filter:drop-shadow(0 0 20px rgba(201,168,76,.9)); transform:scale(1.05); }
+.topbar-logo:hover .topbar-logo-wordmark { filter:drop-shadow(0 1px 12px rgba(201,168,76,.65)); }
+/* compat — hide old image-based text */
+.topbar-text-img { display:none; }
 .topbar-logo-full-img { display:none; }
 .topbar-logo-text { display:none; }
 .topbar-logo span { display:none; }
@@ -3691,8 +3698,9 @@ body { color: #e8e2d4 !important; }
 @media(max-width:480px){
   .topbar { padding:0 14px !important; height:64px !important; }
   .topbar-logo { gap:7px !important; }
-  .topbar-logo-img { width:36px !important; height:36px !important; border-radius:9px !important; }
-  .topbar-text-img { height:36px !important; }
+  .topbar-logo-img { width:34px !important; height:34px !important; border-radius:9px !important; }
+  .topbar-logo-wordmark { font-size:15px !important; letter-spacing:2px !important; }
+  .topbar-logo-sub { display:none !important; }
   .tb-bal-label { display:none !important; }
   .tb-balance { padding:6px 12px !important; }
   .tb-bal-amount { font-size:13px !important; }
@@ -4694,11 +4702,13 @@ body {
 
 /* 3. TOPBAR */
 .topbar {
-  background: rgba(8,11,20,0.9) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  border-bottom: 1px solid rgba(255,255,255,0.06) !important;
-  box-shadow: 0 1px 0 rgba(245,158,11,0.08) !important;
+  background:
+    linear-gradient(180deg, rgba(4,3,8,.52) 0%, rgba(5,4,10,.60) 100%),
+    url('/img/topbar-bg.jpg') center/cover no-repeat !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+  border-bottom: 1px solid rgba(201,168,76,.28) !important;
+  box-shadow: 0 1px 0 rgba(201,168,76,.18), 0 8px 32px rgba(0,0,0,.6) !important;
   height: 64px !important;
 }
 
@@ -5688,11 +5698,13 @@ body { background: var(--ds-bg) !important; color: var(--ds-text) !important; }
 
 /* ── TOPBAR ── */
 .topbar {
-  background: rgba(8,11,20,0.92) !important;
-  backdrop-filter: blur(24px) saturate(1.5) !important;
-  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+  background:
+    linear-gradient(180deg, rgba(4,3,8,.52) 0%, rgba(5,4,10,.60) 100%),
+    url('/img/topbar-bg.jpg') center/cover no-repeat !important;
+  backdrop-filter: blur(4px) !important;
+  border-bottom: 1px solid rgba(201,168,76,.28) !important;
   height: 60px !important;
-  box-shadow: none !important;
+  box-shadow: 0 1px 0 rgba(201,168,76,.18) !important;
 }
 .topbar-logo {
   font-family: 'Cinzel', serif !important;
@@ -14282,7 +14294,10 @@ function App(){
         </button>
         <div className="topbar-logo" onClick={()=>nav('lobby')}>
           <img src="/img/hathor-logo-topbar.png" className="topbar-logo-img" alt="" draggable="false"/>
-          <img src="/img/hathor-text-3d.png" className="topbar-text-img" alt="HATHOR" draggable="false"/>
+          <div>
+            <span className="topbar-logo-wordmark">HATHOR</span>
+            <span className="topbar-logo-sub">ROYAL CASINO</span>
+          </div>
         </div>
         <div className="topbar-right">
           <LangDrop lang={lang} setLang={setLang}/>
