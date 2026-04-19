@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="lt">
+<html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
@@ -8,8 +8,8 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
-  --bg:#04040a;--gold:#f0c060;--gold2:#ffd980;--green:#00e676;--red:#ff3d71;
-  --neon:#00e5ff;--cream:#e8e0d0;--border:rgba(255,255,255,0.08);--glass:rgba(255,255,255,0.04);
+  --bg:#030608;--gold:#f0c060;--gold2:#ffd980;--gold3:#c9a84c;--green:#4caf7c;--red:#c0394c;
+  --neon:#f0c060;--cream:#e8dcc8;--border:rgba(201,168,76,0.12);--glass:rgba(201,168,76,0.04);
 }
 html,body{height:100%;overflow:hidden;}
 body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cream);display:flex;flex-direction:column;}
@@ -36,7 +36,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 
 .hist-bar{position:absolute;top:10px;left:10px;right:10px;display:flex;gap:4px;flex-wrap:nowrap;overflow:hidden;pointer-events:none;z-index:5;}
 .hp{padding:2px 9px;border-radius:20px;font-family:'DM Mono',monospace;font-size:10px;font-weight:700;flex-shrink:0;}
-.hp-low{background:rgba(0,229,255,.14);color:var(--neon);}
+.hp-low{background:rgba(201,168,76,.10);color:var(--gold);}
 .hp-mid{background:rgba(240,192,96,.14);color:var(--gold);}
 .hp-hi{background:rgba(255,153,0,.16);color:#ff9900;}
 .hp-cr{background:rgba(255,61,113,.14);color:var(--red);}
@@ -45,7 +45,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 .mult-big{font-family:'Orbitron',monospace;font-size:clamp(56px,10vw,108px);font-weight:900;
   line-height:1;text-shadow:0 0 50px currentColor;transition:color .2s;}
 .mult-big.mw{color:rgba(200,190,170,.25);}
-.mult-big.ml{color:var(--neon);}
+.mult-big.ml{color:var(--gold);}
 .mult-big.mm{color:var(--gold);}
 .mult-big.mh{color:#ff9900;}
 .mult-big.mu{color:var(--red);}
@@ -63,7 +63,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
   background:rgba(0,0,0,.65);border:1px solid var(--border);border-radius:22px;
   padding:8px 22px;z-index:5;}
 .wait-lbl{font-size:11px;letter-spacing:2px;color:rgba(232,224,208,.35);}
-.wait-num{font-family:'Orbitron',monospace;font-size:13px;color:var(--neon);}
+.wait-num{font-family:'Orbitron',monospace;font-size:13px;color:var(--gold);}
 
 .wf-ov{position:absolute;inset:0;background:rgba(0,230,118,.14);pointer-events:none;opacity:0;z-index:4;}
 @keyframes wfAnim{0%{opacity:0}25%{opacity:1}100%{opacity:0}}
@@ -109,19 +109,19 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 .sw{position:relative;width:38px;height:20px;cursor:pointer;flex-shrink:0;}
 .sw input{opacity:0;width:0;height:0;}
 .sw-t{position:absolute;inset:0;border-radius:10px;background:rgba(255,255,255,.1);transition:.25s;}
-.sw input:checked~.sw-t{background:rgba(0,229,255,.4);}
+.sw input:checked~.sw-t{background:rgba(201,168,76,.4);}
 .sw-k{position:absolute;height:14px;width:14px;left:3px;bottom:3px;border-radius:50%;background:rgba(232,224,208,.4);transition:.25s;}
-.sw input:checked~.sw-k{transform:translateX(18px);background:var(--neon);}
+.sw input:checked~.sw-k{transform:translateX(18px);background:var(--gold);}
 .aval-inp{width:72px;padding:7px 9px;background:rgba(0,0,0,.4);border:1px solid var(--border);
-  border-radius:7px;color:var(--neon);font-family:'DM Mono',monospace;font-size:12px;outline:none;}
-.aval-inp:focus{border-color:rgba(0,229,255,.4);}
+  border-radius:7px;color:var(--gold);font-family:'DM Mono',monospace;font-size:12px;outline:none;}
+.aval-inp:focus{border-color:rgba(201,168,76,.4);}
 .arow-lbl{font-size:11px;color:rgba(232,224,208,.4);}
 
 .bet-btn{width:100%;padding:14px;border-radius:12px;border:none;cursor:pointer;
   font-family:'Orbitron',monospace;font-size:13px;font-weight:900;letter-spacing:1px;transition:all .2s;}
 .bet-btn.idle{background:linear-gradient(135deg,#c9a84c,#f0c060,#a07830);color:#060400;}
 .bet-btn.idle:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(240,192,96,.4);}
-.bet-btn.pend{background:rgba(0,229,255,.12);border:1px solid rgba(0,229,255,.3);color:var(--neon);}
+.bet-btn.pend{background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);color:var(--gold);}
 .bet-btn.cash{background:linear-gradient(135deg,#00b894,#00e676);color:#001a10;}
 .bet-btn.cash:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,230,118,.4);}
 .bet-btn:disabled{opacity:.38;cursor:not-allowed;transform:none!important;box-shadow:none!important;}
@@ -138,7 +138,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
   color:var(--gold);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;}
 .ab-btn:hover{background:rgba(240,192,96,.15);}
 .ab-btn.stop{border-color:rgba(255,61,113,.3);background:rgba(255,61,113,.08);color:var(--red);}
-.ab-ctr{font-family:'Orbitron',monospace;font-size:11px;color:var(--neon);display:none;}
+.ab-ctr{font-family:'Orbitron',monospace;font-size:11px;color:var(--gold);display:none;}
 
 .sess-bar{padding:10px 16px;border-top:1px solid var(--border);flex-shrink:0;}
 .sess-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
@@ -151,7 +151,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 .stats-tab{padding:14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;}
 .pf-box{padding:9px 11px;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;}
 .pf-lbl{font-size:10px;letter-spacing:1px;color:rgba(232,224,208,.3);margin-bottom:4px;}
-.pf-hash{font-family:'DM Mono',monospace;font-size:9px;color:rgba(0,229,255,.5);word-break:break-all;line-height:1.5;}
+.pf-hash{font-family:'DM Mono',monospace;font-size:9px;color:rgba(201,168,76,.5);word-break:break-all;line-height:1.5;}
 .lv-lbl{font-size:10px;letter-spacing:2px;color:rgba(232,224,208,.25);margin-bottom:6px;}
 .lv-item{display:flex;align-items:center;justify-content:space-between;
   padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:11px;}
@@ -159,7 +159,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 .lv-amt{font-family:'DM Mono',monospace;color:rgba(232,224,208,.35);}
 .lv-mult{font-family:'Orbitron',monospace;font-size:10px;font-weight:700;}
 .lv-mult.won{color:var(--green);}
-.lv-mult.fly{color:var(--neon);animation:lPulse .8s ease infinite alternate;}
+.lv-mult.fly{color:var(--gold);animation:lPulse .8s ease infinite alternate;}
 @keyframes lPulse{from{opacity:.4}to{opacity:1}}
 
 .toast-wrap{position:fixed;bottom:80px;right:18px;display:flex;flex-direction:column;gap:6px;z-index:999;pointer-events:none;}
@@ -235,7 +235,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
             <span class="arow-lbl">x</span>
           </div>
         </div>
-        <button class="bet-btn idle" id="btnA" onclick="handleBetA()">STATYTI A</button>
+        <button class="bet-btn idle" id="btnA" onclick="handleBetA()">BET A</button>
         <div class="sep"></div>
         <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(232,224,208,.35);">
           <span>Potential payout:</span>
@@ -246,7 +246,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 
     <div class="tab-content" id="tcB">
       <div class="pinner">
-        <div style="padding:8px 10px;background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.15);border-radius:8px;font-size:11px;color:rgba(232,224,208,.5);">
+        <div style="padding:8px 10px;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);border-radius:8px;font-size:11px;color:rgba(232,224,208,.5);">
           💡 Strategy: A cashes out early (2x), B waits longer (5x+)
         </div>
         <div>
@@ -272,7 +272,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
             <span class="arow-lbl">x</span>
           </div>
         </div>
-        <button class="bet-btn idle" id="btnB" onclick="handleBetB()">STATYTI B</button>
+        <button class="bet-btn idle" id="btnB" onclick="handleBetB()">BET B</button>
       </div>
     </div>
 
@@ -303,7 +303,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
     <div class="sess-bar">
       <div class="sess-grid">
         <div class="sb"><div class="sb-v pos" id="sWins">0</div><div class="sb-l">WON</div></div>
-        <div class="sb"><div class="sb-v neg" id="sLoss">0</div><div class="sb-l">PRARASTA</div></div>
+        <div class="sb"><div class="sb-v neg" id="sLoss">0</div><div class="sb-l">LOST</div></div>
         <div class="sb"><div class="sb-v" id="sProfit">0</div><div class="sb-l">PELNAS</div></div>
       </div>
     </div>
@@ -392,7 +392,7 @@ function draw(){
   var col=lineColor();
   var grad=ctx.createLinearGradient(0,0,0,H);
   if(state===ST.CRASH){grad.addColorStop(0,'rgba(255,61,113,0.28)');grad.addColorStop(1,'rgba(255,61,113,0)');}
-  else if(mult<2){grad.addColorStop(0,'rgba(0,229,255,0.22)');grad.addColorStop(1,'rgba(0,229,255,0)');}
+  else if(mult<2){grad.addColorStop(0,'rgba(201,168,76,0.22)');grad.addColorStop(1,'rgba(201,168,76,0)');}
   else if(mult<5){grad.addColorStop(0,'rgba(240,192,96,0.22)');grad.addColorStop(1,'rgba(240,192,96,0)');}
   else{grad.addColorStop(0,'rgba(255,153,0,0.22)');grad.addColorStop(1,'rgba(255,153,0,0)');}
 
@@ -443,7 +443,7 @@ function draw(){
     ctx.translate(rx,ry);
     ctx.rotate(ang-Math.PI*0.25);
     ctx.font='28px serif';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.shadowColor='rgba(0,229,255,0.9)';ctx.shadowBlur=22;
+    ctx.shadowColor='rgba(201,168,76,0.9)';ctx.shadowBlur=22;
     ctx.fillText('🚀',0,0);ctx.shadowBlur=0;
     ctx.restore();
   }
@@ -451,7 +451,7 @@ function draw(){
 
 function lineColor(){
   if(state===ST.CRASH)return'#ff3d71';
-  if(mult<2)return'#00e5ff';
+  if(mult<2)return'#c9a84c';
   if(mult<5)return'#f0c060';
   if(mult<10)return'#ff9900';
   return'#ff3d71';
@@ -530,7 +530,7 @@ function renderBots(){
     var amt=bB.placed?bB.amount:bB.pending;
     var mc=bB.cashedOut?'won':'fly';
     var mv=bB.cashedOut?bB.mult.toFixed(2)+'x':(state===ST.FLY?mult.toFixed(2)+'x':'...');
-    html+='<div class="lv-item"><span class="lv-name" style="color:var(--neon)">Tu (B)</span><span class="lv-amt">&#129689;'+fmt(amt)+'</span><span class="lv-mult '+mc+'">'+mv+'</span></div>';
+    html+='<div class="lv-item"><span class="lv-name" style="color:var(--gold)">Tu (B)</span><span class="lv-amt">&#129689;'+fmt(amt)+'</span><span class="lv-mult '+mc+'">'+mv+'</span></div>';
   }
   for(var i=0;i<Math.min(bots.length,8);i++){
     var b=bots[i];
@@ -573,7 +573,7 @@ function updBtn(b,lbl,btn,potEl){
   if(!btn)return;
   if(state===ST.WAIT){
     if(b.pending){btn.className='bet-btn pend';btn.textContent='ATSAUKTI '+lbl+' ('+fmt(b.pending)+')';btn.disabled=false;}
-    else{btn.className='bet-btn idle';btn.textContent='STATYTI '+lbl;btn.disabled=false;}
+    else{btn.className='bet-btn idle';btn.textContent='BET '+lbl;btn.disabled=false;}
   }else if(state===ST.FLY){
     if(b.placed&&!b.cashedOut){
       var pot=Math.floor(b.amount*mult)-b.amount;
@@ -586,7 +586,7 @@ function updBtn(b,lbl,btn,potEl){
       btn.className='bet-btn idle';btn.textContent='SKRENDA...';btn.disabled=true;
     }
   }else{
-    btn.className='bet-btn idle';btn.textContent='STATYTI '+lbl;btn.disabled=true;
+    btn.className='bet-btn idle';btn.textContent='BET '+lbl;btn.disabled=true;
   }
   if(potEl){
     potEl.textContent=(state===ST.FLY&&b.placed&&!b.cashedOut)?('&#129689;'+fmt(Math.floor(b.amount*mult))):'&#8212;';
@@ -750,7 +750,7 @@ function handleBetA(){
     var amt=parseInt(document.getElementById('amtA').value)||100;
     if(amt<10)return;
     if(amt>50000){amt=50000;document.getElementById('amtA').value=50000;}
-    if(amt>tokens){showToast('Nepakanka zetonų','loss');return;}
+    if(amt>tokens){showToast('Insufficient balance','loss');return;}
     bA.pending=amt;updateBtns();
   }
 }
@@ -762,7 +762,7 @@ function handleBetB(){
     var amt=parseInt(document.getElementById('amtB').value)||200;
     if(amt<10)return;
     if(amt>50000){amt=50000;document.getElementById('amtB').value=50000;}
-    if(amt>tokens){showToast('Nepakanka zetonų','loss');return;}
+    if(amt>tokens){showToast('Insufficient balance','loss');return;}
     bB.pending=amt;updateBtns();
   }
 }
@@ -807,5 +807,7 @@ draw();
 startWait();
 </script>
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
+<script src="/js/casino-sounds.js"></script>
+<script src="/js/cookie-consent.js"></script>
 </body>
 </html>

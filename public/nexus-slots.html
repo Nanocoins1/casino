@@ -81,7 +81,7 @@ body{font-family:'Space Grotesk',sans-serif;}
   font-size:12px;cursor:pointer;font-family:'DM Mono',monospace;
   transition:all 0.2s;
 }
-.quick-bet:hover{background:rgba(0,229,255,0.1);border-color:rgba(0,229,255,0.3);color:#00e5ff;}
+.quick-bet:hover{background:rgba(240,192,96,0.1);border-color:rgba(240,192,96,0.3);color:#f0c060;}
 .quick-bet.qb-max{background:rgba(240,192,96,0.1);border-color:rgba(240,192,96,0.3);color:#f0c060;}
 
 /* SPIN BUTTON */
@@ -116,7 +116,7 @@ body{font-family:'Space Grotesk',sans-serif;}
   width:38px;height:22px;border-radius:11px;border:none;
   background:rgba(255,255,255,0.1);cursor:pointer;position:relative;transition:all 0.3s;
 }
-#autoToggle.on{background:rgba(0,229,255,0.4);box-shadow:0 0 10px rgba(0,229,255,0.3);}
+#autoToggle.on{background:rgba(240,192,96,0.5);box-shadow:0 0 10px rgba(240,192,96,0.4);}
 #autoToggle::after{
   content:'';position:absolute;width:16px;height:16px;border-radius:50%;
   background:#fff;top:3px;left:3px;transition:left 0.3s;
@@ -158,7 +158,7 @@ body{font-family:'Space Grotesk',sans-serif;}
   text-orientation:mixed;z-index:100;
   transition:all 0.3s;backdrop-filter:blur(8px);
 }
-#paytableBtn:hover{color:#00e5ff;border-color:rgba(0,229,255,0.4);background:rgba(0,229,255,0.05);}
+#paytableBtn:hover{color:#f0c060;border-color:rgba(240,192,96,0.4);background:rgba(240,192,96,0.06);}
 
 #paytablePanel{
   position:fixed;left:0;top:0;bottom:0;width:260px;z-index:150;
@@ -169,7 +169,7 @@ body{font-family:'Space Grotesk',sans-serif;}
   padding:70px 20px 20px;overflow-y:auto;
 }
 #paytablePanel.open{transform:translateX(0);}
-.pt-title{font-family:'Orbitron',monospace;font-size:16px;font-weight:900;color:#00e5ff;letter-spacing:3px;margin-bottom:16px;}
+.pt-title{font-family:'Orbitron',monospace;font-size:16px;font-weight:900;color:#f0c060;letter-spacing:3px;margin-bottom:16px;}
 .pt-close{position:absolute;top:16px;right:16px;background:none;border:none;color:rgba(255,255,255,0.4);font-size:20px;cursor:pointer;}
 .pt-close:hover{color:#fff;}
 .pt-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
@@ -268,7 +268,7 @@ body.shake-big{animation:shakeBig 0.7s ease;}
   <a href="/" class="logo-link"><span class="logo-hex">⬡</span> HATHOR</a>
   <div class="hdr-right">
     <div class="hdr-bal" id="hdrBal">⬡ 10,000</div>
-    <a href="/lobby.html" class="back-btn">← LOBBY</a>
+    <a href="/" class="back-btn">← LOBBY</a>
   </div>
 </div>
 
@@ -280,7 +280,7 @@ body.shake-big{animation:shakeBig 0.7s ease;}
   <button class="pt-close" onclick="togglePaytable()">✕</button>
   <div class="pt-title">PAYTABLE</div>
   <div class="pt-row"><span class="pt-sym">7️⃣</span><span class="pt-name">SEVEN</span><span class="pt-pay" style="color:#ff4444">47×</span></div>
-  <div class="pt-row"><span class="pt-sym">💎</span><span class="pt-name">DIAMOND</span><span class="pt-pay" style="color:#00e5ff">15×</span></div>
+  <div class="pt-row"><span class="pt-sym">💎</span><span class="pt-name">DIAMOND</span><span class="pt-pay" style="color:#60a5fa">15×</span></div>
   <div class="pt-row"><span class="pt-sym">⭐</span><span class="pt-name">STAR</span><span class="pt-pay" style="color:#ffd700">8×</span></div>
   <div class="pt-row"><span class="pt-sym">⚡</span><span class="pt-name">BOLT</span><span class="pt-pay" style="color:#ffff00">6×</span></div>
   <div class="pt-row"><span class="pt-sym">🔮</span><span class="pt-name">CRYSTAL</span><span class="pt-pay" style="color:#cc44ff">4×</span></div>
@@ -358,7 +358,7 @@ var SYMS = ['diamond','seven','star','cherry','crystal','bolt','bomb'];
 var SYM_WEIGHTS = {diamond:3, seven:4, star:5, cherry:15, crystal:8, bolt:6, bomb:2};
 var SYM_PAYS = {diamond:15, seven:47, star:8, cherry:2, crystal:4, bolt:6};
 var SYM_COLORS = {
-  diamond:'#00e5ff', seven:'#ff4444', star:'#ffd700',
+  diamond:'#60a5fa', seven:'#ff4444', star:'#ffd700',
   cherry:'#ff6666', crystal:'#cc44ff', bolt:'#ffff00', bomb:'#ffa500'
 };
 
@@ -419,7 +419,7 @@ var reelWindowH = 0;
 
 // Anticipation
 var anticipating = false;
-var anticipateColor = '#00e5ff';
+var anticipateColor = '#c9a84c';
 var anticipatePulse = 0;
 
 // Ambient float
@@ -620,9 +620,9 @@ function drawMachine(dt, ts) {
 
   // Outer glow
   var glowAlpha = 0.3 + Math.sin(breathPhase) * 0.1;
-  ctx.shadowColor = '#00e5ff';
+  ctx.shadowColor = '#c9a84c';
   ctx.shadowBlur = 30 + breathAmt * 2;
-  ctx.strokeStyle = 'rgba(0,229,255,' + glowAlpha + ')';
+  ctx.strokeStyle = 'rgba(201,168,76,' + glowAlpha + ')';
   ctx.lineWidth = 2;
   roundRect(ctx, MX - 4, MY + mFloatY - 4, MW + 8, MH + 8, 24);
   ctx.stroke();
@@ -649,8 +649,8 @@ function drawMachine(dt, ts) {
   // Frame border gradient
   var borderGrad = ctx.createLinearGradient(MX, MY + mFloatY, MX + MW, MY + mFloatY + MH);
   borderGrad.addColorStop(0, 'rgba(240,192,96,0.6)');
-  borderGrad.addColorStop(0.3, 'rgba(0,229,255,0.4)');
-  borderGrad.addColorStop(0.6, 'rgba(200,100,255,0.3)');
+  borderGrad.addColorStop(0.3, 'rgba(255,217,128,0.5)');
+  borderGrad.addColorStop(0.6, 'rgba(201,168,76,0.3)');
   borderGrad.addColorStop(1, 'rgba(240,192,96,0.5)');
   ctx.strokeStyle = borderGrad;
   ctx.lineWidth = 2;
@@ -682,8 +682,8 @@ function drawMachine(dt, ts) {
   var stripGrad = ctx.createLinearGradient(MX, stripY, MX + MW, stripY);
   stripGrad.addColorStop(0, 'rgba(240,192,96,0)');
   stripGrad.addColorStop(0.3, 'rgba(240,192,96,0.3)');
-  stripGrad.addColorStop(0.7, 'rgba(0,229,255,0.3)');
-  stripGrad.addColorStop(1, 'rgba(0,229,255,0)');
+  stripGrad.addColorStop(0.7, 'rgba(240,192,96,0.3)');
+  stripGrad.addColorStop(1, 'rgba(240,192,96,0)');
   ctx.fillStyle = stripGrad;
   ctx.fillRect(MX + 20, stripY, MW - 40, 2);
 }
@@ -695,15 +695,15 @@ function drawNexusTitle(cx, cy, ts) {
 
   // Glow layers
   var glowAmt = Math.sin(ts * 0.002) * 5 + 15;
-  ctx.shadowColor = '#00e5ff';
+  ctx.shadowColor = '#c9a84c';
   ctx.shadowBlur = glowAmt;
   ctx.font = 'bold ' + Math.min(CELL_W * 0.7, 32) + 'px Orbitron, monospace';
-  ctx.fillStyle = '#00e5ff';
+  ctx.fillStyle = '#f0c060';
   ctx.fillText('NEXUS', cx, cy - 4);
 
-  ctx.shadowColor = '#00e5ff';
+  ctx.shadowColor = '#c9a84c';
   ctx.shadowBlur = glowAmt * 2;
-  ctx.fillStyle = 'rgba(0,229,255,0.3)';
+  ctx.fillStyle = 'rgba(240,192,96,0.3)';
   ctx.fillText('NEXUS', cx, cy - 4);
 
   ctx.shadowBlur = 0;
@@ -739,8 +739,8 @@ function drawPaylineIndicators(floatY) {
     reelY + floatY + CELL_H + 8 + CELL_H / 2,
     reelY + floatY + (CELL_H + 8) * 2 + CELL_H / 2
   ];
-  var lineColors = ['rgba(255,100,100,0.25)', 'rgba(0,229,255,0.3)', 'rgba(255,200,0,0.25)'];
-  var lineActiveColors = ['rgba(255,100,100,0.7)', 'rgba(0,229,255,0.8)', 'rgba(255,200,0,0.7)'];
+  var lineColors = ['rgba(255,100,100,0.25)', 'rgba(240,192,96,0.3)', 'rgba(255,200,0,0.25)'];
+  var lineActiveColors = ['rgba(255,100,100,0.7)', 'rgba(240,192,96,0.85)', 'rgba(255,200,0,0.7)'];
 
   for (var l = 0; l < 3; l++) {
     var isActive = false;
@@ -946,12 +946,12 @@ function drawDiamond(cx, cy, size, ts) {
   ctx.closePath();
 
   var dg = ctx.createLinearGradient(cx - s, cy - s, cx + s, cy + s);
-  dg.addColorStop(0, '#aaffff');
-  dg.addColorStop(0.3, '#00e5ff');
-  dg.addColorStop(0.6, '#0088cc');
-  dg.addColorStop(1, '#004488');
+  dg.addColorStop(0, '#c8e8ff');
+  dg.addColorStop(0.3, '#60a5fa');
+  dg.addColorStop(0.6, '#2563eb');
+  dg.addColorStop(1, '#1e3a8a');
   ctx.fillStyle = dg;
-  ctx.shadowColor = '#00e5ff';
+  ctx.shadowColor = '#60a5fa';
   ctx.shadowBlur = 12;
   ctx.fill();
 
@@ -1307,7 +1307,7 @@ function scheduleReelStop(reelIdx, results, delay) {
       var sym1mid = resolveWild(spinGrid[1][1]);
       if (sym0mid === sym1mid && sym0mid !== 'none') {
         anticipating = true;
-        anticipateColor = SYM_COLORS[spinGrid[0][1]] || '#00e5ff';
+        anticipateColor = SYM_COLORS[spinGrid[0][1]] || '#c9a84c';
         reelVelocity[2] = 4; // slow down reel 3
       }
     }
@@ -1491,7 +1491,7 @@ function triggerSmallWin(amount) {
 
 function triggerMedWin(amount) {
   gameState = STATE_WIN_ANIM;
-  showWinDisplay('BIG WIN!', amount, '#00e5ff');
+  showWinDisplay('BIG WIN!', amount, '#f0c060');
   spawnCoins(60, W/2, H/2);
   shakeScreen('shake-small');
   flashScreen('flash-gold', 200);
@@ -1639,7 +1639,8 @@ function updateAnticipation(dt, ts) {
 }
 
 function hexToRgb(hex) {
-  if (hex === '#00e5ff') return '0,229,255';
+  if (hex === '#c9a84c') return '201,168,76';
+  if (hex === '#60a5fa') return '96,165,250';
   if (hex === '#ffd700') return '255,215,0';
   if (hex === '#ff4444') return '255,68,68';
   if (hex === '#ff6666') return '255,102,102';
@@ -1951,5 +1952,7 @@ init();
 </script>
 
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
+<script src="/js/casino-sounds.js"></script>
+<script src="/js/cookie-consent.js"></script>
 </body>
 </html>

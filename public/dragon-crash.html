@@ -10,7 +10,7 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
   --bg:#04040a;--gold:#f0c060;--gold2:#ffd980;--green:#00e676;--red:#ff3d71;
-  --neon:#00e5ff;--cream:#e8e0d0;--orange:#ff8c00;
+  --neon:#c9a84c;--cream:#e8e0d0;--orange:#ff8c00;
   --border:rgba(255,255,255,0.08);--glass:rgba(255,255,255,0.04);
 }
 html,body{height:100%;overflow:hidden;}
@@ -40,7 +40,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 
 .hist-bar{position:absolute;top:10px;left:10px;right:10px;display:flex;gap:4px;flex-wrap:nowrap;overflow:hidden;pointer-events:none;z-index:5;}
 .hp{padding:2px 9px;border-radius:20px;font-family:'DM Mono',monospace;font-size:10px;font-weight:700;flex-shrink:0;}
-.hp-low{background:rgba(0,229,255,.14);color:var(--neon);}
+.hp-low{background:rgba(201,168,76,.14);color:var(--neon);}
 .hp-mid{background:rgba(240,192,96,.14);color:var(--gold);}
 .hp-hi{background:rgba(255,153,0,.16);color:#ff9900;}
 .hp-cr{background:rgba(255,61,113,.14);color:var(--red);}
@@ -122,12 +122,12 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 .sw{position:relative;width:38px;height:20px;cursor:pointer;flex-shrink:0;}
 .sw input{opacity:0;width:0;height:0;}
 .sw-t{position:absolute;inset:0;border-radius:10px;background:rgba(255,255,255,.1);transition:.25s;}
-.sw input:checked~.sw-t{background:rgba(0,229,255,.4);}
+.sw input:checked~.sw-t{background:rgba(201,168,76,.4);}
 .sw-k{position:absolute;height:14px;width:14px;left:3px;bottom:3px;border-radius:50%;background:rgba(232,224,208,.4);transition:.25s;}
 .sw input:checked~.sw-k{transform:translateX(18px);background:var(--neon);}
 .aval-inp{width:72px;padding:7px 9px;background:rgba(0,0,0,.4);border:1px solid var(--border);
   border-radius:7px;color:var(--neon);font-family:'DM Mono',monospace;font-size:12px;outline:none;}
-.aval-inp:focus{border-color:rgba(0,229,255,.4);}
+.aval-inp:focus{border-color:rgba(201,168,76,.4);}
 .arow-lbl{font-size:11px;color:rgba(232,224,208,.4);}
 
 /* bet-btn — layout wrapper; colors handled by game-ui.css btn-* classes */
@@ -179,7 +179,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 .stats-tab{padding:14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;}
 .pf-box{padding:9px 11px;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;}
 .pf-lbl{font-size:10px;letter-spacing:1px;color:rgba(232,224,208,.3);margin-bottom:4px;}
-.pf-hash{font-family:'DM Mono',monospace;font-size:9px;color:rgba(0,229,255,.5);word-break:break-all;line-height:1.5;}
+.pf-hash{font-family:'DM Mono',monospace;font-size:9px;color:rgba(201,168,76,.5);word-break:break-all;line-height:1.5;}
 .lv-lbl{font-size:10px;letter-spacing:2px;color:rgba(232,224,208,.25);margin-bottom:6px;}
 .lv-item{display:flex;align-items:center;justify-content:space-between;
   padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:11px;}
@@ -800,7 +800,7 @@ function draw(ts){
     var col=lineColor();
     var grad=ctx.createLinearGradient(0,0,0,H);
     if(state===ST.CRASH){grad.addColorStop(0,'rgba(255,61,113,0.18)');grad.addColorStop(1,'rgba(255,61,113,0)');}
-    else if(mult<2){grad.addColorStop(0,'rgba(0,229,255,0.12)');grad.addColorStop(1,'rgba(0,229,255,0)');}
+    else if(mult<2){grad.addColorStop(0,'rgba(201,168,76,0.12)');grad.addColorStop(1,'rgba(201,168,76,0)');}
     else if(mult<5){grad.addColorStop(0,'rgba(240,192,96,0.15)');grad.addColorStop(1,'rgba(240,192,96,0)');}
     else{grad.addColorStop(0,'rgba(255,100,0,0.18)');grad.addColorStop(1,'rgba(255,100,0,0)');}
     ctx.beginPath();
@@ -1056,7 +1056,7 @@ function drawEgg(){
 
 function lineColor(){
   if(state===ST.CRASH)return'#ff3d71';
-  if(mult<2)return'#00e5ff';
+  if(mult<2)return'#c9a84c';
   if(mult<5)return'#f0c060';
   if(mult<10)return'#ff9900';
   return'#ff6030';
@@ -1536,5 +1536,7 @@ requestAnimationFrame(draw);
 startWait();
 </script>
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
+<script src="/js/casino-sounds.js"></script>
+<script src="/js/cookie-consent.js"></script>
 </body>
 </html>

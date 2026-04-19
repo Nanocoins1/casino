@@ -9,7 +9,7 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{--bg:#04040a;--gold:#f0c060;--gold2:#ffd980;--green:#00e676;--red:#ff3d71;
-  --neon:#00e5ff;--cream:#e8e0d0;--border:rgba(255,255,255,0.08);--glass:rgba(255,255,255,0.04);
+  --neon:#c9a84c;--cream:#e8e0d0;--border:rgba(255,255,255,0.08);--glass:rgba(255,255,255,0.04);
   --card-bg:#fdf8ef;--card-red:#cc2222;--card-blk:#0a0a18;}
 html,body{height:100%;overflow:hidden;}
 body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cream);display:flex;flex-direction:column;}
@@ -293,9 +293,9 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 
     <div class="stats-grid">
       <div class="sb"><div class="sb-v pos" id="stW">0</div><div class="sb-l">WON</div></div>
-      <div class="sb"><div class="sb-v neg" id="stL">0</div><div class="sb-l">PRARASTA</div></div>
-      <div class="sb"><div class="sb-v" id="stStr">0</div><div class="sb-l">SERIJA</div></div>
-      <div class="sb"><div class="sb-v" id="stBest">0</div><div class="sb-l">GERIAUSIA</div></div>
+      <div class="sb"><div class="sb-v neg" id="stL">0</div><div class="sb-l">LOST</div></div>
+      <div class="sb"><div class="sb-v" id="stStr">0</div><div class="sb-l">STREAK</div></div>
+      <div class="sb"><div class="sb-v" id="stBest">0</div><div class="sb-l">BEST</div></div>
     </div>
 
     <div class="sep"></div>
@@ -444,7 +444,7 @@ function startRound(){
   betAmt = parseInt(document.getElementById('betInp').value)||100;
   if(betAmt < 10) return;
   if(betAmt > 50000){ betAmt = 50000; document.getElementById('betInp').value = 50000; }
-  if(betAmt > tokens){ showToast('Nepakanka žetonų','loss'); return; }
+  if(betAmt > tokens){ showToast('Insufficient balance','loss'); return; }
 
   if(deck.length < 10) buildDeck();
 
@@ -470,7 +470,7 @@ function startRound(){
   document.getElementById('potBox').style.display = 'flex';
 
   document.getElementById('multEl').className = 'mult-num';
-  document.getElementById('multSub').textContent = 'ŠI KORTA — AUKŠTESNĖ AR ŽEMESNĖ?';
+  document.getElementById('multSub').textContent = 'HIGHER OR LOWER?';
 
   updateOdds();
   updateMult();
@@ -518,7 +518,7 @@ function guess(dir){
     updateOdds();
     updateStreak();
     showFlash('TEISINGAI!', 'correct');
-    document.getElementById('multSub').textContent = 'TEISINGAI! TĘSK ARBA IŠIMK';
+    document.getElementById('multSub').textContent = 'CORRECT! CONTINUE OR CASH OUT';
     updateStats();
   } else {
     // Wrong
@@ -535,7 +535,7 @@ function guess(dir){
     document.getElementById('multSub').textContent = 'NETEISINGA — PRAWON';
     stats.l++;
     showFlash('NETEISINGA!', 'wrong');
-    showToast('Neteisinga! Pralaimėta &#129689;'+fmt(betAmt),'loss');
+    showToast('Neteisinga! Lost &#129689;'+fmt(betAmt),'loss');
     logGame(betAmt, 0);
     updateStreak();
     updateStats();
@@ -559,7 +559,7 @@ function cashout(){
   document.getElementById('cashoutBtn').style.display = 'none';
   document.getElementById('potBox').style.display = 'none';
   document.getElementById('dealBtn').disabled = false;
-  document.getElementById('multSub').textContent = 'LAIMĖJOTE! +&#129689;'+fmt(won);
+  document.getElementById('multSub').textContent = 'YOU WIN! +&#129689;'+fmt(won);
   showToast('x'+mult.toFixed(2)+' &#129689;+'+fmt(won-betAmt),'win');
   logGame(betAmt, won);
   updateStreak();
@@ -631,5 +631,7 @@ updateStats();
 updateStreak();
 if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(function(){});
 </script>
+<script src="/js/casino-sounds.js"></script>
+<script src="/js/cookie-consent.js"></script>
 </body>
 </html>

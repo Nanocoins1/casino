@@ -11,7 +11,7 @@
 :root{
   --bg:#04040a;--bg2:#080812;
   --gold:#f0c060;--gold2:#ffd980;--gold3:#8a6020;
-  --green:#00e676;--red:#ff3d71;--neon:#00e5ff;
+  --green:#00e676;--red:#ff3d71;--neon:#c9a84c;
   --cream:#e8e0d0;--border:rgba(255,255,255,0.08);
   --glass:rgba(255,255,255,0.04);
   --card-bg:#fdf8f0;--card-back1:#1a0a2e;--card-back2:#2d1060;
@@ -200,9 +200,9 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 <body>
 
 <header class="header">
-  <a href="/" class="back-btn">← Atgal</a>
-  <div class="game-title">🎴 VIDEO POKERIS</div>
-  <div class="balance"><span>LIKUTIS</span><span id="balanceDisplay">0</span> ¢</div>
+  <a href="/" class="back-btn">← Lobby</a>
+  <div class="game-title">🎴 VIDEO POKER</div>
+  <div class="balance"><span>BALANCE</span><span id="balanceDisplay">0</span> ¢</div>
 </header>
 
 <div class="main">
@@ -221,8 +221,8 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 
     <!-- Buttons -->
     <div class="controls-row">
-      <button class="btn btn-lg btn-gold action-btn" id="dealBtn" onclick="handleDeal()">🃏 DALINTI</button>
-      <button class="btn btn-lg btn-green action-btn draw-btn" id="drawBtn" onclick="handleDraw()" disabled>🔄 KEISTI</button>
+      <button class="btn btn-lg btn-gold action-btn" id="dealBtn" onclick="handleDeal()">🃏 DEAL</button>
+      <button class="btn btn-lg btn-green action-btn draw-btn" id="drawBtn" onclick="handleDraw()" disabled>🔄 DRAW</button>
     </div>
   </div>
 
@@ -230,7 +230,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
   <div class="side-panel">
 
     <div class="panel-section">
-      <div class="panel-title">Statymas</div>
+      <div class="panel-title">Bet</div>
       <div class="bet-row">
         <div class="coin-display" id="coinDisplay"></div>
         <div style="flex:1"></div>
@@ -245,7 +245,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
         <button class="bq" onclick="addBet(-1)">-1</button>
         <button class="bq" onclick="addBet(1)">+1</button>
       </div>
-      <button class="max-btn" onclick="setMaxBet()">MAX STATYMAS (5×)</button>
+      <button class="max-btn" onclick="setMaxBet()">MAX BET (5×)</button>
     </div>
 
     <div class="panel-section">
@@ -253,23 +253,23 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
       <table class="payout-table" id="payoutTable">
         <tr data-hand="Royal Flush">     <td>Royal Flush</td><td>800×</td></tr>
         <tr data-hand="Straight Flush">  <td>Straight Flush</td><td>50×</td></tr>
-        <tr data-hand="Four of a Kind">  <td>Keturios vienodos</td><td>25×</td></tr>
+        <tr data-hand="Four of a Kind">  <td>Four of a Kind</td><td>25×</td></tr>
         <tr data-hand="Full House">      <td>Full House</td><td>9×</td></tr>
-        <tr data-hand="Flush">           <td>Spalva (Flush)</td><td>6×</td></tr>
+        <tr data-hand="Flush">           <td>Flush</td><td>6×</td></tr>
         <tr data-hand="Straight">        <td>Straight</td><td>4×</td></tr>
-        <tr data-hand="Three of a Kind"> <td>Trys vienodos</td><td>3×</td></tr>
-        <tr data-hand="Two Pair">        <td>Dvi poros</td><td>2×</td></tr>
-        <tr data-hand="Jacks or Better"> <td>Valetas ar geriau</td><td>1×</td></tr>
-        <tr data-hand="Nothing">         <td>Nieko</td><td>0×</td></tr>
+        <tr data-hand="Three of a Kind"> <td>Three of a Kind</td><td>3×</td></tr>
+        <tr data-hand="Two Pair">        <td>Two Pair</td><td>2×</td></tr>
+        <tr data-hand="Jacks or Better"> <td>Jacks or Better</td><td>1×</td></tr>
+        <tr data-hand="Nothing">         <td>Nothing</td><td>0×</td></tr>
       </table>
     </div>
 
     <div class="panel-section">
-      <div class="panel-title">Statistika</div>
+      <div class="panel-title">Statistics</div>
       <div class="stats-grid">
         <div class="stat-box"><div class="stat-val" id="statGames">0</div><div class="stat-lbl">Games</div></div>
         <div class="stat-box"><div class="stat-val green" id="statWins">0</div><div class="stat-lbl">Wins</div></div>
-        <div class="stat-box"><div class="stat-val" id="statBet">0</div><div class="stat-lbl">Pastatyta</div></div>
+        <div class="stat-box"><div class="stat-val" id="statBet">0</div><div class="stat-lbl">Wagered</div></div>
         <div class="stat-box"><div class="stat-val green" id="statWon">0</div><div class="stat-lbl">Won</div></div>
       </div>
     </div>
@@ -355,14 +355,14 @@ const PAYOUTS={
 const HAND_LT={
   'Royal Flush':'Royal Flush',
   'Straight Flush':'Straight Flush',
-  'Four of a Kind':'Keturios vienodos',
+  'Four of a Kind':'Four of a Kind',
   'Full House':'Full House',
-  'Flush':'Spalva (Flush)',
+  'Flush':'Flush',
   'Straight':'Straight',
-  'Three of a Kind':'Trys vienodos',
-  'Two Pair':'Dvi poros',
-  'Jacks or Better':'Valetas ar geriau',
-  'Nothing':'Nieko'
+  'Three of a Kind':'Three of a Kind',
+  'Two Pair':'Two Pair',
+  'Jacks or Better':'Jacks or Better',
+  'Nothing':'Nothing'
 };
 
 // ── Hand evaluation ──
@@ -461,7 +461,7 @@ function toggleHold(i){
 
 // ── Deal ──
 function handleDeal(){
-  if(balance<bet){alert('Nepakanka žetonų!');return;}
+  if(balance<bet){alert('Insufficient balance!');return;}
   if(phase==='drawing')return;
 
   hideResult();
@@ -608,5 +608,7 @@ function logGame(result,won){
 }
 </script>
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
+<script src="/js/casino-sounds.js"></script>
+<script src="/js/cookie-consent.js"></script>
 </body>
 </html>

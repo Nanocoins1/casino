@@ -87,13 +87,13 @@ body::before {
   background: linear-gradient(135deg,
     rgba(240,192,96,.55) 0%,
     rgba(255,215,0,.35) 25%,
-    rgba(0,229,255,.25) 50%,
+    rgba(255,215,0,.30) 50%,
     rgba(240,192,96,.35) 75%,
     rgba(255,215,0,.5) 100%);
   box-shadow:
     0 0 50px rgba(240,192,96,.18),
     0 0 100px rgba(240,192,96,.07),
-    0 0 30px rgba(0,229,255,.08);
+    0 0 30px rgba(240,192,96,.08);
   flex-shrink: 0;
 }
 .machine-inner {
@@ -198,8 +198,8 @@ body::before {
   animation: winLit .7s ease-in-out infinite alternate;
 }
 @keyframes winLit {
-  from { border-color: var(--wc, #00e5ff); box-shadow: 0 0 10px var(--wc,#00e5ff), inset 0 0 8px rgba(0,229,255,.1); }
-  to   { border-color: var(--wc, #00e5ff); box-shadow: 0 0 28px var(--wc,#00e5ff), inset 0 0 18px rgba(0,229,255,.2); }
+  from { border-color: var(--wc, #f0c060); box-shadow: 0 0 10px var(--wc,#f0c060), inset 0 0 8px rgba(240,192,96,.1); }
+  to   { border-color: var(--wc, #f0c060); box-shadow: 0 0 28px var(--wc,#f0c060), inset 0 0 18px rgba(240,192,96,.2); }
 }
 
 /* Canvas overlay for win lines */
@@ -223,10 +223,10 @@ body::before {
   transition: all .2s;
 }
 .pl-tag.active {
-  border-color: var(--lc, #00e5ff);
-  background: rgba(0,229,255,.1);
-  color: var(--lc, #00e5ff);
-  box-shadow: 0 0 8px var(--lc,#00e5ff);
+  border-color: var(--lc, #f0c060);
+  background: rgba(var(--lc-rgb, 240,192,96),.1);
+  color: var(--lc, #f0c060);
+  box-shadow: 0 0 8px var(--lc,#f0c060);
 }
 
 /* ── LAST WIN ────────────────────────────────── */
@@ -292,7 +292,7 @@ body::before {
 }
 .ctrl-auto-count {
   font-family: 'DM Mono', monospace; font-size: 11px;
-  color: rgba(0,229,255,.6); min-width: 24px;
+  color: rgba(240,192,96,.7); min-width: 24px;
 }
 .ctrl-spin { flex: 1; min-width: 160px; }
 
@@ -327,7 +327,7 @@ body::before {
 .p-auto-sel option { background: #0a0a18; }
 .p-auto-count {
   font-family: 'DM Mono', monospace; font-size: 11px;
-  color: rgba(0,229,255,.6); min-width: 28px; text-align: right;
+  color: rgba(240,192,96,.7); min-width: 28px; text-align: right;
 }
 
 /* payout table */
@@ -401,7 +401,7 @@ body::before {
   to   { filter: drop-shadow(0 0 40px rgba(255,215,0,1)); }
 }
 .win-sub { font-size: 14px; color: rgba(232,224,208,.5); margin-bottom: 6px; }
-.win-detail { font-size: 12px; color: #00e5ff; letter-spacing: 1px; margin-bottom: 18px; }
+.win-detail { font-size: 12px; color: #f0c060; letter-spacing: 1px; margin-bottom: 18px; }
 .win-counter-note { font-family:'DM Mono',monospace; font-size:11px; color:rgba(232,224,208,.3); margin-bottom:12px; }
 
 /* particles canvas */
@@ -424,19 +424,19 @@ body::before {
 
 /* ── SPINNING state ──────────────────────────── */
 #spinBtn.spinning {
-  background: linear-gradient(180deg,#005070,#00e5ff,#004060) !important;
-  color: #001824 !important;
+  background: linear-gradient(180deg,#5a3c00,#c9861c,#3a2600) !important;
+  color: #fff8e0 !important;
   animation: spinPulse .6s ease-in-out infinite alternate;
-  box-shadow: 0 6px 0 #002840, 0 8px 20px rgba(0,229,255,.35),
-    inset 0 1px 0 rgba(180,255,255,.4) !important;
+  box-shadow: 0 6px 0 #2a1800, 0 8px 20px rgba(201,134,28,.35),
+    inset 0 1px 0 rgba(255,220,120,.4) !important;
 }
 @keyframes spinPulse {
-  from { box-shadow: 0 6px 0 #002840, 0 8px 14px rgba(0,229,255,.3), inset 0 1px 0 rgba(180,255,255,.35); }
-  to   { box-shadow: 0 6px 0 #002840, 0 12px 30px rgba(0,229,255,.7), inset 0 1px 0 rgba(180,255,255,.5), 0 0 40px rgba(0,229,255,.2); }
+  from { box-shadow: 0 6px 0 #2a1800, 0 8px 14px rgba(201,134,28,.3), inset 0 1px 0 rgba(255,220,120,.35); }
+  to   { box-shadow: 0 6px 0 #2a1800, 0 12px 30px rgba(201,134,28,.7), inset 0 1px 0 rgba(255,220,120,.5), 0 0 40px rgba(201,134,28,.2); }
 }
 #spinBtn2.spinning {
-  background: linear-gradient(180deg,#005070,#00e5ff,#004060) !important;
-  color: #001824 !important;
+  background: linear-gradient(180deg,#5a3c00,#c9861c,#3a2600) !important;
+  color: #fff8e0 !important;
   animation: spinPulse .6s ease-in-out infinite alternate;
 }
 
@@ -473,7 +473,7 @@ body::before {
 
     <!-- Paylines legend -->
     <div class="pl-legend" id="plLegend">
-      <div class="pl-tag" id="plt0" style="--lc:#00e5ff">L1 MID</div>
+      <div class="pl-tag" id="plt0" style="--lc:#e8e0d0">L1 MID</div>
       <div class="pl-tag" id="plt1" style="--lc:#f0c060">L2 TOP</div>
       <div class="pl-tag" id="plt2" style="--lc:#00ff88">L3 BOT</div>
       <div class="pl-tag" id="plt3" style="--lc:#ff44cc">L4 V</div>
@@ -641,7 +641,7 @@ var SYMS = [
   {id:3, ch:'\u{1F347}', name:'Grapes',  color:'#aa44ff', bg:'rgba(80,10,150,.5)', pays:[0,0,5,10,20]},
   {id:4, ch:'\u{1F514}', name:'Bell',    color:'#f0c060', bg:'rgba(120,80,0,.5)',  pays:[0,0,10,25,50]},
   {id:5, ch:'\u2B50',    name:'Star',    color:'#ffe060', bg:'rgba(130,100,0,.5)', pays:[0,0,15,35,75]},
-  {id:6, ch:'\u{1F48E}', name:'Diamond', color:'#00e5ff', bg:'rgba(0,80,140,.5)',  pays:[0,0,25,75,200]},
+  {id:6, ch:'\u{1F48E}', name:'Diamond', color:'#60a5fa', bg:'rgba(0,60,130,.5)',  pays:[0,0,25,75,200]},
   {id:7, ch:'\u{1F451}', name:'Crown',   color:'#ffd700', bg:'rgba(130,80,0,.5)',  pays:[0,0,40,150,500]},
   {id:8, ch:'\u{1F0CF}', name:'Wild',    color:'#ff44cc', bg:'rgba(100,0,80,.5)',  pays:[0,0,100,500,2000]},
   {id:9, ch:'\u2B21',    name:'Scatter', color:'#f0c060', bg:'rgba(100,70,0,.5)',  pays:[0,0,0,0,0]}
@@ -661,7 +661,7 @@ var LINES = [
   [1,0,0,0,1],
   [1,2,2,2,1]
 ];
-var LINE_COLORS = ['#00e5ff','#f0c060','#00ff88','#ff44cc','#ff8820','#aa44ff','#ffe033','#ff4466','#aaffaa'];
+var LINE_COLORS = ['#e8e0d0','#f0c060','#4ade80','#f472b6','#fb923c','#a78bfa','#facc15','#f87171','#86efac'];
 var LINE_NAMES  = ['MID','TOP','BOT','V','∧','↘','↗','⌒T','⌣B'];
 
 var MAX_BET = 50000;
@@ -1186,10 +1186,8 @@ function onAllStopped(bet, totalWin, wins, grid) {
   // win UI
   if (totalWin >= bet * 100) {
     showWinOverlay(totalWin, wins, 'MEGA WIN');
-    launchParticles(true);
   } else if (totalWin >= bet * 30) {
     showWinOverlay(totalWin, wins, 'BIG WIN');
-    launchParticles(false);
   } else if (totalWin > 0) {
     showToast('+' + fmtN(totalWin) + ' tokens', 'win');
     playWin();
@@ -1508,8 +1506,8 @@ function updateAutoUI() {
     if (!el) return;
     if (autoOn) {
       el.classList.add('btn-glass'); // just keep as glass with neon tint via inline
-      el.style.borderColor = 'rgba(0,229,255,.5)';
-      el.style.color = '#00e5ff';
+      el.style.borderColor = 'rgba(240,192,96,.5)';
+      el.style.color = '#f0c060';
     } else {
       el.style.borderColor = '';
       el.style.color = '';
@@ -1641,5 +1639,7 @@ function init() {
 init();
 </script>
 <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(function(){});</script>
+<script src="/js/casino-sounds.js"></script>
+<script src="/js/cookie-consent.js"></script>
 </body>
 </html>

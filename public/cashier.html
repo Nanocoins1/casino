@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Orbitron:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-:root{--bg:#04040a;--gold:#f0c060;--gold2:#ffd980;--green:#00e676;--red:#ff3d71;--neon:#00e5ff;--cream:#e8e0d0;--border:rgba(255,255,255,0.08);--glass:rgba(255,255,255,0.04);}
+:root{--bg:#04040a;--gold:#f0c060;--gold2:#ffd980;--green:#00e676;--red:#ff3d71;--neon:#c9a84c;--cream:#e8e0d0;--border:rgba(255,255,255,0.08);--glass:rgba(255,255,255,0.04);}
 body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cream);min-height:100vh;}
 .header{height:60px;padding:0 28px;display:flex;align-items:center;justify-content:space-between;background:rgba(4,4,10,.95);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100;}
 .logo{font-family:'Orbitron',monospace;font-size:16px;font-weight:900;letter-spacing:3px;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
@@ -30,13 +30,80 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 .label{font-size:9px;letter-spacing:3px;color:rgba(232,224,208,.3);text-transform:uppercase;margin-bottom:8px;display:block;}
 
 /* Currency selector */
-.cur-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:24px;}
-.cur-btn{padding:14px 8px;border-radius:12px;border:1px solid var(--border);background:rgba(0,0,0,.3);cursor:pointer;text-align:center;transition:all .2s;}
-.cur-btn:hover{border-color:rgba(240,192,96,.3);}
-.cur-btn.active{border-color:var(--gold);background:rgba(240,192,96,.08);}
-.cur-icon{font-size:22px;margin-bottom:4px;}
-.cur-name{font-size:10px;color:rgba(232,224,208,.35);letter-spacing:1px;}
-.cur-sym{font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);font-weight:700;}
+.cur-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+.cur-btn{
+  padding:16px 12px;border-radius:14px;border:1px solid var(--border);
+  background:rgba(0,0,0,.35);cursor:pointer;text-align:left;transition:all .25s;
+  position:relative;overflow:hidden;
+}
+.cur-btn::before{
+  content:'';position:absolute;inset:0;opacity:0;transition:opacity .25s;
+  background:linear-gradient(135deg,rgba(240,192,96,.06),rgba(240,192,96,.02));
+}
+.cur-btn:hover{border-color:rgba(240,192,96,.35);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.4);}
+.cur-btn:hover::before{opacity:1;}
+.cur-btn.active{border-color:var(--gold);background:rgba(240,192,96,.07);box-shadow:0 0 0 1px rgba(240,192,96,.15),0 6px 24px rgba(240,192,96,.1);}
+.cur-btn.active::before{opacity:1;}
+.cur-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.cur-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0;}
+.cur-sym{font-family:'DM Mono',monospace;font-size:13px;color:var(--gold);font-weight:700;}
+.cur-name{font-size:9px;color:rgba(232,224,208,.35);letter-spacing:1px;margin-bottom:4px;}
+.cur-price-row{display:flex;align-items:center;gap:5px;}
+.cur-price{font-family:'DM Mono',monospace;font-size:12px;color:rgba(232,224,208,.7);}
+.cur-change{font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;letter-spacing:.3px;}
+.cur-change.up{color:#00e676;background:rgba(0,230,118,.12);}
+.cur-change.dn{color:#ff3d71;background:rgba(255,61,113,.12);}
+.cur-change.flat{color:rgba(232,224,208,.4);background:rgba(255,255,255,.05);}
+.cur-nets{display:flex;gap:3px;margin-top:8px;flex-wrap:wrap;}
+.cur-net-pill{font-size:8px;font-family:'DM Mono',monospace;padding:2px 6px;border-radius:4px;letter-spacing:.5px;font-weight:700;}
+
+/* Network selector */
+.net-select-wrap{margin-bottom:20px;animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.net-select-label{font-size:9px;letter-spacing:3px;color:rgba(232,224,208,.3);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.net-select-label span{flex:1;height:1px;background:rgba(255,255,255,.05);}
+.net-grid{display:flex;gap:8px;flex-wrap:wrap;}
+.net-btn{
+  flex:1;min-width:0;padding:12px 10px;border-radius:12px;border:1px solid var(--border);
+  background:rgba(0,0,0,.3);cursor:pointer;text-align:center;transition:all .2s;
+}
+.net-btn:hover{border-color:rgba(255,255,255,.2);transform:translateY(-1px);}
+.net-btn.active{border-color:var(--net-color,var(--gold));background:rgba(var(--net-rgb,240,192,96),.08);
+  box-shadow:0 0 0 1px rgba(var(--net-rgb,240,192,96),.15);}
+.net-chain{font-size:11px;font-weight:700;font-family:'DM Mono',monospace;margin-bottom:3px;}
+.net-label{font-size:9px;letter-spacing:1px;color:rgba(232,224,208,.4);}
+.net-fee{font-size:9px;margin-top:4px;font-family:'DM Mono',monospace;}
+.net-fee.free{color:#00e676;}
+.net-fee.paid{color:rgba(232,224,208,.35);}
+
+/* Live ticker */
+.live-ticker{
+  display:flex;gap:0;overflow:hidden;position:relative;
+  background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.06);
+  border-radius:10px;padding:0;margin-bottom:20px;
+}
+.ticker-item{
+  display:flex;align-items:center;gap:8px;padding:10px 20px;
+  border-right:1px solid rgba(255,255,255,.06);flex:1;justify-content:center;
+}
+.ticker-item:last-child{border-right:none;}
+.ticker-sym{font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);font-weight:700;}
+.ticker-price{font-family:'DM Mono',monospace;font-size:13px;color:rgba(232,224,208,.9);}
+.ticker-chg{font-size:10px;font-weight:700;}
+.ticker-chg.up{color:#00e676;}
+.ticker-chg.dn{color:#ff3d71;}
+.ticker-chg.flat{color:rgba(232,224,208,.3);}
+.ticker-dot{width:6px;height:6px;border-radius:50%;background:#00e676;animation:pulse 2s ease infinite;flex-shrink:0;}
+.live-badge{
+  position:absolute;top:50%;left:10px;transform:translateY(-50%);
+  font-size:8px;letter-spacing:2px;color:#00e676;font-weight:700;
+  display:flex;align-items:center;gap:4px;
+}
+@media(max-width:480px){
+  .cur-grid{grid-template-columns:1fr 1fr 1fr;}
+  .ticker-item{padding:8px 10px;}
+  .net-grid{flex-direction:column;}
+}
 
 /* Amount presets */
 .preset-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
@@ -60,11 +127,11 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 /* Payment pending */
 .payment-box{padding:28px;border-radius:14px;background:rgba(0,0,0,.4);border:1px solid rgba(240,192,96,.2);text-align:center;}
 .payment-box .address-wrap{background:rgba(0,0,0,.5);border:1px solid var(--border);border-radius:10px;padding:16px;margin:20px 0;word-break:break-all;font-family:'DM Mono',monospace;font-size:13px;color:var(--neon);position:relative;}
-.copy-addr{position:absolute;top:10px;right:10px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:rgba(0,229,255,.08);color:var(--neon);font-size:10px;cursor:pointer;font-family:'Space Grotesk',sans-serif;}
+.copy-addr{position:absolute;top:10px;right:10px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:rgba(201,168,76,.08);color:var(--neon);font-size:10px;cursor:pointer;font-family:'Space Grotesk',sans-serif;}
 .amount-big{font-family:'Orbitron',monospace;font-size:32px;font-weight:700;color:var(--gold);margin:12px 0;}
 .status-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:11px;letter-spacing:1px;font-weight:700;}
 .status-waiting{background:rgba(240,192,96,.1);border:1px solid rgba(240,192,96,.25);color:var(--gold);}
-.status-confirming{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25);color:var(--neon);}
+.status-confirming{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);color:var(--neon);}
 .status-finished{background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.25);color:var(--green);}
 .pulse{animation:pulse 1.5s ease infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
@@ -90,7 +157,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 .s-failed{background:rgba(255,61,113,.1);color:var(--red);}
 
 /* Info boxes */
-.info-box{padding:14px 16px;border-radius:10px;background:rgba(0,229,255,.04);border:1px solid rgba(0,229,255,.12);font-size:12px;color:rgba(232,224,208,.45);line-height:1.8;margin-top:16px;}
+.info-box{padding:14px 16px;border-radius:10px;background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.12);font-size:12px;color:rgba(232,224,208,.45);line-height:1.8;margin-top:16px;}
 .info-box strong{color:var(--neon);}
 .warn-box{padding:14px 16px;border-radius:10px;background:rgba(240,192,96,.04);border:1px solid rgba(240,192,96,.15);font-size:12px;color:rgba(232,224,208,.45);line-height:1.8;margin-bottom:20px;}
 .warn-box strong{color:var(--gold);}
@@ -103,7 +170,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
   width:100%;min-height:120px;border-radius:20px;overflow:hidden;position:relative;
   margin-bottom:28px;display:flex;align-items:flex-end;padding:20px 24px;
   background:linear-gradient(135deg,rgba(8,6,2,0.88),rgba(20,14,4,0.92)),
-    url('/img/cashier-hero.png') center/cover no-repeat;
+    url('/img/cashier-hero.jpg') center/cover no-repeat;
   background-blend-mode:multiply;
   border:1px solid rgba(201,168,76,0.18);
   box-shadow:0 8px 32px rgba(0,0,0,0.5),0 0 0 1px rgba(201,168,76,0.06);
@@ -182,7 +249,7 @@ var PAGE_LANGS = {
     expiresIn:'⏱ Baigiasi per:',
     waitingPay:'⏳ LAUKIAMA MOKĖJIMO',
     confirming:'🔄 TVIRTINAMA...',
-    minAlert:'Minimalus depozitas — 1 000 žetonų',
+    minAlert:'Minimalus depozitas — 500 žetonų',
     minWdAlert:'Minimalus išėmimas — 5 000 žetonų',
     enterAddr:'Įveskite piniginės adresą',
     errConn:'Klaida kuriant depozitą. Bandykite dar kartą.',
@@ -236,7 +303,7 @@ var PAGE_LANGS = {
     expiresIn:'⏱ Expires in:',
     waitingPay:_t('waitingPay'),
     confirming:'🔄 CONFIRMING...',
-    minAlert:'Minimum deposit is 1,000 tokens',
+    minAlert:'Minimum deposit is 500 tokens',
     minWdAlert:'Minimum withdrawal is 5,000 tokens',
     enterAddr:'Enter your wallet address',
     errConn:'Error creating deposit. Try again.',
@@ -290,7 +357,7 @@ var PAGE_LANGS = {
     expiresIn:'⏱ Истекает через:',
     waitingPay:'⏳ ОЖИДАНИЕ ПЛАТЕЖА',
     confirming:'🔄 ПОДТВЕРЖДЕНИЕ...',
-    minAlert:'Минимальный депозит — 1 000 токенов',
+    minAlert:'Минимальный депозит — 500 токенов',
     minWdAlert:'Минимальный вывод — 5 000 токенов',
     enterAddr:'Введите адрес кошелька',
     errConn:'Ошибка создания депозита. Попробуйте снова.',
@@ -344,7 +411,7 @@ var PAGE_LANGS = {
     expiresIn:'⏱ Läuft ab in:',
     waitingPay:'⏳ WARTE AUF ZAHLUNG',
     confirming:'🔄 BESTÄTIGUNG...',
-    minAlert:'Mindesteinzahlung 1.000 Token',
+    minAlert:'Mindesteinzahlung 500 Token',
     minWdAlert:'Mindestabhebung 5.000 Token',
     enterAddr:'Wallet-Adresse eingeben',
     errConn:'Fehler beim Erstellen der Einzahlung. Erneut versuchen.',
@@ -398,7 +465,7 @@ var PAGE_LANGS = {
     expiresIn:'⏱ Wygasa za:',
     waitingPay:'⏳ OCZEKIWANIE NA PŁATNOŚĆ',
     confirming:'🔄 POTWIERDZANIE...',
-    minAlert:'Minimalna wpłata to 1 000 żetonów',
+    minAlert:'Minimalna wpłata to 500 żetonów',
     minWdAlert:'Minimalna wypłata to 5 000 żetonów',
     enterAddr:'Wprowadź adres portfela',
     errConn:'Błąd tworzenia wpłaty. Spróbuj ponownie.',
@@ -452,7 +519,7 @@ var PAGE_LANGS = {
     expiresIn:'⏱ Expire dans :',
     waitingPay:'⏳ EN ATTENTE DE PAIEMENT',
     confirming:'🔄 CONFIRMATION...',
-    minAlert:'Dépôt minimum 1 000 jetons',
+    minAlert:'Dépôt minimum 500 jetons',
     minWdAlert:'Retrait minimum 5 000 jetons',
     enterAddr:'Entrez l'adresse de votre portefeuille',
     errConn:'Erreur lors de la création du dépôt. Réessayez.',
@@ -506,7 +573,7 @@ var PAGE_LANGS = {
     expiresIn:'⏱ Bitiş:',
     waitingPay:'⏳ ÖDEME BEKLENİYOR',
     confirming:'🔄 ONAYLANIYOR...',
-    minAlert:'Minimum yatırım 1.000 token',
+    minAlert:'Minimum yatırım 500 token',
     minWdAlert:'Minimum çekim 5.000 token',
     enterAddr:'Cüzdan adresinizi girin',
     errConn:'Yatırım oluşturma hatası. Tekrar deneyin.',
@@ -560,7 +627,7 @@ var PAGE_LANGS = {
     expiresIn:'⏱ ينتهي خلال:',
     waitingPay:'⏳ في انتظار الدفع',
     confirming:'🔄 جارٍ التأكيد...',
-    minAlert:'الحد الأدنى للإيداع 1,000 رمز',
+    minAlert:'الحد الأدنى للإيداع 500 رمز',
     minWdAlert:'الحد الأدنى للسحب 5,000 رمز',
     enterAddr:'أدخل عنوان محفظتك',
     errConn:'خطأ في إنشاء الإيداع. حاول مرة أخرى.',
@@ -614,7 +681,7 @@ var PAGE_LANGS = {
     expiresIn:'⏱ 到期时间：',
     waitingPay:'⏳ 等待付款',
     confirming:'🔄 确认中...',
-    minAlert:'最低存款1,000代币',
+    minAlert:'最低存款500代币',
     minWdAlert:'最低提款5,000代币',
     enterAddr:'输入您的钱包地址',
     errConn:'创建存款时出错，请重试。',
@@ -668,7 +735,7 @@ var PAGE_LANGS = {
     expiresIn:'⏱ समाप्ति:',
     waitingPay:'⏳ भुगतान की प्रतीक्षा',
     confirming:'🔄 पुष्टि हो रही है...',
-    minAlert:'न्यूनतम जमा 1,000 टोकन',
+    minAlert:'न्यूनतम जमा 500 टोकन',
     minWdAlert:'न्यूनतम निकासी 5,000 टोकन',
     enterAddr:'अपना वॉलेट पता दर्ज करें',
     errConn:'जमा बनाने में त्रुटि। पुनः प्रयास करें।',
@@ -722,7 +789,7 @@ var PAGE_LANGS = {
     expiresIn:'⏱ Закінчується через:',
     waitingPay:'⏳ ОЧІКУВАННЯ ПЛАТЕЖУ',
     confirming:'🔄 ПІДТВЕРДЖЕННЯ...',
-    minAlert:'Мінімальний депозит — 1 000 токенів',
+    minAlert:'Мінімальний депозит — 500 токенів',
     minWdAlert:'Мінімальне виведення — 5 000 токенів',
     enterAddr:'Введіть адресу гаманця',
     errConn:'Помилка створення депозиту. Спробуйте знову.',
@@ -783,15 +850,22 @@ document.addEventListener('DOMContentLoaded', function(){
   <div class="cashier-hero">
     <div class="cashier-hero-text">
       <div class="cashier-hero-title">💳 CASHIER</div>
-      <div class="cashier-hero-sub">DEPOSIT & WITHDRAW · INSTANT CRYPTO PAYMENTS</div>
+      <div class="cashier-hero-sub">STABLECOINS ONLY · ZERO EXCHANGE RISK · INSTANT SETTLEMENT</div>
       <div class="cashier-hero-badges">
-        <span class="cashier-hero-badge">₿ Bitcoin</span>
-        <span class="cashier-hero-badge">Ξ Ethereum</span>
-        <span class="cashier-hero-badge">₮ USDT</span>
-        <span class="cashier-hero-badge">🔒 Secure</span>
-        <span class="cashier-hero-badge">⚡ Instant</span>
+        <span class="cashier-hero-badge">₮ USDT · TRC-20 / ERC-20 / BSC</span>
+        <span class="cashier-hero-badge">◎ USDC · Polygon / ETH / SOL</span>
+        <span class="cashier-hero-badge">€ EURC · MiCA Compliant</span>
+        <span class="cashier-hero-badge">🔒 Encrypted</span>
+        <span class="cashier-hero-badge">⚡ ~1 min</span>
       </div>
     </div>
+  </div>
+
+  <!-- Live price ticker -->
+  <div class="live-ticker" id="liveTicker">
+    <div class="ticker-item"><div class="ticker-dot"></div><span class="ticker-sym">USDT</span><span class="ticker-price" id="tp-usdt">$1.000</span><span class="ticker-chg flat" id="tc-usdt">—</span></div>
+    <div class="ticker-item"><span class="ticker-sym">USDC</span><span class="ticker-price" id="tp-usdc">$1.000</span><span class="ticker-chg flat" id="tc-usdc">—</span></div>
+    <div class="ticker-item"><span class="ticker-sym">EURC</span><span class="ticker-price" id="tp-eurc">$1.070</span><span class="ticker-chg flat" id="tc-eurc">—</span></div>
   </div>
 
   <div id="demoBanner" class="demo-banner" style="display:none;">
@@ -813,11 +887,11 @@ document.addEventListener('DOMContentLoaded', function(){
         <div class="cur-grid" id="curGrid"></div>
         <label class="label" data-i18n="tokenAmt">Token Amount</label>
         <div class="preset-row">
+          <div class="preset" onclick="setAmount(500)">🪙 500</div>
           <div class="preset" onclick="setAmount(1000)">🪙 1,000</div>
           <div class="preset" onclick="setAmount(5000)">🪙 5,000</div>
           <div class="preset" onclick="setAmount(10000)">🪙 10,000</div>
           <div class="preset" onclick="setAmount(50000)">🪙 50,000</div>
-          <div class="preset" onclick="setAmount(100000)">🪙 100,000</div>
         </div>
         <div class="inp-row">
           <div>
@@ -827,16 +901,22 @@ document.addEventListener('DOMContentLoaded', function(){
           <div class="arrow">⇄</div>
           <div>
             <label class="label" data-i18n="youGet">You Get (Tokens)</label>
-            <input class="inp" id="tokenAmountInp" type="number" placeholder="1000" oninput="calcFromTokens()"/>
+            <input class="inp" id="tokenAmountInp" type="number" placeholder="500" oninput="calcFromTokens()"/>
           </div>
         </div>
+        <!-- Network selector — shown after currency picked -->
+        <div class="net-select-wrap" id="netSelectWrap" style="display:none;">
+          <div class="net-select-label">Select Network <span></span></div>
+          <div class="net-grid" id="netGrid"></div>
+        </div>
+
         <div id="rateInfo" style="font-size:11px;color:rgba(232,224,208,.3);text-align:center;margin-bottom:16px;font-family:'DM Mono',monospace;"></div>
         <button class="btn btn-primary" onclick="createDeposit()" id="depositBtn" data-i18n="createDepBtn">Create Deposit Address →</button>
         <div class="info-box" style="margin-top:16px;">
-          <strong data-i18n="minDep">Minimum deposit:</strong> 1,000 tokens<br>
+          <strong data-i18n="minDep">Minimum deposit:</strong> 500 tokens (5 USDT)<br>
           <strong data-i18n="confirmLbl">Confirmations:</strong> <span data-i18n="confirms">1 block (fast)</span><br>
           <strong data-i18n="credited">Tokens credited:</strong> <span data-i18n="instantly">Instantly after confirmation</span><br>
-          <strong data-i18n="supported">Supported:</strong> BTC, ETH, USDT, BNB, TRX
+          <strong data-i18n="supported">Supported:</strong> USDT · USDC · EURC (stablecoins only)
         </div>
       </div>
     </div>
@@ -847,7 +927,8 @@ document.addEventListener('DOMContentLoaded', function(){
         <div class="payment-box">
           <div class="status-badge status-waiting pulse" id="payStatus" data-i18n="waitingPay">⏳ WAITING FOR PAYMENT</div>
           <div class="amount-big" id="payAmount">—</div>
-          <div style="font-size:12px;color:rgba(232,224,208,.3);margin-bottom:16px;" id="payCurLabel">—</div>
+          <div style="font-size:12px;color:rgba(232,224,208,.3);margin-bottom:8px;" id="payCurLabel">—</div>
+          <div id="payNetBadge" style="margin-bottom:12px;display:none;"></div>
           <div class="qr-placeholder" id="qrBox">QR code<br/>coming soon</div>
           <div class="address-wrap">
             <span id="payAddress">—</span>
@@ -931,6 +1012,10 @@ document.addEventListener('DOMContentLoaded', function(){
       </div>
       <label class="label" data-i18n="selCur">Select Currency</label>
       <div class="cur-grid" id="wdCurGrid"></div>
+      <div class="net-select-wrap" id="wdNetSelectWrap" style="display:none;">
+        <div class="net-select-label">Select Network <span></span></div>
+        <div class="net-grid" id="wdNetGrid"></div>
+      </div>
       <div class="inp-row">
         <div>
           <label class="label">Token Amount</label>
@@ -965,15 +1050,53 @@ const uid = localStorage.getItem('hrc_uid');
 const userName = localStorage.getItem('hrc_name');
 let currencies = [];
 let selectedCur = null;
+let selectedNet = null;   // selected network for deposit
 let wdSelectedCur = null;
+let wdSelectedNet = null;
 let activePaymentId = null;
 let pollInterval = null;
 let timerInterval = null;
 let expiresAt = null;
+let liveRates = {};       // CoinGecko live data keyed by cgId
 
 const fmt = n => Number(n||0).toLocaleString();
 
-// Load on start
+// ── CoinGecko live prices (free, no key) ────────────────────
+async function fetchLivePrices() {
+  try {
+    const ids = 'tether,usd-coin,euro-coin';
+    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`;
+    const d = await fetch(url).then(r=>r.json());
+    liveRates = d;
+    updateTicker();
+    // Re-render currency cards to show live prices
+    if(currencies.length) {
+      renderCurGrid('curGrid','deposit');
+      renderCurGrid('wdCurGrid','withdraw');
+    }
+  } catch(e) { /* offline — keep defaults */ }
+}
+
+function updateTicker() {
+  const map = { usdt:'tether', usdc:'usd-coin', eurc:'euro-coin' };
+  ['usdt','usdc','eurc'].forEach(sym => {
+    const cgKey = map[sym];
+    const data = liveRates[cgKey];
+    if(!data) return;
+    const price = data.usd;
+    const chg = data.usd_24h_change;
+    const priceEl = document.getElementById('tp-'+sym);
+    const chgEl   = document.getElementById('tc-'+sym);
+    if(priceEl) priceEl.textContent = '$' + price.toFixed(3);
+    if(chgEl) {
+      const sign = chg >= 0 ? '+' : '';
+      chgEl.textContent = sign + chg.toFixed(2) + '%';
+      chgEl.className = 'ticker-chg ' + (Math.abs(chg) < 0.05 ? 'flat' : chg > 0 ? 'up' : 'dn');
+    }
+  });
+}
+
+// ── Load on start ────────────────────────────────────────────
 window.onload = async () => {
   if(!uid) { alert('Please log in to the casino first!'); window.location.href='/'; return; }
   loadBalance();
@@ -982,45 +1105,150 @@ window.onload = async () => {
   currencies = d.currencies;
   renderCurGrid('curGrid', 'deposit');
   renderCurGrid('wdCurGrid', 'withdraw');
-  // Check demo mode
-  const dm = await fetch('/api/crypto/estimate?currency=btc&tokenAmount=1000').then(r=>r.json()).catch(()=>({}));
-  // Check if no API key
-  const testDep = await fetch('/api/crypto/status/DEMO_TEST').then(r=>r.json()).catch(()=>({}));
-  // Show demo banner check via headers — simple approach: always show if no key configured
+  fetchLivePrices();
+  // Refresh ticker every 60 s
+  setInterval(fetchLivePrices, 60000);
 };
 
 async function loadBalance() {
   if(!uid) return;
-  // Get from casino stats
   const r = await fetch(`/api/stats/${uid}`).then(r=>r.json()).catch(()=>({}));
   if(r.user) document.getElementById('balanceChip').textContent = '🪙 ' + fmt(r.user.tokens);
 }
 
-function renderCurGrid(containerId, mode) {
-  const grid = document.getElementById(containerId);
-  grid.innerHTML = currencies.map(c => `
-    <div class="cur-btn" id="${mode}_cur_${c.id}" onclick="selectCur('${c.id}','${mode}')">
-      <div class="cur-icon">${c.icon}</div>
-      <div class="cur-sym">${c.symbol}</div>
-      <div class="cur-name">${c.name}</div>
-    </div>
-  `).join('');
-  // Auto-select first
-  selectCur(currencies[0].id, mode);
+// ── Currency card rendering ───────────────────────────────────
+function getCurLivePrice(cur) {
+  const data = liveRates[cur.cgId];
+  if(!data) return null;
+  return { price: data.usd, change: data.usd_24h_change };
 }
 
+function hexToRgb(hex) {
+  // Convert hex like #627eea → "98,126,234"
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `${r},${g},${b}`;
+}
+
+const CUR_ICON_STYLES = {
+  usdt: 'background:linear-gradient(135deg,#26a17b,#1a7a5e);color:#fff;',
+  usdc: 'background:linear-gradient(135deg,#2775ca,#1a5490);color:#fff;',
+  eurc: 'background:linear-gradient(135deg,#003399,#0050cc);color:#fff;',
+};
+
+function renderCurGrid(containerId, mode) {
+  const grid = document.getElementById(containerId);
+  grid.innerHTML = currencies.map(c => {
+    const live = getCurLivePrice(c);
+    const price = live ? '$' + live.price.toFixed(3) : '$?.???';
+    const chg   = live ? live.change : null;
+    const chgHtml = chg !== null
+      ? `<span class="cur-change ${Math.abs(chg)<0.05?'flat':chg>0?'up':'dn'}">${chg>=0?'+':''}${chg.toFixed(2)}%</span>`
+      : `<span class="cur-change flat">LIVE</span>`;
+    const netPills = (c.networks||[]).map(n =>
+      `<span class="cur-net-pill" style="background:${n.color}20;color:${n.color};">${n.label}</span>`
+    ).join('');
+    return `
+    <div class="cur-btn" id="${mode}_cur_${c.id}" onclick="selectCur('${c.id}','${mode}')">
+      <div class="cur-header">
+        <div class="cur-icon" style="${CUR_ICON_STYLES[c.id]||''}">${c.icon}</div>
+        <div>
+          <div class="cur-sym">${c.symbol}</div>
+          <div class="cur-name">${c.name}</div>
+        </div>
+      </div>
+      <div class="cur-price-row">
+        <span class="cur-price">${price}</span>
+        ${chgHtml}
+      </div>
+      <div class="cur-nets">${netPills}</div>
+    </div>`;
+  }).join('');
+  // Keep selection after re-render
+  const curId = mode==='deposit' ? selectedCur?.id : wdSelectedCur?.id;
+  if(curId) document.getElementById(`${mode}_cur_${curId}`)?.classList.add('active');
+  else selectCur(currencies[0].id, mode);
+}
+
+// ── Network selector ──────────────────────────────────────────
+function renderNetGrid(cur, mode) {
+  if(!cur || !cur.networks || cur.networks.length === 0) {
+    document.getElementById('netSelectWrap').style.display = 'none';
+    return;
+  }
+  if(mode !== 'deposit') return;
+
+  document.getElementById('netSelectWrap').style.display = 'block';
+  const grid = document.getElementById('netGrid');
+  grid.innerHTML = cur.networks.map(n => `
+    <div class="net-btn" id="net_${n.id}"
+      style="--net-color:${n.color};--net-rgb:${hexToRgb(n.color)};"
+      onclick="selectNet('${n.id}')">
+      <div class="net-chain" style="color:${n.color};">${n.label}</div>
+      <div class="net-label">${n.chain}</div>
+      <div class="net-fee ${n.fee==='Free'?'free':'paid'}">${n.fee==='Free'?'⚡ Free':'⛽ '+n.fee}</div>
+    </div>
+  `).join('');
+  // Auto-pick first network
+  selectNet(cur.networks[0].id);
+}
+
+function selectNet(id) {
+  if(!selectedCur) return;
+  const net = selectedCur.networks.find(n=>n.id===id);
+  if(!net) return;
+  selectedNet = net;
+  document.querySelectorAll('#netGrid .net-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(`net_${id}`)?.classList.add('active');
+  updateRateInfo();
+}
+
+function renderWdNetGrid(cur) {
+  if(!cur || !cur.networks || cur.networks.length === 0) {
+    document.getElementById('wdNetSelectWrap').style.display = 'none';
+    return;
+  }
+  document.getElementById('wdNetSelectWrap').style.display = 'block';
+  const grid = document.getElementById('wdNetGrid');
+  grid.innerHTML = cur.networks.map(n => `
+    <div class="net-btn" id="wdnet_${n.id}"
+      style="--net-color:${n.color};--net-rgb:${hexToRgb(n.color)};"
+      onclick="selectWdNet('${n.id}')">
+      <div class="net-chain" style="color:${n.color};">${n.label}</div>
+      <div class="net-label">${n.chain}</div>
+      <div class="net-fee ${n.fee==='Free'?'free':'paid'}">${n.fee==='Free'?'⚡ Free':'⛽ '+n.fee}</div>
+    </div>
+  `).join('');
+  selectWdNet(cur.networks[0].id);
+}
+
+function selectWdNet(id) {
+  if(!wdSelectedCur) return;
+  const net = wdSelectedCur.networks.find(n=>n.id===id);
+  if(!net) return;
+  wdSelectedNet = net;
+  document.querySelectorAll('#wdNetGrid .net-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(`wdnet_${id}`)?.classList.add('active');
+}
+
+// ── Currency selection ────────────────────────────────────────
 function selectCur(id, mode) {
   const cur = currencies.find(c=>c.id===id);
   if(!cur) return;
   if(mode==='deposit') {
     selectedCur = cur;
+    selectedNet = null;
     document.querySelectorAll('#curGrid .cur-btn').forEach(b=>b.classList.remove('active'));
     document.getElementById(`deposit_cur_${id}`)?.classList.add('active');
+    renderNetGrid(cur, 'deposit');
     updateRateInfo();
   } else {
     wdSelectedCur = cur;
+    wdSelectedNet = null;
     document.querySelectorAll('#wdCurGrid .cur-btn').forEach(b=>b.classList.remove('active'));
     document.getElementById(`withdraw_cur_${id}`)?.classList.add('active');
+    renderWdNetGrid(cur);
     calcWd();
   }
 }
@@ -1033,7 +1261,7 @@ function setAmount(tokens) {
 function calcFromTokens() {
   if(!selectedCur) return;
   const tokens = parseInt(document.getElementById('tokenAmountInp').value)||0;
-  const crypto = (tokens/selectedCur.tokensPerUnit).toFixed(8);
+  const crypto = (tokens/selectedCur.tokensPerUnit).toFixed(6);
   document.getElementById('cryptoAmountInp').value = tokens>0?crypto:'';
   updateRateInfo();
 }
@@ -1048,29 +1276,36 @@ function calcFromCrypto() {
 
 function updateRateInfo() {
   if(!selectedCur) return;
+  const net = selectedNet ? ` · ${selectedNet.label} (${selectedNet.chain})` : '';
   document.getElementById('rateInfo').textContent =
-    `Rate: 1 ${selectedCur.symbol} = ${fmt(selectedCur.tokensPerUnit)} tokens`;
+    `1 ${selectedCur.symbol} = ${fmt(selectedCur.tokensPerUnit)} tokens${net}`;
 }
 
 function calcWd() {
   if(!wdSelectedCur) return;
   const tokens = parseInt(document.getElementById('wdTokenInp').value)||0;
-  const crypto = (tokens/wdSelectedCur.tokensPerUnit).toFixed(8);
+  const crypto = (tokens/wdSelectedCur.tokensPerUnit).toFixed(6);
   document.getElementById('wdCryptoInp').value = tokens>0?crypto:'';
   document.getElementById('wdRateInfo').textContent =
-    `Rate: 1 ${wdSelectedCur.symbol} = ${fmt(wdSelectedCur.tokensPerUnit)} tokens`;
+    `1 ${wdSelectedCur.symbol} = ${fmt(wdSelectedCur.tokensPerUnit)} tokens`;
 }
 
+// ── Create deposit ────────────────────────────────────────────
 async function createDeposit() {
   if(!selectedCur) return;
   const tokenAmount = parseInt(document.getElementById('tokenAmountInp').value)||0;
-  if(tokenAmount < 1000) { alert(_t('minAlert')); return; }
+  if(tokenAmount < 500) { alert(_t('minAlert')); return; }
   document.getElementById('depositBtn').disabled = true;
   document.getElementById('depositBtn').textContent = 'Creating...';
   try {
     const r = await fetch('/api/crypto/deposit', {
       method:'POST', headers:{'content-type':'application/json'},
-      body: JSON.stringify({uid, currency: selectedCur.id, tokenAmount})
+      body: JSON.stringify({
+        uid,
+        currency: selectedCur.id,
+        tokenAmount,
+        network: selectedNet?.id || selectedCur.networks?.[0]?.id
+      })
     });
     const d = await r.json();
     if(d.error) { alert(d.error); return; }
@@ -1082,11 +1317,18 @@ async function createDeposit() {
     document.getElementById('payAmount').textContent = d.amount + ' ' + d.currency;
     document.getElementById('payAmountRepeat').textContent = d.amount + ' ' + d.currency;
     document.getElementById('payCurLabel').textContent = selectedCur.name;
+    // Network badge
+    const netBadge = document.getElementById('payNetBadge');
+    if(d.network && selectedNet) {
+      netBadge.style.display = 'block';
+      netBadge.innerHTML = `<span style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;border:1px solid ${selectedNet.color}44;background:${selectedNet.color}12;font-size:11px;font-family:'DM Mono',monospace;color:${selectedNet.color};font-weight:700;">⛓ ${d.network.label} · ${d.network.chain}</span>`;
+    } else {
+      netBadge.style.display = 'none';
+    }
     document.getElementById('payAddress').textContent = d.address;
     // Timer
     expiresAt = Date.now() + (d.expiresIn||3600)*1000;
     startTimer();
-    // Poll status
     pollPayment();
   } catch(e) {
     alert(_t('errConn'));
@@ -1148,11 +1390,12 @@ async function createWithdrawal() {
   const address = document.getElementById('wdAddress').value.trim();
   if(tokenAmount < 5000) { alert(_t('minWdAlert')); return; }
   if(!address) { alert(_t('enterAddr')); return; }
-  if(!confirm(`Withdraw ${fmt(tokenAmount)} tokens → ${(tokenAmount/wdSelectedCur.tokensPerUnit).toFixed(8)} ${wdSelectedCur.symbol}?\n\nAddress: ${address}`)) return;
+  const netInfo = wdSelectedNet ? ` via ${wdSelectedNet.label} (${wdSelectedNet.chain})` : '';
+  if(!confirm(`Withdraw ${fmt(tokenAmount)} tokens → ${(tokenAmount/wdSelectedCur.tokensPerUnit).toFixed(6)} ${wdSelectedCur.symbol}${netInfo}?\n\nAddress: ${address}`)) return;
   document.getElementById('wdBtn').disabled=true;
   const r = await fetch('/api/crypto/withdraw',{
     method:'POST',headers:{'content-type':'application/json'},
-    body:JSON.stringify({uid,currency:wdSelectedCur.id,tokenAmount,address})
+    body:JSON.stringify({uid,currency:wdSelectedCur.id,tokenAmount,address,network:wdSelectedNet?.id})
   });
   const d = await r.json();
   const el = document.getElementById('wdResult');
@@ -1370,5 +1613,7 @@ document.addEventListener('DOMContentLoaded', function() { updateCardTokens(); }
 
 
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
+<script src="/js/casino-sounds.js"></script>
+<script src="/js/cookie-consent.js"></script>
 </body>
 </html>

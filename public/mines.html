@@ -785,7 +785,7 @@ function spawnParticles(){
   var wrap=document.getElementById('gameArea');
   canvas.width=wrap.offsetWidth; canvas.height=wrap.offsetHeight;
   var ctx=canvas.getContext('2d');
-  var cols=['#00e676','#ffd680','#f0c060','#60ffb0','#ffffff'];
+  var cols=['#ffd700','#f0c060','#ffe566','#fff4b0','#ffa500','#ffffff'];
   var pieces=Array.from({length:70},function(){
     return{x:Math.random()*canvas.width,y:-10,vx:(Math.random()-.5)*6,vy:Math.random()*4+2,
       r:Math.random()*5+2,color:cols[Math.floor(Math.random()*cols.length)],
@@ -847,5 +847,7 @@ try {
 } catch(e){ console.error('Mines init:', e); }
 </script>
 <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(function(){});</script>
+<script src="/js/casino-sounds.js"></script>
+<script src="/js/cookie-consent.js"></script>
 </body>
 </html>

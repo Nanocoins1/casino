@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="lt">
+<html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
@@ -10,7 +10,7 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
   --bg:#04040a;--gold:#f0c060;--gold2:#ffd980;--green:#00e676;--red:#ff3d71;
-  --neon:#00e5ff;--cream:#e8e0d0;--orange:#ff8c00;
+  --neon:#c9a84c;--cream:#e8e0d0;--orange:#ff8c00;
   --border:rgba(255,255,255,0.08);--glass:rgba(255,255,255,0.04);
 }
 html,body{height:100%;overflow:hidden;}
@@ -135,8 +135,8 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 .diff-opt{padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:var(--glass);
   color:rgba(232,224,208,.4);font-size:10px;font-weight:700;cursor:pointer;
   text-align:center;transition:all .18s;line-height:1.3;}
-.diff-opt:hover{border-color:rgba(0,229,255,.3);color:var(--neon);}
-.diff-opt.on{background:rgba(0,229,255,.1);border-color:rgba(0,229,255,.45);color:var(--neon);}
+.diff-opt:hover{border-color:rgba(201,168,76,.3);color:var(--neon);}
+.diff-opt.on{background:rgba(201,168,76,.1);border-color:rgba(201,168,76,.45);color:var(--neon);}
 .diff-chance{font-size:9px;opacity:.6;display:block;margin-top:2px;}
 .diff-mult{font-size:9px;color:var(--gold);display:block;margin-top:1px;}
 
@@ -199,7 +199,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .toast.win{background:rgba(0,230,118,.2);border:1px solid rgba(0,230,118,.4);color:var(--green);}
 .toast.loss{background:rgba(255,61,113,.15);border:1px solid rgba(255,61,113,.35);color:var(--red);}
-.toast.info{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.3);color:var(--neon);}
+.toast.info{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);color:var(--neon);}
 
 /* Divider */
 .divider{height:1px;background:var(--border);margin:2px 0;}
@@ -207,7 +207,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 /* Provably fair hash */
 .pf-box{padding:7px 9px;background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;}
 .pf-lbl{font-size:9px;letter-spacing:1px;color:rgba(232,224,208,.25);margin-bottom:3px;text-transform:uppercase;}
-.pf-hash{font-family:'DM Mono',monospace;font-size:9px;color:rgba(0,229,255,.4);word-break:break-all;line-height:1.4;}
+.pf-hash{font-family:'DM Mono',monospace;font-size:9px;color:rgba(201,168,76,.4);word-break:break-all;line-height:1.4;}
 
 /* ── Responsive ── */
 @media(max-width:600px){
@@ -844,5 +844,7 @@ buildStars();
 </style>
 
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
+<script src="/js/casino-sounds.js"></script>
+<script src="/js/cookie-consent.js"></script>
 </body>
 </html>

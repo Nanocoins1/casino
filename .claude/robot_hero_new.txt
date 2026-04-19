@@ -1,0 +1,106 @@
+function RobotHero() {
+  const mountRef = React.useRef(null);
+  React.useEffect(()=>{
+    if(!mountRef.current || typeof THREE==='undefined') return;
+    const W=270,H=400;
+    const scene=new THREE.Scene();
+    const cam=new THREE.PerspectiveCamera(38,W/H,0.1,100);
+    cam.position.set(0,0.3,5.2); cam.lookAt(0,0,0);
+    const renderer=new THREE.WebGLRenderer({alpha:true,antialias:true});
+    renderer.setSize(W,H); renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+    renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+    renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.3;
+    mountRef.current.appendChild(renderer.domElement);
+    // MATERIALS
+    const gM=new THREE.MeshPhysicalMaterial({color:0xc9a84c,metalness:1.0,roughness:0.08});
+    const gB=new THREE.MeshPhysicalMaterial({color:0xf0c060,metalness:1.0,roughness:0.05});
+    const dM=new THREE.MeshPhysicalMaterial({color:0x080604,metalness:0.8,roughness:0.35});
+    const vM=new THREE.MeshPhysicalMaterial({color:0x001122,metalness:0.95,roughness:0.0});
+    // helpers
+    function Lth(pts,m,s=40){return new THREE.Mesh(new THREE.LatheGeometry(pts,s),m);}
+    function Sph(r,m,s=24){return new THREE.Mesh(new THREE.SphereGeometry(r,s,s),m);}
+    function Cap(r,l,m,s=20){return new THREE.Mesh(new THREE.CapsuleGeometry(r,l,s,s),m);}
+    function Cyl(rt,rb,h,m,s=24){return new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,s),m);}
+    function Bx(w,h,d,m){return new THREE.Mesh(new THREE.BoxGeometry(w,h,d,2,2,2),m);}
+    function Tor(r,t,m,s=24){return new THREE.Mesh(new THREE.TorusGeometry(r,t,8,s),m);}
+    const robot=new THREE.Group(); scene.add(robot);
+    // HEAD
+    const HG=new THREE.Group(); HG.position.y=1.92; robot.add(HG);
+    const hd=Sph(0.34,gM,32); hd.scale.set(1,1.08,0.95); HG.add(hd);
+    // visor circle on right side
+    const vis=Sph(0.16,vM,24); vis.scale.set(0.12,1,1); vis.position.set(-0.28,0.02,0.22); HG.add(vis);
+    const visRing=Tor(0.17,0.018,dM,24); visRing.position.set(-0.28,0.02,0.22); visRing.rotation.y=Math.PI/2; HG.add(visRing);
+    // head panel line
+    const hLine=Tor(0.33,0.009,dM,32); hLine.rotation.set(0,0,Math.PI/2); HG.add(hLine);
+    // NECK
+    const nk=Cyl(0.095,0.115,0.15,dM); nk.position.y=1.52; robot.add(nk);
+    // TORSO — LatheGeometry feminine profile
+    const tPts=[new THREE.Vector2(0.01,0),new THREE.Vector2(0.28,0.08),new THREE.Vector2(0.33,0.18),new THREE.Vector2(0.32,0.28),new THREE.Vector2(0.22,0.5),new THREE.Vector2(0.24,0.62),new THREE.Vector2(0.32,0.82),new THREE.Vector2(0.34,0.95),new THREE.Vector2(0.28,1.1),new THREE.Vector2(0.16,1.2)];
+    const torso=Lth(tPts,gM,48); torso.position.y=0.28; robot.add(torso);
+    // torso panel lines
+    [-0.13,0.13].forEach(x=>{const s=Bx(0.018,0.85,0.7,dM);s.position.set(x,0.82,0.0);robot.add(s);});
+    // diagonal panel line
+    const diagLine=Bx(0.74,0.018,0.7,dM); diagLine.position.set(0,0.62,0.0); diagLine.rotation.z=0.35; robot.add(diagLine);
+    // SHOULDER joints
+    [-0.54,0.54].forEach(x=>{
+      const sh=Sph(0.19,gB,24); sh.position.set(x,1.42,0); robot.add(sh);
+      const sr=Tor(0.195,0.014,dM,24); sr.position.set(x,1.42,0); sr.rotation.z=Math.PI/2; robot.add(sr);
+    });
+    // LEFT ARM — hand on hip (bent outward)
+    const LAG=new THREE.Group(); LAG.position.set(-0.62,1.12,0); LAG.rotation.set(0,0,-0.4); robot.add(LAG);
+    const lua=Cap(0.105,0.32,gM); lua.position.y=-0.26; LAG.add(lua);
+    const le=Sph(0.11,gB); le.position.y=-0.46; LAG.add(le);
+    const llaG=new THREE.Group(); llaG.position.y=-0.46; llaG.rotation.z=0.55; LAG.add(llaG);
+    const lla=Cap(0.09,0.28,gM); lla.position.y=-0.22; llaG.add(lla);
+    const lh=Sph(0.085,gM); lh.position.y=-0.4; llaG.add(lh);
+    // RIGHT ARM — hanging naturally
+    const RAG=new THREE.Group(); RAG.position.set(0.62,1.12,0); RAG.rotation.set(0,0,0.15); robot.add(RAG);
+    const rua=Cap(0.105,0.32,gM); rua.position.y=-0.26; RAG.add(rua);
+    const re=Sph(0.11,gB); re.position.y=-0.46; RAG.add(re);
+    const rla=Cap(0.09,0.28,gM); rla.position.y=-0.72; RAG.add(rla);
+    const rh=Sph(0.085,gM); rh.position.y=-0.94; RAG.add(rh);
+    // HIPS
+    const hPts=[new THREE.Vector2(0.01,0),new THREE.Vector2(0.22,0.0),new THREE.Vector2(0.33,0.08),new THREE.Vector2(0.36,0.2),new THREE.Vector2(0.32,0.3),new THREE.Vector2(0.28,0.38)];
+    const hips=Lth(hPts,gM,48); hips.position.y=0.0; robot.add(hips);
+    // hip panel line
+    const hipLine=Bx(0.72,0.016,0.7,dM); hipLine.position.set(0,0.2,0); robot.add(hipLine);
+    // LEGS
+    [[-0.17,0.04],[0.17,0.0]].forEach(function(xd,idx){
+      var x=xd[0]; var LG=new THREE.Group(); LG.position.set(x,-0.04,0); robot.add(LG);
+      // thigh — LatheGeometry
+      var thPts=[new THREE.Vector2(0.01,0),new THREE.Vector2(0.16,0.0),new THREE.Vector2(0.185,0.08),new THREE.Vector2(0.175,0.28),new THREE.Vector2(0.15,0.5),new THREE.Vector2(0.13,0.65)];
+      var th=Lth(thPts,gM,32); th.rotation.x=Math.PI; th.position.y=0; LG.add(th);
+      // knee
+      var kn=Sph(0.135,gB,24); kn.position.y=-0.7; LG.add(kn);
+      var knR=Tor(0.14,0.016,dM,24); knR.position.y=-0.7; LG.add(knR);
+      // shin — LatheGeometry
+      var shPts=[new THREE.Vector2(0.01,0),new THREE.Vector2(0.125,0.0),new THREE.Vector2(0.115,0.15),new THREE.Vector2(0.095,0.38),new THREE.Vector2(0.08,0.55)];
+      var sh=Lth(shPts,gM,32); sh.rotation.x=Math.PI; sh.position.y=-0.72; LG.add(sh);
+      // ankle band
+      var ab=Tor(0.088,0.014,dM,20); ab.position.y=-1.3; LG.add(ab);
+      // heel stiletto
+      var heel=Cyl(0.016,0.02,0.28,gM,8); heel.position.set(0.02,-1.5,-0.1); LG.add(heel);
+      // foot platform
+      var foot=Bx(0.16,0.04,0.32,gM); foot.position.set(0.02,-1.36,0.06); LG.add(foot);
+    });
+    // PLATFORM
+    var plt=new THREE.Mesh(new THREE.CylinderGeometry(0.92,1.02,0.07,48),new THREE.MeshPhysicalMaterial({color:0x141210,metalness:0.9,roughness:0.35}));
+    plt.position.y=-2.18; plt.receiveShadow=true; scene.add(plt);
+    // COINS
+    var coins=[]; var cMat=new THREE.MeshPhysicalMaterial({color:0xffd700,metalness:1.0,roughness:0.05,emissive:new THREE.Color(0xffbb00),emissiveIntensity:0.25});
+    for(var i=0;i<18;i++){var c=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,0.013,12),cMat);c.position.set((Math.random()-0.5)*3.8,Math.random()*6-3,(Math.random()-0.5)*2);c.rotation.set(Math.random()*Math.PI,0,Math.random()*Math.PI);c.userData={vy:0.009+Math.random()*0.012,vr:0.022+Math.random()*0.04,ox:(Math.random()-0.5)*3.8,oz:(Math.random()-0.5)*2};coins.push(c);scene.add(c);}
+    // LIGHTS
+    scene.add(new THREE.AmbientLight(0xffe8cc,0.4));
+    var kL=new THREE.DirectionalLight(0xffffff,3.5); kL.position.set(3,6,4); kL.castShadow=true; scene.add(kL);
+    var fL=new THREE.DirectionalLight(0xffd0a0,1.4); fL.position.set(-3,2,3); scene.add(fL);
+    var rL=new THREE.DirectionalLight(0xccccff,1.8); rL.position.set(0,4,-4); scene.add(rL);
+    var bL=new THREE.PointLight(0xffd700,2.5,7); bL.position.set(0,-2,2.5); scene.add(bL);
+    var fP=new THREE.PointLight(0xffffff,1.2,8); fP.position.set(0,1.5,4); scene.add(fP);
+    // ANIMATE
+    var raf,t=0;
+    function animate(){raf=requestAnimationFrame(animate);t+=0.006;robot.rotation.y=Math.sin(t*0.28)*0.45;robot.position.y=Math.sin(t*0.75)*0.06;coins.forEach(function(c){c.position.y+=c.userData.vy;c.rotation.y+=c.userData.vr;if(c.position.y>3.5){c.position.y=-3;c.position.x=c.userData.ox+(Math.random()-0.5)*0.4;c.position.z=c.userData.oz;}});bL.intensity=2.2+Math.sin(t*2.5)*0.6;renderer.render(scene,cam);}
+    animate();
+    return function(){cancelAnimationFrame(raf);renderer.dispose();if(mountRef.current&&renderer.domElement.parentNode===mountRef.current)mountRef.current.removeChild(renderer.domElement);};
+  },[]);
+  return React.createElement('div',{ref:mountRef,style:{width:'270px',height:'400px',flexShrink:0,position:'relative',zIndex:2}});
+}

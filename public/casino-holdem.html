@@ -379,7 +379,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 
 <!-- ═══ HEADER ═══ -->
 <div class="hdr">
-  <a class="back-btn" href="/lobby.html">&#8592; Lobby</a>
+  <a class="back-btn" href="/">&#8592; Lobby</a>
   <div class="hdr-title">CASINO HOLD'EM</div>
   <div class="hdr-right">
     <div class="hdr-bal"><span class="hdr-bal-icon">&#9689;</span><span id="balEl">—</span></div>
@@ -1250,7 +1250,7 @@ function spawnParticles(type) {
   canvas.width = wrap.offsetWidth;
   canvas.height = wrap.offsetHeight;
   var ctx = canvas.getContext('2d');
-  var colors = ['#f0c060','#ffd700','#00e676','#60c8fa','#f87171'];
+  var colors = ['#f0c060','#ffd700','#ffe566','#fff4b0','#ffa500','#ffffff'];
   var particles = [];
   for (var i = 0; i < 80; i++) {
     particles.push({
@@ -1302,5 +1302,7 @@ renderHistory();
 setState('idle');
 </script>
 <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(function(){});</script>
+<script src="/js/casino-sounds.js"></script>
+<script src="/js/cookie-consent.js"></script>
 </body>
 </html>

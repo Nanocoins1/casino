@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NEXUS WHEEL — HATHOR Casino</title>
+<title>HATHOR — Lucky Wheel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/game-ui.css"/>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
@@ -207,25 +207,25 @@ updateBal();
 // ── Segments ─────────────────────────────────────────────────────────────────
 const SEGMENTS=[
   {mult:2,   weight:8,   hex:0x00ccdd, emHex:0x004455, label:'2×'},
-  {mult:0,   weight:18,  hex:0x050508, emHex:0x000000, label:'VOID'},
+  {mult:0,   weight:12,  hex:0x050508, emHex:0x000000, label:'VOID'},
   {mult:1.5, weight:10,  hex:0x1a4fcc, emHex:0x0a1f66, label:'1.5×'},
-  {mult:0,   weight:18,  hex:0x050508, emHex:0x000000, label:'VOID'},
+  {mult:0,   weight:12,  hex:0x050508, emHex:0x000000, label:'VOID'},
   {mult:3,   weight:6,   hex:0x00cc55, emHex:0x004422, label:'3×'},
-  {mult:0,   weight:18,  hex:0x050508, emHex:0x000000, label:'VOID'},
+  {mult:0,   weight:12,  hex:0x050508, emHex:0x000000, label:'VOID'},
   {mult:1.2, weight:12,  hex:0x1a3a7a, emHex:0x081530, label:'1.2×'},
-  {mult:0,   weight:18,  hex:0x050508, emHex:0x000000, label:'VOID'},
+  {mult:0,   weight:12,  hex:0x050508, emHex:0x000000, label:'VOID'},
   {mult:5,   weight:4,   hex:0xddcc00, emHex:0x554f00, label:'5×'},
-  {mult:0,   weight:18,  hex:0x050508, emHex:0x000000, label:'VOID'},
+  {mult:0,   weight:12,  hex:0x050508, emHex:0x000000, label:'VOID'},
   {mult:1.5, weight:10,  hex:0x1a4fcc, emHex:0x0a1f66, label:'1.5×'},
-  {mult:0,   weight:18,  hex:0x050508, emHex:0x000000, label:'VOID'},
+  {mult:0,   weight:12,  hex:0x050508, emHex:0x000000, label:'VOID'},
   {mult:2,   weight:8,   hex:0x00ccdd, emHex:0x004455, label:'2×'},
-  {mult:0,   weight:18,  hex:0x050508, emHex:0x000000, label:'VOID'},
+  {mult:0,   weight:12,  hex:0x050508, emHex:0x000000, label:'VOID'},
   {mult:10,  weight:2,   hex:0xff8800, emHex:0x662200, label:'10×'},
-  {mult:0,   weight:18,  hex:0x050508, emHex:0x000000, label:'VOID'},
+  {mult:0,   weight:12,  hex:0x050508, emHex:0x000000, label:'VOID'},
   {mult:1.2, weight:12,  hex:0x1a3a7a, emHex:0x081530, label:'1.2×'},
-  {mult:0,   weight:18,  hex:0x050508, emHex:0x000000, label:'VOID'},
+  {mult:0,   weight:12,  hex:0x050508, emHex:0x000000, label:'VOID'},
   {mult:50,  weight:0.5, hex:0xff2200, emHex:0x881100, label:'50×'},
-  {mult:0,   weight:18,  hex:0x050508, emHex:0x000000, label:'VOID'},
+  {mult:0,   weight:12,  hex:0x050508, emHex:0x000000, label:'VOID'},
 ];
 const N=SEGMENTS.length;
 const TOTAL_W=SEGMENTS.reduce((a,s)=>a+s.weight,0);
@@ -768,5 +768,7 @@ window.addEventListener('resize',()=>{
 
 animate(performance.now());
 </script>
+<script src="/js/casino-sounds.js"></script>
+<script src="/js/cookie-consent.js"></script>
 </body>
 </html>

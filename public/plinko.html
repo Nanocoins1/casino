@@ -3,21 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HATHOR – Krioklis</title>
+<title>HATHOR — Plinko</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/game-ui.css"/>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #04040a;
-    --purple: #7b2fff;
-    --neon: #00d4ff;
+    --bg: #030608;
+    --purple: #c9a84c;
+    --neon: #f0c060;
     --gold: #ffd700;
-    --green: #00ff88;
-    --red: #ff3366;
-    --card: rgba(255,255,255,0.04);
-    --border: rgba(123,47,255,0.3);
+    --gold2: #f0c060;
+    --gold3: #c9a84c;
+    --green: #4caf7c;
+    --red: #c0394c;
+    --cream: #e8dcc8;
+    --card: rgba(201,168,76,0.04);
+    --border: rgba(201,168,76,0.18);
   }
 
   html, body {
@@ -64,10 +67,10 @@
   }
   .back-link {
     font-size: .85rem; color: var(--neon); text-decoration: none;
-    border: 1px solid rgba(0,212,255,.3); border-radius: 8px; padding: 6px 14px;
+    border: 1px solid rgba(201,168,76,.3); border-radius: 8px; padding: 6px 14px;
     transition: all .2s;
   }
-  .back-link:hover { background: rgba(0,212,255,.1); box-shadow: 0 0 12px rgba(0,212,255,.3); }
+  .back-link:hover { background: rgba(201,168,76,.1); box-shadow: 0 0 12px rgba(201,168,76,.3); }
 
   /* ── Main grid ── */
   .main { display: flex; gap: 20px; align-items: flex-start; padding: 20px 24px; width: 100%; max-width: 1100px; }
@@ -79,10 +82,10 @@
     border-radius: 16px;
     padding: 3px;
     background: linear-gradient(135deg, var(--purple), var(--neon), var(--purple));
-    box-shadow: 0 0 40px rgba(123,47,255,.5), 0 0 80px rgba(0,212,255,.2);
+    box-shadow: 0 0 40px rgba(201,168,76,.5), 0 0 80px rgba(201,168,76,.2);
   }
   .canvas-inner {
-    border-radius: 14px; overflow: hidden; background: #07071a;
+    border-radius: 14px; overflow: hidden; background: #04060e;
     position: relative;
   }
   #krioklis-canvas { display: block; }
@@ -109,8 +112,8 @@
     font-size: .7rem; font-weight: 700; cursor: pointer; letter-spacing: 1px;
     transition: all .2s;
   }
-  .risk-btn:hover { border-color: var(--purple); color: #fff; background: rgba(123,47,255,.15); }
-  .risk-btn.active { background: linear-gradient(135deg, var(--purple), #4a00a0); border-color: var(--purple); color: #fff; box-shadow: 0 0 14px rgba(123,47,255,.6); }
+  .risk-btn:hover { border-color: var(--purple); color: #fff; background: rgba(201,168,76,.15); }
+  .risk-btn.active { background: linear-gradient(135deg, #c9a84c, #7a5c1e); border-color: var(--gold); color: #060300; box-shadow: 0 0 14px rgba(201,168,76,.5); }
 
   /* Bet controls */
   .bet-presets { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; margin-bottom: 10px; }
@@ -130,7 +133,7 @@
     border-radius: 8px; color: #fff; font-family: 'Orbitron', sans-serif;
     font-size: .85rem; padding: 8px 10px; outline: none; width: 100%;
   }
-  #bet-input:focus { border-color: var(--purple); box-shadow: 0 0 8px rgba(123,47,255,.4); }
+  #bet-input:focus { border-color: var(--purple); box-shadow: 0 0 8px rgba(201,168,76,.4); }
 
   /* Drop button — 3D btn-purple via game-ui.css; override font only */
   #drop-btn { font-family: 'Orbitron', sans-serif; letter-spacing: 2px; }
@@ -151,8 +154,8 @@
     font-family: 'Orbitron', sans-serif; font-size: .6rem; font-weight: 700;
     padding: 3px 8px; border-radius: 20px; white-space: nowrap;
   }
-  .pill.win { background: rgba(0,255,136,.18); color: var(--green); border: 1px solid rgba(0,255,136,.4); }
-  .pill.loss { background: rgba(255,51,102,.18); color: var(--red); border: 1px solid rgba(255,51,102,.4); }
+  .pill.win { background: rgba(76,175,124,.18); color: var(--green); border: 1px solid rgba(76,175,124,.4); }
+  .pill.loss { background: rgba(192,57,76,.18); color: var(--red); border: 1px solid rgba(192,57,76,.4); }
 
   /* Multiplier legend */
   #mult-legend { display: flex; gap: 3px; margin-top: 6px; }
@@ -253,7 +256,7 @@
 
       <!-- Drop — TOP so you can tap and watch the ball fall -->
       <div class="panel-card" style="padding:14px;">
-        <button id="drop-btn" class="btn btn-full btn-lg btn-purple">
+        <button id="drop-btn" class="btn btn-full btn-lg btn-gold">
           🎯 DROP BALL
         </button>
         <div id="queue-info">Queue: 0 / 3</div>
@@ -261,7 +264,7 @@
 
       <!-- Risk -->
       <div class="panel-card">
-        <div class="panel-title">Rizikos lygis</div>
+        <div class="panel-title">Risk Level</div>
         <div class="risk-btns">
           <button class="risk-btn active" data-risk="low">Low</button>
           <button class="risk-btn" data-risk="medium">Medium</button>
@@ -272,7 +275,7 @@
 
       <!-- Bet -->
       <div class="panel-card">
-        <div class="panel-title">Statymas</div>
+        <div class="panel-title">Bet</div>
         <div class="bet-presets">
           <button class="preset-btn" data-amount="10">10</button>
           <button class="preset-btn" data-amount="50">50</button>
@@ -280,14 +283,14 @@
           <button class="preset-btn" data-amount="500">500</button>
         </div>
         <div class="bet-input-row">
-          <label>Suma:</label>
-          <input id="bet-input" type="number" min="10" value="50" step="10">
+          <label>Amount:</label>
+          <input id="bet-input" type="number" min="10" max="5000" value="50" step="10">
         </div>
       </div>
 
       <!-- Stats -->
       <div class="panel-card">
-        <div class="panel-title">Statistika</div>
+        <div class="panel-title">Statistics</div>
         <div class="stats-grid">
           <div class="stat-item">
             <div class="stat-val" id="stat-total">0</div>
@@ -295,14 +298,14 @@
           </div>
           <div class="stat-item">
             <div class="stat-val" id="stat-best">0x</div>
-            <div class="stat-lbl">Geriausia</div>
+            <div class="stat-lbl">Best</div>
           </div>
         </div>
       </div>
 
       <!-- Recent results -->
       <div class="panel-card">
-        <div class="panel-title">Paskutiniai rezultatai</div>
+        <div class="panel-title">Recent Results</div>
         <div id="results-pills"></div>
       </div>
 
@@ -323,8 +326,8 @@ if (!uid) {
   location.href = '/login.html';
 }
 let balance = parseInt(localStorage.getItem('casino_tokens') || '10000');
-let _plinkoRTP = 93;
-fetch('/api/rtp-config').then(function(r){return r.json();}).then(function(d){_plinkoRTP=d.plinko||93;}).catch(function(){});
+let _plinkoRTP = 95;
+fetch('/api/rtp-config').then(function(r){return r.json();}).then(function(d){_plinkoRTP=d.plinko||95;}).catch(function(){});
 
 // ─────────────────────────────────────────────────────────────────────
 //  SOCKET
@@ -332,7 +335,7 @@ fetch('/api/rtp-config').then(function(r){return r.json();}).then(function(d){_p
 let socket;
 try {
   socket = io();
-  socket.emit('register', { name: localStorage.getItem('casino_name') || 'Žaidėjas', uid });
+  socket.emit('register', { name: localStorage.getItem('casino_name') || 'Player', uid });
   socket.on('registered', d => { balance = d.tokens; updateBalance(); });
 } catch(e) { /* no socket */ }
 
@@ -454,7 +457,7 @@ const sfx = {
       r: Math.random() * 1.5 + .3,
       speed: Math.random() * .0002 + .00005,
       phase: Math.random() * Math.PI * 2,
-      color: ['#fff','#c9aaff','#00d4ff','#ffd700'][Math.floor(Math.random()*4)]
+      color: ['#ffd700','#f0c060','#ffe566','#ffffff'][Math.floor(Math.random()*4)]
     });
   }
   function drawStars(t) {
@@ -485,17 +488,26 @@ const PEG_R = 5;
 const BALL_R = 9;
 const PEG_SPACING_Y = BOARD_H / (ROWS + 1);
 
-// Multipliers calibrated for BINOMIAL bucket distribution (14 rows, 15 buckets).
-// E_raw = Σ C(14,k)/2^14 * mult[k]
-// LOW   E_raw≈1.010 × 97% RTP  → ~98% actual RTP (low volatility)
-// MEDIUM E_raw≈0.981 × 93% RTP → ~91% actual RTP
-// HIGH   E_raw≈0.907 × 93% RTP → ~84% actual RTP (high house edge, high volatility)
-// MAX WIN capped at 500 000 tokens.
+// ─── MULTIPLIER DESIGN — 14 rows, 15 buckets, TRUE binomial distribution ───────
+// Bucket probability: P(k) = C(14,k) / 2^14  (C values: 1,14,91,364,1001,2002,3003,3432,…)
+// Win formula: bet × mult × (_plinkoRTP / 100)
+// E_raw = Σ P(k) × mult[k]  — must stay near 1.0 so _plinkoRTP is the true house-edge lever
+//
+// Mode     E_raw   _plinkoRTP=95   House edge   Max win (500 bet)
+// LOW      1.026      97.4 %          2.6 %       5 700
+// MEDIUM   0.995      94.5 %          5.5 %      23 750
+// HIGH     0.945      89.8 %         10.2 %      47 500
+//
+// Per-mode max-bet limits (enforced in drop handler):
+//   LOW → 5 000  |  MEDIUM → 1 000  |  HIGH → 500
 const MULTIPLIERS = {
-  low:    [130, 16, 5.5, 2.8, 1.5, 1.0, 0.65, 0.55, 0.65, 1.0, 1.5, 2.8, 5.5, 16, 130],
-  medium: [480, 50, 14,  4.5, 1.5, 0.6, 0.30, 0.20, 0.30, 0.6, 1.5, 4.5, 14,  50, 480],
-  high:   [500, 80, 20,  4,  0.9, 0.3, 0.20, 0.20, 0.20, 0.3, 0.9,  4,  20,  80, 500]
+  low:    [ 12,   6,   3,  1.8,  1.4,  1.1,  0.8, 0.8, 0.8,  1.1,  1.4,  1.8,   3,   6,  12],
+  medium: [ 50,  14,   6,  2.8,  1.7,  1.0, 0.65, 0.4, 0.65, 1.0,  1.7,  2.8,   6,  14,  50],
+  high:   [100,  25,   8,  3.5,  1.5,  0.8,  0.5, 0.4, 0.5,  0.8,  1.5,  3.5,   8,  25, 100]
 };
+
+// Per-mode maximum bet — caps single-ball exposure
+const MODE_MAX_BET = { low: 5000, medium: 1000, high: 500 };
 
 let riskMode = 'low';
 let currentBet = 50;
@@ -587,14 +599,14 @@ function spawnPegHit(x, y) {
       vy: Math.sin(angle) * speed,
       r: 2 + Math.random() * 2,
       alpha: 1,
-      color: `hsl(${180 + Math.random()*80},100%,80%)`,
+      color: `hsl(${40 + Math.random()*20},100%,${70+Math.random()*20}%)`,
       life: 0.9
     });
   }
 }
 
 function spawnLandingExplosion(x, y) {
-  const colors = ['#ffd700','#ff6b35','#ff3366','#00ff88','#00d4ff','#c9aaff','#fff'];
+  const colors = ['#ffd700','#f0c060','#ffe566','#fff4b0','#ffa500','#ffffff'];
   for (let i = 0; i < 36; i++) {
     const angle = Math.random() * Math.PI * 2;
     const speed = 2 + Math.random() * 6;
@@ -721,13 +733,13 @@ function draw(ts) {
     ctx.fillRect(0, 0, CW, CH);
   } else {
     const bgGrad = ctx.createLinearGradient(0, 0, 0, CH);
-    bgGrad.addColorStop(0, '#07071a');
+    bgGrad.addColorStop(0, '#04060e');
     bgGrad.addColorStop(1, '#04040e');
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, CW, CH);
   }
   // subtle grid overlay
-  ctx.strokeStyle = 'rgba(123,47,255,0.06)';
+  ctx.strokeStyle = 'rgba(201,168,76,0.06)';
   ctx.lineWidth = 1;
   for (let x = 0; x < CW; x += 40) {
     ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, CH); ctx.stroke();
@@ -796,7 +808,7 @@ function draw(ts) {
 
     ctx.save();
     ctx.shadowBlur = flashing ? 30 : 8 + glowPulse * 8;
-    ctx.shadowColor = flashing ? '#ffffff' : '#00d4ff';
+    ctx.shadowColor = flashing ? '#ffffff' : '#c9a84c';
     ctx.beginPath();
     ctx.arc(peg.x, peg.y, flashing ? PEG_R + 2 : PEG_R, 0, Math.PI * 2);
 
@@ -995,7 +1007,7 @@ function landBall(ball, bucketIdx) {
   if(mult >= 2){ sfx.bigWin(mult); if(navigator.vibrate) navigator.vibrate([40,20,100]); }
   else if(profit < 0){ sfx.lose(); if(navigator.vibrate) navigator.vibrate(25); }
 
-  const textColor = profit >= 0 ? '#00ff88' : '#ff3366';
+  const textColor = profit >= 0 ? '#4caf7c' : '#c0394c';
   const textStr = profit >= 0 ? `+${profit} 🪙` : `${profit} 🪙`;
   spawnFloatingText(bx, by - 30, textStr, textColor);
 
@@ -1021,7 +1033,7 @@ function landBall(ball, bucketIdx) {
 
   // Toast
   if (mult >= 5) {
-    showToast(`🎉 ${mult}x – ${profit >= 0 ? '+' + profit : profit} žetonų!`, profit >= 0 ? '#00ff88' : '#ff3366');
+    showToast(`🎉 ${mult}x – ${profit >= 0 ? '+' + profit : profit} chips!`, profit >= 0 ? '#4caf7c' : '#c0394c');
   }
 
   updateQueueInfo();
@@ -1056,11 +1068,25 @@ function updateBalance() {
 updateBalance();
 
 // Risk buttons
+function applyModeMaxBet() {
+  const maxBet = MODE_MAX_BET[riskMode];
+  const inp = document.getElementById('bet-input');
+  inp.max = maxBet;
+  if (currentBet > maxBet) {
+    currentBet = maxBet;
+    inp.value = maxBet;
+    document.querySelectorAll('.preset-btn').forEach(b =>
+      b.classList.toggle('active', parseInt(b.dataset.amount) === maxBet)
+    );
+  }
+}
+
 document.querySelectorAll('.risk-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.risk-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     riskMode = btn.dataset.risk;
+    applyModeMaxBet();
     renderMultLegend();
   });
 });
@@ -1104,12 +1130,13 @@ function pickBucket() {
 
 document.getElementById('drop-btn').addEventListener('click', () => {
   const bet = currentBet;
-  if (bet < 10) { showToast('Minimalus statymas: 10 žetonų', '#ff3366'); return; }
-  if (bet > 10000) { showToast('Maks. statymas: 10 000 žetonų', '#ff3366'); return; }
-  if (bet > balance) { showToast('Nepakanka žetonų!', '#ff3366'); return; }
+  const maxBet = MODE_MAX_BET[riskMode];
+  if (bet < 10)      { showToast('Minimum bet: 10 chips', '#c0394c'); return; }
+  if (bet > maxBet)  { showToast(`Max bet on ${riskMode.toUpperCase()}: ${maxBet.toLocaleString()} chips`, '#c0394c'); return; }
+  if (bet > balance) { showToast('Insufficient balance!', '#c0394c'); return; }
 
   // Check queue
-  if (ballQueue.length >= 3) { showToast('Eilė pilna! (maks 3)', '#ff9900'); return; }
+  if (ballQueue.length >= 3) { showToast('Queue full! (max 3)', '#ff9900'); return; }
 
   balance -= bet;
   updateBalance();
@@ -1181,5 +1208,7 @@ function showToast(msg, color) {
 requestAnimationFrame(draw);
 </script>
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
+<script src="/js/casino-sounds.js"></script>
+<script src="/js/cookie-consent.js"></script>
 </body>
 </html>

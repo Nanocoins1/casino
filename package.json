@@ -13,7 +13,9 @@
     "better-sqlite3": "^9.4.3",
     "cors": "^2.8.5",
     "docx": "^9.6.1",
+    "dotenv": "^17.4.2",
     "express": "^4.18.2",
+    "express-rate-limit": "^8.3.2",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.13",
     "pg": "^8.20.0",
@@ -28,6 +30,7 @@
     "node": ">=18.0.0"
   },
   "devDependencies": {
-    "@anthropic-ai/sdk": "^0.82.0"
+    "@anthropic-ai/sdk": "^0.82.0",
+    "sharp": "^0.34.5"
   }
 }

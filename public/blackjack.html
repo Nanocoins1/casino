@@ -1143,9 +1143,7 @@ function spawnParticles(type){
   canvas.width  = wrap.offsetWidth;
   canvas.height = wrap.offsetHeight;
   var ctx = canvas.getContext('2d');
-  var colors = type==='bj'
-    ? ['#f0c060','#ffd680','#fff','#c9a84c']
-    : ['#00e676','#ffd680','#60a5fa','#f87171','#f0c060'];
+  var colors = ['#f0c060','#ffd680','#ffe566','#fff4b0','#ffa500','#ffffff'];
   var particles = Array.from({length:type==='bj'?140:90},function(){
     return{
       x:canvas.width/2+(Math.random()-.5)*200,
@@ -1228,5 +1226,7 @@ try {
 }
 </script>
 <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(function(){});</script>
+<script src="/js/casino-sounds.js"></script>
+<script src="/js/cookie-consent.js"></script>
 </body>
 </html>

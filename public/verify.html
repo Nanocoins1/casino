@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Orbitron:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-:root{--bg:#04040a;--gold:#f0c060;--gold2:#ffd980;--green:#00e676;--red:#ff3d71;--neon:#00e5ff;--cream:#e8e0d0;--border:rgba(255,255,255,0.08);}
+:root{--bg:#04040a;--gold:#f0c060;--gold2:#ffd980;--green:#00e676;--red:#ff3d71;--neon:#c9a84c;--cream:#e8e0d0;--border:rgba(255,255,255,0.08);}
 body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cream);min-height:100vh;}
 .header{height:60px;padding:0 28px;display:flex;align-items:center;justify-content:space-between;background:rgba(4,4,10,.95);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);}
 .logo{font-family:'Orbitron',monospace;font-size:16px;font-weight:900;letter-spacing:3px;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
@@ -55,7 +55,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 .result-detail strong{color:var(--cream);}
 
 /* Nonce counter */
-.nonce-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:20px;background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.2);font-family:'DM Mono',monospace;font-size:12px;color:var(--neon);}
+.nonce-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:20px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);font-family:'DM Mono',monospace;font-size:12px;color:var(--neon);}
 
 /* SHA check tool */
 .sha-check{padding:16px;background:rgba(0,0,0,.3);border-radius:10px;border:1px dashed rgba(255,255,255,.06);margin-top:12px;}
@@ -325,5 +325,7 @@ function showToast(msg) {
   setTimeout(()=>el.style.display='none',2500);
 }
 </script>
+<script src="/js/casino-sounds.js"></script>
+<script src="/js/cookie-consent.js"></script>
 </body>
 </html>

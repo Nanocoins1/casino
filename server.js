@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 // Use built-in fetch (Node 18+) or polyfill
 if(typeof fetch === 'undefined'){
@@ -86,19 +87,54 @@ const app    = express();
 const server = http.createServer(app);
 const io     = new Server(server, { cors: { origin: '*' } });
 
+// ── Rate limiting ─────────────────────────────────────────────
+const rateLimit = require('express-rate-limit');
+
+// General API: 120 req / min per IP
+app.use('/api/', rateLimit({
+  windowMs: 60_000, max: 120,
+  standardHeaders: true, legacyHeaders: false,
+  message: { error: 'Too many requests — slow down.' },
+  skip: req => req.path.startsWith('/api/stats/') // allow frequent balance polls
+}));
+
+// Auth endpoints: 10 attempts / 15 min (brute-force protection)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60_000, max: 10,
+  standardHeaders: true, legacyHeaders: false,
+  message: { error: 'Too many login attempts. Try again in 15 minutes.' },
+});
+app.use('/api/auth/login',    authLimiter);
+app.use('/api/auth/register', authLimiter);
+
+// Deposit / withdrawal: 15 per 15 min
+const txLimiter = rateLimit({
+  windowMs: 15 * 60_000, max: 15,
+  standardHeaders: true, legacyHeaders: false,
+  message: { error: 'Too many payment requests. Please wait.' },
+});
+app.use('/api/crypto/deposit',  txLimiter);
+app.use('/api/crypto/withdraw', txLimiter);
+
+// KYC uploads: 5 per hour
+app.use('/api/kyc', rateLimit({
+  windowMs: 60 * 60_000, max: 5,
+  message: { error: 'Too many KYC upload attempts.' },
+}));
+
+let _dbOk = false; // set to true once initDB succeeds
 async function dbQuery(sql, params) {
+  if (!_dbOk && !process.env.DATABASE_URL) return { rows: [] };
   return await pool.query(sql, params || []);
 }
 async function dbGet(sql, params) {
-  const r = await dbQuery(sql, params);
-  return r.rows[0] || null;
+  try { const r = await dbQuery(sql, params); return r.rows[0] || null; } catch(e){ return null; }
 }
 async function dbAll(sql, params) {
-  const r = await dbQuery(sql, params);
-  return r.rows;
+  try { const r = await dbQuery(sql, params); return r.rows; } catch(e){ return []; }
 }
 async function dbRun(sql, params) {
-  await dbQuery(sql, params);
+  try { await dbQuery(sql, params); } catch(e){}
 }
 
 
@@ -414,7 +450,7 @@ setInterval(async () => {
 const RTP_DEFAULTS = {
   grand:      95,  // GrandFortune slots
   classic:    92,  // Classic slots
-  plinko:     93,  // Krioklis / Plinko
+  plinko:     95,  // Krioklis / Plinko
   wheel:      90,  // Wheel of Fortune
   crash:      94,  // Crash
   mines:      93,  // Mines
@@ -431,6 +467,7 @@ let rtpConfig = {...RTP_DEFAULTS};
 
 const getUser = async uid => await dbGet(`SELECT * FROM users WHERE uid=$1`, [uid]);
 const saveUser = async u => {
+  if (!_dbOk) return; // demo mode — skip DB write
   await pool.query(
     `INSERT INTO users(uid,name,tokens,avatar,level,xp,total_won,games_played,last_bonus)
     VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)
@@ -1062,12 +1099,18 @@ function fetchOdds(apiKey, sport, cb) {
 }
 
 const SPORTS_MAP = {
-  soccer_epl:        '⚽ Premier League',
-  soccer_spain_la_liga: '⚽ La Liga',
-  basketball_nba:    '🏀 NBA',
-  basketball_euroleague: '🏀 Euroleague',
-  tennis_atp_french_open: '🎾 Tennis ATP',
-  icehockey_nhl:     '🏒 NHL',
+  soccer_epl:               '⚽ Premier League',
+  soccer_spain_la_liga:     '⚽ La Liga',
+  soccer_germany_bundesliga:'⚽ Bundesliga',
+  soccer_italy_serie_a:     '⚽ Serie A',
+  soccer_uefa_champs_league:'⚽ Champions League',
+  basketball_nba:           '🏀 NBA',
+  basketball_euroleague:    '🏀 Euroleague',
+  tennis_atp_french_open:   '🎾 Tennis ATP',
+  icehockey_nhl:            '🏒 NHL',
+  americanfootball_nfl:     '🏈 NFL',
+  baseball_mlb:             '⚾ MLB',
+  mma_mixed_martial_arts:   '🥊 MMA / UFC',
 };
 
 app.get('/api/sports', async (req, res) => {
@@ -1127,8 +1170,11 @@ const DEMO_MATCHES = {
     {id:'nba4',home:'Dallas Mavericks',away:'Phoenix Suns',time:new Date(Date.now()+86400000).toISOString(),odds:{home:2.10,away:1.80}},
   ],
   basketball_euroleague: [
-    {id:'el1',home:'Real Madrid',away:'CSKA Moscow',time:new Date(Date.now()+3600000*5).toISOString(),odds:{home:1.70,away:2.20}},
-    {id:'el2',home:'Fenerbahce',away:'Olimpia Milano',time:new Date(Date.now()+86400000).toISOString(),odds:{home:1.85,away:2.05}},
+    {id:'el1',home:'Real Madrid',away:'Panathinaikos',time:new Date(Date.now()+3600000*5).toISOString(),odds:{home:1.60,away:2.40}},
+    {id:'el2',home:'Fenerbahce',away:'Olimpia Milano',time:new Date(Date.now()+3600000*8).toISOString(),odds:{home:1.85,away:2.05}},
+    {id:'el3',home:'Zalgiris Kaunas',away:'FC Barcelona',time:new Date(Date.now()+86400000).toISOString(),odds:{home:3.20,away:1.38}},
+    {id:'el4',home:'Maccabi Tel Aviv',away:'Bayern Munich',time:new Date(Date.now()+86400000).toISOString(),odds:{home:2.30,away:1.65}},
+    {id:'el5',home:'Olympiacos',away:'Virtus Bologna',time:new Date(Date.now()+86400000*2).toISOString(),odds:{home:1.75,away:2.15}},
   ],
   tennis_atp_french_open: [
     {id:'t1',home:'C. Alcaraz',away:'N. Djokovic',time:new Date(Date.now()+3600000*2).toISOString(),odds:{home:2.10,away:1.75}},
@@ -1138,6 +1184,38 @@ const DEMO_MATCHES = {
   icehockey_nhl: [
     {id:'nhl1',home:'Colorado Avalanche',away:'Vegas Golden Knights',time:new Date(Date.now()+3600000*6).toISOString(),odds:{home:1.85,draw:4.00,away:2.10}},
     {id:'nhl2',home:'Toronto Maple Leafs',away:'Boston Bruins',time:new Date(Date.now()+86400000).toISOString(),odds:{home:2.20,draw:4.20,away:1.85}},
+  ],
+  soccer_germany_bundesliga: [
+    {id:'bun1',home:'Bayern Munich',away:'Borussia Dortmund',time:new Date(Date.now()+3600000*3).toISOString(),odds:{home:1.65,draw:3.80,away:5.00}},
+    {id:'bun2',home:'RB Leipzig',away:'Bayer Leverkusen',time:new Date(Date.now()+3600000*6).toISOString(),odds:{home:2.10,draw:3.30,away:3.50}},
+    {id:'bun3',home:'Eintracht Frankfurt',away:'Borussia Monchengladbach',time:new Date(Date.now()+86400000).toISOString(),odds:{home:1.90,draw:3.40,away:4.20}},
+  ],
+  soccer_italy_serie_a: [
+    {id:'sa1',home:'Internazionale',away:'AC Milan',time:new Date(Date.now()+3600000*4).toISOString(),odds:{home:2.00,draw:3.40,away:3.80}},
+    {id:'sa2',home:'Juventus',away:'Napoli',time:new Date(Date.now()+3600000*7).toISOString(),odds:{home:2.20,draw:3.30,away:3.30}},
+    {id:'sa3',home:'AS Roma',away:'Lazio',time:new Date(Date.now()+86400000).toISOString(),odds:{home:2.30,draw:3.20,away:3.10}},
+  ],
+  soccer_uefa_champs_league: [
+    {id:'ucl1',home:'Real Madrid',away:'Bayern Munich',time:new Date(Date.now()+3600000*5).toISOString(),odds:{home:1.95,draw:3.60,away:3.80}},
+    {id:'ucl2',home:'Manchester City',away:'PSG',time:new Date(Date.now()+3600000*8).toISOString(),odds:{home:1.70,draw:3.70,away:4.80}},
+    {id:'ucl3',home:'Barcelona',away:'Inter Milan',time:new Date(Date.now()+86400000).toISOString(),odds:{home:1.85,draw:3.50,away:4.30}},
+    {id:'ucl4',home:'Liverpool',away:'Atletico Madrid',time:new Date(Date.now()+86400000*2).toISOString(),odds:{home:1.80,draw:3.60,away:4.50}},
+  ],
+  americanfootball_nfl: [
+    {id:'nfl1',home:'Kansas City Chiefs',away:'San Francisco 49ers',time:new Date(Date.now()+3600000*5).toISOString(),odds:{home:1.75,away:2.15}},
+    {id:'nfl2',home:'Buffalo Bills',away:'Miami Dolphins',time:new Date(Date.now()+86400000).toISOString(),odds:{home:1.60,away:2.45}},
+    {id:'nfl3',home:'Dallas Cowboys',away:'Philadelphia Eagles',time:new Date(Date.now()+86400000).toISOString(),odds:{home:2.00,away:1.90}},
+    {id:'nfl4',home:'Baltimore Ravens',away:'Cincinnati Bengals',time:new Date(Date.now()+86400000*2).toISOString(),odds:{home:1.85,away:2.05}},
+  ],
+  baseball_mlb: [
+    {id:'mlb1',home:'New York Yankees',away:'Boston Red Sox',time:new Date(Date.now()+3600000*3).toISOString(),odds:{home:1.70,away:2.25}},
+    {id:'mlb2',home:'Los Angeles Dodgers',away:'San Francisco Giants',time:new Date(Date.now()+3600000*6).toISOString(),odds:{home:1.55,away:2.60}},
+    {id:'mlb3',home:'Houston Astros',away:'Texas Rangers',time:new Date(Date.now()+86400000).toISOString(),odds:{home:1.80,away:2.10}},
+  ],
+  mma_mixed_martial_arts: [
+    {id:'mma1',home:'Jon Jones',away:'Stipe Miocic',time:new Date(Date.now()+3600000*10).toISOString(),odds:{home:1.45,away:2.80}},
+    {id:'mma2',home:'Islam Makhachev',away:'Charles Oliveira',time:new Date(Date.now()+86400000).toISOString(),odds:{home:1.55,away:2.55}},
+    {id:'mma3',home:'Alex Pereira',away:'Jiri Prochazka',time:new Date(Date.now()+86400000*3).toISOString(),odds:{home:1.75,away:2.15}},
   ],
 };
 
@@ -1165,13 +1243,28 @@ const NOW_API_KEY = process.env.NOWPAYMENTS_API_KEY || '';
 const NOW_IPN_SECRET = process.env.NOWPAYMENTS_IPN_SECRET || '';
 const NOW_BASE = 'https://api.nowpayments.io/v1';
 
-// Supported currencies
+// Supported currencies (stablecoins only)
 const CRYPTO_CURRENCIES = [
-  { id: 'btc',   name: 'Bitcoin',  symbol: 'BTC',  icon: '₿',  tokensPerUnit: 50000000 },
-  { id: 'eth',   name: 'Ethereum', symbol: 'ETH',  icon: 'Ξ',  tokensPerUnit: 3000000  },
-  { id: 'usdt',  name: 'USDT',     symbol: 'USDT', icon: '₮',  tokensPerUnit: 1000     },
-  { id: 'bnb',   name: 'BNB',      symbol: 'BNB',  icon: '◈',  tokensPerUnit: 500000   },
-  { id: 'trx',   name: 'TRON',     symbol: 'TRX',  icon: '◉',  tokensPerUnit: 100      },
+  { id: 'usdt', name: 'Tether USD', symbol: 'USDT', icon: '₮', tokensPerUnit: 100, cgId: 'tether',
+    networks: [
+      { id: 'trc20',   label: 'TRC-20',   chain: 'TRON',     color: '#ff4444', fee: 'Free',   nowId: 'usdttrc20' },
+      { id: 'erc20',   label: 'ERC-20',   chain: 'Ethereum', color: '#627eea', fee: '~$2',    nowId: 'usdterc20' },
+      { id: 'bep20',   label: 'BEP-20',   chain: 'BSC',      color: '#f0b90b', fee: '~$0.10', nowId: 'usdtbsc'   },
+    ]
+  },
+  { id: 'usdc', name: 'USD Coin', symbol: 'USDC', icon: '◎', tokensPerUnit: 100, cgId: 'usd-coin',
+    networks: [
+      { id: 'polygon', label: 'Polygon',  chain: 'Polygon',  color: '#8247e5', fee: '~$0.01', nowId: 'usdcmatic' },
+      { id: 'erc20',   label: 'ERC-20',   chain: 'Ethereum', color: '#627eea', fee: '~$2',    nowId: 'usdcerc20' },
+      { id: 'solana',  label: 'Solana',   chain: 'Solana',   color: '#9945ff', fee: '~$0.01', nowId: 'usdcsol'   },
+    ]
+  },
+  { id: 'eurc', name: 'Euro Coin', symbol: 'EURC', icon: '€', tokensPerUnit: 107, cgId: 'euro-coin',
+    networks: [
+      { id: 'erc20',  label: 'ERC-20',  chain: 'Ethereum', color: '#627eea', fee: '~$2',    nowId: 'eurcerc20' },
+      { id: 'solana', label: 'Solana',  chain: 'Solana',   color: '#9945ff', fee: '~$0.01', nowId: 'eurcsol'   },
+    ]
+  },
 ];
 
 // Create transactions table
@@ -1199,26 +1292,34 @@ app.get('/api/crypto/estimate', async (req,res)=>{
   const cur = CRYPTO_CURRENCIES.find(c=>c.id===currency);
   if(!cur) return res.status(400).json({error:'Unknown currency'});
   const cryptoAmount = (parseInt(tokenAmount)/cur.tokensPerUnit).toFixed(8);
-  // Minimum deposit = 1000 tokens
-  const minTokens = 1000;
+  // Minimum deposit = 500 tokens (= 5 USDT)
+  const minTokens = 500;
   res.json({ cryptoAmount, currency, tokenAmount, minTokens, rate: cur.tokensPerUnit });
 });
 
 // Create deposit
 app.post('/api/crypto/deposit', express.json(), async (req,res)=>{
-  const { uid, currency, tokenAmount } = req.body;
+  const { uid, currency, tokenAmount, network } = req.body;
   if(!uid || !currency || !tokenAmount) return res.status(400).json({error:'Missing fields'});
-  if(tokenAmount < 1000) return res.status(400).json({error:'Minimum deposit is 1,000 tokens'});
+  if(tokenAmount < 500) return res.status(400).json({error:'Minimum deposit is 500 tokens (5 USDT)'});
   const cur = CRYPTO_CURRENCIES.find(c=>c.id===currency);
   if(!cur) return res.status(400).json({error:'Unknown currency'});
   const cryptoAmount = (tokenAmount/cur.tokensPerUnit).toFixed(8);
+  // Resolve network — default to first network
+  const net = (cur.networks||[]).find(n=>n.id===network) || (cur.networks||[])[0];
+  const payCurrency = net ? net.nowId : currency;
 
   if(!NOW_API_KEY) {
     // DEMO MODE — no real API key
     const demoId = 'DEMO_' + Date.now();
-    const demoAddress = currency === 'btc'
-      ? '1A1zP1eP5QGefi2DMPTfTL5SLmv7Divf'
-      : '0x742d35Cc6634C0532925a3b844Bc454e4438f44e';
+    const demoAddresses = {
+      trc20:   'TRx8UMDWaFBXqVYmKsTbMsxwmQqBj1qGmD',
+      erc20:   '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
+      bep20:   '0x1a2b3c4D5e6F7a8b9C0D1e2f3A4B5c6D7e8f9A0b',
+      polygon: '0x9Ef9e3B0AB123456789abcdef1234567890abcde',
+      solana:  'DRpbCBMxVnDK7mVeX9q7NkDmjJsWk7LhZm3h4VDZJ',
+    };
+    const demoAddress = demoAddresses[net?.id] || demoAddresses.erc20;
     await dbRun(`INSERT INTO transactions(id,uid,type,currency,amount_crypto,amount_tokens,status,payment_id,payment_address)
       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)`, [demoId,uid,'deposit',currency,cryptoAmount,tokenAmount,'waiting',demoId,demoAddress]);
     return res.json({
@@ -1226,6 +1327,7 @@ app.post('/api/crypto/deposit', express.json(), async (req,res)=>{
       address: demoAddress,
       amount: cryptoAmount,
       currency: cur.symbol,
+      network: net ? { id: net.id, label: net.label, chain: net.chain } : null,
       tokenAmount,
       expiresIn: 3600,
       demo: true
@@ -1236,7 +1338,7 @@ app.post('/api/crypto/deposit', express.json(), async (req,res)=>{
     const payment = await nowFetch('/payment', 'POST', {
       price_amount: cryptoAmount,
       price_currency: currency,
-      pay_currency: currency,
+      pay_currency: payCurrency,
       order_id: `${uid}_${Date.now()}`,
       order_description: `HATHOR Casino deposit — ${tokenAmount} tokens`,
       ipn_callback_url: process.env.RAILWAY_PUBLIC_DOMAIN
@@ -1252,8 +1354,9 @@ app.post('/api/crypto/deposit', express.json(), async (req,res)=>{
         address: payment.pay_address,
         amount: payment.pay_amount,
         currency: cur.symbol,
+        network: net ? { id: net.id, label: net.label, chain: net.chain } : null,
         tokenAmount,
-        expiresIn: payment.expiration_estimate_date ? 3600 : 3600
+        expiresIn: 3600
       });
     } else {
       res.status(500).json({error: payment.message||'Payment creation failed'});
@@ -1807,6 +1910,18 @@ app.post('/api/auth/register', express.json(), async (req, res) => {
   if(!name||!email||!password) return res.status(400).json({error:'Missing required fields'});
   if(password.length < 8) return res.status(400).json({error:'Password must be at least 8 characters'});
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({error:'Invalid email format'});
+
+  // ── DEMO MODE bypass (no PostgreSQL) ──────────────────────────────────
+  if (!_dbOk) {
+    const demoUid = 'demo-' + Buffer.from(email.toLowerCase()).toString('hex').slice(0, 16);
+    const demoUser = { uid: demoUid, name: name, tokens: 10000,
+      avatar: null, level: 1, xp: 0, total_won: 0, games_played: 0, last_bonus: null };
+    const token = demoUid + '-session';
+    return res.json({ ok: true, token, uid: demoUid,
+      user: { ...demoUser, levelInfo: getLvInfo(0), kycStatus: 'unverified' } });
+  }
+  // ─────────────────────────────────────────────────────────────────────
+
   const exists = await dbGet(`SELECT uid FROM auth WHERE email=$1`, [email.toLowerCase()]);
   if(exists) return res.status(400).json({error:'This email is already registered'});
   try {
@@ -1849,6 +1964,18 @@ app.post('/api/auth/register', express.json(), async (req, res) => {
 app.post('/api/auth/login', express.json(), async (req, res) => {
   const { email, password } = req.body;
   if(!email||!password) return res.status(400).json({error:'Enter your email and password'});
+
+  // ── DEMO MODE bypass (no PostgreSQL) ──────────────────────────────────
+  if (!_dbOk) {
+    const demoUid = 'demo-' + Buffer.from(email.toLowerCase()).toString('hex').slice(0, 16);
+    const demoUser = { uid: demoUid, name: email.split('@')[0], tokens: 10000,
+      avatar: null, level: 1, xp: 0, total_won: 0, games_played: 0, last_bonus: null };
+    const token = demoUid + '-session';
+    return res.json({ ok: true, token, uid: demoUid,
+      user: { ...demoUser, levelInfo: getLvInfo(0), kycStatus: 'unverified' } });
+  }
+  // ─────────────────────────────────────────────────────────────────────
+
   const authRow = await dbGet(`SELECT * FROM auth WHERE email=$1`, [email.toLowerCase()]);
   if(!authRow) return res.status(401).json({error:'Invalid email or password'});
   try {
@@ -1875,6 +2002,15 @@ app.post('/api/auth/login', express.json(), async (req, res) => {
 // Sesijos patikrinimas
 app.get('/api/auth/me', async (req, res) => {
   const token = (req.headers.authorization||'').replace('Bearer ','') || req.headers['x-session-token'];
+
+  // Demo mode session check
+  if (!_dbOk && token && token.endsWith('-session')) {
+    const demoUid = token.replace('-session','');
+    const demoUser = { uid: demoUid, name: demoUid.replace('demo-','').slice(0,8),
+      tokens: 10000, avatar: null, level: 1, xp: 0, total_won: 0, games_played: 0, last_bonus: null };
+    return res.json({ uid: demoUid, user: { ...demoUser, levelInfo: getLvInfo(0), kycStatus: 'unverified' } });
+  }
+
   const uid = await checkSession(token);
   if(!uid) return res.status(401).json({error:'Sesija negaliojanti'});
   const user = await getUser(uid);
@@ -3807,10 +3943,10 @@ async function initDB() {
       }
     }
     // ── End migration ──────────────────────────────────────────────────
-
+    _dbOk = true;
+    console.log('✅ Database ready');
   } catch(e) {
-    console.error('❌ DB init error:', e.message);
-    process.exit(1);
+    console.warn('⚠️  DB init warning (no database — running in static/demo mode):', e.message);
   }
 }
 

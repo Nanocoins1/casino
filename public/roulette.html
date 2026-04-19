@@ -1002,7 +1002,7 @@ function spawnParticles(){
   var canvas=document.getElementById('particleCanvas');
   canvas.width=window.innerWidth; canvas.height=window.innerHeight;
   var ctx=canvas.getContext('2d');
-  var colors=['#f0c060','#ffd680','#00e676','#60a5fa','#f87171','#ffffff'];
+  var colors=['#f0c060','#ffd700','#ffe566','#fff4b0','#ffa500','#ffffff'];
   var pieces=Array.from({length:80},function(){
     return{x:Math.random()*canvas.width,y:-10,vx:(Math.random()-.5)*7,vy:Math.random()*5+2,r:Math.random()*5+2,
       color:colors[Math.floor(Math.random()*colors.length)],rot:Math.random()*360,rv:(Math.random()-.5)*10,life:1};
@@ -1061,5 +1061,7 @@ updateBetsUI();
 document.getElementById('spinBtn').disabled=true;
 </script>
 <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(function(){});</script>
+<script src="/js/casino-sounds.js"></script>
+<script src="/js/cookie-consent.js"></script>
 </body>
 </html>

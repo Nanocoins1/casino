@@ -1,5 +1,5 @@
-// HATHOR Casino — Service Worker v2.0
-var CACHE = 'hathor-v2.0';
+// HATHOR Casino — Service Worker v3.3
+var CACHE = 'hathor-v3.3';
 var STATIC = [
   '/',
   '/manifest.json',
@@ -13,7 +13,7 @@ var IMG_CACHE = [
   '/img/win-celebration.png',
   '/img/bonus-bg.png',
   '/img/vip-card-bg.png',
-  '/img/cashier-hero.png',
+  '/img/cashier-hero.jpg',
   '/img/cat-all.png',
   '/img/cat-tables.png',
   '/img/cat-slots.png',
@@ -34,6 +34,13 @@ var IMG_CACHE = [
   '/img/av-dragon.png',
   '/img/av-king.png',
   '/img/av-queen.png',
+  // AI-generated nav icons (DALL-E 3)
+  '/img/nav-lobby.png',
+  '/img/nav-slots.png',
+  '/img/nav-sports.png',
+  '/img/nav-poker.png',
+  '/img/nav-pyramid.png',
+  '/img/nav-cashier.png',
 ];
 
 // Pages that should always come from network (live game data)
@@ -44,6 +51,17 @@ var CACHE_FIRST = [
   '/terms.html', '/privacy.html', '/responsible.html',
   '/provably-fair.html', '/aml.html', '/login.html', '/404.html'
 ];
+
+self.addEventListener('message', function(e) {
+  if(e.data && e.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+  if(e.data && e.data.type === 'NUKE_CACHE') {
+    caches.keys().then(function(keys) {
+      return Promise.all(keys.map(function(k) { return caches.delete(k); }));
+    }).then(function() { self.skipWaiting(); });
+  }
+});
 
 self.addEventListener('install', function(e) {
   self.skipWaiting();
@@ -107,7 +125,24 @@ self.addEventListener('fetch', function(e) {
     return;
   }
 
-  // Stale-while-revalidate for everything else
+  // Network-first for HTML pages (always get fresh version)
+  var isHTML = url.indexOf('.html') >= 0 || url.endsWith('/') || url.split('?')[0].endsWith('/index');
+  if (isHTML) {
+    e.respondWith(
+      fetch(e.request).then(function(res) {
+        if (res && res.status === 200) {
+          var clone = res.clone();
+          caches.open(CACHE).then(function(c) { c.put(e.request, clone); });
+        }
+        return res;
+      }).catch(function() {
+        return caches.match(e.request);
+      })
+    );
+    return;
+  }
+
+  // Stale-while-revalidate for assets (images, fonts, js, css)
   e.respondWith(
     caches.match(e.request).then(function(cached) {
       var fetchPromise = fetch(e.request).then(function(res) {

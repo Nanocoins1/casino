@@ -1,29 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎱 Keno</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>HATHOR — Keno</title>
+<meta name="description" content="Premium Keno — pick up to 10 numbers, win up to 100,000×."/>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/css/game-ui.css"/>
+<link rel="icon" type="image/png" href="/img/favicon.png"/>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #04040a;
-    --bg2: #0a0a14;
-    --bg3: #10101e;
+    --bg: #030608;
+    --bg2: #08090f;
+    --bg3: #0e0f18;
     --gold: #f0c060;
-    --gold2: #d4a840;
-    --green: #00e676;
-    --red: #ff5252;
-    --text: #e0e0e0;
-    --muted: #888;
-    --border: #222240;
+    --gold2: #ffd980;
+    --gold3: #c9a84c;
+    --green: #4caf7c;
+    --red: #c0394c;
+    --cream: #e8dcc8;
+    --muted: rgba(232,220,200,0.35);
+    --border: rgba(201,168,76,0.12);
+    --border2: rgba(201,168,76,0.25);
   }
 
+  html, body { height: 100%; }
   body {
-    background: #04040a url('/img/keno-bg.png') center/cover no-repeat fixed;
-    color: var(--text);
-    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg) url('/img/keno-bg.png') center/cover no-repeat fixed;
+    color: var(--cream);
+    font-family: 'Space Grotesk', sans-serif;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -31,53 +38,50 @@
   }
   body::before {
     content: '';
-    position: fixed;
-    inset: 0;
-    background: rgba(4,4,10,0.72);
-    z-index: 0;
-    pointer-events: none;
+    position: fixed; inset: 0;
+    background: rgba(3,6,8,0.65);
+    z-index: 0; pointer-events: none;
   }
   header, .main { position: relative; z-index: 1; }
 
-  /* HEADER */
+  /* ─── HEADER ─── */
   header {
-    background: linear-gradient(135deg, #0a0a18 0%, #12122a 100%);
-    border-bottom: 2px solid var(--gold);
+    height: 56px; display: flex; align-items: center; justify-content: space-between;
     padding: 0 20px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 2px 20px rgba(240,192,96,0.2);
+    background: rgba(3,6,8,.98);
+    border-bottom: 1px solid rgba(201,168,76,0.14);
+    flex-shrink: 0; z-index: 100; position: sticky; top: 0;
+    box-shadow: 0 1px 0 rgba(201,168,76,0.06);
+  }
+  .hdr-logo {
+    font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 900; letter-spacing: 3px;
+    background: linear-gradient(135deg,#c9a84c,#ffd980);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .hdr-game {
+    font-family: 'Cinzel', serif; font-size: 16px; font-weight: 900;
+    color: var(--cream); letter-spacing: 2px;
+  }
+  .hdr-right { display: flex; align-items: center; gap: 14px; }
+  .hdr-bal {
+    font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 700; color: var(--gold);
   }
 
   .back-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--gold);
-    text-decoration: none;
-    font-size: 15px;
-    font-weight: 600;
-    padding: 8px 14px;
-    border: 1px solid rgba(240,192,96,0.3);
-    border-radius: 8px;
-    transition: all 0.2s;
+    padding: 6px 14px; border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.07);
+    background: rgba(255,255,255,0.03);
+    color: rgba(232,220,200,0.4);
+    font-size: 11px; font-family: 'Space Grotesk', sans-serif; font-weight: 600;
+    text-decoration: none; transition: all .2s; letter-spacing: .5px;
   }
-  .back-btn:hover {
-    background: rgba(240,192,96,0.1);
-    border-color: var(--gold);
-  }
+  .back-btn:hover { color: var(--cream); border-color: rgba(255,255,255,.15); }
 
+  /* OLD header-title kept for reference but hidden */
   .header-title {
-    font-size: 26px;
-    font-weight: 800;
-    color: var(--gold);
-    text-shadow: 0 0 20px rgba(240,192,96,0.5);
-    letter-spacing: 2px;
+    font-family: 'Cinzel', serif;
+    font-size: 16px; font-weight: 900; letter-spacing: 2px;
+    color: var(--cream);
   }
 
   .balance-display {
@@ -144,8 +148,9 @@
   }
 
   .picks-count {
+    font-family: 'Orbitron', monospace;
     font-size: 22px;
-    font-weight: 800;
+    font-weight: 900;
     color: var(--gold);
   }
 
@@ -182,48 +187,52 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--bg3);
-    border: 1.5px solid var(--border);
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 700;
+    background: linear-gradient(145deg,rgba(14,12,28,0.9),rgba(8,6,18,0.95));
+    border: 1.5px solid rgba(255,255,255,0.07);
+    border-radius: 9px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: all 0.13s;
     user-select: none;
     position: relative;
     overflow: hidden;
+    color: rgba(232,220,200,0.55);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
   }
 
   .keno-cell:hover:not(.drawn):not(.selected) {
-    background: #1a1a30;
-    border-color: rgba(240,192,96,0.4);
+    background: linear-gradient(145deg,rgba(40,30,70,0.9),rgba(20,14,50,0.95));
+    border-color: rgba(201,168,76,0.4);
     color: var(--gold);
-    transform: scale(1.05);
+    transform: scale(1.06);
+    box-shadow: 0 0 12px rgba(201,168,76,0.15);
   }
 
   .keno-cell.selected {
-    background: rgba(240,192,96,0.15);
-    border-color: var(--gold);
+    background: linear-gradient(145deg,rgba(60,44,12,0.92),rgba(40,28,8,0.95));
+    border-color: rgba(240,192,96,0.7);
     color: var(--gold);
-    box-shadow: 0 0 12px rgba(240,192,96,0.4), inset 0 0 8px rgba(240,192,96,0.1);
-    transform: scale(1.05);
+    box-shadow: 0 0 14px rgba(240,192,96,0.35), inset 0 0 8px rgba(240,192,96,0.1);
+    transform: scale(1.06);
   }
 
   .keno-cell.drawn {
-    animation: drawReveal 0.3s ease forwards;
+    animation: drawReveal 0.32s cubic-bezier(.34,1.4,.64,1) forwards;
   }
 
   .keno-cell.drawn.hit {
-    background: rgba(0,230,118,0.2);
-    border-color: var(--green);
-    color: var(--green);
-    box-shadow: 0 0 16px rgba(0,230,118,0.6), inset 0 0 10px rgba(0,230,118,0.15);
+    background: linear-gradient(145deg,rgba(0,80,40,0.85),rgba(0,40,20,0.92));
+    border-color: rgba(76,175,124,0.65);
+    color: #7de8b0;
+    box-shadow: 0 0 18px rgba(76,175,124,0.4), inset 0 0 10px rgba(76,175,124,0.12);
   }
 
   .keno-cell.drawn.miss {
-    background: rgba(255,255,255,0.03);
-    border-color: #333;
-    color: #444;
+    background: rgba(8,6,16,0.6);
+    border-color: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.15);
     box-shadow: none;
   }
 
@@ -246,13 +255,14 @@
     display: none;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, rgba(10,10,24,0.97), rgba(16,16,30,0.97));
-    border: 2px solid var(--gold);
+    background: linear-gradient(135deg, rgba(8,6,16,0.98), rgba(12,10,22,0.98));
+    border: 1px solid rgba(201,168,76,0.45);
     border-radius: 16px;
     padding: 28px;
     text-align: center;
     animation: fadeIn 0.4s ease;
-    box-shadow: 0 0 40px rgba(240,192,96,0.2);
+    box-shadow: 0 0 60px rgba(240,192,96,0.15), 0 0 120px rgba(201,168,76,0.06);
+    backdrop-filter: blur(20px);
   }
 
   .win-overlay.visible {
@@ -267,17 +277,19 @@
   }
 
   .win-label {
-    font-size: 13px;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
     text-transform: uppercase;
-    letter-spacing: 2px;
-    color: var(--muted);
+    letter-spacing: 3px;
+    color: rgba(201,168,76,0.5);
   }
 
   .win-amount {
+    font-family: 'Orbitron', monospace;
     font-size: 48px;
     font-weight: 900;
     color: var(--gold);
-    text-shadow: 0 0 30px rgba(240,192,96,0.7);
+    text-shadow: 0 0 40px rgba(240,192,96,0.8), 0 0 80px rgba(201,168,76,0.3);
     line-height: 1;
   }
 
@@ -330,17 +342,20 @@
   }
 
   .panel-card {
-    background: var(--bg2);
+    background: rgba(8,9,15,0.85);
     border: 1px solid var(--border);
     border-radius: 14px;
     padding: 16px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 
   .panel-title {
-    font-size: 11px;
+    font-family: 'Cinzel', serif;
+    font-size: 10px; font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 2px;
-    color: var(--muted);
+    letter-spacing: 3px;
+    color: rgba(201,168,76,0.55);
     margin-bottom: 12px;
     border-bottom: 1px solid var(--border);
     padding-bottom: 8px;
@@ -356,20 +371,22 @@
 
   .bet-input {
     flex: 1;
-    background: var(--bg3);
-    border: 1.5px solid var(--border);
+    background: rgba(0,0,0,0.5);
+    border: 1.5px solid rgba(201,168,76,0.18);
     border-radius: 8px;
     color: var(--gold);
+    font-family: 'DM Mono', monospace;
     font-size: 20px;
     font-weight: 700;
     padding: 8px 12px;
     text-align: right;
     width: 100%;
     transition: border-color 0.2s;
+    outline: none;
   }
   .bet-input:focus {
-    outline: none;
-    border-color: var(--gold);
+    border-color: rgba(240,192,96,0.45);
+    box-shadow: 0 0 0 2px rgba(240,192,96,0.06);
   }
 
   .bet-currency {
@@ -384,21 +401,22 @@
   }
 
   .quick-btn {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    color: var(--text);
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    color: rgba(232,220,200,0.6);
     padding: 7px;
     border-radius: 7px;
     cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'DM Mono', monospace;
     transition: all 0.15s;
     text-align: center;
   }
   .quick-btn:hover {
-    border-color: var(--gold);
+    border-color: rgba(201,168,76,0.35);
     color: var(--gold);
-    background: rgba(240,192,96,0.07);
+    background: rgba(201,168,76,0.07);
   }
 
   /* DRAW BUTTON */
@@ -420,8 +438,9 @@
     text-align: center;
   }
   .pick-stat-val {
+    font-family: 'Orbitron', monospace;
     font-size: 24px;
-    font-weight: 800;
+    font-weight: 900;
     color: var(--gold);
   }
   .pick-stat-lbl {
@@ -458,9 +477,9 @@
     border-bottom: 1px solid rgba(34,34,64,0.5);
   }
   .payout-table tr.active-row td {
-    color: var(--green);
+    color: #7de8b0;
     font-weight: 700;
-    background: rgba(0,230,118,0.07);
+    background: rgba(76,175,124,0.08);
   }
   .payout-table tr.highlight-row td {
     color: var(--gold);
@@ -485,14 +504,16 @@
     gap: 10px;
   }
   .stat-box {
-    background: var(--bg3);
-    border-radius: 8px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
     padding: 10px;
     text-align: center;
   }
   .stat-val {
+    font-family: 'DM Mono', monospace;
     font-size: 20px;
-    font-weight: 800;
+    font-weight: 700;
   }
   .stat-val.green { color: var(--green); }
   .stat-val.red { color: var(--red); }
@@ -513,18 +534,21 @@
     min-height: 28px;
   }
   .drawn-tag {
-    background: rgba(0,230,118,0.15);
-    border: 1px solid rgba(0,230,118,0.4);
-    color: var(--green);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(232,220,200,0.5);
     border-radius: 5px;
     padding: 2px 7px;
-    font-size: 12px;
-    font-weight: 700;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
   }
   .drawn-tag.hit {
-    background: rgba(0,230,118,0.25);
-    border-color: var(--green);
-    box-shadow: 0 0 6px rgba(0,230,118,0.3);
+    background: rgba(201,168,76,0.15);
+    border-color: rgba(201,168,76,0.5);
+    color: var(--gold);
+    box-shadow: 0 0 8px rgba(201,168,76,0.25);
+    font-weight: 700;
   }
 
   /* TOAST */
@@ -615,7 +639,7 @@
   /* Number 0 padding for grid */
   .keno-cell[data-num="1"] { --delay: 0; }
 
-  /* Confetti */
+  /* Gold coin shower */
   .confetti-container {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -625,30 +649,24 @@
   }
   .confetti-piece {
     position: absolute;
-    width: 8px;
-    height: 8px;
     top: -10px;
-    animation: confettiFall linear forwards;
-    border-radius: 2px;
+    border-radius: 50%;
+    animation: goldCoinFall linear forwards;
   }
-  @keyframes confettiFall {
-    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  @keyframes goldCoinFall {
+    0%   { transform: translateY(0) rotateY(0deg); opacity: 1; }
+    80%  { opacity: 1; }
+    100% { transform: translateY(100vh) rotateY(720deg); opacity: 0; }
   }
 </style>
-<link rel="stylesheet" href="/css/game-ui.css"/>
 </head>
 <body>
 
 <header>
-  <a href="/" class="back-btn">← Atgal</a>
-  <div class="header-title">🎱 KENO</div>
-  <div class="balance-display">
-    <span class="balance-icon">🪙</span>
-    <div>
-      <div class="balance-amount" id="balanceDisplay">0</div>
-      <div class="balance-label">Tokens</div>
-    </div>
+  <a href="/" class="back-btn">← Lobby</a>
+  <div class="hdr-game">KENO</div>
+  <div class="hdr-right">
+    <div class="hdr-bal">🪙 <span id="balanceDisplay">0</span></div>
   </div>
 </header>
 
@@ -657,7 +675,7 @@
   <div class="grid-area">
     <div class="grid-header">
       <div class="picks-info">
-        <span class="picks-label">Pasirinkta:</span>
+        <span class="picks-label">Picks:</span>
         <span class="picks-count" id="picksCount">0</span>
         <span class="picks-max">/ 10</span>
       </div>
@@ -668,7 +686,7 @@
 
     <!-- Win overlay (shown after draw) -->
     <div class="win-overlay" id="winOverlay">
-      <div class="win-label" id="winLabel">Rezultatas</div>
+      <div class="win-label" id="winLabel">Result</div>
       <div class="win-amount" id="winAmount">0</div>
       <div id="winDetail"></div>
       <button class="play-again-btn" onclick="resetGame()">🎱 Play Again</button>
@@ -686,7 +704,7 @@
 
     <!-- Bet -->
     <div class="panel-card">
-      <div class="panel-title">Statymas</div>
+      <div class="panel-title">Bet</div>
       <div class="bet-input-row">
         <span class="bet-currency">🪙</span>
         <input type="number" class="bet-input" id="betInput" value="100" min="1" max="10000" step="10">
@@ -704,24 +722,24 @@
       <div class="pick-status">
         <div class="pick-stat">
           <div class="pick-stat-val" id="statPicked">0</div>
-          <div class="pick-stat-lbl">Pasirinkta</div>
+          <div class="pick-stat-lbl">Picks</div>
         </div>
         <div class="pick-divider"></div>
         <div class="pick-stat">
           <div class="pick-stat-val" id="statHits" style="color:var(--green)">-</div>
-          <div class="pick-stat-lbl">Pataikyta</div>
+          <div class="pick-stat-lbl">Hits</div>
         </div>
         <div class="pick-divider"></div>
         <div class="pick-stat">
           <div class="pick-stat-val" id="statMult" style="color:var(--gold)">-</div>
-          <div class="pick-stat-lbl">Daugiklis</div>
+          <div class="pick-stat-lbl">Multiplier</div>
         </div>
       </div>
     </div>
 
     <!-- Draw button -->
     <button class="btn btn-full btn-lg btn-green draw-btn" id="drawBtn" onclick="startDraw()">
-      🎱 TRAUKTI
+      🎱 DRAW
     </button>
 
     <!-- Payout table -->
@@ -730,8 +748,8 @@
       <table class="payout-table" id="payoutTable">
         <thead>
           <tr>
-            <th>Pataikyta</th>
-            <th>Daugiklis</th>
+            <th>Hits</th>
+            <th>Multiplier</th>
             <th>Payout</th>
           </tr>
         </thead>
@@ -743,7 +761,7 @@
 
     <!-- Stats -->
     <div class="panel-card">
-      <div class="panel-title">Statistika</div>
+      <div class="panel-title">Statistics</div>
       <div class="stats-grid">
         <div class="stat-box">
           <div class="stat-val gold" id="statGamesPlayed">0</div>
@@ -759,7 +777,7 @@
         </div>
         <div class="stat-box">
           <div class="stat-val red" id="statTotalLost">0</div>
-          <div class="stat-lbl">Prarasta</div>
+          <div class="stat-lbl">Lost</div>
         </div>
       </div>
     </div>
@@ -844,7 +862,7 @@ function toggleNum(num) {
     getCell(num).classList.remove('selected');
   } else {
     if (selectedNums.size >= 10) {
-      showToast('Galite pasirinkti iki 10 skaičių!', 'error');
+      showToast('You can pick up to 10 numbers!', 'error');
       return;
     }
     selectedNums.add(num);
@@ -926,13 +944,13 @@ document.getElementById('betInput').addEventListener('input', () => updatePayout
 async function startDraw() {
   if (gamePhase !== 'pick') return;
   if (selectedNums.size === 0) {
-    showToast('Pasirinkite bent 1 skaičių!', 'error');
+    showToast('Pick at least 1 number!', 'error');
     return;
   }
 
   const bet = getBet();
   if (bet > balance) {
-    showToast('Nepakanka žetonų!', 'error');
+    showToast('Insufficient balance!', 'error');
     return;
   }
   if (bet <= 0) {
@@ -1031,25 +1049,25 @@ function showResults(bet) {
     saveBalance();
     updateBalanceDisplay();
 
-    winLabelEl.textContent = won >= bet * 10 ? '🎉 DIDYSIS LAIMĖJIMAS!' : '🏆 Laimėjote!';
+    winLabelEl.textContent = won >= bet * 10 ? '🎉 BIG WIN!' : '🏆 You won!';
     winAmountEl.textContent = `+${won.toLocaleString()} 🪙`;
     winAmountEl.style.color = 'var(--gold)';
     if (won >= bet * 10) winAmountEl.classList.add('big-win');
-    winDetailEl.innerHTML = `<div class="win-hits">Pataikėte: ${hits} iš ${picks} • ×${mult}</div>`;
+    winDetailEl.innerHTML = `<div class="win-hits">Hits: ${hits} of ${picks} • ×${mult}</div>`;
 
     stats.wins++;
     stats.totalWon += won;
 
     if (won >= bet * 5) launchConfetti();
-    showToast(`Laimėjote ${won.toLocaleString()} žetonų!`, 'success');
+    showToast(`You won ${won.toLocaleString()} chips!`, 'success');
   } else {
-    winLabelEl.textContent = '😔 Nepasisekė';
+    winLabelEl.textContent = '😔 No win';
     winAmountEl.textContent = `−${bet.toLocaleString()} 🪙`;
     winAmountEl.style.color = 'var(--red)';
-    winDetailEl.innerHTML = `<div class="win-loss">Pataikėte: ${hits} iš ${picks}</div>`;
+    winDetailEl.innerHTML = `<div class="win-loss">Hits: ${hits} of ${picks}</div>`;
 
     stats.totalLost += bet;
-    showToast(`Nepasisekė. Pataikėte ${hits}/${picks}.`, 'error');
+    showToast(`No win. Hits ${hits}/${picks}.`, 'error');
   }
 
   stats.games++;
@@ -1140,16 +1158,17 @@ function showToast(msg, type = '') {
 // ============================================================
 function launchConfetti() {
   const container = document.getElementById('confettiContainer');
-  const colors = ['#f0c060', '#00e676', '#ff5252', '#64b5f6', '#ba68c8', '#ffb74d'];
+  const colors = ['#ffd700', '#f0c060', '#ffe566', '#fff4b0', '#ffa500', '#ffffff'];
   for (let i = 0; i < 60; i++) {
     const piece = document.createElement('div');
     piece.className = 'confetti-piece';
     piece.style.left = Math.random() * 100 + 'vw';
     piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.boxShadow = '0 0 6px rgba(255,215,0,0.6)';
     piece.style.animationDuration = (1.5 + Math.random() * 2) + 's';
     piece.style.animationDelay = Math.random() * 0.8 + 's';
-    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
-    piece.style.width = piece.style.height = (5 + Math.random() * 8) + 'px';
+    const sz = (5 + Math.random() * 8) + 'px';
+    piece.style.width = sz; piece.style.height = sz;
     container.appendChild(piece);
     setTimeout(() => piece.remove(), 4000);
   }
@@ -1161,5 +1180,7 @@ function launchConfetti() {
 init();
 </script>
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
+<script src="/js/casino-sounds.js"></script>
+<script src="/js/cookie-consent.js"></script>
 </body>
 </html>

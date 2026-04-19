@@ -11,7 +11,7 @@
 :root{
   --bg:#04040a;--bg2:#080812;
   --gold:#f0c060;--gold2:#ffd980;--gold3:#8a6020;
-  --green:#00e676;--red:#ff3d71;--neon:#00e5ff;
+  --green:#00e676;--red:#ff3d71;--neon:#c9a84c;
   --cream:#e8e0d0;--border:rgba(255,255,255,0.08);--glass:rgba(255,255,255,0.04);
   --felt:#0a2a14;--felt2:#0d3318;--felt-border:rgba(255,255,255,0.12);
   --card-bg:#fdf8f0;--card-red:#d42b2b;--card-black:#0d0d1a;
@@ -92,7 +92,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
   font-size:9px;font-weight:800;display:none;align-items:center;justify-content:center;
   border:2px solid rgba(0,0,0,.4);box-shadow:0 2px 8px rgba(0,0,0,.4);}
 .bet-area-chip.visible{display:flex;}
-.bet-area.player-area.selected{border-color:#00e5ff;background:rgba(0,229,255,.08);}
+.bet-area.player-area.selected{border-color:#60a5fa;background:rgba(96,165,250,.08);}
 .bet-area.tie-area.selected{border-color:var(--gold);background:rgba(240,192,96,.1);}
 .bet-area.banker-area.selected{border-color:var(--red);background:rgba(255,61,113,.08);}
 .bet-area.tie-area{min-width:70px;}
@@ -151,7 +151,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
   color:rgba(232,224,208,.4);font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer;
   text-align:center;transition:all .2s;}
 .btt:hover{color:var(--cream);border-color:rgba(255,255,255,.2);}
-.btt.active.player{background:rgba(0,229,255,.12);border-color:#00e5ff;color:#00e5ff;}
+.btt.active.player{background:rgba(96,165,250,.12);border-color:#60a5fa;color:#60a5fa;}
 .btt.active.tie{background:rgba(240,192,96,.12);border-color:var(--gold);color:var(--gold);}
 .btt.active.banker{background:rgba(255,61,113,.12);border-color:var(--red);color:var(--red);}
 
@@ -180,7 +180,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 .history-pill{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   font-size:10px;font-weight:800;letter-spacing:0.5px;}
 .history-pill.B{background:rgba(255,61,113,.2);color:var(--red);border:1px solid rgba(255,61,113,.3);}
-.history-pill.P{background:rgba(0,229,255,.15);color:#00e5ff;border:1px solid rgba(0,229,255,.25);}
+.history-pill.P{background:rgba(96,165,250,.15);color:#60a5fa;border:1px solid rgba(96,165,250,.25);}
 .history-pill.T{background:rgba(240,192,96,.15);color:var(--gold);border:1px solid rgba(240,192,96,.25);}
 
 /* Stats */
@@ -188,7 +188,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 .stat-box{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;
   padding:8px;text-align:center;}
 .stat-val{font-family:'DM Mono',monospace;font-size:16px;font-weight:700;}
-.stat-val.p{color:#00e5ff;}
+.stat-val.p{color:#60a5fa;}
 .stat-val.t{color:var(--gold);}
 .stat-val.b{color:var(--red);}
 .stat-label{font-size:8px;letter-spacing:1.5px;color:rgba(232,224,208,.3);margin-top:2px;}
@@ -263,7 +263,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 <body>
 
 <div class="header">
-  <a href="/" class="back-btn">← ATGAL</a>
+  <a href="/" class="back-btn">← LOBBY</a>
   <div class="game-title">🃏 BACCARAT</div>
   <div class="balance-wrap">
     <span class="balance-label">BALANSAS</span>
@@ -364,7 +364,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 
     <!-- Deal -->
     <div class="panel-section">
-      <button class="btn btn-full btn-lg btn-gold deal-btn" id="dealBtn" onclick="startRound()">🃏 DALINTI</button>
+      <button class="btn btn-full btn-lg btn-gold deal-btn" id="dealBtn" onclick="startRound()">🃏 DEAL</button>
     </div>
 
     <!-- History -->
@@ -505,7 +505,7 @@ function selectBetType(type) {
   document.getElementById(feltMap[type]).classList.add('selected');
 
   // Label
-  const labelMap = {player:'Žaidėjas (1:1)', tie:'Lygiosios (8:1)', banker:'Bankininkas (0.95:1)'};
+  const labelMap = {player:'Player (1:1)', tie:'Lygiosios (8:1)', banker:'Bankininkas (0.95:1)'};
   document.getElementById('currentBetLabel').textContent = labelMap[type];
 
   updateChips();
@@ -594,10 +594,10 @@ async function startRound() {
 
   betAmount = parseFloat(document.getElementById('betAmount').value) || 0;
 
-  if (!betType) { setStatus('Pasirinkite lažybos tipą!', 'active'); return; }
-  if (betAmount < 1) { setStatus('Minimalus statymas yra 1!', 'active'); return; }
+  if (!betType) { setStatus('Please select a bet type!', 'active'); return; }
+  if (betAmount < 1) { setStatus('Minimum bet is 1!', 'active'); return; }
   if (betAmount > MAX_BET) { betAmount = MAX_BET; document.getElementById('betAmount').value = MAX_BET; }
-  if (betAmount > balance) { setStatus('Nepakanka žetonų!', 'active'); return; }
+  if (betAmount > balance) { setStatus('Insufficient balance!', 'active'); return; }
 
   isDealing = true;
   var btn = document.getElementById('dealBtn');
@@ -660,7 +660,7 @@ async function startRound() {
   let pDrewThird = false;
   let pThirdCard = null;
   if (pTotal <= 5) {
-    setStatus('Žaidėjas ima kortą...', 'active');
+    setStatus('Player draws a card...', 'active');
     await delay(500);
     pThirdCard = drawCard();
     playerCards.push(pThirdCard);
@@ -688,7 +688,7 @@ async function startRound() {
   }
 
   if (bankerDraws) {
-    setStatus('Bankininkas ima kortą...', 'active');
+    setStatus('Bankininkas draws a card...', 'active');
     await delay(500);
     const bThirdCard = drawCard();
     bankerCards.push(bThirdCard);
@@ -771,7 +771,7 @@ async function resolveRound(playerCards, bankerCards) {
   var btn = document.getElementById('dealBtn');
   btn.disabled = false;
   btn.className = 'btn btn-full btn-lg btn-gold deal-btn';
-  btn.innerHTML = '🃏 DALINTI';
+  btn.innerHTML = '🃏 DEAL';
 }
 
 function showResultPopup(userWon, won, result, myBet, pScore, bScore) {
@@ -783,26 +783,26 @@ function showResultPopup(userWon, won, result, myBet, pScore, bScore) {
 
   popup.classList.remove('lose-popup');
 
-  const resultName = {player:'Žaidėjas', banker:'Bankininkas', tie:'Lygiosios'};
+  const resultName = {player:'Player', banker:'Bankininkas', tie:'Lygiosios'};
 
   if (result === 'tie' && myBet !== 'tie') {
     // Push
-    label.textContent = 'LYGIOSIOS — GRĄŽINTA';
+    label.textContent = 'LYGIOSIOS — REFUNDED';
     amount.textContent = `${Math.round(won).toLocaleString('lt-LT')} 🪙`;
     amount.className = 'wp-amount';
-    sub.textContent = `Žaidėjas: ${pScore} | Bankininkas: ${bScore}`;
+    sub.textContent = `Player: ${pScore} | Bankininkas: ${bScore}`;
   } else if (userWon) {
-    label.textContent = '🏆 LAIMĖJAI!';
+    label.textContent = '🏆 YOU WIN!';
     var profit = won - betAmount;
     amount.textContent = `+${Math.round(profit).toLocaleString('lt-LT')} 🪙`;
     amount.className = 'wp-amount';
-    sub.textContent = `${resultName[result]} laimėjo! (${pScore} vs ${bScore})`;
+    sub.textContent = `${resultName[result]} wins! (${pScore} vs ${bScore})`;
   } else {
     popup.classList.add('lose-popup');
-    label.textContent = 'PRALAIMĖJAI';
+    label.textContent = 'YOU LOSE';
     amount.textContent = `-${Math.round(betAmount).toLocaleString('lt-LT')} 🪙`;
     amount.className = 'wp-amount lose';
-    sub.textContent = `${resultName[result]} laimėjo! (${pScore} vs ${bScore})`;
+    sub.textContent = `${resultName[result]} wins! (${pScore} vs ${bScore})`;
   }
 
   bg.classList.add('show');
@@ -909,5 +909,7 @@ renderStats();
 setStatus('Place your bet and click DEAL');
 </script>
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
+<script src="/js/casino-sounds.js"></script>
+<script src="/js/cookie-consent.js"></script>
 </body>
 </html>

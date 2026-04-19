@@ -10,7 +10,7 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
   --bg:#04040a;--gold:#f0c060;--gold2:#ffd980;--green:#00e676;--red:#ff3d71;
-  --neon:#00e5ff;--cream:#e8e0d0;--border:rgba(255,255,255,0.08);--glass:rgba(255,255,255,0.04);
+  --neon:#c9a84c;--cream:#e8e0d0;--border:rgba(255,255,255,0.08);--glass:rgba(255,255,255,0.04);
 }
 html,body{height:100%;overflow:hidden;background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cream);}
 ::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-thumb{background:#8a6020;border-radius:2px;}
@@ -86,23 +86,23 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:'Space Gr
 .qb:hover{border-color:rgba(240,192,96,.3);color:var(--gold);}
 
 /* Target multiplier */
-.target-section{background:rgba(0,229,255,.04);border:1px solid rgba(0,229,255,.12);border-radius:10px;padding:14px;}
-.target-inp{width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(0,229,255,.2);
+.target-section{background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.12);border-radius:10px;padding:14px;}
+.target-inp{width:100%;padding:10px 12px;background:rgba(0,0,0,.5);border:1px solid rgba(201,168,76,.2);
   border-radius:9px;color:var(--neon);font-family:'Orbitron',monospace;font-size:18px;font-weight:700;outline:none;text-align:center;}
-.target-inp:focus{border-color:rgba(0,229,255,.5);}
+.target-inp:focus{border-color:rgba(201,168,76,.5);}
 .target-presets{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:8px;}
-.tp{padding:6px;border-radius:6px;border:1px solid rgba(0,229,255,.15);background:rgba(0,229,255,.04);
-  color:rgba(0,229,255,.5);font-size:11px;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;}
-.tp:hover,.tp.on{border-color:var(--neon);color:var(--neon);background:rgba(0,229,255,.1);}
+.tp{padding:6px;border-radius:6px;border:1px solid rgba(201,168,76,.15);background:rgba(201,168,76,.04);
+  color:rgba(201,168,76,.5);font-size:11px;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;}
+.tp:hover,.tp.on{border-color:var(--neon);color:var(--neon);background:rgba(201,168,76,.1);}
 
 /* Slider */
 .slider-wrap{margin-top:8px;}
-input[type=range]{width:100%;-webkit-appearance:none;height:4px;background:rgba(0,229,255,.15);
+input[type=range]{width:100%;-webkit-appearance:none;height:4px;background:rgba(201,168,76,.15);
   border-radius:2px;outline:none;cursor:pointer;}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;
   border-radius:50%;background:var(--neon);cursor:pointer;box-shadow:0 0 8px var(--neon);}
 
-.win-chance{font-size:11px;color:rgba(0,229,255,.5);text-align:center;margin-top:6px;font-family:'DM Mono',monospace;}
+.win-chance{font-size:11px;color:rgba(201,168,76,.5);text-align:center;margin-top:6px;font-family:'DM Mono',monospace;}
 
 /* .spin-btn — 3D handled by btn-teal in game-ui.css (neon/cyan theme) */
 .spin-btn{margin:0 16px 12px;font-family:'Orbitron',monospace;font-size:13px;letter-spacing:2px;}
@@ -112,7 +112,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .sw{position:relative;width:38px;height:20px;cursor:pointer;flex-shrink:0;}
 .sw input{opacity:0;width:0;height:0;}
 .sw-t{position:absolute;inset:0;border-radius:10px;background:rgba(255,255,255,.1);transition:.25s;}
-.sw input:checked~.sw-t{background:rgba(0,229,255,.4);}
+.sw input:checked~.sw-t{background:rgba(201,168,76,.4);}
 .sw-k{position:absolute;height:14px;width:14px;left:3px;bottom:3px;border-radius:50%;background:rgba(232,224,208,.4);transition:.25s;}
 .sw input:checked~.sw-k{transform:translateX(18px);background:var(--neon);}
 .auto-sel{flex:1;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:7px;
@@ -157,7 +157,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   <span style="font-family:'Orbitron',monospace;font-size:15px;font-weight:900;letter-spacing:2px;color:var(--neon);">LIMBO</span>
   <div style="display:flex;align-items:center;gap:12px;">
     <div class="bal-row">🪙 <span id="balEl">10000</span></div>
-    <a class="back-btn" href="/">← Atgal</a>
+    <a class="back-btn" href="/">← Lobby</a>
   </div>
 </div>
 
@@ -173,12 +173,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       <div class="result-badge" id="resultBadge">&nbsp;</div>
       <div class="target-row">
         <div class="target-box">
-          <div class="lbl">Taikinys</div>
+          <div class="lbl">Target</div>
           <div class="val" id="tgtDisp">2.00x</div>
         </div>
         <div style="color:rgba(232,224,208,.15);font-size:20px;">→</div>
         <div class="target-box">
-          <div class="lbl">Laimi jei ≥</div>
+          <div class="lbl">Win if ≥</div>
           <div class="val" id="tgtDisp2">2.00x</div>
         </div>
       </div>
@@ -194,7 +194,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 
       <!-- Bet amount -->
       <div>
-        <div class="inp-lbl">Statymo suma</div>
+        <div class="inp-lbl">Bet Amount</div>
         <input class="amt-inp" id="betInp" type="number" value="100" min="10" max="50000"/>
         <div class="qgrid">
           <button class="qb" onclick="qset(50)">50</button>
@@ -208,7 +208,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 
       <!-- Target multiplier -->
       <div class="target-section">
-        <div class="inp-lbl">Tikslinis koeficientas</div>
+        <div class="inp-lbl">Target Multiplier</div>
         <input class="target-inp" id="targetInp" type="number" value="2.00" min="1.01" max="100" step="0.01" oninput="onTargetChange()"/>
         <div class="target-presets">
           <button class="tp" onclick="setTarget(1.5)">1.5x</button>
@@ -226,7 +226,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 
       <!-- Auto bet -->
       <div>
-        <div class="inp-lbl">Auto statymas</div>
+        <div class="inp-lbl">Auto Bet</div>
         <div class="auto-row">
           <label class="sw"><input type="checkbox" id="autoTog" onchange="onAutoToggle()"/><span class="sw-t"></span><span class="sw-k"></span></label>
           <select class="auto-sel" id="autoSel">
@@ -234,7 +234,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
             <option value="25">25 rounds</option>
             <option value="50">50 rounds</option>
             <option value="100">100 rounds</option>
-            <option value="999">∞ Begaliniai</option>
+            <option value="999">∞ Infinite</option>
           </select>
         </div>
         <div class="auto-ctr" id="autoCtr"></div>
@@ -242,16 +242,16 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 
       <!-- Stats -->
       <div>
-        <div class="inp-lbl">Sesijos statistika</div>
+        <div class="inp-lbl">Session Stats</div>
         <div class="stats-grid">
           <div class="sb"><div class="sv" id="stBets">0</div><div class="sl">Bets</div></div>
           <div class="sb"><div class="sv" id="stWins">0</div><div class="sl">Wins</div></div>
-          <div class="sb"><div class="sv" id="stProfit">0</div><div class="sl">Pelnas</div></div>
+          <div class="sb"><div class="sv" id="stProfit">0</div><div class="sl">Profit</div></div>
         </div>
       </div>
 
       <!-- Payout info -->
-      <div style="background:rgba(0,229,255,.03);border:1px solid rgba(0,229,255,.08);border-radius:9px;padding:12px;">
+      <div style="background:rgba(201,168,76,.03);border:1px solid rgba(201,168,76,.08);border-radius:9px;padding:12px;">
         <div class="inp-lbl" style="margin-bottom:8px;">How to play</div>
         <div style="font-size:11px;color:rgba(232,224,208,.4);line-height:1.8;">
           Set a target (e.g. <span style="color:var(--neon);">3.00x</span>)<br/>
@@ -262,7 +262,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 
     </div>
 
-    <button class="btn btn-full btn-lg btn-teal spin-btn" id="spinBtn" onclick="doSpin()">▶ STATYTI</button>
+    <button class="btn btn-full btn-lg btn-teal spin-btn" id="spinBtn" onclick="doSpin()">▶ BET</button>
   </div>
 </div>
 </div>
@@ -348,7 +348,7 @@ function doSpin(){
   var bet = parseInt(document.getElementById('betInp').value)||100;
   if(bet < 10){ showToast('Min. statymas: 10','loss'); return; }
   if(bet > MAX_BET){ bet = MAX_BET; document.getElementById('betInp').value = MAX_BET; }
-  if(bet > tokens){ showToast('Nepakanka žetonų!','loss'); stopAuto(); return; }
+  if(bet > tokens){ showToast('Insufficient balance!','loss'); stopAuto(); return; }
 
   spinning = true;
   tokens -= bet;
@@ -395,7 +395,7 @@ function showResult(won, payout, bet, result){
     updateBal();
     multEl.className = 'mult-val win';
     badge.className = 'result-badge win';
-    badge.textContent = 'LAIMĖJOTE! +🪙'+fmt(payout-bet);
+    badge.textContent = 'WIN! +🪙'+fmt(payout-bet);
     flash.className = 'flash-ov win-flash';
     showToast('+🪙'+fmt(payout-bet)+' ('+target.toFixed(2)+'x)','win');
     sess.wins++;
@@ -403,7 +403,7 @@ function showResult(won, payout, bet, result){
   } else {
     multEl.className = 'mult-val lose';
     badge.className = 'result-badge lose';
-    badge.textContent = 'PRALAIMĖTA -🪙'+fmt(bet);
+    badge.textContent = 'LOST -🪙'+fmt(bet);
     flash.className = 'flash-ov lose-flash';
     showToast('-🪙'+fmt(bet),'loss');
     sess.profit -= bet;
@@ -505,5 +505,7 @@ updateBal();
 updateTargetUI();
 </script>
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
+<script src="/js/casino-sounds.js"></script>
+<script src="/js/cookie-consent.js"></script>
 </body>
 </html>

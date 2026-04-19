@@ -305,7 +305,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
   </div>
   <div class="hdr-right">
     <div class="hdr-bal"><span>⬡</span><span id="balDisp">10,000</span></div>
-    <a href="/lobby.html" class="back-btn">← LOBBY</a>
+    <a href="/" class="back-btn">← LOBBY</a>
   </div>
 </header>
 
@@ -443,7 +443,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
         <tr class="hi"><td>Straight Flush</td><td>40:1</td></tr>
         <tr class="hi"><td>Three of a Kind</td><td>30:1</td></tr>
         <tr><td>Straight</td><td>6:1</td></tr>
-        <tr><td>Flush</td><td>3:1</td></tr>
+        <tr><td>Flush</td><td>4:1</td></tr>
         <tr><td>Pair</td><td>1:1</td></tr>
         <tr><td>High Card</td><td>Lose</td></tr>
       </table>
@@ -575,7 +575,7 @@ function ppBonus(hand, pp){
   if(h.rank===5) return pp * 40;
   if(h.rank===4) return pp * 30;
   if(h.rank===3) return pp * 6;
-  if(h.rank===2) return pp * 3;
+  if(h.rank===2) return pp * 4;
   if(h.rank===1) return pp * 1;
   return -pp;
 }
@@ -963,5 +963,7 @@ function renderHistory(){
 /* ─── INIT ─── */
 updatePills();
 </script>
+<script src="/js/casino-sounds.js"></script>
+<script src="/js/cookie-consent.js"></script>
 </body>
 </html>
