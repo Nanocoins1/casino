@@ -778,25 +778,21 @@ body {
 }
 @keyframes loadFill { from{width:0%} to{width:100%} }
 .hathor-loading-logo {
-  display: flex; flex-direction: column; align-items: center; gap: 12px;
+  display: flex; flex-direction: column; align-items: center;
 }
-.hathor-loading-mark {
-  width: 90px; height: 90px; border-radius: 22px;
-  box-shadow: 0 0 50px rgba(201,168,76,0.45), 0 0 100px rgba(201,168,76,0.12);
+/* 3D DALL-E full logo on loading screen */
+.hathor-loading-full-img {
+  height: 88px; width: auto;
+  filter: drop-shadow(0 0 28px rgba(201,168,76,.55)) drop-shadow(0 0 60px rgba(201,168,76,.15));
   animation: loadGlow 2s ease-in-out infinite alternate;
 }
 @keyframes loadGlow {
-  from { box-shadow: 0 0 40px rgba(201,168,76,.4), 0 0 80px rgba(201,168,76,.1); }
-  to   { box-shadow: 0 0 70px rgba(201,168,76,.7), 0 0 140px rgba(201,168,76,.2); }
-}
-.hathor-loading-wordmark {
-  font-family: 'Cinzel Decorative', serif; font-size: 32px;
-  color: #c9a84c; letter-spacing: 4px;
-  text-shadow: 0 0 30px rgba(201,168,76,0.5);
+  from { filter: drop-shadow(0 0 20px rgba(201,168,76,.4)) drop-shadow(0 0 50px rgba(201,168,76,.1)); }
+  to   { filter: drop-shadow(0 0 40px rgba(201,168,76,.75)) drop-shadow(0 0 90px rgba(201,168,76,.22)); }
 }
 .hathor-loading-sub {
-  font-size: 10px; letter-spacing: 4px; color: rgba(201,168,76,0.35);
-  font-family: 'Space Grotesk', sans-serif; margin-top: 8px; text-transform: uppercase;
+  font-size: 10px; letter-spacing: 5px; color: rgba(201,168,76,0.28);
+  font-family: 'Space Grotesk', sans-serif; margin-top: 14px; text-transform: uppercase;
 }
 
 .levelup-banner {
@@ -2920,25 +2916,23 @@ body { color: #e8e2d4 !important; }
   padding:0 28px; flex-shrink:0;
 }
 .topbar-logo {
-  font-family:'Cinzel Decorative',serif;
-  font-size:17px; font-weight:900; letter-spacing:2px;
-  background:linear-gradient(135deg,#a07828 0%,#c9a84c 25%,#f0c060 50%,#ffd680 65%,#c9a84c 85%,#a07828 100%);
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-  white-space:nowrap; flex-shrink:0; cursor:pointer;
-  display:flex; flex-direction:row; align-items:center; gap:10px;
+  flex-shrink:0; cursor:pointer;
+  display:flex; align-items:center;
 }
-.topbar-logo-img {
-  width:38px; height:38px; border-radius:10px; flex-shrink:0; object-fit:cover;
-  filter:drop-shadow(0 0 10px rgba(201,168,76,.55));
-  transition:filter .3s;
+/* Full 3D DALL-E logo image (mark + wordmark combined) */
+.topbar-logo-full-img {
+  height:50px; width:auto; object-fit:contain;
+  filter:drop-shadow(0 2px 12px rgba(201,168,76,.45));
+  transition:filter .3s, transform .25s;
 }
-.topbar-logo:hover .topbar-logo-img { filter:drop-shadow(0 0 16px rgba(201,168,76,.85)); }
-.topbar-logo-text { display:flex; flex-direction:column; gap:1px; }
-.topbar-logo span {
-  font-family:'Cinzel',serif; font-size:7px; letter-spacing:6px;
-  color:rgba(201,168,76,.3); display:block;
-  -webkit-text-fill-color:rgba(201,168,76,.3);
+.topbar-logo:hover .topbar-logo-full-img {
+  filter:drop-shadow(0 2px 20px rgba(201,168,76,.75)) drop-shadow(0 0 6px rgba(201,168,76,.3));
+  transform:scale(1.03);
 }
+/* Keep old classes for theme overrides */
+.topbar-logo-img { display:none; }
+.topbar-logo-text { display:none; }
+.topbar-logo span { display:none; }
 /* CENTER nav — absolute center of topbar */
 .topbar-nav {
   position:absolute; left:50%; transform:translateX(-50%);
@@ -3681,9 +3675,7 @@ body { color: #e8e2d4 !important; }
 }
 @media(max-width:480px){
   .topbar { padding:0 14px !important; height:64px !important; }
-  .topbar-logo { font-size:14px !important; gap:7px !important; }
-  .topbar-logo-img { width:30px !important; height:30px !important; border-radius:8px !important; }
-  .topbar-logo span { display:none; }
+  .topbar-logo-full-img { height:40px !important; }
   .tb-bal-label { display:none !important; }
   .tb-balance { padding:6px 12px !important; }
   .tb-bal-amount { font-size:13px !important; }
@@ -6427,8 +6419,7 @@ body { background: var(--ds-bg) !important; color: var(--ds-text) !important; }
 <!-- HATHOR Loading Screen -->
 <div id="hathor-loading">
   <div class="hathor-loading-logo">
-    <img src="/img/hathor-logo-mark.png" class="hathor-loading-mark" alt="HATHOR" draggable="false"/>
-    <div class="hathor-loading-wordmark">HATHOR</div>
+    <img src="/img/hathor-logo-loading.png" class="hathor-loading-full-img" alt="HATHOR Royal Casino" draggable="false"/>
   </div>
   <div class="hathor-loading-sub">Royal Casino</div>
   <div class="hathor-loading-bar"><div class="hathor-loading-bar-fill"></div></div>
@@ -14272,8 +14263,7 @@ function App(){
           <span/><span/><span/>
         </button>
         <div className="topbar-logo" onClick={()=>nav('lobby')}>
-          <img src="/img/hathor-logo-topbar.png" className="topbar-logo-img" alt="" draggable="false"/>
-          <div className="topbar-logo-text">HATHOR<span>ROYAL CASINO</span></div>
+          <img src="/img/hathor-logo-full.png" className="topbar-logo-full-img" alt="HATHOR" draggable="false"/>
         </div>
         <div className="topbar-right">
           <LangDrop lang={lang} setLang={setLang}/>
