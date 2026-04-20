@@ -6783,11 +6783,11 @@ function EmojiParticles({particles}){
 function Auth({onLogin,t=LANGS.en}){
   useEffect(()=>{
     const token=localStorage.getItem('casino_session');
-    if(!token){ window.location.href='/login.html'; return; }
+    if(!token){ onLogin(null); return; }
     fetch('/api/auth/me',{headers:{'Authorization':'Bearer '+token}})
       .then(r=>r.ok?r.json():null)
       .then(data=>{
-        if(!data){ localStorage.removeItem('casino_session'); window.location.href='/login.html'; return; }
+        if(!data){ localStorage.removeItem('casino_session'); onLogin(null); return; }
         const uid=data.uid;
         const name=data.user?.name||localStorage.getItem('casino_name')||'Žaidėjas';
         const sessionToken=localStorage.getItem('casino_session')||'';
@@ -6804,20 +6804,12 @@ function Auth({onLogin,t=LANGS.en}){
           onLogin(d);
         });
       })
-      .catch(()=>{ window.location.href='/login.html'; });
+      .catch(()=>{ onLogin(null); });
   },[]);
   return(
-    <div className="auth-scene">
-      <div className="auth-card">
-        <div className="auth-logo">
-          <h1>HATHOR</h1>
-          <p>ROYAL CASINO · EST. 2026</p>
-        </div>
-        <div style={{textAlign:'center',padding:'20px',color:'rgba(232,224,208,.5)',fontSize:13}}>
-          <div style={{fontSize:28,marginBottom:12}}>⬡</div>
-          Verifying session...
-        </div>
-      </div>
+    <div style={{position:'fixed',inset:0,background:'#0a0806',zIndex:99999,display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:8}}>
+      <div style={{fontSize:32,color:'#c9a84c',fontFamily:'Cinzel,serif',letterSpacing:4}}>HATHOR</div>
+      <div style={{fontSize:11,color:'rgba(232,224,208,0.3)',letterSpacing:3}}>LOADING...</div>
     </div>
   );
 }
@@ -6856,6 +6848,34 @@ function DailyBonus({onClose,onClaim,t=LANGS.en}){
             <button className="btn btn-primary btn-block" onClick={()=>{onClaim(amount);onClose();}}>{t.continued}</button>
           </>
         )}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// GUEST MODAL — shown when guest tries to play
+// ═══════════════════════════════════════════════════
+function GuestModal({onClose}){
+  return(
+    <div className="modal-overlay" onClick={onClose} style={{zIndex:9000}}>
+      <div className="modal" onClick={e=>e.stopPropagation()} style={{maxWidth:340,textAlign:'center',padding:'32px 28px'}}>
+        <div style={{fontSize:52,marginBottom:4}}>🎰</div>
+        <h3 style={{color:'#c9a84c',fontFamily:'Cinzel,serif',letterSpacing:2,fontSize:16,marginBottom:8}}>PRISIJUNK ŽAISTI</h3>
+        <p style={{color:'rgba(232,224,208,0.55)',fontSize:13,lineHeight:1.6,margin:'0 0 22px'}}>
+          Sukurk nemokamą paskyrą ir gauk <strong style={{color:'#f0c060'}}>10 000 🪙</strong> pradinių žetonų!
+        </p>
+        <div style={{display:'flex',flexDirection:'column',gap:10}}>
+          <a href="/login.html?mode=register" className="btn btn-primary" style={{display:'block',textDecoration:'none',padding:'13px',textAlign:'center',fontSize:14,fontWeight:700,letterSpacing:1,borderRadius:10}}>
+            🚀 Registruotis — nemokama
+          </a>
+          <a href="/login.html" style={{display:'block',textDecoration:'none',padding:'12px',textAlign:'center',fontSize:13,color:'rgba(232,224,208,0.7)',background:'rgba(255,255,255,0.05)',border:'1px solid rgba(201,168,76,0.2)',borderRadius:10,fontWeight:600}}>
+            Jau turiu paskyrą →
+          </a>
+        </div>
+        <button onClick={onClose} style={{marginTop:18,background:'none',border:'none',color:'rgba(232,224,208,0.3)',cursor:'pointer',fontSize:12,letterSpacing:0.5}}>
+          Tęsti naršymą
+        </button>
       </div>
     </div>
   );
@@ -14074,6 +14094,8 @@ function App(){
   const t=lang;
   const ALL_GAMES=getGames(t);
   const [user,setUser]=useState(null);
+  const [authChecked,setAuthChecked]=useState(false);
+  const [showGuestModal,setShowGuestModal]=useState(false);
   const [page,setPage]=useState('lobby');
   const [roomId,setRoomId]=useState(null);
   const [gameState,setGameState]=useState(null);
@@ -14319,12 +14341,14 @@ function App(){
     } catch(e){console.warn('Push subscribe error:',e);}
   };
 
-  if(!user)return <Auth onLogin={d=>setUser(d)} t={t}/>;
+  if(!authChecked)return <Auth onLogin={d=>{setUser(d);setAuthChecked(true);}} t={t}/>;
 
-  const lv=user.levelInfo||LEVELS[0];
-  const nextLv=user.nextLevel||null;
-  const nav=pg=>{ if(pg==='cashier'){window.open('/cashier.html','_self');return;}if(pg==='viktor'){setSbOpen(false);setViktorOpen(o=>!o);return;}if(pg==='support'){setSbOpen(false);setSupportOpen(o=>!o);return;}sfx.click();setPage(pg);setSbOpen(false);if(pg!=='poker'){setRoomId(null);setGameState(null);}};
-  const bumpTokens=amt=>{setTokenBump(true);setTimeout(()=>setTokenBump(false),500);setUser(u=>({...u,tokens:u.tokens+amt}));}
+  const lv=(user&&user.levelInfo)||LEVELS[0];
+  const nextLv=(user&&user.nextLevel)||null;
+  const GAME_PAGES=['prempoker','slots','roulette','blackjack','pyramid','sports','poker','tournaments','vip','referral','stats','leaderboard'];
+  const nav=pg=>{ if(pg==='cashier'){if(!user){setShowGuestModal(true);return;}window.open('/cashier.html','_self');return;}if(pg==='viktor'){setSbOpen(false);setViktorOpen(o=>!o);return;}if(pg==='support'){setSbOpen(false);setSupportOpen(o=>!o);return;}if(!user&&GAME_PAGES.includes(pg)){setShowGuestModal(true);return;}sfx.click();setPage(pg);setSbOpen(false);if(pg!=='poker'){setRoomId(null);setGameState(null);}};
+  const bumpTokens=amt=>{setTokenBump(true);setTimeout(()=>setTokenBump(false),500);setUser(u=>({...u,tokens:(u.tokens||0)+amt}));}
+  const requireAuth=fn=>{if(user&&user.uid){fn();}else{setShowGuestModal(true);}};
   const claimDaily=async()=>{
     const tok=localStorage.getItem('casino_session');
     if(!tok) return;
@@ -14432,18 +14456,36 @@ function App(){
         </div>
         <div className="topbar-right">
           <LangDrop lang={lang} setLang={setLang}/>
-          <LvPill xp={user.xp||0} levelInfo={lv} nextLevel={nextLv}/>
-          <div className={`tb-balance${tokenBump?' bump':''}`}>
-            <div className="tb-bal-label">{t.balance||'Balance'}</div>
-            <div className="tb-bal-amount">🪙 {fmt(user.tokens)}</div>
-          </div>
-          <button className="tb-cashier" onClick={()=>window.open('/cashier.html','_self')}>💳 {t.cashier||'Cashier'}</button>
-          <div className="tb-user-btn" onClick={()=>setShowAvatar(true)}>{user.avatar?<img src={user.avatar} alt="" style={{width:'100%',height:'100%',borderRadius:10,objectFit:'cover'}}/>:'👤'}</div>
-          <SoundToggle/>
-          <button className="tb-logout" onClick={doLogout}>⏻</button>
+          {user ? (
+            <>
+              <LvPill xp={user.xp||0} levelInfo={lv} nextLevel={nextLv}/>
+              <div className={`tb-balance${tokenBump?' bump':''}`}>
+                <div className="tb-bal-label">{t.balance||'Balance'}</div>
+                <div className="tb-bal-amount">🪙 {fmt(user.tokens||0)}</div>
+              </div>
+              <button className="tb-cashier" onClick={()=>window.open('/cashier.html','_self')}>💳 {t.cashier||'Cashier'}</button>
+              <div className="tb-user-btn" onClick={()=>setShowAvatar(true)}>{user.avatar?<img src={user.avatar} alt="" style={{width:'100%',height:'100%',borderRadius:10,objectFit:'cover'}}/>:'👤'}</div>
+              <SoundToggle/>
+              <button className="tb-logout" onClick={doLogout}>⏻</button>
+            </>
+          ) : (
+            <>
+              <SoundToggle/>
+              <a href="/login.html" style={{padding:'7px 14px',background:'rgba(255,255,255,0.06)',border:'1px solid rgba(201,168,76,0.25)',borderRadius:8,color:'rgba(232,224,208,0.8)',fontSize:12,fontWeight:600,letterSpacing:'0.5px',textDecoration:'none',whiteSpace:'nowrap'}}>Prisijungti</a>
+              <a href="/login.html?mode=register" className="btn btn-primary" style={{padding:'7px 16px',fontSize:12,fontWeight:700,letterSpacing:'0.5px',whiteSpace:'nowrap',textDecoration:'none'}}>🚀 Registruotis</a>
+            </>
+          )}
         </div>
       </div>
 
+      {/* ── GUEST BANNER ── */}
+      {!user&&(
+        <div style={{background:'linear-gradient(90deg,rgba(201,168,76,0.12),rgba(240,192,96,0.06),rgba(201,168,76,0.12))',borderBottom:'1px solid rgba(201,168,76,0.15)',padding:'8px 16px',display:'flex',alignItems:'center',justifyContent:'center',gap:12,fontSize:13}}>
+          <span style={{color:'rgba(232,224,208,0.65)'}}>🎁 Registruokis ir gauk <strong style={{color:'#f0c060'}}>10 000 🪙</strong> nemokamai</span>
+          <a href="/login.html?mode=register" className="btn btn-primary" style={{padding:'5px 14px',fontSize:11,fontWeight:700,letterSpacing:1,textDecoration:'none',borderRadius:6}}>Registruotis</a>
+          <a href="/login.html" style={{fontSize:11,color:'rgba(232,224,208,0.4)',textDecoration:'none'}}>Prisijungti</a>
+        </div>
+      )}
       {/* ── LIVE WINNERS TICKER ── */}
       <LiveTicker t={t}/>
 
@@ -14525,7 +14567,7 @@ function App(){
                 </div>
                 {/* greeting */}
                 <div style={{fontSize:11,color:'rgba(201,168,76,0.5)',fontFamily:"'Cinzel',serif",letterSpacing:1.2,marginBottom:10}}>
-                  {t.welcome||'Welcome back,'} <span style={{color:'var(--gold2)',fontWeight:700}}>{user.name}</span>
+                  {user?(t.welcome||'Welcome back,'):('Sveiki atvykę į')}<span style={{color:'var(--gold2)',fontWeight:700}}>{user?user.name:'HATHOR'}</span>
                 </div>
                 {/* headline */}
                 <h1 style={{margin:'0 0 8px',fontSize:'clamp(28px,3.8vw,52px)',fontWeight:900,letterSpacing:-1,lineHeight:1.0,background:'linear-gradient(135deg,#ffffff 0%,#ffe9a0 40%,#f0c060 60%,#c9a84c 100%)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundClip:'text',fontFamily:"'Cinzel',serif"}}>
@@ -14538,9 +14580,9 @@ function App(){
                 {/* stats chips */}
                 <div style={{display:'flex',flexWrap:'wrap',gap:8,marginBottom:24}}>
                   {[
-                    {l:t.balance||'Balance', v:`🪙 ${(user.tokens||0).toLocaleString()}`, c:'#f0c060'},
+                    {l:t.balance||'Balance', v:user?`🪙 ${(user.tokens||0).toLocaleString()}`:'—', c:'#f0c060'},
                     {l:t.level||'Level',     v:`${lv.e} ${lv.name}`,                     c:'rgba(232,220,200,.9)'},
-                    {l:'XP',                 v:(user.xp||0).toLocaleString(),             c:'#fbbf24'},
+                    {l:'XP',                 v:user?(user.xp||0).toLocaleString():'—',   c:'#fbbf24'},
                   ].map((s,i)=>(
                     <div key={i} style={{background:'rgba(0,0,0,0.4)',border:'1px solid rgba(201,168,76,0.12)',borderRadius:12,padding:'8px 16px',backdropFilter:'blur(8px)'}}>
                       <div style={{color:'rgba(201,168,76,0.38)',fontSize:8,letterSpacing:1.5,marginBottom:3,textTransform:'uppercase',fontFamily:"'Space Grotesk',sans-serif"}}>{s.l}</div>
@@ -14550,10 +14592,16 @@ function App(){
                 </div>
                 {/* CTA buttons */}
                 <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-                  <button className="btn btn-primary" style={{display:'flex',alignItems:'center',gap:7,fontSize:'13px',padding:'12px 26px',letterSpacing:'1.5px',fontWeight:900}} onClick={()=>window.open('/cashier.html','_self')}>
-                    <img src="/img/icon-deposit.png" className="btn-icon-img" alt="" draggable="false"/> {t.deposit2||'Papildyti'}
-                  </button>
-                  <button className="btn btn-primary" style={{display:'flex',alignItems:'center',gap:7,fontSize:'13px',padding:'12px 22px',letterSpacing:'1.5px',fontWeight:900}} onClick={()=>setShowBonus(true)}>
+                  {user?(
+                    <button className="btn btn-primary" style={{display:'flex',alignItems:'center',gap:7,fontSize:'13px',padding:'12px 26px',letterSpacing:'1.5px',fontWeight:900}} onClick={()=>window.open('/cashier.html','_self')}>
+                      <img src="/img/icon-deposit.png" className="btn-icon-img" alt="" draggable="false"/> {t.deposit2||'Papildyti'}
+                    </button>
+                  ):(
+                    <a href="/login.html?mode=register" className="btn btn-primary" style={{display:'flex',alignItems:'center',gap:7,fontSize:'13px',padding:'12px 26px',letterSpacing:'1.5px',fontWeight:900,textDecoration:'none'}}>
+                      🚀 {t.joinNow||'Registruotis'}
+                    </a>
+                  )}
+                  <button className="btn btn-primary" style={{display:'flex',alignItems:'center',gap:7,fontSize:'13px',padding:'12px 22px',letterSpacing:'1.5px',fontWeight:900}} onClick={()=>requireAuth(()=>setShowBonus(true))}>
                     <img src="/img/icon-bonus.png" className="btn-icon-img" alt="" draggable="false"/> {t.bonuses||'Bonusai'}
                   </button>
                   <button className="btn btn-primary" style={{display:'flex',alignItems:'center',gap:7,fontSize:'13px',padding:'12px 20px',letterSpacing:'1.5px',fontWeight:900}} onClick={()=>{
@@ -14703,11 +14751,11 @@ function App(){
                   const gameObj=games.find(function(g){return g.thumb===thumbKey;})||{};
                   return (
                     <div key={i} className="last-played-chip"
-                      onClick={function(){
+                      onClick={function(){requireAuth(function(){
                         trackPlay(thumbKey);
                         if(gameObj.page) nav(gameObj.page);
                         else if(gameObj.href) window.location.href=gameObj.href;
-                      }}>
+                      });}}>
                       <img src={'/img/'+thumbKey+'.png'} alt={label}
                         onError={function(e){e.target.style.display='none';}}/>
                       <span className="last-played-chip-name">{gameObj.name||label}</span>
@@ -14729,7 +14777,7 @@ function App(){
                 {personalizedGames.slice(0,6).map((g,i)=>{
                   const badgeCls=g.badge?.includes('LIVE')?'live':g.badge?.includes('HOT')||g.badge?.includes('🔥')?'hot':'new';
                   const badgeTxt=g.badge?.includes('LIVE')?'LIVE':g.badge?.includes('HOT')||g.badge?.includes('🔥')?'HOT':'NEW';
-                  return <UCard key={i} id={g.thumb} badge={g.badge?badgeTxt:null} badgeCls={g.badge?badgeCls:null} href={g.href} onClick={g.page?()=>nav(g.page):null} name={g.name} sub={g.desc} t={t}/>;
+                  return <UCard key={i} id={g.thumb} badge={g.badge?badgeTxt:null} badgeCls={g.badge?badgeCls:null} href={null} onClick={()=>requireAuth(()=>{if(g.page)nav(g.page);else if(g.href)window.location.href=g.href;})} name={g.name} sub={g.desc} t={t}/>;
                 })}
               </div>
             </div>
@@ -14741,7 +14789,7 @@ function App(){
                 <div style={{fontSize:13,fontWeight:700,color:'#4caf7c'}}>{t.newPlayerTip||'Welcome! New here?'}</div>
                 <div style={{fontSize:12,color:'rgba(232,224,208,.5)'}}>{t.newPlayerSub||'Try Slots or Roulette to get started — it\'s easy!'}</div>
               </div>
-              <button className="btn btn-ghost btn-sm" style={{marginLeft:'auto',color:'#4caf7c',borderColor:'rgba(76,175,124,.3)'}} onClick={()=>nav('slots')}>Try Slots →</button>
+              <button className="btn btn-ghost btn-sm" style={{marginLeft:'auto',color:'#4caf7c',borderColor:'rgba(76,175,124,.3)'}} onClick={()=>requireAuth(()=>nav('slots'))}>Try Slots →</button>
             </div>
           )}
 
@@ -14757,7 +14805,7 @@ function App(){
                 {href:'/blackjack.html',    img:'/img/thumb-blackjack.png',iconImg:'/img/icon-blackjack.png', title:'Blackjack',     sub:'21 · Hit, Stand, Double'},
                 {href:'/mines.html',        img:'/img/thumb-mines.png',    iconImg:'/img/icon-mines.png',     title:'Mines',         sub:'5×5 grid · Diamonds or mines?'},
               ].map((c,i)=>(
-                <div key={i} className="featured-card" onClick={c.page?()=>nav(c.page):()=>window.location.href=c.href} style={{textDecoration:'none',cursor:'pointer'}}>
+                <div key={i} className="featured-card" onClick={()=>requireAuth(()=>{if(c.page)nav(c.page);else window.location.href=c.href;})} style={{textDecoration:'none',cursor:'pointer'}}>
                   <div className="featured-card-bg" style={{backgroundImage:`url(${c.img})`,backgroundSize:'cover',backgroundPosition:'center'}}/>
                   <div style={{position:'absolute',inset:0,background:'linear-gradient(to bottom,rgba(0,0,0,0.1) 0%,rgba(0,0,0,0.75) 100%)'}}/>
                   <div className="featured-card-content">
@@ -14907,8 +14955,8 @@ function App(){
                         id={g.thumb}
                         badge={g.badge?badgeTxt:null}
                         badgeCls={g.badge?badgeCls:null}
-                        href={g.href}
-                        onClick={g.page?()=>{trackPlay(g.thumb);nav(g.page);}:()=>trackPlay(g.thumb)}
+                        href={null}
+                        onClick={()=>requireAuth(()=>{trackPlay(g.thumb);if(g.page)nav(g.page);else if(g.href)window.location.href=g.href;})}
                         name={g.name}
                         sub={g.desc}
                         t={t}
@@ -14987,8 +15035,9 @@ function App(){
         sfx.win();
         setPendingReward(null);
       }}/>}
-      {showAvatar&&<AvatarModal user={user} onClose={()=>setShowAvatar(false)} onUpdate={url=>setUser(u=>({...u,avatar:url}))}/>}
-      {showBonus&&<DailyBonus onClose={()=>setShowBonus(false)} onClaim={amt=>bumpTokens(amt)} t={t}/>}
+      {showGuestModal&&<GuestModal onClose={()=>setShowGuestModal(false)}/>}
+      {showAvatar&&user&&<AvatarModal user={user} onClose={()=>setShowAvatar(false)} onUpdate={url=>setUser(u=>({...u,avatar:url}))}/>}
+      {showBonus&&user&&<DailyBonus onClose={()=>setShowBonus(false)} onClaim={amt=>bumpTokens(amt)} t={t}/>}
       {lvUp&&(
         <>
           <div className="win-celebration-overlay"/>
