@@ -1,5 +1,5 @@
-// HATHOR Casino — Service Worker v4.5
-var CACHE = 'hathor-v4.5';
+// HATHOR Casino — Service Worker v4.6
+var CACHE = 'hathor-v4.6';
 var STATIC = [
   '/',
   '/manifest.json',
@@ -152,20 +152,11 @@ self.addEventListener('fetch', function(e) {
     return;
   }
 
-  // Network-first for HTML pages (always get fresh version)
+  // HTML pages: ALWAYS from network, NEVER from cache
+  // This ensures every visitor always gets the latest version without needing to clear cache
   var isHTML = url.indexOf('.html') >= 0 || url.endsWith('/') || url.split('?')[0].endsWith('/index');
   if (isHTML) {
-    e.respondWith(
-      fetch(e.request).then(function(res) {
-        if (res && res.status === 200) {
-          var clone = res.clone();
-          caches.open(CACHE).then(function(c) { c.put(e.request, clone); });
-        }
-        return res;
-      }).catch(function() {
-        return caches.match(e.request);
-      })
-    );
+    e.respondWith(fetch(e.request));
     return;
   }
 

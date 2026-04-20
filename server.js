@@ -635,6 +635,16 @@ app.use(function(req,res,next){
   );
   next();
 });
+// HTML files: never cache — always fresh from server
+app.use(function(req,res,next){
+  const url = req.url.split('?')[0];
+  if(url === '/' || url.endsWith('.html') || url === '/index') {
+    res.setHeader('Cache-Control','no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma','no-cache');
+    res.setHeader('Expires','0');
+  }
+  next();
+});
 app.use(express.static(path.join(__dirname,'public')));
 app.use(express.json());
 
