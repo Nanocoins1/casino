@@ -1,5 +1,5 @@
-// HATHOR Casino — Service Worker v3.8
-var CACHE = 'hathor-v3.8';
+// HATHOR Casino — Service Worker v3.9
+var CACHE = 'hathor-v3.9';
 var STATIC = [
   '/',
   '/manifest.json',
@@ -56,6 +56,10 @@ var IMG_CACHE = [
   '/img/icon-crash.png',
   '/img/icon-pyramid-game.png',
   '/img/icon-vip.png',
+  // Gold 3D button textures (DALL-E 3)
+  '/img/btn-primary.png',
+  '/img/btn-secondary.png',
+  '/img/btn-danger.png',
   '/img/sports-hero.jpg',
   '/img/sport-icon-soccer.png',
   '/img/sport-icon-basketball.png',
