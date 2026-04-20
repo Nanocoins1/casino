@@ -6790,9 +6790,10 @@ function Auth({onLogin,t=LANGS.en}){
         if(!data){ localStorage.removeItem('casino_session'); window.location.href='/login.html'; return; }
         const uid=data.uid;
         const name=data.user?.name||localStorage.getItem('casino_name')||'Žaidėjas';
+        const sessionToken=localStorage.getItem('casino_session')||'';
         localStorage.setItem('hrc_uid',uid);
         localStorage.setItem('hrc_name',name);
-        socket.emit('register',{name,uid});
+        socket.emit('register',{name,uid,token:sessionToken});
         socket.once('registered',d=>{
           localStorage.setItem('hrc_uid',d.uid);
           localStorage.setItem('hrc_name',d.name);
@@ -14234,7 +14235,16 @@ function App(){
       setParticles(p=>[...p,{id,emoji,x:5+Math.random()*90,y:10+Math.random()*70}]);
       setTimeout(()=>setParticles(p=>p.filter(e=>e.id!==id)),2200);
     });
-    return()=>socket.off('gameState').off('roomCreated').off('dailyBonusAvailable').off('levelUp').off('emojiReaction');
+    // balanceSync — server sends real DB balance (replaces old client-controlled saveTokens)
+    socket.on('balanceSync',({tokens})=>{
+      setUser(u=>u?{...u,tokens}:u);
+      setTokenBump(true);setTimeout(()=>setTokenBump(false),600);
+    });
+    // tokensReceived — P2P transfer notification
+    socket.on('tokensReceived',({from,amount})=>{
+      setUser(u=>u?{...u,tokens:(u.tokens||0)+amount}:u);
+    });
+    return()=>socket.off('gameState').off('roomCreated').off('dailyBonusAvailable').off('levelUp').off('emojiReaction').off('balanceSync').off('tokensReceived');
   },[]);
 
   // keep casino_tokens in sync so external game pages see correct balance

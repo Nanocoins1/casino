@@ -631,11 +631,15 @@ app.use(function(req,res,next){
   res.setHeader('Strict-Transport-Security','max-age=63072000; includeSubDomains; preload');
   res.setHeader('Content-Security-Policy',
     "default-src 'self'; " +
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; " +
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' " +
+      "https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net " +
+      "https://cdn.socket.io https://cdn.onesignal.com https://onesignal.com; " +
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
-    "font-src 'self' https://fonts.gstatic.com; " +
+    "font-src 'self' https://fonts.gstatic.com data:; " +
     "img-src 'self' data: blob: https:; " +
     "connect-src 'self' wss: ws: https:; " +
+    "worker-src 'self' blob: https://cdn.onesignal.com; " +
+    "frame-src 'self' https://onesignal.com; " +
     "frame-ancestors 'none';"
   );
   next();
