@@ -1723,8 +1723,8 @@ function settleSports(id, won) {
 
 // Auto refresh overview every 30s
 setInterval(() => {
-  const key = sessionStorage.getItem('admin_key');
-  if(key) { loadOverview(); loadKYCStats(); }
+  const key = API_KEY||'';
+  if(API_KEY) { loadOverview(); loadKYCStats(); }
 }, 30000);
 
 // ── RTP Management ──
@@ -1776,7 +1776,7 @@ function rtpSlide(el, key){
 
 async function saveRTP(){
   try{
-    const key = sessionStorage.getItem('admin_key');
+    const key = API_KEY||'';
     const r = await fetch('/api/rtp-config',{
       method:'POST',
       headers:{'Content-Type':'application/json','x-admin-key':key},
@@ -1993,7 +1993,7 @@ async function cancelSelfExclusion(){
   msg.style.display='block';
 }
 async function runCashbackAll(){
-  const key=localStorage.getItem('admin_key')||sessionStorage.getItem('admin_key')||'';
+  const key=API_KEY||'';
   const r=await fetch('/api/vip/cashback-all',{method:'POST',headers:{'x-admin-key':key}});
   const d=await r.json();
   const msg=document.getElementById('cashback-msg');
@@ -2002,7 +2002,7 @@ async function runCashbackAll(){
   msg.style.display='block';
 }
 async function giveAdminBonus(){
-  const key=localStorage.getItem('admin_key')||sessionStorage.getItem('admin_key')||'';
+  const key=API_KEY||'';
   const uid=document.getElementById('bonus-uid').value.trim();
   const amount=parseInt(document.getElementById('bonus-amount').value)||1000;
   const type=document.getElementById('bonus-type').value;
@@ -2017,7 +2017,7 @@ async function giveAdminBonus(){
 }
 async function loadVIPDistribution(){
   try{
-    const key=localStorage.getItem('admin_key')||sessionStorage.getItem('admin_key')||'';
+    const key=API_KEY||'';
     const r=await fetch('/api/analytics',{headers:{'x-admin-key':key}});
     const d=await r.json();
     const el=document.getElementById('vip-distribution');
@@ -2048,7 +2048,7 @@ async function loadPushStatus(){
   }catch(e){}
 }
 async function sendBroadcast(){
-  const key=localStorage.getItem('admin_key')||sessionStorage.getItem('admin_key')||'';
+  const key=API_KEY||'';
   const title=document.getElementById('push-title').value.trim();
   const message=document.getElementById('push-msg').value.trim();
   const url=document.getElementById('push-url').value.trim()||'/';
@@ -2061,7 +2061,7 @@ async function sendBroadcast(){
   msg.style.display='block';
 }
 async function sendUserPush(){
-  const key=localStorage.getItem('admin_key')||sessionStorage.getItem('admin_key')||'';
+  const key=API_KEY||'';
   const uid=document.getElementById('push-uid').value.trim();
   const title=document.getElementById('push-user-title').value.trim();
   const message=document.getElementById('push-user-msg').value.trim();
