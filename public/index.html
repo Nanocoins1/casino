@@ -6882,13 +6882,20 @@ const AVATAR_IMAGES=[
 function AvatarModal({user,onClose,onUpdate}){
   const [preview,setPreview]=useState(user.avatar||null);
   const [file,setFile]=useState(null);
-  const [tab,setTab]=useState('profile'); // 'profile'|'stats'|'history'|'security'
+  const [tab,setTab]=useState('profile'); // 'profile'|'stats'|'history'|'transfer'|'security'
   const [twoFaStatus,setTwoFaStatus]=useState(null);
   const [twoFaSetup,setTwoFaSetup]=useState(null);
   const [twoFaCode,setTwoFaCode]=useState('');
   const [twoFaMsg,setTwoFaMsg]=useState('');
   const [statsData,setStatsData]=useState(null);
   const [historyData,setHistoryData]=useState(null);
+  const [editName,setEditName]=useState(user.name||'');
+  const [nameMsg,setNameMsg]=useState(null);
+  const [transferTo,setTransferTo]=useState('');
+  const [transferAmt,setTransferAmt]=useState('');
+  const [transferNote,setTransferNote]=useState('');
+  const [transferMsg,setTransferMsg]=useState(null);
+  const [transfersData,setTransfersData]=useState(null);
   const [selectedEmoji,setSelectedEmoji]=useState(null);
   const fileRef=useRef();
   const miniChartRef=useRef();
@@ -6904,6 +6911,9 @@ function AvatarModal({user,onClose,onUpdate}){
     }
     if(tab==='history'&&!historyData){
       fetch(`/api/stats/${user.uid}`).then(r=>r.json()).then(d=>setHistoryData(d)).catch(()=>{});
+    }
+    if(tab==='transfer'&&!transfersData){
+      fetch('/api/tokens/transfers',{headers:{'x-session-token':tok}}).then(r=>r.json()).then(d=>setTransfersData(d)).catch(()=>{});
     }
   },[tab]);
 
@@ -6948,6 +6958,25 @@ function AvatarModal({user,onClose,onUpdate}){
     if(d.url){socket.emit('updateAvatar',{avatarUrl:d.url});onUpdate(d.url);}
     onClose();
   };
+  const saveName=async()=>{
+    setNameMsg(null);
+    const r=await fetch('/api/user/update-name',{method:'POST',headers:{'Content-Type':'application/json','x-session-token':tok},body:JSON.stringify({name:editName})});
+    const d=await r.json();
+    if(d.ok){setNameMsg({ok:true,text:'✅ Vardas atnaujintas!'});if(onUpdate)onUpdate(d.name,'name');}
+    else setNameMsg({ok:false,text:d.error||'Klaida'});
+  };
+  const sendTokens=async()=>{
+    setTransferMsg(null);
+    if(!transferTo.trim()||!transferAmt){setTransferMsg({ok:false,text:'Užpildyk visus laukus'});return;}
+    const r=await fetch('/api/tokens/send',{method:'POST',headers:{'Content-Type':'application/json','x-session-token':tok},body:JSON.stringify({to_name:transferTo.trim(),amount:parseInt(transferAmt),note:transferNote||null})});
+    const d=await r.json();
+    if(d.ok){
+      setTransferMsg({ok:true,text:`✅ ${d.sent} 🪙 išsiųsta → ${d.to}`});
+      setTransferTo('');setTransferAmt('');setTransferNote('');
+      setTransfersData(null);// reload
+      fetch('/api/tokens/transfers',{headers:{'x-session-token':tok}}).then(r2=>r2.json()).then(d2=>setTransfersData(d2)).catch(()=>{});
+    } else setTransferMsg({ok:false,text:d.error||'Klaida'});
+  };
   const setup2fa=async()=>{
     const r=await fetch('/api/auth/2fa/setup',{method:'POST',headers:{'Authorization':'Bearer '+tok}});
     const d=await r.json();
@@ -6968,10 +6997,11 @@ function AvatarModal({user,onClose,onUpdate}){
   };
 
   const TABS=[
-    {id:'profile',label:'👤 Profile'},
-    {id:'stats',label:'📊 Stats'},
-    {id:'history',label:'📋 History'},
-    {id:'security',label:'🔐 Security'},
+    {id:'profile',label:'👤 Profilis'},
+    {id:'stats',label:'📊 Statistika'},
+    {id:'history',label:'📋 Istorija'},
+    {id:'transfer',label:'💸 Pervesti'},
+    {id:'security',label:'🔐 Saugumas'},
   ];
 
   return(
@@ -7008,7 +7038,16 @@ function AvatarModal({user,onClose,onUpdate}){
               <span style={{fontSize:11,color:'rgba(232,224,208,.4)'}}>Member since {new Date().getFullYear()}</span>
             </div>
             <input ref={fileRef} type="file" accept="image/*" style={{display:'none'}} onChange={pick}/>
-            <div style={{fontSize:11,color:'rgba(232,224,208,.3)',marginTop:6}}>Click avatar to upload photo</div>
+            <div style={{fontSize:11,color:'rgba(232,224,208,.3)',marginTop:6}}>Spausk avatarą norėdamas pakeisti</div>
+          </div>
+          {/* Username edit */}
+          <div style={{marginBottom:14}}>
+            <div style={{fontSize:10,letterSpacing:2,color:'rgba(201,168,76,.4)',fontFamily:'Cinzel,serif',marginBottom:6,textTransform:'uppercase'}}>Vardas</div>
+            <div style={{display:'flex',gap:8}}>
+              <input className="inp" value={editName} onChange={e=>setEditName(e.target.value)} maxLength={24} placeholder="Tavo vardas" style={{flex:1,padding:'8px 12px',fontSize:13}}/>
+              <button className="btn btn-primary" style={{padding:'8px 16px',fontSize:12}} onClick={saveName}>Išsaugoti</button>
+            </div>
+            {nameMsg&&<div style={{fontSize:12,marginTop:6,color:nameMsg.ok?'#4ecc91':'#e07080'}}>{nameMsg.text}</div>}
           </div>
           {/* Avatar image grid */}
           <div style={{fontSize:10,letterSpacing:2,color:'rgba(201,168,76,.4)',fontFamily:'Cinzel,serif',marginBottom:8,textTransform:'uppercase'}}>Choose Avatar</div>
@@ -7077,6 +7116,45 @@ function AvatarModal({user,onClose,onUpdate}){
             </div>
           )}
           <button className="btn btn-ghost" style={{width:'100%',marginTop:8}} onClick={onClose}>Close</button>
+        </>)}
+
+        {/* TRANSFER TAB */}
+        {tab==='transfer'&&(<>
+          <div style={{background:'rgba(201,168,76,0.06)',border:'1px solid rgba(201,168,76,0.15)',borderRadius:12,padding:16,marginBottom:16}}>
+            <div style={{fontSize:10,letterSpacing:2,color:'rgba(201,168,76,.5)',fontFamily:'Cinzel,serif',marginBottom:12,textTransform:'uppercase'}}>💸 Siųsti žetonus žaidėjui</div>
+            <div style={{marginBottom:10}}>
+              <div style={{fontSize:11,color:'rgba(232,224,208,.5)',marginBottom:5}}>Gavėjo vardas</div>
+              <input className="inp" value={transferTo} onChange={e=>setTransferTo(e.target.value)} placeholder="Žaidėjo vardas..." style={{width:'100%',padding:'9px 12px',fontSize:13,boxSizing:'border-box'}}/>
+            </div>
+            <div style={{marginBottom:10}}>
+              <div style={{fontSize:11,color:'rgba(232,224,208,.5)',marginBottom:5}}>Suma (🪙 žetonai)</div>
+              <input className="inp" type="number" min="1" max="100000" value={transferAmt} onChange={e=>setTransferAmt(e.target.value)} placeholder="pvz. 500" style={{width:'100%',padding:'9px 12px',fontSize:13,boxSizing:'border-box'}}/>
+            </div>
+            <div style={{marginBottom:12}}>
+              <div style={{fontSize:11,color:'rgba(232,224,208,.5)',marginBottom:5}}>Pastaba (nebūtina)</div>
+              <input className="inp" value={transferNote} onChange={e=>setTransferNote(e.target.value)} placeholder="pvz. Skolos grąžinimas" maxLength={80} style={{width:'100%',padding:'9px 12px',fontSize:13,boxSizing:'border-box'}}/>
+            </div>
+            <div style={{fontSize:11,color:'rgba(201,168,76,.4)',marginBottom:10}}>💰 Tavo balansas: 🪙 {(user.tokens||0).toLocaleString()}</div>
+            <button className="btn btn-primary" style={{width:'100%',fontSize:13}} onClick={sendTokens}>💸 Siųsti žetonus</button>
+            {transferMsg&&<div style={{fontSize:12,marginTop:8,color:transferMsg.ok?'#4ecc91':'#e07080',textAlign:'center'}}>{transferMsg.text}</div>}
+          </div>
+          {/* Transfer history */}
+          <div style={{fontSize:10,letterSpacing:2,color:'rgba(201,168,76,.4)',fontFamily:'Cinzel,serif',marginBottom:8,textTransform:'uppercase'}}>Pervedimų istorija</div>
+          {!transfersData&&<div style={{color:'rgba(232,224,208,.3)',fontSize:12,textAlign:'center',padding:'12px 0'}}>Kraunama...</div>}
+          {transfersData&&(transfersData.transfers||[]).length===0&&<div style={{color:'rgba(232,224,208,.25)',fontSize:12,textAlign:'center',padding:'12px 0'}}>Pervedimų dar nebuvo</div>}
+          {transfersData&&(transfersData.transfers||[]).map((tr,i)=>{
+            const isSender=tr.from_uid===transfersData.uid;
+            return(
+              <div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 10px',background:'rgba(0,0,0,0.25)',borderRadius:8,marginBottom:6,border:'1px solid rgba(201,168,76,0.07)'}}>
+                <div>
+                  <div style={{fontSize:12,fontWeight:600,color:'rgba(232,220,200,.8)'}}>{isSender?`→ ${tr.to_name}`:`← ${tr.from_name}`}</div>
+                  <div style={{fontSize:10,color:'rgba(232,220,200,.3)'}}>{new Date(tr.created_at).toLocaleString('lt-LT')}{tr.note?` · ${tr.note}`:''}</div>
+                </div>
+                <span style={{fontWeight:700,color:isSender?'#e07080':'#4ecc91',fontFamily:"'DM Mono',monospace",fontSize:13}}>{isSender?'-':'+'}🪙{(tr.amount||0).toLocaleString()}</span>
+              </div>
+            );
+          })}
+          <button className="btn btn-ghost" style={{width:'100%',marginTop:8}} onClick={onClose}>Uždaryti</button>
         </>)}
 
         {/* SECURITY TAB */}
@@ -10027,6 +10105,32 @@ function ReferralPage({user, t=LANGS.en}) {
                 {applyMsg.text}
               </div>
             )}
+          </div>
+
+          {/* Download report */}
+          <div style={{...panelStyle,background:'linear-gradient(135deg,rgba(201,168,76,0.06),rgba(201,168,76,0.02))'}}>
+            <div style={labelStyle}>📄 ATASKAITA</div>
+            <div style={{fontSize:12,color:'rgba(232,226,212,0.5)',marginBottom:14,lineHeight:1.6}}>
+              Atsisiųsk asmeninę ataskaitą su žaidimų istorija, pakviestų žaidėjų sąrašu ir statistika (Word formatu).
+            </div>
+            <a
+              href={`/api/referral/report.docx`}
+              download
+              onClick={e=>{
+                e.preventDefault();
+                const tok2=localStorage.getItem('casino_session')||'';
+                fetch('/api/referral/report.docx',{headers:{'x-session-token':tok2}})
+                  .then(r=>r.blob()).then(blob=>{
+                    const url=URL.createObjectURL(blob);
+                    const a=document.createElement('a');
+                    a.href=url;a.download='hathor-report.docx';
+                    document.body.appendChild(a);a.click();
+                    document.body.removeChild(a);URL.revokeObjectURL(url);
+                  }).catch(()=>alert('Nepavyko sugeneruoti ataskaitos'));
+              }}
+              style={{display:'inline-flex',alignItems:'center',gap:8,padding:'10px 22px',backgroundImage:"url('/img/btn-primary.png')",backgroundSize:'cover',borderRadius:8,color:'#1a0800',fontWeight:900,fontSize:12,letterSpacing:1,textDecoration:'none',border:'1px solid rgba(255,245,150,0.4)',boxShadow:'0 4px 0 #5a3a08, 0 6px 14px rgba(0,0,0,0.5)',cursor:'pointer'}}>
+              📥 Atsisiųsti ataskaitą (.docx)
+            </a>
           </div>
         </>
       ) : (

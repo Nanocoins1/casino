@@ -86,6 +86,7 @@ function emailTemplate(title, content) {
 const app    = express();
 const server = http.createServer(app);
 const io     = new Server(server, { cors: { origin: '*' } });
+app.set('io', io);
 
 // ── Rate limiting ─────────────────────────────────────────────
 const rateLimit = require('express-rate-limit');
@@ -974,6 +975,164 @@ app.get('/api/stats/:uid', async (req,res)=>{
     totalWins: logs.filter(l=>l.won).length,
     biggestWin: Math.max(0,...logs.map(l=>l.result)),
   });
+});
+
+// ── Update username ───────────────────────────────────────
+app.post('/api/user/update-name', express.json(), async (req,res)=>{
+  const token = (req.headers.authorization||'').replace('Bearer ','') || req.headers['x-session-token'];
+  const uid = await checkSession(token);
+  if(!uid) return res.status(401).json({error:'Unauthorized'});
+  const {name} = req.body||{};
+  if(!name||name.trim().length<2) return res.status(400).json({error:'Name must be at least 2 characters'});
+  if(name.trim().length>24) return res.status(400).json({error:'Name too long (max 24 chars)'});
+  const clean = name.trim().replace(/[<>\"']/g,'');
+  // Check uniqueness
+  const existing = await dbGet(`SELECT uid FROM users WHERE name=$1 AND uid!=$2`, [clean, uid]);
+  if(existing) return res.status(400).json({error:'Name already taken'});
+  await dbRun(`UPDATE users SET name=$1 WHERE uid=$2`, [clean, uid]);
+  res.json({ok:true, name:clean});
+});
+
+// ── P2P Token Transfer ─────────────────────────────────────
+app.post('/api/tokens/send', express.json(), async (req,res)=>{
+  const token = (req.headers.authorization||'').replace('Bearer ','') || req.headers['x-session-token'];
+  const uid = await checkSession(token);
+  if(!uid) return res.status(401).json({error:'Unauthorized'});
+  const {to_name, amount} = req.body||{};
+  if(!to_name||!amount) return res.status(400).json({error:'Missing fields'});
+  const amt = parseInt(amount);
+  if(isNaN(amt)||amt<1) return res.status(400).json({error:'Invalid amount'});
+  if(amt>100000) return res.status(400).json({error:'Max transfer is 100,000 tokens'});
+  const sender = await getUser(uid);
+  if(!sender) return res.status(404).json({error:'Sender not found'});
+  if(sender.tokens < amt) return res.status(400).json({error:'Insufficient balance'});
+  const recipient = await dbGet(`SELECT uid,name,tokens FROM users WHERE LOWER(name)=LOWER($1)`, [to_name.trim()]);
+  if(!recipient) return res.status(404).json({error:'Player not found'});
+  if(recipient.uid === uid) return res.status(400).json({error:'Cannot send to yourself'});
+  // Execute transfer
+  await dbRun(`UPDATE users SET tokens=tokens-$1 WHERE uid=$2`, [amt, uid]);
+  await dbRun(`UPDATE users SET tokens=tokens+$1 WHERE uid=$2`, [amt, recipient.uid]);
+  await dbRun(`INSERT INTO token_transfers(id,from_uid,to_uid,amount,note) VALUES($1,$2,$3,$4,$5)`,
+    [require('uuid').v4(), uid, recipient.uid, amt, req.body.note||null]);
+  // Notify recipient via socket if online
+  try {
+    const io = req.app.get('io');
+    if(io) io.to(recipient.uid).emit('tokensReceived', {from: sender.name, amount: amt});
+  } catch(e){}
+  res.json({ok:true, sent:amt, to:recipient.name});
+});
+
+// ── P2P Transfer History ───────────────────────────────────
+app.get('/api/tokens/transfers', async (req,res)=>{
+  const token = (req.headers.authorization||'').replace('Bearer ','') || req.headers['x-session-token'];
+  const uid = await checkSession(token);
+  if(!uid) return res.status(401).json({error:'Unauthorized'});
+  const rows = await dbAll(`
+    SELECT tt.*, us.name as from_name, ur.name as to_name
+    FROM token_transfers tt
+    LEFT JOIN users us ON us.uid=tt.from_uid
+    LEFT JOIN users ur ON ur.uid=tt.to_uid
+    WHERE tt.from_uid=$1 OR tt.to_uid=$1
+    ORDER BY tt.created_at DESC LIMIT 50`, [uid]);
+  res.json({transfers: rows, uid});
+});
+
+// ── Affiliate/Referral DOCX report ────────────────────────
+app.get('/api/referral/report.docx', async (req,res)=>{
+  const token = (req.headers.authorization||'').replace('Bearer ','') || req.headers['x-session-token'];
+  const uid = await checkSession(token);
+  if(!uid) return res.status(401).json({error:'Unauthorized'});
+  try {
+    const { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, HeadingLevel, AlignmentType, WidthType, BorderStyle } = require('docx');
+    const u = await getUser(uid);
+    const refs = await dbAll(`
+      SELECT u.name, u.games_played, u.total_won, u.tokens, pr.created_at as joined,
+             (SELECT COUNT(*) FROM transactions t WHERE t.uid=u.uid AND t.status='completed' AND t.type='deposit') as deposits
+      FROM player_referrals pr
+      JOIN users u ON u.uid=pr.referred_uid
+      WHERE pr.referrer_uid=$1
+      ORDER BY pr.created_at DESC`, [uid]);
+    const transfers = await dbAll(`
+      SELECT tt.amount, tt.created_at, tt.note, ur.name as to_name, uf.name as from_name
+      FROM token_transfers tt
+      LEFT JOIN users ur ON ur.uid=tt.to_uid
+      LEFT JOIN users uf ON uf.uid=tt.from_uid
+      WHERE tt.from_uid=$1 OR tt.to_uid=$1
+      ORDER BY tt.created_at DESC LIMIT 100`, [uid]);
+    const gameLogs = await dbAll(`SELECT game, bet, result, won, ts FROM game_log WHERE uid=$1 ORDER BY ts DESC LIMIT 200`, [uid]);
+
+    const goldColor = 'C9A84C';
+    const darkBg = '0A0806';
+    const headerRun = txt => new TextRun({text:txt, bold:true, color:'FFFFFF', size:24, font:'Calibri'});
+    const cellRun = txt => new TextRun({text:String(txt||'—'), size:20, font:'Calibri', color:'000000'});
+    const hCell = txt => new TableCell({children:[new Paragraph({children:[new TextRun({text:txt,bold:true,size:20,font:'Calibri',color:'FFFFFF'})],alignment:AlignmentType.CENTER})], shading:{fill:goldColor}});
+    const dCell = (txt,shade) => new TableCell({children:[new Paragraph({children:[cellRun(txt)],alignment:AlignmentType.CENTER})], shading:shade?{fill:'F5F0E8'}:{}});
+
+    const refRows = refs.map((r,i) => new TableRow({children:[
+      dCell(i+1, i%2===0),
+      dCell(r.name, i%2===0),
+      dCell(new Date(r.joined).toLocaleDateString('lt-LT'), i%2===0),
+      dCell(r.games_played||0, i%2===0),
+      dCell(r.deposits||0, i%2===0),
+      dCell((r.total_won||0).toLocaleString()+' 🪙', i%2===0),
+    ]}));
+
+    const gameRows = gameLogs.slice(0,50).map((g,i) => new TableRow({children:[
+      dCell(new Date(g.ts).toLocaleString('lt-LT'), i%2===0),
+      dCell(g.game||'—', i%2===0),
+      dCell((g.bet||0).toLocaleString(), i%2===0),
+      dCell((g.result||0).toLocaleString(), i%2===0),
+      dCell(g.won?'✓ Laimėjo':'✗ Pralaimėjo', i%2===0),
+    ]}));
+
+    const doc = new Document({
+      sections:[{
+        properties:{},
+        children:[
+          new Paragraph({children:[new TextRun({text:'HATHOR ROYAL CASINO', bold:true, size:48, color:goldColor, font:'Calibri'})], alignment:AlignmentType.CENTER, heading:HeadingLevel.TITLE}),
+          new Paragraph({children:[new TextRun({text:`Žaidėjo ataskaita — ${u.name}`, size:28, color:'666666', font:'Calibri'})], alignment:AlignmentType.CENTER}),
+          new Paragraph({children:[new TextRun({text:`Sugeneruota: ${new Date().toLocaleString('lt-LT')}`, size:20, color:'999999', font:'Calibri'})], alignment:AlignmentType.CENTER}),
+          new Paragraph({text:''}),
+          new Paragraph({children:[new TextRun({text:'📊 Statistika', bold:true, size:32, color:goldColor, font:'Calibri'})], heading:HeadingLevel.HEADING_1}),
+          new Table({width:{size:100,type:WidthType.PERCENTAGE}, rows:[
+            new TableRow({children:[hCell('Rodiklis'), hCell('Reikšmė')]}),
+            new TableRow({children:[dCell('Žaidėjas',true), dCell(u.name,true)]}),
+            new TableRow({children:[dCell('Lygis'), dCell(u.level||1)]}),
+            new TableRow({children:[dCell('Balansas',true), dCell((u.tokens||0).toLocaleString()+' 🪙',true)]}),
+            new TableRow({children:[dCell('Žaidimai'), dCell(u.games_played||0)]}),
+            new TableRow({children:[dCell('Iš viso laimėta',true), dCell((u.total_won||0).toLocaleString()+' 🪙',true)]}),
+            new TableRow({children:[dCell('Pakvietimų'), dCell(refs.length)]}),
+          ]}),
+          new Paragraph({text:''}),
+          ...(refs.length > 0 ? [
+            new Paragraph({children:[new TextRun({text:'👥 Pakviesti žaidėjai', bold:true, size:32, color:goldColor, font:'Calibri'})], heading:HeadingLevel.HEADING_1}),
+            new Table({width:{size:100,type:WidthType.PERCENTAGE}, rows:[
+              new TableRow({children:[hCell('#'), hCell('Vardas'), hCell('Prisijungė'), hCell('Žaidimai'), hCell('Depozitai'), hCell('Laimėta')]}),
+              ...refRows
+            ]}),
+            new Paragraph({text:''}),
+          ] : []),
+          new Paragraph({children:[new TextRun({text:'🎲 Žaidimų istorija (paskutiniai 50)', bold:true, size:32, color:goldColor, font:'Calibri'})], heading:HeadingLevel.HEADING_1}),
+          ...(gameRows.length > 0 ? [
+            new Table({width:{size:100,type:WidthType.PERCENTAGE}, rows:[
+              new TableRow({children:[hCell('Data'), hCell('Žaidimas'), hCell('Statymas'), hCell('Rezultatas'), hCell('Baigtis')]}),
+              ...gameRows
+            ]})
+          ] : [new Paragraph({children:[new TextRun({text:'Žaidimų istorija tuščia', size:20, color:'999999', font:'Calibri'})]})]),
+          new Paragraph({text:''}),
+          new Paragraph({children:[new TextRun({text:'HATHOR Royal Casino — Konfidenciali ataskaita', size:16, color:'AAAAAA', font:'Calibri', italics:true})], alignment:AlignmentType.CENTER}),
+        ]
+      }]
+    });
+
+    const buf = await Packer.toBuffer(doc);
+    res.setHeader('Content-Type','application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    res.setHeader('Content-Disposition',`attachment; filename="hathor-report-${u.name}-${new Date().toISOString().slice(0,10)}.docx"`);
+    res.send(buf);
+  } catch(e) {
+    console.error('DOCX report error:', e.message);
+    res.status(500).json({error:'Report generation failed: '+e.message});
+  }
 });
 
 // ── Stats Charts endpoint ─────────────────────────────────
@@ -3754,6 +3913,7 @@ async function initDB() {
   CREATE TABLE IF NOT EXISTS player_bonuses (id SERIAL PRIMARY KEY, uid TEXT NOT NULL, bonus_type TEXT NOT NULL, bonus_tokens INTEGER NOT NULL, wagering_required INTEGER NOT NULL, wagering_done INTEGER DEFAULT 0, status TEXT DEFAULT 'active', created_at TIMESTAMPTZ DEFAULT NOW(), expires_at TIMESTAMPTZ);
   CREATE TABLE IF NOT EXISTS player_referrals (id SERIAL PRIMARY KEY, referrer_uid TEXT NOT NULL, referred_uid TEXT NOT NULL, bonus_given BOOLEAN DEFAULT FALSE, created_at TIMESTAMPTZ DEFAULT NOW(), UNIQUE(referred_uid));
   CREATE TABLE IF NOT EXISTS push_subscriptions (id SERIAL PRIMARY KEY, uid TEXT NOT NULL, subscription JSONB NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW());
+  CREATE TABLE IF NOT EXISTS token_transfers (id TEXT PRIMARY KEY, from_uid TEXT NOT NULL, to_uid TEXT NOT NULL, amount INTEGER NOT NULL, note TEXT, created_at TIMESTAMPTZ DEFAULT NOW());
 `);
     await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS push_subs_uid_endpoint ON push_subscriptions (uid, (subscription->>'endpoint'))`).catch(()=>{});
     // New-style tournament tables (separate from old ones)
