@@ -157,6 +157,8 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
 .aff-badge-paused{background:rgba(255,165,0,.12);color:orange;}
 .aff-section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .aff-section-hdr span{font-size:10px;letter-spacing:2px;color:rgba(232,224,208,.3);text-transform:uppercase;}
+.inbox-conv-item:hover { background: rgba(201,168,76,0.06); }
+.inbox-conv-item.active { background: rgba(201,168,76,0.1); border-color: rgba(201,168,76,0.2) !important; }
 </style>
 </head>
 <body>
@@ -213,6 +215,7 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
     <div class="tab" onclick="showTab('affiliates',this)">🔗 Affiliate</div>
     <div class="tab" onclick="showTab('limits',this)">🛡️ Limitai</div>
     <div class="tab" onclick="showTab('vip-admin',this)">🌟 VIP</div>
+    <div class="tab" onclick="showTab('inbox-admin',this)">📬 Žinutės</div>
     <div class="tab" onclick="showTab('push',this)">🔔 Push</div>
     <div class="tab" id="tab-staff" onclick="showTab('staff',this)" style="display:none;">👥 Darbuotojai</div>
     <div class="tab" onclick="showTab('bonuses',this)">🎁 Bonusai</div>
@@ -693,6 +696,27 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
       </div>
     </div>
 
+    <!-- INBOX ADMIN -->
+    <div class="section" id="sec-inbox-admin">
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:20px;color:#e8e2d4;">📬 Žaidėjų žinutės</h2>
+      <div style="display:grid;grid-template-columns:280px 1fr;gap:16px;height:500px;">
+        <!-- Player list -->
+        <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;overflow-y:auto;" id="inbox-player-list">
+          <div style="padding:12px 14px;font-size:11px;letter-spacing:2px;color:rgba(201,168,76,.4);border-bottom:1px solid rgba(255,255,255,.05);">POKALBIAI</div>
+          <div id="inbox-conversations" style="padding:8px;"></div>
+        </div>
+        <!-- Conversation -->
+        <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;display:flex;flex-direction:column;" id="inbox-conversation-panel">
+          <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px;color:rgba(232,224,208,.5);" id="inbox-conv-header">← Pasirink pokalbį</div>
+          <div id="inbox-messages-list" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;"></div>
+          <div style="padding:12px;border-top:1px solid rgba(255,255,255,.05);display:flex;gap:8px;" id="inbox-reply-form">
+            <input class="inp" id="inbox-reply-input" placeholder="Atsakymas..." style="flex:1;margin:0;" onkeydown="if(event.key==='Enter')sendInboxReply()"/>
+            <button class="btn btn-primary" onclick="sendInboxReply()" style="padding:8px 16px;white-space:nowrap;">Siųsti →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- VIP ADMIN -->
     <div class="section" id="sec-vip-admin">
       <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:20px;color:#e8e2d4;">🌟 VIP valdymas</h2>
@@ -1028,6 +1052,7 @@ function applyAdminLang() {
     'pending': t.pending, 'sports': t.sports, 'give': t.give, 'promos': t.promos,
     'rtp': t.rtp, 'analytics': t.analytics, 'tournaments': t.tournaments,
     'affiliates': t.affiliates, 'limits': t.limits, 'vip-admin': t.vip,
+    'inbox-admin': t.inbox || 'Žinutės',
     'push': t.push, 'staff': t.staff
   };
   document.querySelectorAll('.tab[onclick]').forEach(tab => {
@@ -1149,6 +1174,7 @@ function applyRoleRestrictions(role) {
     promos:       ['superadmin'],
     tournaments:  ['superadmin'],
     'vip-admin':  ['superadmin'],
+    'inbox-admin': ['superadmin','kyc','players'],
     push:         ['superadmin'],
     staff:        ['superadmin'],
     rtp:          ['superadmin','finance'],
@@ -1210,6 +1236,7 @@ function showTab(name, el) {
   if(name === 'analytics') loadAnalytics();
   if(name === 'tournaments') { loadActiveTournament(); loadAdminTournaments(); }
   if(name === 'vip-admin') loadVIPDistribution();
+  if(name === 'inbox-admin') loadInboxConversations();
   if(name === 'push') loadPushStatus();
   if(name === 'staff') loadStaff();
   if(name === 'affiliates') loadAffReport();
@@ -2455,6 +2482,73 @@ function updateFirstDepPreview() {
   const profit = casinoRevenue - bonus;
   const el = document.getElementById('firstDepPreview');
   if(el) el.innerHTML = `Depozitas <strong style="color:var(--gold)">${deposit.toLocaleString()}</strong> → Bonus <strong style="color:var(--gold)">${bonus.toLocaleString()} 🪙</strong> → Reikia išžaisti <strong>${wagering.toLocaleString()} 🪙</strong> → ~7% edge = kazino uždirba ~${casinoRevenue.toLocaleString()} → <strong style="color:${profit>=0?'var(--green)':'var(--red)'}">Pelnas po bonuso: ~${profit.toLocaleString()} 🪙</strong>`;
+}
+
+let _inboxCurrentUid = null;
+let _inboxCurrentName = '';
+
+async function loadInboxConversations(){
+  const r = await fetch('/admin/inbox', {headers:{'x-admin-key':API_KEY}});
+  const d = await r.json();
+  const el = document.getElementById('inbox-conversations');
+  if(!el) return;
+  if(!d.messages || d.messages.length===0){
+    el.innerHTML='<div style="padding:14px;color:rgba(232,224,208,.3);font-size:13px;">Žinučių nėra</div>';
+    return;
+  }
+  // Group by player
+  const players={};
+  d.messages.forEach(m=>{
+    const puid = m.player_uid || (m.from_uid==='__support'?m.to_uid:m.from_uid);
+    if(!puid||puid==='__support') return;
+    if(!players[puid]) players[puid]={uid:puid, name:m.from_name, last:m.body, time:m.created_at, unread:0};
+    if(!m.is_read && m.to_uid==='__support') players[puid].unread++;
+  });
+  el.innerHTML = Object.values(players).map(p=>`
+    <div onclick="loadInboxConv('${p.uid}','${(p.name||'').replace(/'/g,"\\'")}');document.querySelectorAll('.inbox-conv-item').forEach(x=>x.classList.remove('active'));this.classList.add('active');"
+      class="inbox-conv-item"
+      style="padding:10px 12px;border-radius:8px;cursor:pointer;margin-bottom:4px;border:1px solid rgba(255,255,255,.04);transition:.15s;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-weight:700;font-size:13px;color:#e8e2d4;">${p.name||'Player'}</span>
+        ${p.unread?`<span style="background:#ff3d71;color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;">${p.unread}</span>`:''}
+      </div>
+      <div style="font-size:11px;color:rgba(232,224,208,.3);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${(p.last||'').substring(0,40)}</div>
+    </div>
+  `).join('');
+}
+
+async function loadInboxConv(uid, name){
+  _inboxCurrentUid = uid;
+  _inboxCurrentName = name;
+  document.getElementById('inbox-conv-header').textContent = '💬 ' + name;
+  const r = await fetch('/admin/inbox/'+uid, {headers:{'x-admin-key':API_KEY}});
+  const msgs = await r.json();
+  const el = document.getElementById('inbox-messages-list');
+  if(!msgs.length){ el.innerHTML='<div style="color:rgba(232,224,208,.3);font-size:13px;text-align:center;padding:20px;">Žinučių nėra</div>'; return; }
+  const fmt=ts=>new Date(ts).toLocaleString('lt-LT',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  el.innerHTML = msgs.map(m=>{
+    const isAdmin = m.from_uid==='__support';
+    return `<div style="display:flex;flex-direction:column;align-items:${isAdmin?'flex-end':'flex-start'};">
+      <div style="max-width:80%;padding:9px 13px;border-radius:${isAdmin?'12px 12px 2px 12px':'12px 12px 12px 2px'};
+        background:${isAdmin?'rgba(201,168,76,0.15)':'rgba(255,255,255,0.06)'};
+        border:1px solid ${isAdmin?'rgba(201,168,76,0.25)':'rgba(255,255,255,0.08)'};
+        font-size:13px;color:rgba(232,224,208,0.9);line-height:1.5;">
+        ${!isAdmin?`<div style="font-size:10px;color:#c9a84c;font-weight:700;margin-bottom:4px;">${m.from_name}</div>`:''}
+        ${m.body}
+      </div>
+      <div style="font-size:10px;color:rgba(232,224,208,.25);margin-top:3px;">${fmt(m.created_at)}</div>
+    </div>`;
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+async function sendInboxReply(){
+  if(!_inboxCurrentUid) return;
+  const body = document.getElementById('inbox-reply-input').value.trim();
+  if(!body) return;
+  await fetch('/admin/inbox/reply',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':API_KEY},body:JSON.stringify({to_uid:_inboxCurrentUid, body})});
+  document.getElementById('inbox-reply-input').value='';
+  await loadInboxConv(_inboxCurrentUid, _inboxCurrentName);
 }
 
 async function saveBonusSettings() {

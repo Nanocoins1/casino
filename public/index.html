@@ -6922,6 +6922,91 @@ function PromoTabContent({tok, onUpdate}){
 }
 
 // ═══════════════════════════════════════════════════
+// INBOX TAB CONTENT
+// ═══════════════════════════════════════════════════
+function InboxTabContent({tok, user}){
+  const [msgs,setMsgs]=useState(null);
+  const [body,setBody]=useState('');
+  const [sending,setSending]=useState(false);
+  const [sent,setSent]=useState(false);
+
+  useEffect(()=>{
+    fetch('/api/inbox',{headers:{'x-session-token':tok,'Authorization':'Bearer '+tok}})
+      .then(r=>r.json()).then(d=>{setMsgs(Array.isArray(d)?d:[]);})
+      .catch(()=>setMsgs([]));
+    // Mark as read
+    fetch('/api/inbox/read',{method:'POST',headers:{'x-session-token':tok}}).catch(()=>{});
+  },[tok]);
+
+  const sendMsg=async()=>{
+    if(!body.trim()) return;
+    setSending(true);
+    const r=await fetch('/api/inbox/send',{method:'POST',headers:{'Content-Type':'application/json','x-session-token':tok},body:JSON.stringify({body:body.trim()})});
+    const d=await r.json();
+    setSending(false);
+    if(d.ok){
+      setBody('');
+      setSent(true);
+      setTimeout(()=>setSent(false),3000);
+      // Reload messages
+      fetch('/api/inbox',{headers:{'x-session-token':tok,'Authorization':'Bearer '+tok}})
+        .then(r=>r.json()).then(d=>{setMsgs(Array.isArray(d)?d:[]);}).catch(()=>{});
+    }
+  };
+
+  const fmtTime=ts=>{
+    const d=new Date(ts);
+    return d.toLocaleDateString('lt-LT',{month:'short',day:'numeric'})+' '+d.toLocaleTimeString('lt-LT',{hour:'2-digit',minute:'2-digit'});
+  };
+
+  return(<>
+    <div style={{fontSize:11,letterSpacing:2,color:'rgba(201,168,76,.4)',fontFamily:'Cinzel,serif',marginBottom:14}}>ŽINUTĖS SU SUPPORT</div>
+
+    {/* Message thread */}
+    <div style={{maxHeight:260,overflowY:'auto',display:'flex',flexDirection:'column',gap:8,marginBottom:16,paddingRight:4}}>
+      {msgs===null&&<div style={{color:'rgba(232,224,208,.4)',fontSize:13,textAlign:'center',padding:'20px 0'}}>Kraunama...</div>}
+      {msgs&&msgs.length===0&&<div style={{color:'rgba(232,224,208,.3)',fontSize:13,textAlign:'center',padding:'20px 0'}}>Žinučių nėra. Parašyk mums! 👇</div>}
+      {msgs&&msgs.map(m=>{
+        const isMe=m.from_uid===user.uid;
+        return(
+          <div key={m.id} style={{display:'flex',flexDirection:'column',alignItems:isMe?'flex-end':'flex-start'}}>
+            <div style={{
+              maxWidth:'85%',padding:'9px 13px',borderRadius:isMe?'12px 12px 2px 12px':'12px 12px 12px 2px',
+              background:isMe?'rgba(201,168,76,0.15)':'rgba(255,255,255,0.06)',
+              border:isMe?'1px solid rgba(201,168,76,0.25)':'1px solid rgba(255,255,255,0.08)',
+              fontSize:13,color:'rgba(232,224,208,0.9)',lineHeight:1.5
+            }}>
+              {!isMe&&<div style={{fontSize:10,color:'#c9a84c',fontWeight:700,marginBottom:4}}>{m.from_name}</div>}
+              {m.body}
+            </div>
+            <div style={{fontSize:10,color:'rgba(232,224,208,.25)',marginTop:3}}>{fmtTime(m.created_at)}</div>
+          </div>
+        );
+      })}
+    </div>
+
+    {/* Compose */}
+    <div style={{borderTop:'1px solid rgba(201,168,76,.08)',paddingTop:14}}>
+      <textarea
+        className="modal-input"
+        placeholder="Rašyk žinutę support komandai..."
+        value={body}
+        onChange={e=>setBody(e.target.value)}
+        rows={3}
+        style={{width:'100%',resize:'none',marginBottom:8,fontSize:13}}
+      />
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        {sent&&<span style={{color:'#4ade80',fontSize:12}}>✅ Išsiųsta!</span>}
+        {!sent&&<span style={{fontSize:11,color:'rgba(232,224,208,.3)'}}>Atsakome per 24h</span>}
+        <button className="btn btn-primary btn-sm" onClick={sendMsg} disabled={sending||!body.trim()}>
+          {sending?'...':'Siųsti →'}
+        </button>
+      </div>
+    </div>
+  </>);
+}
+
+// ═══════════════════════════════════════════════════
 // GUEST MODAL — shown when guest tries to play
 // ═══════════════════════════════════════════════════
 function GuestModal({onClose}){
@@ -7090,6 +7175,7 @@ function AvatarModal({user,onClose,onUpdate}){
     {id:'stats',label:'📊 Statistika'},
     {id:'history',label:'📋 Istorija'},
     {id:'transfer',label:'💸 Pervesti'},
+    {id:'inbox',label:'📬 Žinutės'},
     {id:'promo',label:'🎁 Promo'},
     {id:'security',label:'🔐 Saugumas'},
   ];
@@ -7246,6 +7332,9 @@ function AvatarModal({user,onClose,onUpdate}){
           })}
           <button className="btn btn-ghost" style={{width:'100%',marginTop:8}} onClick={onClose}>Uždaryti</button>
         </>)}
+
+        {/* INBOX TAB */}
+        {tab==='inbox'&&<InboxTabContent tok={tok} user={user}/>}
 
         {/* PROMO TAB */}
         {tab==='promo'&&<PromoTabContent tok={tok} onUpdate={onUpdate}/>}
@@ -14168,6 +14257,7 @@ function App(){
   const [user,setUser]=useState(null);
   const [authChecked,setAuthChecked]=useState(false);
   const [showGuestModal,setShowGuestModal]=useState(false);
+  const [inboxUnread,setInboxUnread]=useState(0);
   const [page,setPage]=useState('lobby');
   const [roomId,setRoomId]=useState(null);
   const [gameState,setGameState]=useState(null);
@@ -14338,12 +14428,23 @@ function App(){
     socket.on('tokensReceived',({from,amount})=>{
       setUser(u=>u?{...u,tokens:(u.tokens||0)+amount}:u);
     });
-    return()=>socket.off('gameState').off('roomCreated').off('dailyBonusAvailable').off('levelUp').off('emojiReaction').off('balanceSync').off('tokensReceived');
+    socket.on('newInboxMessage',()=>{
+      setInboxUnread(u=>u+1);
+    });
+    return()=>socket.off('gameState').off('roomCreated').off('dailyBonusAvailable').off('levelUp').off('emojiReaction').off('balanceSync').off('tokensReceived').off('newInboxMessage');
   },[]);
 
   // keep casino_tokens in sync so external game pages see correct balance
   // Must be BEFORE early return to obey Rules of Hooks
   useEffect(()=>{if(user)localStorage.setItem('casino_tokens',String(user.tokens||0));},[user?user.tokens:null]);
+
+  // Fetch inbox unread count when user logs in
+  useEffect(()=>{
+    if(!user||!user.uid) return;
+    const tok=localStorage.getItem('casino_session')||'';
+    fetch('/api/inbox/unread',{headers:{'x-session-token':tok}})
+      .then(r=>r.json()).then(d=>setInboxUnread(d.count||0)).catch(()=>{});
+  },[user?.uid]);
 
   // Fetch bonus status when logged in
   useEffect(()=>{
@@ -14537,6 +14638,10 @@ function App(){
               </div>
               <button className="tb-cashier" onClick={()=>window.open('/cashier.html','_self')}>💳 {t.cashier||'Cashier'}</button>
               <div className="tb-user-btn" onClick={()=>setShowAvatar(true)}>{user.avatar?<img src={user.avatar} alt="" style={{width:'100%',height:'100%',borderRadius:10,objectFit:'cover'}}/>:'👤'}</div>
+              <button className="tb-notify" onClick={()=>{setInboxUnread(0);setShowAvatar(true);}} style={{position:'relative',background:'none',border:'none',cursor:'pointer',fontSize:18,color:'rgba(232,224,208,0.6)',padding:'4px 6px'}}>
+                🔔
+                {inboxUnread>0&&<span style={{position:'absolute',top:0,right:0,background:'#ff3d71',color:'white',borderRadius:'50%',fontSize:9,width:16,height:16,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700}}>{inboxUnread>9?'9+':inboxUnread}</span>}
+              </button>
               <SoundToggle/>
               <button className="tb-logout" onClick={doLogout}>⏻</button>
             </>

@@ -1094,6 +1094,101 @@ app.get('/api/tokens/transfers', async (req,res)=>{
   res.json({transfers: rows, uid});
 });
 
+// ── Inbox / Messaging ─────────────────────────────────────
+
+// GET /api/inbox — get my messages (sent + received with support)
+app.get('/api/inbox', async (req,res) => {
+  const token = (req.headers.authorization||'').replace('Bearer ','') || req.headers['x-session-token'];
+  const uid = await checkSession(token);
+  if(!uid) return res.status(401).json({error:'Unauthorized'});
+  const msgs = await dbAll(
+    `SELECT * FROM inbox_messages WHERE from_uid=$1 OR to_uid=$1 ORDER BY created_at ASC`,
+    [uid]
+  );
+  res.json(msgs);
+});
+
+// GET /api/inbox/unread — unread count
+app.get('/api/inbox/unread', async (req,res) => {
+  const token = (req.headers.authorization||'').replace('Bearer ','') || req.headers['x-session-token'];
+  const uid = await checkSession(token);
+  if(!uid) return res.status(401).json({count:0});
+  const row = await dbGet(`SELECT COUNT(*) as c FROM inbox_messages WHERE to_uid=$1 AND is_read=false`, [uid]);
+  res.json({count: parseInt(row?.c||0)});
+});
+
+// POST /api/inbox/send — player sends to support
+app.post('/api/inbox/send', express.json(), async (req,res) => {
+  const token = (req.headers.authorization||'').replace('Bearer ','') || req.headers['x-session-token'];
+  const uid = await checkSession(token);
+  if(!uid) return res.status(401).json({error:'Unauthorized'});
+  const { body } = req.body || {};
+  if(!body || !body.trim()) return res.status(400).json({error:'Empty message'});
+  const user = await getUser(uid);
+  const id = uuidv4();
+  await dbRun(
+    `INSERT INTO inbox_messages(id,from_uid,to_uid,from_name,body) VALUES($1,$2,$3,$4,$5)`,
+    [id, uid, '__support', user?.name||'Player', body.trim()]
+  );
+  // Notify all admin sockets
+  io.emit('adminNewMessage', {id, from_uid: uid, from_name: user?.name||'Player', body: body.trim(), created_at: new Date()});
+  res.json({ok:true, id});
+});
+
+// POST /api/inbox/read — mark messages as read
+app.post('/api/inbox/read', express.json(), async (req,res) => {
+  const token = (req.headers.authorization||'').replace('Bearer ','') || req.headers['x-session-token'];
+  const uid = await checkSession(token);
+  if(!uid) return res.status(401).json({error:'Unauthorized'});
+  await dbRun(`UPDATE inbox_messages SET is_read=true WHERE to_uid=$1`, [uid]);
+  res.json({ok:true});
+});
+
+// ADMIN: GET /admin/inbox — all player messages
+app.get('/admin/inbox', adminAuth, async (req,res) => {
+  // Get latest message per player for inbox overview
+  const msgs = await dbAll(`
+    SELECT DISTINCT ON (CASE WHEN from_uid='__support' THEN to_uid ELSE from_uid END)
+      *,
+      CASE WHEN from_uid='__support' THEN to_uid ELSE from_uid END as player_uid
+    FROM inbox_messages
+    ORDER BY CASE WHEN from_uid='__support' THEN to_uid ELSE from_uid END, created_at DESC
+  `, []);
+  // Count unread from players
+  const unread = await dbGet(`SELECT COUNT(*) as c FROM inbox_messages WHERE to_uid='__support' AND is_read=false`, []);
+  res.json({messages: msgs, unread: parseInt(unread?.c||0)});
+});
+
+// ADMIN: GET /admin/inbox/:uid — full conversation with a player
+app.get('/admin/inbox/:uid', adminAuth, async (req,res) => {
+  const msgs = await dbAll(
+    `SELECT * FROM inbox_messages WHERE (from_uid=$1 AND to_uid='__support') OR (from_uid='__support' AND to_uid=$1) ORDER BY created_at ASC`,
+    [req.params.uid]
+  );
+  // Mark player messages as read
+  await dbRun(`UPDATE inbox_messages SET is_read=true WHERE from_uid=$1 AND to_uid='__support'`, [req.params.uid]);
+  res.json(msgs);
+});
+
+// ADMIN: POST /admin/inbox/reply — reply to player
+app.post('/admin/inbox/reply', adminAuth, express.json(), async (req,res) => {
+  const { to_uid, body } = req.body || {};
+  if(!to_uid || !body) return res.status(400).json({error:'Missing fields'});
+  const id = uuidv4();
+  const senderName = req.adminUser === 'superadmin' ? 'Support' : (req.adminUser||'Support');
+  await dbRun(
+    `INSERT INTO inbox_messages(id,from_uid,to_uid,from_name,body) VALUES($1,$2,$3,$4,$5)`,
+    [id, '__support', to_uid, '🛡️ ' + senderName, body.trim()]
+  );
+  // Notify player via socket
+  const sock = sockets[to_uid];
+  if(sock && sock.socket) {
+    sock.socket.emit('newInboxMessage', {id, from_name:'🛡️ ' + senderName, body: body.trim(), created_at: new Date()});
+    sock.socket.emit('unreadCount', {count: 1});
+  }
+  res.json({ok:true, id});
+});
+
 // ── Affiliate/Referral DOCX report ────────────────────────
 app.get('/api/referral/report.docx', async (req,res)=>{
   const token = (req.headers.authorization||'').replace('Bearer ','') || req.headers['x-session-token'];
@@ -4094,6 +4189,15 @@ async function initDB() {
   CREATE TABLE IF NOT EXISTS token_transfers (id TEXT PRIMARY KEY, from_uid TEXT NOT NULL, to_uid TEXT NOT NULL, amount INTEGER NOT NULL, note TEXT, created_at TIMESTAMPTZ DEFAULT NOW());
   CREATE TABLE IF NOT EXISTS password_reset_tokens (token TEXT PRIMARY KEY, uid TEXT NOT NULL, expires_at TIMESTAMPTZ NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW());
   CREATE TABLE IF NOT EXISTS email_verify_tokens (token TEXT PRIMARY KEY, uid TEXT NOT NULL, expires_at TIMESTAMPTZ NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW());
+  CREATE TABLE IF NOT EXISTS inbox_messages (
+    id TEXT PRIMARY KEY,
+    from_uid TEXT,
+    to_uid TEXT,
+    from_name TEXT NOT NULL,
+    body TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+  );
 `);
     await pool.query(`ALTER TABLE auth ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT FALSE`).catch(()=>{});
     await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS push_subs_uid_endpoint ON push_subscriptions (uid, (subscription->>'endpoint'))`).catch(()=>{});
