@@ -646,6 +646,7 @@ app.use(function(req,res,next){
   next();
 });
 app.use(express.static(path.join(__dirname,'public')));
+app.get('/admin', (req,res) => res.redirect('/admin.html'));
 app.use(express.json());
 
 app.post('/upload-avatar', upload.single('avatar'), async (req,res)=>{
