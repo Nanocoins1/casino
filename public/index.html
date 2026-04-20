@@ -2995,14 +2995,10 @@ body { color: #e8e2d4 !important; }
 }
 .tb-user-btn:hover { border-color:var(--gold); box-shadow:0 0 16px rgba(201,168,76,.3); }
 .tb-cashier {
-  padding: 9px 22px; border-radius: 100px;
-  background: linear-gradient(180deg,
-    #ffe980 0%,
-    #f0d058 15%,
-    #d4aa38 50%,
-    #b08828 78%,
-    #8a6610 100%
-  );
+  padding: 9px 22px; border-radius: 10px;
+  background-image: url('/img/btn-primary.png');
+  background-size: cover;
+  background-position: center;
   color: #150800;
   font-family: 'Space Grotesk', sans-serif;
   font-size: 12px; font-weight: 900;
@@ -4757,19 +4753,22 @@ body {
 }
 
 .tb-cashier {
-  background: linear-gradient(135deg, #d97706, #f59e0b) !important;
+  background-image: url('/img/btn-primary.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
   border: none !important;
+  border-top: 1px solid rgba(255,245,150,0.5) !important;
+  border-bottom: 1px solid rgba(80,40,0,0.8) !important;
   border-radius: 10px !important;
-  color: #0a0600 !important;
-  font-weight: 700 !important;
-  padding: 8px 16px !important;
-  transition: opacity 0.2s !important;
-  box-shadow: 0 4px 16px rgba(245,158,11,0.3) !important;
+  color: #1a0800 !important;
+  font-weight: 900 !important;
+  padding: 8px 18px !important;
+  box-shadow: 0 5px 0 #5a3a08, 0 7px 16px rgba(0,0,0,0.6), 0 0 20px rgba(201,168,76,0.2) !important;
 }
 .tb-cashier:hover {
-  opacity: 0.9 !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 6px 20px rgba(245,158,11,0.45) !important;
+  filter: brightness(1.08) saturate(1.1) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 7px 0 #5a3a08, 0 12px 24px rgba(201,168,76,0.5), 0 0 32px rgba(240,192,96,0.3) !important;
 }
 
 .ham-btn {
@@ -5746,14 +5745,14 @@ body { background: var(--ds-bg) !important; color: var(--ds-text) !important; }
 }
 .tb-bal-amount { color: #fbbf24 !important; font-size: 14px !important; font-weight: 700 !important; }
 .tb-cashier {
-  background: linear-gradient(180deg,
-    #ffe980 0%, #f0d058 15%, #d4aa38 50%, #b08828 78%, #8a6610 100%
-  ) !important;
+  background-image: url('/img/btn-primary.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
   border: none !important;
-  border-top: 1px solid rgba(255,252,160,0.7) !important;
-  border-bottom: 1px solid rgba(60,30,0,0.8) !important;
-  border-radius: 100px !important;
-  color: #150800 !important; font-weight: 900 !important;
+  border-top: 1px solid rgba(255,245,150,0.5) !important;
+  border-bottom: 1px solid rgba(80,40,0,0.8) !important;
+  border-radius: 10px !important;
+  color: #1a0800 !important; font-weight: 900 !important;
   font-size: 12px !important; padding: 9px 22px !important;
   letter-spacing: 1px !important; text-transform: uppercase !important;
   text-shadow: 0 1px 0 rgba(255,245,140,0.6) !important;
@@ -14440,7 +14439,7 @@ function App(){
                   <button className="btn btn-primary" style={{display:'flex',alignItems:'center',gap:7,fontSize:'13px',padding:'12px 26px',letterSpacing:'1.5px',fontWeight:900}} onClick={()=>window.open('/cashier.html','_self')}>
                     <img src="/img/icon-deposit.png" className="btn-icon-img" alt="" draggable="false"/> {t.deposit2||'Papildyti'}
                   </button>
-                  <button className="btn btn-vip" style={{display:'flex',alignItems:'center',gap:7,fontSize:'13px',padding:'12px 22px',letterSpacing:'1.5px'}} onClick={()=>setShowBonus(true)}>
+                  <button className="btn btn-primary" style={{display:'flex',alignItems:'center',gap:7,fontSize:'13px',padding:'12px 22px',letterSpacing:'1.5px',fontWeight:900}} onClick={()=>setShowBonus(true)}>
                     <img src="/img/icon-bonus.png" className="btn-icon-img" alt="" draggable="false"/> {t.bonuses||'Bonusai'}
                   </button>
                   <button className="btn btn-gold-outline" style={{display:'flex',alignItems:'center',gap:7,fontSize:'12px',padding:'12px 20px',letterSpacing:'.8px',backgroundImage:"url('/img/btn-secondary.png')",backgroundSize:'cover',backgroundPosition:'center',border:'1px solid rgba(201,168,76,0.4)',color:'#ffd680',borderRadius:10,fontWeight:700,boxShadow:'0 5px 0 #2a1a04, 0 7px 16px rgba(0,0,0,0.6), 0 0 18px rgba(201,168,76,0.2)'}} onClick={()=>{
