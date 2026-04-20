@@ -7022,6 +7022,7 @@ function AvatarModal({user,onClose,onUpdate}){
     {id:'stats',label:'📊 Statistika'},
     {id:'history',label:'📋 Istorija'},
     {id:'transfer',label:'💸 Pervesti'},
+    {id:'promo',label:'🎁 Promo'},
     {id:'security',label:'🔐 Saugumas'},
   ];
 
@@ -7177,6 +7178,69 @@ function AvatarModal({user,onClose,onUpdate}){
           })}
           <button className="btn btn-ghost" style={{width:'100%',marginTop:8}} onClick={onClose}>Uždaryti</button>
         </>)}
+
+        {/* PROMO TAB */}
+        {tab==='promo'&&(()=>{
+          const [promoInput,setPromoInput]=React.useState('');
+          const [promoMsg,setPromoMsg]=React.useState(null);
+          const [promoLoading,setPromoLoading]=React.useState(false);
+          const applyPromo=async()=>{
+            if(!promoInput.trim()){setPromoMsg({ok:false,text:'Įvesk promo kodą'});return;}
+            setPromoLoading(true);setPromoMsg(null);
+            const r=await fetch('/api/promo/use',{method:'POST',headers:{'Content-Type':'application/json','x-session-token':tok},body:JSON.stringify({code:promoInput.trim().toUpperCase()})});
+            const d=await r.json();
+            setPromoLoading(false);
+            if(d.ok){
+              setPromoMsg({ok:true,text:`✅ Promo kodas pritaikytas! +${d.amount||''} 🪙`});
+              setPromoInput('');
+              if(onUpdate&&d.tokens!=null)onUpdate(d.tokens,'tokens');
+            } else {
+              setPromoMsg({ok:false,text:d.error||'Neteisingas arba jau panaudotas kodas'});
+            }
+          };
+          // Email verification status
+          const [emailVerified,setEmailVerified]=React.useState(null);
+          const [resendMsg,setResendMsg]=React.useState(null);
+          React.useEffect(()=>{
+            fetch('/api/auth/me',{headers:{'Authorization':'Bearer '+tok}})
+              .then(r=>r.json()).then(d=>{setEmailVerified(!!d?.user?.email_verified||false);}).catch(()=>{});
+          },[]);
+          const resendVerification=async()=>{
+            const r=await fetch('/api/auth/resend-verification',{method:'POST',headers:{'Authorization':'Bearer '+tok}});
+            const d=await r.json();
+            setResendMsg(d.already?'✅ El. paštas jau patvirtintas!':'✅ Patvirtinimo laiškas išsiųstas!');
+          };
+          return(<>
+            <div style={{marginBottom:20}}>
+              <div style={{fontSize:11,letterSpacing:2,color:'rgba(201,168,76,.4)',fontFamily:'Cinzel,serif',marginBottom:12}}>EL. PAŠTO PATVIRTINIMAS</div>
+              {emailVerified===null&&<div style={{color:'rgba(232,224,208,.4)',fontSize:13}}>Kraunama...</div>}
+              {emailVerified===true&&<div style={{padding:'10px 14px',background:'rgba(76,175,124,.1)',border:'1px solid rgba(76,175,124,.3)',borderRadius:8,color:'#4ade80',fontSize:13}}>✅ El. paštas patvirtintas</div>}
+              {emailVerified===false&&<>
+                <div style={{padding:'10px 14px',background:'rgba(255,193,7,.07)',border:'1px solid rgba(255,193,7,.25)',borderRadius:8,color:'#fbbf24',fontSize:13,marginBottom:10}}>⚠️ El. paštas nepatvirtintas</div>
+                <button className="btn btn-ghost btn-sm" onClick={resendVerification} style={{marginBottom:6}}>📧 Siųsti patvirtinimo laišką</button>
+                {resendMsg&&<div style={{color:'#4ade80',fontSize:12,marginTop:4}}>{resendMsg}</div>}
+              </>}
+            </div>
+            <div style={{borderTop:'1px solid rgba(201,168,76,.08)',paddingTop:16}}>
+              <div style={{fontSize:11,letterSpacing:2,color:'rgba(201,168,76,.4)',fontFamily:'Cinzel,serif',marginBottom:12}}>PROMO KODAS</div>
+              <div style={{display:'flex',gap:8,marginBottom:10}}>
+                <input
+                  className="modal-input"
+                  placeholder="KODAS"
+                  value={promoInput}
+                  onChange={e=>setPromoInput(e.target.value.toUpperCase())}
+                  onKeyDown={e=>e.key==='Enter'&&applyPromo()}
+                  style={{flex:1,letterSpacing:3,textTransform:'uppercase',fontFamily:'DM Mono,monospace'}}
+                />
+                <button className="btn btn-primary btn-sm" onClick={applyPromo} disabled={promoLoading}>
+                  {promoLoading?'...':'Taikyti'}
+                </button>
+              </div>
+              {promoMsg&&<div style={{fontSize:13,color:promoMsg.ok?'#4ade80':'#ff7096',padding:'8px 0'}}>{promoMsg.text}</div>}
+              <div style={{fontSize:11,color:'rgba(232,224,208,.3)',marginTop:6}}>Promo kodai suteikia papildomų žetonų. Kiekvienas kodas veikia vieną kartą.</div>
+            </div>
+          </>);
+        })()}
 
         {/* SECURITY TAB */}
         {tab==='security'&&(<>

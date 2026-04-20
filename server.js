@@ -2124,7 +2124,7 @@ async function checkSession(token) {
 
 // Registracija
 app.post('/api/auth/register', express.json(), async (req, res) => {
-  const { name, email, password, ref, cid, pref } = req.body;
+  const { name, email, password, ref, cid, pref, promo } = req.body;
   if(!name||!email||!password) return res.status(400).json({error:'Missing required fields'});
   if(password.length < 8) return res.status(400).json({error:'Password must be at least 8 characters'});
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({error:'Invalid email format'});
@@ -2168,13 +2168,33 @@ app.post('/api/auth/register', express.json(), async (req, res) => {
       } catch(prefErr) { console.error('Player ref error:', prefErr.message); }
     }
     const token = await makeSession(uid);
-    // Welcome email
+    // Apply promo code if provided
+    let promoBonus = 0;
+    if(promo) {
+      try {
+        const promoRow = await dbGet(`SELECT * FROM promo_codes WHERE code=$1`, [promo.toUpperCase()]);
+        if(promoRow && promoRow.used_count < promoRow.max_uses) {
+          await dbRun(`UPDATE promo_codes SET used_count=used_count+1 WHERE code=$1`, [promoRow.code]);
+          await dbRun(`INSERT INTO promo_uses(code,uid) VALUES($1,$2) ON CONFLICT DO NOTHING`, [promoRow.code, uid]);
+          await dbRun(`UPDATE users SET tokens=tokens+$1 WHERE uid=$2`, [promoRow.amount, uid]);
+          user.tokens += promoRow.amount;
+          promoBonus = promoRow.amount;
+        }
+      } catch(pe) { console.warn('Promo apply error:', pe.message); }
+    }
+    // Send verification email
+    const baseUrl = process.env.BASE_URL || 'https://casino-production-0712.up.railway.app';
+    const vToken = require('crypto').randomBytes(32).toString('hex');
+    const vExpires = new Date(Date.now() + 24*60*60*1000);
+    await dbRun(`INSERT INTO email_verify_tokens(token,uid,expires_at) VALUES($1,$2,$3)`, [vToken, uid, vExpires]).catch(()=>{});
     await sendEmail(email, 'Welcome to HATHOR Royal Casino! 🎰', emailTemplate(
       'Welcome, ' + name + '!',
-      `<p style="color:rgba(232,226,212,0.7);line-height:1.7">Your account has been created. You start with <strong style="color:#c9a84c">10,000 tokens</strong> — good luck! 🍀</p>
-       <a href="https://casino-production-0712.up.railway.app" style="display:inline-block;margin-top:16px;padding:14px 28px;background:linear-gradient(135deg,#c9a84c,#ffd680);color:#0a0806;text-decoration:none;border-radius:10px;font-weight:700">Enter Casino →</a>`
+      `<p style="color:rgba(232,226,212,0.7);line-height:1.7">Your account has been created. You start with <strong style="color:#c9a84c">${(10000+promoBonus).toLocaleString()} tokens</strong>${promoBonus?` (including <strong style="color:#4ade80">+${promoBonus.toLocaleString()} promo bonus</strong>)`:''} — good luck! 🍀</p>
+       <p style="margin:16px 0 8px;color:rgba(232,226,212,0.7);">Please verify your email address:</p>
+       <a href="${baseUrl}/api/auth/verify-email/${vToken}" style="display:inline-block;padding:14px 28px;background:linear-gradient(135deg,#c9a84c,#ffd680);color:#0a0806;text-decoration:none;border-radius:10px;font-weight:700">Verify Email →</a>
+       <p style="margin-top:12px;color:rgba(232,226,212,0.4);font-size:12px">Link expires in 24 hours.</p>`
     ));
-    res.json({ok:true, token, uid, user:{...user, levelInfo:getLvInfo(0), kycStatus:'unverified'}});
+    res.json({ok:true, token, uid, promoBonus, user:{...user, levelInfo:getLvInfo(0), kycStatus:'unverified'}});
   } catch(e) { res.status(500).json({error:'Serverio klaida: '+e.message}); }
 });
 
@@ -2234,7 +2254,8 @@ app.get('/api/auth/me', async (req, res) => {
   const user = await getUser(uid);
   if(!user) return res.status(404).json({error:'Vartotojas nerastas'});
   const kycRow = await dbGet(`SELECT status FROM kyc WHERE uid=$1`, [uid]);
-  res.json({uid, user:{...user, kycStatus:kycRow?.status||'unverified'}});
+  const authRow = await dbGet(`SELECT email_verified FROM auth WHERE uid=$1`, [uid]);
+  res.json({uid, user:{...user, kycStatus:kycRow?.status||'unverified', email_verified:!!authRow?.email_verified}});
 });
 
 // Atsijungimas
@@ -2242,6 +2263,87 @@ app.post('/api/auth/logout', express.json(), async (req, res) => {
   const token = req.body?.token || req.headers['x-session-token'];
   if(token) await dbRun(`DELETE FROM sessions WHERE token=$1`, [token]);
   res.json({ok:true});
+});
+
+// ── Forgot / Reset password ────────────────────────────────
+app.post('/api/auth/forgot-password', authLimiter, express.json(), async (req,res) => {
+  const { email } = req.body || {};
+  // Always return ok to prevent email enumeration
+  if(!email) return res.json({ok:true});
+  try {
+    const row = await dbGet(`SELECT uid FROM auth WHERE email=$1`, [email.toLowerCase()]);
+    if(row) {
+      const token = require('crypto').randomBytes(32).toString('hex');
+      const expires = new Date(Date.now() + 60*60*1000); // 1 hour
+      await dbRun(`DELETE FROM password_reset_tokens WHERE uid=$1`, [row.uid]);
+      await dbRun(`INSERT INTO password_reset_tokens(token,uid,expires_at) VALUES($1,$2,$3)`, [token, row.uid, expires]);
+      const baseUrl = process.env.BASE_URL || 'https://casino-production-0712.up.railway.app';
+      await sendEmail(email.toLowerCase(), 'Reset your HATHOR Casino password', emailTemplate(
+        'Password Reset',
+        `<p style="color:rgba(232,226,212,0.7);line-height:1.7">Click the button below to reset your password. This link expires in 1 hour.</p>
+         <a href="${baseUrl}/login.html?mode=reset&token=${token}" style="display:inline-block;margin-top:16px;padding:14px 28px;background:linear-gradient(135deg,#c9a84c,#ffd680);color:#0a0806;text-decoration:none;border-radius:10px;font-weight:700">Reset Password →</a>
+         <p style="margin-top:16px;color:rgba(232,226,212,0.4);font-size:12px">If you didn't request this, ignore this email.</p>`
+      ));
+    }
+  } catch(e) { console.error('Forgot password error:', e.message); }
+  res.json({ok:true});
+});
+
+app.post('/api/auth/reset-password', express.json(), async (req,res) => {
+  const { token, password } = req.body || {};
+  if(!token || !password) return res.status(400).json({error:'Missing fields'});
+  if(password.length < 8) return res.status(400).json({error:'Password must be at least 8 characters'});
+  try {
+    const row = await dbGet(`SELECT uid, expires_at FROM password_reset_tokens WHERE token=$1`, [token]);
+    if(!row) return res.status(400).json({error:'Invalid or expired reset link'});
+    if(new Date(row.expires_at) < new Date()) {
+      await dbRun(`DELETE FROM password_reset_tokens WHERE token=$1`, [token]);
+      return res.status(400).json({error:'Reset link has expired — request a new one'});
+    }
+    const salt = require('crypto').randomBytes(16).toString('hex');
+    const hash = await hashPwd(password, salt);
+    await dbRun(`UPDATE auth SET password_hash=$1, salt=$2 WHERE uid=$3`, [hash, salt, row.uid]);
+    await dbRun(`DELETE FROM password_reset_tokens WHERE token=$1`, [token]);
+    await dbRun(`DELETE FROM sessions WHERE uid=$1`, [row.uid]); // invalidate all sessions
+    res.json({ok:true});
+  } catch(e) { res.status(500).json({error:'Server error'}); }
+});
+
+// ── Email verification ─────────────────────────────────────
+app.get('/api/auth/verify-email/:token', async (req,res) => {
+  try {
+    const row = await dbGet(`SELECT uid, expires_at FROM email_verify_tokens WHERE token=$1`, [req.params.token]);
+    if(!row) return res.redirect('/login.html?verifyError=1');
+    if(new Date(row.expires_at) < new Date()) {
+      await dbRun(`DELETE FROM email_verify_tokens WHERE token=$1`, [req.params.token]);
+      return res.redirect('/login.html?verifyError=expired');
+    }
+    await dbRun(`UPDATE auth SET email_verified=true WHERE uid=$1`, [row.uid]);
+    await dbRun(`DELETE FROM email_verify_tokens WHERE token=$1`, [req.params.token]);
+    res.redirect('/login.html?verified=1');
+  } catch(e) { res.redirect('/login.html?verifyError=1'); }
+});
+
+app.post('/api/auth/resend-verification', express.json(), async (req,res) => {
+  const token = (req.headers.authorization||'').replace('Bearer ','') || req.headers['x-session-token'];
+  const uid = await checkSession(token);
+  if(!uid) return res.status(401).json({error:'Unauthorized'});
+  try {
+    const authRow = await dbGet(`SELECT email, email_verified FROM auth WHERE uid=$1`, [uid]);
+    if(!authRow) return res.status(404).json({error:'User not found'});
+    if(authRow.email_verified) return res.json({ok:true, already:true});
+    const vToken = require('crypto').randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 24*60*60*1000); // 24 hours
+    await dbRun(`DELETE FROM email_verify_tokens WHERE uid=$1`, [uid]);
+    await dbRun(`INSERT INTO email_verify_tokens(token,uid,expires_at) VALUES($1,$2,$3)`, [vToken, uid, expires]);
+    const baseUrl = process.env.BASE_URL || 'https://casino-production-0712.up.railway.app';
+    await sendEmail(authRow.email, 'Verify your HATHOR Casino email', emailTemplate(
+      'Email Verification',
+      `<p style="color:rgba(232,226,212,0.7);line-height:1.7">Click below to verify your email address.</p>
+       <a href="${baseUrl}/api/auth/verify-email/${vToken}" style="display:inline-block;margin-top:16px;padding:14px 28px;background:linear-gradient(135deg,#c9a84c,#ffd680);color:#0a0806;text-decoration:none;border-radius:10px;font-weight:700">Verify Email →</a>`
+    ));
+    res.json({ok:true});
+  } catch(e) { res.status(500).json({error:'Server error'}); }
 });
 
 // ── 2FA endpoints ─────────────────────────────────────────
@@ -3989,7 +4091,10 @@ async function initDB() {
   CREATE TABLE IF NOT EXISTS player_referrals (id SERIAL PRIMARY KEY, referrer_uid TEXT NOT NULL, referred_uid TEXT NOT NULL, bonus_given BOOLEAN DEFAULT FALSE, created_at TIMESTAMPTZ DEFAULT NOW(), UNIQUE(referred_uid));
   CREATE TABLE IF NOT EXISTS push_subscriptions (id SERIAL PRIMARY KEY, uid TEXT NOT NULL, subscription JSONB NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW());
   CREATE TABLE IF NOT EXISTS token_transfers (id TEXT PRIMARY KEY, from_uid TEXT NOT NULL, to_uid TEXT NOT NULL, amount INTEGER NOT NULL, note TEXT, created_at TIMESTAMPTZ DEFAULT NOW());
+  CREATE TABLE IF NOT EXISTS password_reset_tokens (token TEXT PRIMARY KEY, uid TEXT NOT NULL, expires_at TIMESTAMPTZ NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW());
+  CREATE TABLE IF NOT EXISTS email_verify_tokens (token TEXT PRIMARY KEY, uid TEXT NOT NULL, expires_at TIMESTAMPTZ NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW());
 `);
+    await pool.query(`ALTER TABLE auth ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT FALSE`).catch(()=>{});
     await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS push_subs_uid_endpoint ON push_subscriptions (uid, (subscription->>'endpoint'))`).catch(()=>{});
     // New-style tournament tables (separate from old ones)
     try { await pool.query(`

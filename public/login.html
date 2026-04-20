@@ -155,6 +155,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
       <button class="submit-btn" id="loginBtn" onclick="doLogin()" id="loginBtnLbl" data-i18n="btn_login">Log In →</button>
       <div class="legal">
         <span data-i18n-html="no_account">No account? <a href="#" onclick="switchTab('register');return false;">Register here</a></span>
+        <span style="display:block;margin-top:6px;"><a href="#" onclick="switchTab('forgot');return false;" style="color:rgba(201,168,76,0.45);font-size:12px;" data-i18n="forgot">Forgot password?</a></span>
       </div>
     </div>
 
@@ -190,11 +191,58 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
           <button class="eye-btn" onclick="togglePwd('regPwd2',this)" tabindex="-1">👁</button>
         </div>
       </div>
+      <div class="field" style="margin-top:4px;">
+        <label style="font-size:11px;letter-spacing:1px;color:rgba(201,168,76,0.5);">🎁 PROMO CODE (optional)</label>
+        <input class="inp" id="regPromo" type="text" placeholder="Enter promo code" style="text-transform:uppercase;letter-spacing:2px;" oninput="this.value=this.value.toUpperCase()"/>
+      </div>
       <button class="submit-btn" id="regBtn" onclick="doRegister()" id="regBtnLbl" data-i18n="btn_register">Create Account →</button>
       <div class="legal">
         <span data-i18n-html="legal">By registering you agree to <a href="/terms.html">Terms &amp; Conditions</a> and confirm you are 18+.</span><br/>
         <span data-i18n-html="have_account">Already have an account? <a href="#" onclick="switchTab('login');return false;">Log in</a></span>
       </div>
+    </div>
+
+    <!-- FORGOT PASSWORD FORM -->
+    <div class="form-section" id="form-forgot">
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-size:40px;margin-bottom:8px;">🔑</div>
+        <div style="font-size:14px;color:rgba(232,224,208,0.6);line-height:1.6">Enter your email and we'll send you a reset link</div>
+      </div>
+      <div class="field">
+        <label data-i18n="lbl_email">Email</label>
+        <input class="inp" id="forgotEmail" type="email" placeholder="your@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')doForgot()"/>
+      </div>
+      <button class="submit-btn" id="forgotBtn" onclick="doForgot()">Send Reset Link →</button>
+      <div class="legal" style="text-align:center;margin-top:12px;">
+        <a href="#" onclick="switchTab('login');return false;" style="color:rgba(201,168,76,0.5);font-size:12px;">← Back to login</a>
+      </div>
+    </div>
+
+    <!-- RESET PASSWORD FORM -->
+    <div class="form-section" id="form-reset">
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-size:40px;margin-bottom:8px;">🔐</div>
+        <div style="font-size:14px;color:rgba(232,224,208,0.6);line-height:1.6">Enter your new password</div>
+      </div>
+      <div class="field">
+        <label>New Password</label>
+        <div class="inp-wrap">
+          <input class="inp" id="resetPwd" type="password" placeholder="At least 8 characters" autocomplete="new-password" style="padding-right:44px;" oninput="checkStrength(this.value)"/>
+          <button class="eye-btn" onclick="togglePwd('resetPwd',this)" tabindex="-1">👁</button>
+        </div>
+        <div class="pwd-strength" id="pwdStrength2">
+          <div class="pwd-bar"><div class="pwd-fill" id="pwdFill2"></div></div>
+          <div class="pwd-label" id="pwdLabel2"></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Repeat New Password</label>
+        <div class="inp-wrap">
+          <input class="inp" id="resetPwd2" type="password" placeholder="••••••••" autocomplete="new-password" style="padding-right:44px;" onkeydown="if(event.key==='Enter')doReset()"/>
+          <button class="eye-btn" onclick="togglePwd('resetPwd2',this)" tabindex="-1">👁</button>
+        </div>
+      </div>
+      <button class="submit-btn" id="resetBtn" onclick="doReset()">Set New Password →</button>
     </div>
   </div>
 </div>
@@ -203,8 +251,17 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 // Return URL support
 const _returnUrl = new URLSearchParams(location.search).get('return') || localStorage.getItem('login_return') || '/';
 function _getReturn(){ const u=_returnUrl; localStorage.removeItem('login_return'); return u; }
-// Auto-switch to register tab if ?mode=register
-if(new URLSearchParams(location.search).get('mode')==='register') switchTab('register');
+// Auto-switch based on ?mode param
+const _mode = new URLSearchParams(location.search).get('mode');
+const _resetToken = new URLSearchParams(location.search).get('token');
+if(_mode==='register') switchTab('register');
+if(_mode==='reset' && _resetToken) switchTab('reset');
+if(_mode==='forgot') switchTab('forgot');
+// Show verification messages
+const _verified = new URLSearchParams(location.search).get('verified');
+const _verifyError = new URLSearchParams(location.search).get('verifyError');
+if(_verified) { document.getElementById('errBox').style.background='rgba(76,175,124,0.15)'; document.getElementById('errBox').style.borderColor='rgba(76,175,124,0.4)'; document.getElementById('errBox').style.color='#4ade80'; document.getElementById('errBox').textContent='✅ Email verified! You can now log in.'; }
+if(_verifyError) { showErr(_verifyError==='expired'?'Verification link expired — log in and resend from your profile.':'Invalid verification link.'); }
 
 // Redirect if already logged in
 (async function(){
@@ -219,7 +276,10 @@ if(new URLSearchParams(location.search).get('mode')==='register') switchTab('reg
 function switchTab(tab) {
   ['login','register'].forEach(t => {
     document.getElementById('tab-'+t).classList.toggle('active', t===tab);
-    document.getElementById('form-'+t).classList.toggle('active', t===tab);
+  });
+  ['login','register','forgot','reset'].forEach(t => {
+    const el = document.getElementById('form-'+t);
+    if(el) el.classList.toggle('active', t===tab);
   });
   hideErr();
 }
@@ -310,9 +370,10 @@ async function doRegister() {
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>Kuriama paskyra...';
   try {
+    const promo = (document.getElementById('regPromo')?.value||'').trim().toUpperCase()||undefined;
     const r = await fetch('/api/auth/register', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({name, email, password})
+      body: JSON.stringify({name, email, password, ...(promo&&{promo})})
     });
     const data = await r.json();
     if(data.ok) {
@@ -334,12 +395,50 @@ async function doRegister() {
   }
 }
 
-function showSuccess() {
-  document.getElementById('form-login').classList.remove('active');
-  document.getElementById('form-register').classList.remove('active');
+function showSuccess(msg) {
+  ['login','register','forgot','reset'].forEach(t => {
+    const el = document.getElementById('form-'+t); if(el) el.classList.remove('active');
+  });
   document.getElementById('errBox').classList.remove('visible');
   document.querySelector('.auth-tabs').style.display = 'none';
   document.getElementById('successWrap').classList.add('visible');
+  if(msg) document.querySelector('.success-desc').textContent = msg;
+}
+
+async function doForgot() {
+  hideErr();
+  const email = document.getElementById('forgotEmail').value.trim();
+  if(!email) { showErr('Please enter your email'); return; }
+  const btn = document.getElementById('forgotBtn');
+  btn.disabled = true; btn.textContent = 'Sending...';
+  try {
+    await fetch('/api/auth/forgot-password', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email})});
+    // Always show success (server never reveals if email exists)
+    document.querySelector('.auth-tabs').style.display = 'none';
+    document.getElementById('form-forgot').classList.remove('active');
+    document.getElementById('errBox').style.background='rgba(76,175,124,0.15)';
+    document.getElementById('errBox').style.borderColor='rgba(76,175,124,0.4)';
+    document.getElementById('errBox').style.color='#4ade80';
+    document.getElementById('errBox').textContent = '✅ If that email is registered, a reset link has been sent. Check your inbox.';
+    document.getElementById('errBox').classList.add('visible');
+  } catch(e) { showErr('Connection error'); }
+  btn.disabled = false; btn.textContent = 'Send Reset Link →';
+}
+
+async function doReset() {
+  hideErr();
+  const password = document.getElementById('resetPwd').value;
+  const password2 = document.getElementById('resetPwd2').value;
+  if(password.length < 8) { showErr('Password must be at least 8 characters'); return; }
+  if(password !== password2) { showErr('Passwords do not match'); return; }
+  const btn = document.getElementById('resetBtn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    const r = await fetch('/api/auth/reset-password', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token:_resetToken, password})});
+    const d = await r.json();
+    if(d.ok) { showSuccess('Password updated! Redirecting to login...'); setTimeout(()=>window.location.href='/login.html', 2000); }
+    else { showErr(d.error||'Reset failed'); btn.disabled=false; btn.textContent='Set New Password →'; }
+  } catch(e) { showErr('Connection error'); btn.disabled=false; btn.textContent='Set New Password →'; }
 }
 </script>
 
