@@ -451,6 +451,9 @@ var tokens = parseInt(localStorage.getItem('casino_tokens') || '10000');
 var betAmt = 100;
 var mines = 1;
 var playing = false;
+window._gameName = 'mines';
+window._onBalanceSync = function(bal){ tokens = bal; updateBal(); };
+var _minesBetId = null;
 var mineSet = new Set();
 var revealedSafe = [];
 var autoCash = 0;
@@ -538,9 +541,17 @@ function startGame(){
   if(betAmt > tokens) return showToast('Not enough tokens','loss');
   if(mines >= TOTAL) return showToast('Too many mines!','info');
 
-  tokens -= betAmt;
-  localStorage.setItem('casino_tokens', tokens);
-  updateBal();
+  gameBet(betAmt, 'mines').then(function(d){
+    if(!d.ok){ showToast(d.error||'Error','loss'); return; }
+    tokens = d.balance; _minesBetId = d.betId; localStorage.setItem('casino_tokens', tokens); updateBal();
+    _minesStartGame();
+  }).catch(function(){
+    tokens -= betAmt; _minesBetId = null; localStorage.setItem('casino_tokens', tokens); updateBal();
+    _minesStartGame();
+  });
+}
+
+function _minesStartGame(){
   playing = true;
   revealedSafe = [];
   mineSet.clear();
@@ -655,9 +666,8 @@ function cashout(){
   var won = Math.min(Math.floor(betAmt * mult), 500000);
   var profit = won - betAmt;
 
-  tokens += won;
-  localStorage.setItem('casino_tokens', tokens);
-  updateBal();
+  var bId = _minesBetId; _minesBetId = null;
+  gameSettle(bId, won, 'mines').then(function(d){ if(d&&d.ok){ tokens=d.balance; localStorage.setItem('casino_tokens',tokens); updateBal(); } }).catch(function(){ tokens+=won; localStorage.setItem('casino_tokens',tokens); updateBal(); });
 
   stats.w++;
   stats.profit += profit;
@@ -683,7 +693,6 @@ function cashout(){
   if(profit >= 500) spawnParticles();
   showToast('×'+mult.toFixed(2)+' — +🪙'+fmt(profit),'win');
   endRound('cash', mult, won);
-  logGame(betAmt, won);
 }
 
 function endRound(type, mult, won){
@@ -719,7 +728,7 @@ function endRound(type, mult, won){
   document.getElementById('resultOv').style.display='flex';
   setTimeout(function(){ document.getElementById('resultOv').style.display='none'; }, 2800);
 
-  if(type==='mine') logGame(betAmt, 0);
+  if(type==='mine'){ var bId=_minesBetId; _minesBetId=null; gameSettle(bId, 0, 'mines').catch(function(){}); }
 }
 
 // ─── Multiplier display ────────────────────────────
@@ -849,5 +858,6 @@ try {
 <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(function(){});</script>
 <script src="/js/casino-sounds.js"></script>
 <script src="/js/cookie-consent.js"></script>
+<script src="/js/game-wallet.js"></script>
 </body>
 </html>

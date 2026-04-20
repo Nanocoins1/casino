@@ -380,6 +380,9 @@ var difficulty = 'easy';
 var canCashOut = false;
 
 var tokens = 10000;
+window._gameName = 'dragon-tower';
+window._onBalanceSync = function(bal){ tokens = bal; saveTokens(); updateBalDisplay(); };
+var _towerBetId = null;
 var stats = {wins:0, losses:0, best:1};
 
 // Easy:   1 dragon/3 eggs, P=2/3, mult=1.35 → P×mult=0.90 (10% house edge per floor)
@@ -504,9 +507,17 @@ function startGame() {
     return;
   }
 
-  tokens -= betAmount;
-  saveTokens();
-  updateBalDisplay();
+  gameBet(betAmount, 'dragon-tower').then(function(d){
+    if(!d.ok){ showToast(d.error||'Server error', 'loss'); return; }
+    tokens = d.balance; _towerBetId = d.betId; saveTokens(); updateBalDisplay();
+    _towerStartGame(betAmount);
+  }).catch(function(){
+    tokens -= betAmount; _towerBetId = null; saveTokens(); updateBalDisplay();
+    _towerStartGame(betAmount);
+  });
+}
+
+function _towerStartGame(betAmount){
 
   // Generate all floor layouts up front
   floorLayouts = [];
@@ -721,9 +732,11 @@ function endGame(won, maxFloor) {
 
   if (won) {
     var winAmt = Math.min(Math.floor(betAmount * multiplier), MAX_WIN);
-    tokens += winAmt;
-    saveTokens();
-    updateBalDisplay();
+    var bId = _towerBetId; _towerBetId = null;
+    gameSettle(bId, winAmt, 'dragon-tower').then(function(d){
+      if(d.ok){ tokens = d.balance; saveTokens(); updateBalDisplay(); }
+      else { tokens += winAmt; saveTokens(); updateBalDisplay(); }
+    }).catch(function(){ tokens += winAmt; saveTokens(); updateBalDisplay(); });
     stats.wins++;
     if (multiplier > stats.best) stats.best = multiplier;
     saveStats();
@@ -738,6 +751,8 @@ function endGame(won, maxFloor) {
     showResultOverlay();
   } else {
     // Loss — bet already deducted at start
+    var bId2 = _towerBetId; _towerBetId = null;
+    gameSettle(bId2, 0, 'dragon-tower').catch(function(){});
     stats.losses++;
     saveStats();
     updateStatsDisplay();
@@ -846,5 +861,6 @@ buildStars();
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
 <script src="/js/casino-sounds.js"></script>
 <script src="/js/cookie-consent.js"></script>
+<script src="/js/game-wallet.js"></script>
 </body>
 </html>

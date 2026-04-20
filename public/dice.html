@@ -320,6 +320,8 @@ input[type=range]{position:absolute;width:100%;opacity:0;height:40px;cursor:poin
 const uid = localStorage.getItem('casino_uid');
 if(!uid){ localStorage.setItem('login_return', location.href); location.href = '/login.html'; }
 let tokens = parseInt(localStorage.getItem('casino_tokens')||'10000');
+window._gameName = 'dice';
+window._onBalanceSync = function(bal){ tokens = bal; updateBal(); };
 let _diceRTP = 94;
 fetch('/api/rtp-config').then(function(r){return r.json();}).then(function(d){_diceRTP=d.dice||94;}).catch(function(){});
 function fmt(n){return Number(n).toLocaleString();}
@@ -383,17 +385,32 @@ function rollDice(){
   let chance,mult;
   if(diceDir==='over'){chance=(100-target)/100;} else {chance=(target-1)/100;}
   mult=chance>0?parseFloat((_diceRTP/100/chance).toFixed(2)):99;
-  tokens-=bet;
-  if(won){const w=Math.min(Math.floor(bet*mult),500000);tokens+=w;showToast(`🎲 ${roll} — YOU WIN! ×${mult} → +🪙${fmt(w-bet)}`,'win');diceWins++;}
-  else{showToast(`🎲 ${roll} — You lost 🪙${fmt(bet)}`,'loss');diceLosses++;}
-  saveT();
-  const el=document.getElementById('diceResult');
-  el.textContent=roll;el.className='result-num '+(won?'win':'loss');
-  document.getElementById('dWins').textContent=diceWins;
-  document.getElementById('dLosses').textContent=diceLosses;
-  diceHistory.unshift({v:roll,won});if(diceHistory.length>16)diceHistory.pop();
-  document.getElementById('diceHist').innerHTML=diceHistory.map(h=>`<div class="hist-pill" style="background:${h.won?'rgba(0,230,118,.12)':'rgba(255,61,113,.1)'};color:${h.won?'var(--green)':'var(--red)'}">${h.v}</div>`).join('');
-  logGame('dice',bet,won?Math.floor(bet*mult):0);
+  const payout=won?Math.min(Math.floor(bet*mult),500000):0;
+  gameBet(bet,'dice').then(function(d){
+    if(!d.ok){showToast(d.error||'Error','loss');return;}
+    tokens=d.balance;saveT();
+    const betId=d.betId;
+    if(won){showToast(`🎲 ${roll} — YOU WIN! ×${mult} → +🪙${fmt(payout-bet)}`,'win');diceWins++;}
+    else{showToast(`🎲 ${roll} — You lost 🪙${fmt(bet)}`,'loss');diceLosses++;}
+    const el=document.getElementById('diceResult');
+    el.textContent=roll;el.className='result-num '+(won?'win':'loss');
+    document.getElementById('dWins').textContent=diceWins;
+    document.getElementById('dLosses').textContent=diceLosses;
+    diceHistory.unshift({v:roll,won});if(diceHistory.length>16)diceHistory.pop();
+    document.getElementById('diceHist').innerHTML=diceHistory.map(h=>`<div class="hist-pill" style="background:${h.won?'rgba(0,230,118,.12)':'rgba(255,61,113,.1)'};color:${h.won?'var(--green)':'var(--red)'}">${h.v}</div>`).join('');
+    gameSettle(betId,payout,'dice').then(function(s){if(s.ok){tokens=s.balance;saveT();}}).catch(function(){if(won){tokens+=payout;saveT();}});
+  }).catch(function(){
+    tokens-=bet;
+    if(won){tokens+=payout;showToast(`🎲 ${roll} — YOU WIN! ×${mult} → +🪙${fmt(payout-bet)}`,'win');diceWins++;}
+    else{showToast(`🎲 ${roll} — You lost 🪙${fmt(bet)}`,'loss');diceLosses++;}
+    saveT();
+    const el=document.getElementById('diceResult');
+    el.textContent=roll;el.className='result-num '+(won?'win':'loss');
+    document.getElementById('dWins').textContent=diceWins;
+    document.getElementById('dLosses').textContent=diceLosses;
+    diceHistory.unshift({v:roll,won});if(diceHistory.length>16)diceHistory.pop();
+    document.getElementById('diceHist').innerHTML=diceHistory.map(h=>`<div class="hist-pill" style="background:${h.won?'rgba(0,230,118,.12)':'rgba(255,61,113,.1)'};color:${h.won?'var(--green)':'var(--red)'}">${h.v}</div>`).join('');
+  });
 }
 
 function dab(n){document.getElementById('diceBet').value=Math.max(10,parseInt(document.getElementById('diceBet').value||0)+n);}
@@ -417,7 +434,6 @@ function playLimbo(){
   const target=parseFloat(document.getElementById('limboTarget').value)||2;
   if(bet<10||bet>tokens){showToast(bet>tokens?'Insufficient balance':'Min. bet is 10','loss');return;}
   if(target<1.01){showToast('Min. koeficientas 1.01','loss');return;}
-  tokens-=bet;saveT();
   limboRunning=true;
   document.getElementById('limboBtn').disabled=true;
   // Generate result
@@ -425,31 +441,55 @@ function playLimbo(){
   const crashAt=Math.max(1.00,1/(r));
   const result=Math.min(crashAt,1000);
   const won=result>=target;
-  // Animate
-  const el=document.getElementById('limboVal');
-  el.className='limbo-val idle';
-  let cur=1.0,anim;
-  const rocketEl=document.getElementById('limboRocket');
-  rocketEl.style.fontSize='48px';
-  function tick(){
-    cur=Math.min(cur*1.08,result);
-    el.textContent=cur.toFixed(2)+'×';
-    if(cur<result){anim=setTimeout(tick,30);}
-    else{
-      el.textContent=result.toFixed(2)+'×';
-      el.className='limbo-val '+(won?'win':'loss');
-      if(won){const w=Math.min(Math.floor(bet*target),500000);tokens+=w;showToast(`🚀 ${result.toFixed(2)}× ≥ ${target}× — +🪙${fmt(w-bet)}`,'win');limboWins++;}
-      else{showToast(`🚀 ${result.toFixed(2)}× < ${target}× — You lost`,'loss');limboLosses++;}
-      saveT();
-      document.getElementById('lWins').textContent=limboWins;
-      document.getElementById('lLosses').textContent=limboLosses;
-      limboHistory.unshift({v:result.toFixed(2),won});if(limboHistory.length>12)limboHistory.pop();
-      document.getElementById('limboHist').innerHTML=limboHistory.map(h=>`<div class="hist-pill" style="background:${h.won?'rgba(0,230,118,.12)':'rgba(255,61,113,.1)'};color:${h.won?'var(--green)':'var(--red)'}">${h.v}×</div>`).join('');
-      logGame('limbo',bet,won?Math.floor(bet*target):0);
-      setTimeout(()=>{limboRunning=false;document.getElementById('limboBtn').disabled=false;el.className='limbo-val idle';el.textContent='1.00×';},1800);
+  const payout=won?Math.min(Math.floor(bet*target),500000):0;
+  gameBet(bet,'limbo').then(function(d){
+    if(!d.ok){showToast(d.error||'Error','loss');limboRunning=false;document.getElementById('limboBtn').disabled=false;return;}
+    tokens=d.balance;saveT();
+    const betId=d.betId;
+    // Animate
+    const el=document.getElementById('limboVal');
+    el.className='limbo-val idle';
+    let cur=1.0;
+    const rocketEl=document.getElementById('limboRocket');
+    rocketEl.style.fontSize='48px';
+    function tick(){
+      cur=Math.min(cur*1.08,result);
+      el.textContent=cur.toFixed(2)+'×';
+      if(cur<result){setTimeout(tick,30);}
+      else{
+        el.textContent=result.toFixed(2)+'×';
+        el.className='limbo-val '+(won?'win':'loss');
+        if(won){showToast(`🚀 ${result.toFixed(2)}× ≥ ${target}× — +🪙${fmt(payout-bet)}`,'win');limboWins++;}
+        else{showToast(`🚀 ${result.toFixed(2)}× < ${target}× — You lost`,'loss');limboLosses++;}
+        document.getElementById('lWins').textContent=limboWins;
+        document.getElementById('lLosses').textContent=limboLosses;
+        limboHistory.unshift({v:result.toFixed(2),won});if(limboHistory.length>12)limboHistory.pop();
+        document.getElementById('limboHist').innerHTML=limboHistory.map(h=>`<div class="hist-pill" style="background:${h.won?'rgba(0,230,118,.12)':'rgba(255,61,113,.1)'};color:${h.won?'var(--green)':'var(--red)'}">${h.v}×</div>`).join('');
+        gameSettle(betId,payout,'limbo').then(function(s){if(s.ok){tokens=s.balance;saveT();}}).catch(function(){if(won){tokens+=payout;saveT();}});
+        setTimeout(function(){limboRunning=false;document.getElementById('limboBtn').disabled=false;el.className='limbo-val idle';el.textContent='1.00×';},1800);
+      }
     }
-  }
-  tick();
+    tick();
+  }).catch(function(){
+    tokens-=bet;saveT();
+    const el=document.getElementById('limboVal');
+    el.className='limbo-val idle';
+    let cur=1.0;
+    function tick(){
+      cur=Math.min(cur*1.08,result);
+      el.textContent=cur.toFixed(2)+'×';
+      if(cur<result){setTimeout(tick,30);}
+      else{
+        el.textContent=result.toFixed(2)+'×';
+        el.className='limbo-val '+(won?'win':'loss');
+        if(won){tokens+=payout;showToast(`🚀 ${result.toFixed(2)}× ≥ ${target}× — +🪙${fmt(payout-bet)}`,'win');limboWins++;}
+        else{showToast(`🚀 ${result.toFixed(2)}× < ${target}× — You lost`,'loss');limboLosses++;}
+        saveT();
+        setTimeout(function(){limboRunning=false;document.getElementById('limboBtn').disabled=false;el.className='limbo-val idle';el.textContent='1.00×';},1800);
+      }
+    }
+    tick();
+  });
   lab(0);
 }
 
@@ -473,21 +513,38 @@ function renderCard(card,elId){
   el.innerHTML=`<span class="suit">${card.suit}</span><span style="font-size:28px">${card.rank}</span><span class="suit2">${card.suit}</span>`;
 }
 
+var _hiloServerBetId=null;
 function startHilo(){
   const bet=parseInt(document.getElementById('hiloBet').value)||100;
   if(bet<10||bet>tokens){showToast(bet>tokens?'Insufficient balance':'Min. bet is 10','loss');return;}
-  tokens-=bet;saveT();
-  hiloBetAmt=bet;hiloActive=true;hiloStreak=0;hiloMult=1;
-  hiloCurrentCard=randCard();
-  renderCard(hiloCurrentCard,'hiloCardA');
-  document.getElementById('hiloCardB').className='hilo-card hidden';
-  document.getElementById('hiloCardB').innerHTML='🂠';
-  document.getElementById('hiloStreak').textContent='0';
-  document.getElementById('hiloPot').textContent=fmt(bet);
-  document.getElementById('hiloHigher').disabled=false;
-  document.getElementById('hiloLower').disabled=false;
-  document.getElementById('hiloCashout').disabled=false;
-  document.getElementById('hiloStartBtn').textContent='NEW GAME';
+  gameBet(bet,'hilo').then(function(d){
+    if(!d.ok){showToast(d.error||'Error','loss');return;}
+    tokens=d.balance;saveT();_hiloServerBetId=d.betId;
+    hiloBetAmt=bet;hiloActive=true;hiloStreak=0;hiloMult=1;
+    hiloCurrentCard=randCard();
+    renderCard(hiloCurrentCard,'hiloCardA');
+    document.getElementById('hiloCardB').className='hilo-card hidden';
+    document.getElementById('hiloCardB').innerHTML='🂠';
+    document.getElementById('hiloStreak').textContent='0';
+    document.getElementById('hiloPot').textContent=fmt(bet);
+    document.getElementById('hiloHigher').disabled=false;
+    document.getElementById('hiloLower').disabled=false;
+    document.getElementById('hiloCashout').disabled=false;
+    document.getElementById('hiloStartBtn').textContent='NEW GAME';
+  }).catch(function(){
+    tokens-=bet;saveT();_hiloServerBetId=null;
+    hiloBetAmt=bet;hiloActive=true;hiloStreak=0;hiloMult=1;
+    hiloCurrentCard=randCard();
+    renderCard(hiloCurrentCard,'hiloCardA');
+    document.getElementById('hiloCardB').className='hilo-card hidden';
+    document.getElementById('hiloCardB').innerHTML='🂠';
+    document.getElementById('hiloStreak').textContent='0';
+    document.getElementById('hiloPot').textContent=fmt(bet);
+    document.getElementById('hiloHigher').disabled=false;
+    document.getElementById('hiloLower').disabled=false;
+    document.getElementById('hiloCashout').disabled=false;
+    document.getElementById('hiloStartBtn').textContent='NEW GAME';
+  });
 }
 
 function hiloGuess(dir){
@@ -533,7 +590,7 @@ function hiloGuess(dir){
     hiloHistory.unshift({v:`×${hiloMult.toFixed(2)}`,won:false,streak:hiloStreak});
     if(hiloHistory.length>8)hiloHistory.pop();
     renderHiloHist();
-    logGame('hilo',hiloBetAmt,0);
+    gameSettle(_hiloServerBetId,0,'hilo').catch(function(){});_hiloServerBetId=null;
   }
 }
 
@@ -541,7 +598,6 @@ function hiloCashout(){
   if(!hiloActive||hiloStreak===0) return;
   hiloActive=false;
   const won=Math.floor(hiloBetAmt*hiloMult);
-  tokens+=won;saveT();
   hiloWins++;
   document.getElementById('hWins').textContent=hiloWins;
   showToast(`💰 Cashed out ×${hiloMult} — +🪙${fmt(won-hiloBetAmt)}`,'win');
@@ -551,7 +607,8 @@ function hiloCashout(){
   hiloHistory.unshift({v:`×${hiloMult.toFixed(2)}`,won:true,streak:hiloStreak});
   if(hiloHistory.length>8)hiloHistory.pop();
   renderHiloHist();
-  logGame('hilo',hiloBetAmt,won);
+  const bId=_hiloServerBetId;_hiloServerBetId=null;
+  gameSettle(bId,won,'hilo').then(function(s){if(s.ok){tokens=s.balance;saveT();}else{tokens+=won;saveT();}}).catch(function(){tokens+=won;saveT();});
 }
 
 function renderHiloHist(){
@@ -569,5 +626,6 @@ sliderMove();
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
 <script src="/js/casino-sounds.js"></script>
 <script src="/js/cookie-consent.js"></script>
+<script src="/js/game-wallet.js"></script>
 </body>
 </html>

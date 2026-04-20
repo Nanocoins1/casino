@@ -284,6 +284,9 @@ if(!uid){ localStorage.setItem('login_return', location.href); location.href = '
 let balance = parseInt(localStorage.getItem('casino_tokens')||'1000');
 function saveBalance(){localStorage.setItem('casino_tokens',balance);}
 function updateBalanceDisplay(){document.getElementById('balanceDisplay').textContent=balance;}
+window._gameName = 'videopoker';
+window._onBalanceSync = function(b){ balance = b; updateBalanceDisplay(); };
+let _vpBetId = null;
 updateBalanceDisplay();
 
 // ── Stats ──
@@ -467,6 +470,10 @@ function handleDeal(){
   hideResult();
   clearPayoutHighlight();
 
+  gameBet(bet, 'videopoker').then(function(d){
+    if(!d.ok){ return; }
+    balance = d.balance; _vpBetId = d.betId; saveBalance(); updateBalanceDisplay();
+  }).catch(function(){ _vpBetId = null; });
   balance-=bet;
   saveBalance();
   updateBalanceDisplay();
@@ -537,9 +544,8 @@ function finishRound(){
   const mult=(handName==='Royal Flush'&&bet===5)?4000/5:PAYOUTS[handName];
   const won=Math.min(mult*bet, 500000); // safety cap
 
-  balance+=won;
-  saveBalance();
-  updateBalanceDisplay();
+  var bId = _vpBetId; _vpBetId = null;
+  gameSettle(bId, won, 'videopoker').then(function(d){ if(d&&d.ok){ balance=d.balance; saveBalance(); updateBalanceDisplay(); } }).catch(function(){ balance+=won; saveBalance(); updateBalanceDisplay(); });
 
   stats.games++;
   stats.totalBet+=bet;
@@ -610,5 +616,6 @@ function logGame(result,won){
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
 <script src="/js/casino-sounds.js"></script>
 <script src="/js/cookie-consent.js"></script>
+<script src="/js/game-wallet.js"></script>
 </body>
 </html>

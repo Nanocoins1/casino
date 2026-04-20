@@ -317,6 +317,9 @@ var uid = localStorage.getItem('casino_uid');
 if(!uid){ localStorage.setItem('login_return', location.href); location.href='/login.html'; }
 
 var tokens = parseInt(localStorage.getItem('casino_tokens')||'10000');
+window._gameName = 'hilo';
+window._onBalanceSync = function(bal){ tokens = bal; updateBal(); };
+var _hiloBetId = null;
 var stats = {w:0,l:0,streak:0,best:0};
 var playing = false;
 var betAmt = 100;
@@ -448,10 +451,19 @@ function startRound(){
 
   if(deck.length < 10) buildDeck();
 
-  tokens -= betAmt;
-  localStorage.setItem('casino_tokens', tokens);
-  updateBal();
+  gameBet(betAmt, 'hilo').then(function(d){
+    if(!d.ok){ showToast(d.error||'Server error','loss'); return; }
+    tokens = d.balance; _hiloBetId = d.betId;
+    localStorage.setItem('casino_tokens', tokens); updateBal();
+    _hiloStartRound(betAmt);
+  }).catch(function(){
+    tokens -= betAmt; _hiloBetId = null;
+    localStorage.setItem('casino_tokens', tokens); updateBal();
+    _hiloStartRound(betAmt);
+  });
+}
 
+function _hiloStartRound(betAmt){
   playing = true;
   mult = 1.0;
   cardHistory = [];
@@ -536,7 +548,8 @@ function guess(dir){
     stats.l++;
     showFlash('NETEISINGA!', 'wrong');
     showToast('Neteisinga! Lost &#129689;'+fmt(betAmt),'loss');
-    logGame(betAmt, 0);
+    var bIdL = _hiloBetId; _hiloBetId = null;
+    gameSettle(bIdL, 0, 'hilo').catch(function(){});
     updateStreak();
     updateStats();
   }
@@ -548,9 +561,11 @@ function cashout(){
   if(!playing) return;
   playing = false;
   var won = Math.min(Math.floor(betAmt * mult), MAX_WIN);
-  tokens += won;
-  localStorage.setItem('casino_tokens', tokens);
-  updateBal();
+  var bIdW = _hiloBetId; _hiloBetId = null;
+  gameSettle(bIdW, won, 'hilo').then(function(d){
+    if(d.ok){ tokens = d.balance; localStorage.setItem('casino_tokens', tokens); updateBal(); }
+    else { tokens += won; localStorage.setItem('casino_tokens', tokens); updateBal(); }
+  }).catch(function(){ tokens += won; localStorage.setItem('casino_tokens', tokens); updateBal(); });
   stats.w++;
   stats.streak = 0;
   document.getElementById('btnHi').disabled = true;
@@ -633,5 +648,6 @@ if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catc
 </script>
 <script src="/js/casino-sounds.js"></script>
 <script src="/js/cookie-consent.js"></script>
+<script src="/js/game-wallet.js"></script>
 </body>
 </html>

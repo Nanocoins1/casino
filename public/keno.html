@@ -828,6 +828,8 @@ function init() {
 
   const stored = localStorage.getItem('casino_tokens');
   balance = stored ? parseInt(stored) : 1000;
+  window._gameName = 'keno';
+  window._onBalanceSync = function(bal){ balance = bal; saveBalance(); updateBalanceDisplay(); };
   updateBalanceDisplay();
   buildGrid();
   updatePayoutTable();
@@ -958,10 +960,15 @@ async function startDraw() {
     return;
   }
 
-  // Deduct bet
-  balance -= bet;
-  saveBalance();
-  updateBalanceDisplay();
+  // Deduct bet via server
+  var _kenoBetId = null;
+  try {
+    var gbd = await gameBet(bet, 'keno');
+    if (!gbd.ok) { showToast(gbd.error || 'Server error', 'error'); gamePhase = 'pick'; document.getElementById('drawBtn').disabled = false; document.getElementById('drawBtn').classList.remove('drawing'); document.getElementById('clearBtn').disabled = false; return; }
+    balance = gbd.balance; _kenoBetId = gbd.betId; saveBalance(); updateBalanceDisplay();
+  } catch(e) {
+    balance -= bet; saveBalance(); updateBalanceDisplay();
+  }
 
   gamePhase = 'drawing';
   document.getElementById('drawBtn').disabled = true;
@@ -1000,7 +1007,7 @@ async function startDraw() {
   });
 
   await delay(200);
-  showResults(bet);
+  showResults(bet, _kenoBetId);
 }
 
 function delay(ms) {
@@ -1010,7 +1017,7 @@ function delay(ms) {
 // ============================================================
 // RESULTS
 // ============================================================
-function showResults(bet) {
+function showResults(bet, kenoBetId) {
   gamePhase = 'result';
 
   const picks = selectedNums.size;
@@ -1045,9 +1052,7 @@ function showResults(bet) {
 
   if (won > 0) {
     won = Math.min(won, 500000); // safety cap
-    balance += won;
-    saveBalance();
-    updateBalanceDisplay();
+    gameSettle(kenoBetId, won, 'keno').then(function(s){ if(s.ok){ balance=s.balance; saveBalance(); updateBalanceDisplay(); } else { balance+=won; saveBalance(); updateBalanceDisplay(); } }).catch(function(){ balance+=won; saveBalance(); updateBalanceDisplay(); });
 
     winLabelEl.textContent = won >= bet * 10 ? '🎉 BIG WIN!' : '🏆 You won!';
     winAmountEl.textContent = `+${won.toLocaleString()} 🪙`;
@@ -1061,6 +1066,7 @@ function showResults(bet) {
     if (won >= bet * 5) launchConfetti();
     showToast(`You won ${won.toLocaleString()} chips!`, 'success');
   } else {
+    gameSettle(kenoBetId, 0, 'keno').catch(function(){});
     winLabelEl.textContent = '😔 No win';
     winAmountEl.textContent = `−${bet.toLocaleString()} 🪙`;
     winAmountEl.style.color = 'var(--red)';
@@ -1072,9 +1078,6 @@ function showResults(bet) {
 
   stats.games++;
   updateStats();
-
-  // Log to API
-  logGame(bet, won > 0 ? 'win' : 'loss', won);
 
   document.getElementById('drawBtn').classList.remove('drawing');
 }
@@ -1182,5 +1185,6 @@ init();
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
 <script src="/js/casino-sounds.js"></script>
 <script src="/js/cookie-consent.js"></script>
+<script src="/js/game-wallet.js"></script>
 </body>
 </html>

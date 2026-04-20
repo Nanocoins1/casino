@@ -274,6 +274,9 @@ var tokens = parseInt(localStorage.getItem('casino_tokens')||'10000');
 var sess = {bets:0, wins:0, profit:0};
 var target = 2.0;
 var spinning = false;
+window._gameName = 'limbo';
+window._onBalanceSync = function(bal){ tokens = bal; updateBal(); };
+var _limboBetId = null;
 var autoOn = false;
 var autoLeft = 0;
 var autoTimer = null;
@@ -351,14 +354,21 @@ function doSpin(){
   if(bet > tokens){ showToast('Insufficient balance!','loss'); stopAuto(); return; }
 
   spinning = true;
-  tokens -= bet;
-  saveTokens();
-  updateBal();
-
   var result = genResult();
   var won = result >= target;
   var payout = won ? Math.min(Math.floor(bet * target), MAX_WIN) : 0;
 
+  gameBet(bet, 'limbo').then(function(d){
+    if(!d.ok){ showToast(d.error||'Error','loss'); spinning=false; return; }
+    tokens = d.balance; _limboBetId = d.betId; saveTokens(); updateBal();
+    _doLimboAnim(bet, result, won, payout);
+  }).catch(function(){
+    tokens -= bet; _limboBetId = null; saveTokens(); updateBal();
+    _doLimboAnim(bet, result, won, payout);
+  });
+}
+
+function _doLimboAnim(bet, result, won, payout){
   // Animate number rolling up to result
   var multEl = document.getElementById('multVal');
   multEl.className = 'mult-val rolling';
@@ -389,10 +399,8 @@ function showResult(won, payout, bet, result){
   var badge = document.getElementById('resultBadge');
   var flash = document.getElementById('flashOv');
 
+  var bId = _limboBetId; _limboBetId = null;
   if(won){
-    tokens += payout;
-    saveTokens();
-    updateBal();
     multEl.className = 'mult-val win';
     badge.className = 'result-badge win';
     badge.textContent = 'WIN! +🪙'+fmt(payout-bet);
@@ -400,6 +408,7 @@ function showResult(won, payout, bet, result){
     showToast('+🪙'+fmt(payout-bet)+' ('+target.toFixed(2)+'x)','win');
     sess.wins++;
     sess.profit += payout-bet;
+    gameSettle(bId, payout, 'limbo').then(function(d){ if(d&&d.ok){ tokens=d.balance; saveTokens(); updateBal(); } }).catch(function(){ tokens+=payout; saveTokens(); updateBal(); });
   } else {
     multEl.className = 'mult-val lose';
     badge.className = 'result-badge lose';
@@ -407,6 +416,7 @@ function showResult(won, payout, bet, result){
     flash.className = 'flash-ov lose-flash';
     showToast('-🪙'+fmt(bet),'loss');
     sess.profit -= bet;
+    gameSettle(bId, 0, 'limbo').catch(function(){});
   }
 
   // Force reflow for animation restart
@@ -415,7 +425,6 @@ function showResult(won, payout, bet, result){
   sess.bets++;
   updateStats();
   addHist(result, won);
-  logGame(bet, payout);
 
   spinning = false;
 
@@ -507,5 +516,6 @@ updateTargetUI();
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
 <script src="/js/casino-sounds.js"></script>
 <script src="/js/cookie-consent.js"></script>
+<script src="/js/game-wallet.js"></script>
 </body>
 </html>

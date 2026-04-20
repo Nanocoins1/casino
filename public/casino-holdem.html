@@ -583,6 +583,10 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 // ─── Balance ─────────────────────────────────────
 var tokens = parseInt(localStorage.getItem('casino_tokens') || '10000', 10);
 if (isNaN(tokens) || tokens < 0) tokens = 10000;
+window._gameName = 'casino-holdem';
+window._onBalanceSync = function(bal){ tokens = bal; updateBal(); };
+var _holdemBetId = null;
+var _holdemTotalReturned = 0;
 
 function saveBal() { localStorage.setItem('casino_tokens', tokens); }
 function fmtN(n) { return Math.round(n).toLocaleString(); }
@@ -923,10 +927,19 @@ function deal() {
   if (anteBet < 10 || anteBet > 10000) return toast('Ante must be 10–10,000', 'bad');
   if (totalCost > tokens) return toast('Insufficient balance', 'bad');
 
-  tokens -= totalCost;
-  saveBal();
-  updateBal();
-  callBet = 0;
+  gameBet(totalCost, 'casino-holdem').then(function(d){
+    if(!d.ok){ toast(d.error||'Server error','bad'); return; }
+    tokens = d.balance; _holdemBetId = d.betId; saveBal(); updateBal();
+    callBet = 0;
+    _holdemDealProceed();
+  }).catch(function(){
+    tokens -= totalCost; _holdemBetId = null; saveBal(); updateBal();
+    callBet = 0;
+    _holdemDealProceed();
+  });
+}
+
+function _holdemDealProceed(){
 
   setState('dealing');
 
@@ -1019,6 +1032,7 @@ function resolve(folded) {
 
   setTimeout(function() {
     // Final evaluation
+    var _tokBefore = tokens;
     var all7Player = playerHole.concat(community);
     var all7Dealer = dealerHole.concat(community);
     var playerBest = bestOf7(all7Player);
@@ -1048,6 +1062,7 @@ function resolve(folded) {
           lines.push({ text: 'AA+ Bonus — no qualifying hand', cls: 'neg' });
         }
       }
+      _holdemTotalReturned = Math.max(0, tokens - _tokBefore);
       showResult('lose', playerBest, dealerBest, lines, netChange);
       return;
     }
@@ -1113,6 +1128,7 @@ function resolve(folded) {
     }
 
     updateBal();
+    _holdemTotalReturned = Math.max(0, tokens - _tokBefore);
     showResult(mainResult, playerBest, dealerBest, lines, netChange);
   }, 1200);
 }
@@ -1158,6 +1174,13 @@ function showResult(mainResult, playerBest, dealerBest, lines, netChange) {
   if (mainResult === 'win') { sfx.win(); spawnParticles('win'); }
   else if (mainResult === 'lose') sfx.lose();
   else sfx.push();
+
+  // Settle server balance
+  var bId = _holdemBetId; _holdemBetId = null;
+  var settleAmt = Math.max(0, _holdemTotalReturned || 0);
+  gameSettle(bId, settleAmt, 'casino-holdem').then(function(d){
+    if(d.ok){ tokens = d.balance; saveBal(); updateBal(); }
+  }).catch(function(){});
 
   setState('result');
 }
@@ -1304,5 +1327,6 @@ setState('idle');
 <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(function(){});</script>
 <script src="/js/casino-sounds.js"></script>
 <script src="/js/cookie-consent.js"></script>
+<script src="/js/game-wallet.js"></script>
 </body>
 </html>

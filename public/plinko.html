@@ -327,6 +327,8 @@ if (!uid) {
 }
 let balance = parseInt(localStorage.getItem('casino_tokens') || '10000');
 let _plinkoRTP = 95;
+window._gameName = 'plinko';
+window._onBalanceSync = function(bal){ balance = bal; updateBalance(); };
 fetch('/api/rtp-config').then(function(r){return r.json();}).then(function(d){_plinkoRTP=d.plinko||95;}).catch(function(){});
 
 // ─────────────────────────────────────────────────────────────────────
@@ -998,10 +1000,6 @@ function landBall(ball, bucketIdx) {
 
   const mult = MULTIPLIERS[riskMode][bucketIdx];
   const win = Math.min(Math.round(ball.bet * mult * (_plinkoRTP / 100)), 500000);
-  // bet was already deducted on drop → add back win only (not profit, avoids double-deduction)
-  balance += win;
-  updateBalance();
-  saveTokens();
   sfx.land();
   const profit = win - ball.bet;
   if(mult >= 2){ sfx.bigWin(mult); if(navigator.vibrate) navigator.vibrate([40,20,100]); }
@@ -1011,14 +1009,8 @@ function landBall(ball, bucketIdx) {
   const textStr = profit >= 0 ? `+${profit} 🪙` : `${profit} 🪙`;
   spawnFloatingText(bx, by - 30, textStr, textColor);
 
-  // Log game
-  try {
-    fetch('/api/log-game', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ uid, game: 'krioklis', bet: ball.bet, result: win, won: win > 0 })
-    });
-  } catch(e) {}
+  // Settle balance via server
+  gameSettle(ball.betId||null, win, 'plinko').then(function(d){ if(d&&d.ok){ balance=d.balance; saveTokens(); updateBalance(); } }).catch(function(){ balance+=win; saveTokens(); updateBalance(); });
 
   // Update stats
   totalDropped++;
@@ -1138,8 +1130,6 @@ document.getElementById('drop-btn').addEventListener('click', () => {
   // Check queue
   if (ballQueue.length >= 3) { showToast('Queue full! (max 3)', '#ff9900'); return; }
 
-  balance -= bet;
-  updateBalance();
   sfx.drop();
   if(navigator.vibrate) navigator.vibrate(18);
 
@@ -1147,15 +1137,18 @@ document.getElementById('drop-btn').addEventListener('click', () => {
   const bucketTarget = pickBucket();
   const ball = createBall(bucketTarget, bet);
 
-  if (!activeBall) {
-    activeBall = ball;
-    isDropping = true;
-  } else {
-    ballQueue.push(ball);
-  }
-
-  updateQueueInfo();
-  document.getElementById('drop-btn').disabled = (ballQueue.length >= 3);
+  gameBet(bet, 'plinko').then(function(d){
+    if(!d.ok){ showToast(d.error||'Error','#c0394c'); return; }
+    balance = d.balance; ball.betId = d.betId; saveTokens(); updateBalance();
+    if (!activeBall) { activeBall = ball; isDropping = true; } else { ballQueue.push(ball); }
+    updateQueueInfo();
+    document.getElementById('drop-btn').disabled = (ballQueue.length >= 3);
+  }).catch(function(){
+    balance -= bet; ball.betId = null; saveTokens(); updateBalance();
+    if (!activeBall) { activeBall = ball; isDropping = true; } else { ballQueue.push(ball); }
+    updateQueueInfo();
+    document.getElementById('drop-btn').disabled = (ballQueue.length >= 3);
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────
@@ -1210,5 +1203,6 @@ requestAnimationFrame(draw);
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
 <script src="/js/casino-sounds.js"></script>
 <script src="/js/cookie-consent.js"></script>
+<script src="/js/game-wallet.js"></script>
 </body>
 </html>

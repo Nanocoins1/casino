@@ -673,6 +673,9 @@ var MAX_WIN = 500000;
 var tokens = 10000;
 var spinning = false;
 var autoOn = false;
+window._gameName = 'slots';
+window._onBalanceSync = function(bal){ tokens = bal; renderBal(); };
+var _slotsBetId = null;
 var autoRemaining = 0;
 var autoTimer = null;
 var sSpins = 0, sWins = 0, sProfit = 0;
@@ -1122,10 +1125,18 @@ function doSpin() {
   if (bet < 10) { showToast('Min bet is 10', 'info'); return; }
 
   spinning = true;
-  tokens -= bet;
-  saveBalance();
-  renderBal();
 
+  gameBet(bet, 'slots').then(function(d){
+    if(!d.ok){ spinning=false; showToast(d.error||'Error','loss'); stopAuto(); return; }
+    tokens = d.balance; _slotsBetId = d.betId; saveBalance(); renderBal();
+    _slotsDoSpin(bet);
+  }).catch(function(){
+    tokens -= bet; _slotsBetId = null; saveBalance(); renderBal();
+    _slotsDoSpin(bet);
+  });
+}
+
+function _slotsDoSpin(bet) {
   clearWinVisuals();
   setSpinBtn(true);
 
@@ -1166,9 +1177,8 @@ function onAllStopped(bet, totalWin, wins, grid) {
   setSpinBtn(false);
 
   // apply win
-  tokens += totalWin;
-  saveBalance();
-  renderBal();
+  var bId = _slotsBetId; _slotsBetId = null;
+  gameSettle(bId, totalWin, 'slots').then(function(d){ if(d&&d.ok){ tokens=d.balance; saveBalance(); renderBal(); } }).catch(function(){ tokens+=totalWin; saveBalance(); renderBal(); });
 
   // stats
   sSpins++;
@@ -1641,5 +1651,6 @@ init();
 <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(function(){});</script>
 <script src="/js/casino-sounds.js"></script>
 <script src="/js/cookie-consent.js"></script>
+<script src="/js/game-wallet.js"></script>
 </body>
 </html>

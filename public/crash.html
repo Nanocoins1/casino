@@ -323,6 +323,9 @@ var ST={WAIT:'wait',FLY:'fly',CRASH:'crash'};
 var state=ST.WAIT, mult=1.0, crashPt=0, roundId=0, elapsed=0;
 var flyInt=null, waitTmo=null;
 var tokens=parseInt(localStorage.getItem('casino_tokens')||'10000');
+window._gameName='crash';
+window._onBalanceSync=function(bal){tokens=bal;saveTokens();};
+var _betIdA=null, _betIdB=null;
 
 var bA={placed:false,amount:0,cashedOut:false,mult:0,pending:0};
 var bB={placed:false,amount:0,cashedOut:false,mult:0,pending:0};
@@ -606,12 +609,14 @@ function cashoutBet(b,lbl){
   if(!b.placed||b.cashedOut||state!==ST.FLY)return;
   b.cashedOut=true;b.mult=mult;
   var won=Math.min(Math.floor(b.amount*mult),MAX_WIN);
-  tokens+=won;
   var profit=won-b.amount;
   sess.wins++;sess.profit+=profit;
-  saveTokens();
+  var betId=(lbl==='A')?_betIdA:_betIdB;
+  gameSettle(betId,won,'crash').then(function(d){
+    if(d.ok){tokens=d.balance;saveTokens();}
+    else{tokens+=won;saveTokens();}
+  }).catch(function(){tokens+=won;saveTokens();});
   showToast(lbl+': x'+mult.toFixed(2)+' +'+fmt(profit),'win');
-  logGame(b.amount,won);
   updateSess();
   var ov=document.getElementById('wfOv');
   ov.classList.remove('flash');void ov.offsetWidth;ov.classList.add('flash');
@@ -629,11 +634,25 @@ function startWait(){
   document.getElementById('pfHash').textContent='Round #'+roundId+' - '+currentHash;
 
   if(bA.pending){
-    if(bA.pending<=tokens){bA.placed=true;bA.amount=bA.pending;tokens-=bA.pending;saveTokens();}
+    (function(amt){
+      if(amt<=tokens){
+        gameBet(amt,'crash').then(function(d){
+          if(d.ok){tokens=d.balance;_betIdA=d.betId;bA.placed=true;bA.amount=amt;saveTokens();}
+          else{showToast(d.error||'Bet error','loss');}
+        }).catch(function(){if(amt<=tokens){tokens-=amt;bA.placed=true;bA.amount=amt;_betIdA=null;saveTokens();}});
+      }
+    })(bA.pending);
     bA.pending=0;
   }
   if(bB.pending){
-    if(bB.pending<=tokens){bB.placed=true;bB.amount=bB.pending;tokens-=bB.pending;saveTokens();}
+    (function(amt){
+      if(amt<=tokens){
+        gameBet(amt,'crash').then(function(d){
+          if(d.ok){tokens=d.balance;_betIdB=d.betId;bB.placed=true;bB.amount=amt;saveTokens();}
+          else{showToast(d.error||'Bet error','loss');}
+        }).catch(function(){if(amt<=tokens){tokens-=amt;bB.placed=true;bB.amount=amt;_betIdB=null;saveTokens();}});
+      }
+    })(bB.pending);
     bB.pending=0;
   }
 
@@ -711,11 +730,13 @@ function doCrash(){
   if(bA.placed&&!bA.cashedOut){
     sess.losses++;sess.profit-=bA.amount;
     showToast('A pralaimeta '+fmt(bA.amount),'loss');
-    logGame(bA.amount,0);
+    gameSettle(_betIdA,0,'crash').catch(function(){});
+    _betIdA=null;
   }
   if(bB.placed&&!bB.cashedOut){
     sess.losses++;sess.profit-=bB.amount;
-    logGame(bB.amount,0);
+    gameSettle(_betIdB,0,'crash').catch(function(){});
+    _betIdB=null;
   }
 
   addHist(crashPt);updateMultDisp();updateBtns();updateSess();renderBots();
@@ -809,5 +830,6 @@ startWait();
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
 <script src="/js/casino-sounds.js"></script>
 <script src="/js/cookie-consent.js"></script>
+<script src="/js/game-wallet.js"></script>
 </body>
 </html>

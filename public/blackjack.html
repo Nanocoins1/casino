@@ -594,6 +594,9 @@ if(!uid){ localStorage.setItem('login_return', location.href); location.href = '
 
 // ─── State ──────────────────────────────────────────
 var tokens = parseInt(localStorage.getItem('casino_tokens') || '10000');
+window._gameName = 'blackjack';
+window._onBalanceSync = function(bal){ tokens = bal; updateBal(); };
+var _currentBetId = null;
 var betAmt = 100;
 var lastBet = 100;
 var playing = false;
@@ -795,15 +798,34 @@ function deal(){
 
   if(deck.length < 40) buildDeck();
 
-  tokens -= betAmt;
-  lastBet = betAmt;
-  localStorage.setItem('casino_tokens', tokens);
-  updateBal();
-  playing = true;
-  splitMode = false;
-  insuranceTaken = false;
-  insuranceCost = 0;
+  gameBet(betAmt, 'blackjack').then(function(d){
+    if(!d.ok){ return showToast(d.error||'Server error','loss'); }
+    tokens = d.balance;
+    _currentBetId = d.betId;
+    lastBet = betAmt;
+    localStorage.setItem('casino_tokens', tokens);
+    updateBal();
+    playing = true;
+    splitMode = false;
+    insuranceTaken = false;
+    insuranceCost = 0;
+    _dealCards();
+  }).catch(function(){
+    // Fallback to local deduction
+    tokens -= betAmt;
+    _currentBetId = null;
+    lastBet = betAmt;
+    localStorage.setItem('casino_tokens', tokens);
+    updateBal();
+    playing = true;
+    splitMode = false;
+    insuranceTaken = false;
+    insuranceCost = 0;
+    _dealCards();
+  });
+}
 
+function _dealCards(){
   playerHand = [draw(), draw()];
   dealerHand = [draw(), draw()];
 
@@ -1010,10 +1032,7 @@ function resolveSplitDealer(){
       if(res==='win'||res==='dealerbust') won=bet*2;
       else if(res==='push') won=bet;
       totalWon+=won;
-      tokens+=won;
     }
-    localStorage.setItem('casino_tokens',tokens);
-    updateBal();
     // Display combined result
     var wins = results.filter(function(r){return r==='win'||r==='dealerbust';}).length;
     var losses = results.filter(function(r){return r==='lose'||r==='bust';}).length;
@@ -1033,7 +1052,13 @@ function resolveSplitDealer(){
     if(overallResult==='win'){ sfx.win(); vibe([80,40,80]); spawnParticles('win'); }
     else if(overallResult==='lose'){ sfx.lose(); vibe(200); }
     else sfx.push();
-    logGame(splitBets[0]+splitBets[1], totalWon);
+    (function(tw, bId){
+      gameSettle(bId, tw, 'blackjack').then(function(d){
+        if(d.ok){ tokens = d.balance; localStorage.setItem('casino_tokens', tokens); updateBal(); }
+        else { tokens += tw; localStorage.setItem('casino_tokens', tokens); updateBal(); }
+      }).catch(function(){ tokens += tw; localStorage.setItem('casino_tokens', tokens); updateBal(); });
+    })(totalWon, _currentBetId);
+    _currentBetId = null;
     setTimeout(function(){ document.getElementById('resultOv').style.display='none'; }, 3000);
   });
 }
@@ -1070,10 +1095,6 @@ function endRound(outcome){
   }
 
   won = Math.min(won, 500000);
-  tokens += won + insWin;
-  localStorage.setItem('casino_tokens', tokens);
-  updateBal();
-
   profit = won - betAmt;
   stats.profit += profit;
   if(outcome==='bj'||outcome==='win'||outcome==='dealerbust') stats.w++;
@@ -1083,7 +1104,13 @@ function endRound(outcome){
   if(history.length>15) history.pop();
   updateStats();
   showResult(outcome, profit, outcome==='bj');
-  logGame(betAmt, won);
+  (function(totalWon, insW, bId){
+    gameSettle(bId, totalWon + insW, 'blackjack').then(function(d){
+      if(d.ok){ tokens = d.balance; localStorage.setItem('casino_tokens', tokens); updateBal(); }
+      else { tokens += totalWon + insW; localStorage.setItem('casino_tokens', tokens); updateBal(); }
+    }).catch(function(){ tokens += totalWon + insW; localStorage.setItem('casino_tokens', tokens); updateBal(); });
+  })(won, insWin, _currentBetId);
+  _currentBetId = null;
   setTimeout(function(){ document.getElementById('resultOv').style.display='none'; }, 3000);
 }
 
@@ -1228,5 +1255,6 @@ try {
 <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(function(){});</script>
 <script src="/js/casino-sounds.js"></script>
 <script src="/js/cookie-consent.js"></script>
+<script src="/js/game-wallet.js"></script>
 </body>
 </html>

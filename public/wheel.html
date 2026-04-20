@@ -202,6 +202,9 @@ function setTokens(v){
 let balance=getTokens();
 const balEl=document.getElementById('balDisp');
 function updateBal(){balEl.textContent='⬡ '+balance.toLocaleString();}
+window._gameName = 'wheel';
+window._onBalanceSync = function(b){ balance = b; updateBal(); };
+let _wheelBetId = null;
 updateBal();
 
 // ── Segments ─────────────────────────────────────────────────────────────────
@@ -557,6 +560,11 @@ function spinWheel(){
   const bet=getBet();
   if(bet===null)return;
   if(bet>balance){toast('Insufficient balance!');return;}
+
+  gameBet(bet, 'wheel').then(function(d){
+    if(!d.ok){ toast(d.error||'Error'); return; }
+    balance = d.balance; _wheelBetId = d.betId; setTokens(balance); updateBal();
+  }).catch(function(){ _wheelBetId = null; });
   balance-=bet;
   setTokens(balance);
   updateBal();
@@ -595,9 +603,8 @@ function showResult(winI,bet){
   const seg=SEGMENTS[winI];
   const raw=Math.round(bet*seg.mult);
   const win=Math.min(raw,500000);
-  balance+=win;
-  setTokens(balance);
-  updateBal();
+  const bId = _wheelBetId; _wheelBetId = null;
+  gameSettle(bId, win, 'wheel').then(function(d){ if(d&&d.ok){ balance=d.balance; setTokens(balance); updateBal(); } }).catch(function(){ balance+=win; setTokens(balance); updateBal(); });
 
   historyData.push({mult:seg.mult,hex:seg.hex,label:seg.label});
   if(historyData.length>10)historyData.shift();
@@ -770,5 +777,6 @@ animate(performance.now());
 </script>
 <script src="/js/casino-sounds.js"></script>
 <script src="/js/cookie-consent.js"></script>
+<script src="/js/game-wallet.js"></script>
 </body>
 </html>

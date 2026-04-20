@@ -345,6 +345,9 @@ var balance = 10000;
 var bet = 100;
 var betSteps = [10,25,50,100,200,500,1000,2500,5000,10000,25000,50000];
 var betIdx = 3;
+window._gameName = 'nexus-slots';
+window._onBalanceSync = function(bal){ balance = bal; updateBalDisplay(); };
+var _nexusBetId = null;
 
 var autoOn = false;
 var autoSpins = 0;
@@ -1256,10 +1259,17 @@ function doSpin() {
   if (gameState !== STATE_IDLE) return;
   if (balance < bet) { showToast('Insufficient balance!'); return; }
 
-  balance -= bet;
-  saveBalance();
-  updateBalDisplay();
+  gameBet(bet, 'nexus-slots').then(function(d){
+    if(!d.ok){ showToast(d.error||'Error'); return; }
+    balance = d.balance; _nexusBetId = d.betId; saveBalance(); updateBalDisplay();
+    _nexusDoSpin();
+  }).catch(function(){
+    balance -= bet; _nexusBetId = null; saveBalance(); updateBalDisplay();
+    _nexusDoSpin();
+  });
+}
 
+function _nexusDoSpin() {
   // Clear win state
   winLines = [];
   winAmount = 0;
@@ -1391,9 +1401,11 @@ function evaluateWin() {
   winAmount = totalWin;
 
   if (totalWin > 0) {
-    balance += totalWin;
-    saveBalance();
-    updateBalDisplay();
+    var bId = _nexusBetId; _nexusBetId = null;
+    gameSettle(bId, totalWin, 'nexus-slots').then(function(d){ if(d&&d.ok){ balance=d.balance; saveBalance(); updateBalDisplay(); } }).catch(function(){ balance+=totalWin; saveBalance(); updateBalDisplay(); });
+  } else {
+    var bId = _nexusBetId; _nexusBetId = null;
+    gameSettle(bId, 0, 'nexus-slots').catch(function(){});
   }
 
   // Determine reaction
@@ -1954,5 +1966,6 @@ init();
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
 <script src="/js/casino-sounds.js"></script>
 <script src="/js/cookie-consent.js"></script>
+<script src="/js/game-wallet.js"></script>
 </body>
 </html>

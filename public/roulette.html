@@ -426,6 +426,9 @@ var chipSize = 10;
 var bets = {};          // key → {name, numbers[], amount, payout}
 var lastBets = {};      // for re-bet
 var spinning = false;
+window._gameName = 'roulette';
+window._onBalanceSync = function(bal){ tokens = bal; updateBal(); };
+var _roulBetId = null;
 var histNums = [];      // last 50 results
 var numFreq = {};       // number → hit count
 var stats = { w:0, l:0, profit:0, spins:0 };
@@ -832,6 +835,21 @@ function spin(){
   var total=getTotalBet();
   if(total<=0){ return showToast('Place a bet first','info'); }
 
+  // Tokens were already deducted locally during placeBet().
+  // Restore them locally so gameBet() can deduct server-side.
+  tokens += total; localStorage.setItem('casino_tokens', tokens); updateBal();
+
+  gameBet(total, 'roulette').then(function(d){
+    if(!d.ok){ tokens -= total; localStorage.setItem('casino_tokens',tokens); updateBal(); showToast(d.error||'Error','loss'); return; }
+    tokens = d.balance; _roulBetId = d.betId; localStorage.setItem('casino_tokens',tokens); updateBal();
+    _roulSpin(total);
+  }).catch(function(){
+    tokens -= total; localStorage.setItem('casino_tokens',tokens); updateBal(); _roulBetId = null;
+    _roulSpin(total);
+  });
+}
+
+function _roulSpin(total){
   spinning=true;
   document.getElementById('spinBtn').disabled=true;
   document.getElementById('rebetBtn').disabled=true;
@@ -867,9 +885,8 @@ function onSpinEnd(winNum, totalBet){
   }
   totalWon=Math.min(totalWon,500000);
 
-  tokens+=totalWon;
-  localStorage.setItem('casino_tokens',tokens);
-  updateBal();
+  var bId = _roulBetId; _roulBetId = null;
+  gameSettle(bId, totalWon, 'roulette').then(function(d){ if(d&&d.ok){ tokens=d.balance; localStorage.setItem('casino_tokens',tokens); updateBal(); } }).catch(function(){ tokens+=totalWon; localStorage.setItem('casino_tokens',tokens); updateBal(); });
 
   var profit=totalWon-totalBet;
   stats.profit+=profit; stats.spins++;
@@ -1063,5 +1080,6 @@ document.getElementById('spinBtn').disabled=true;
 <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(function(){});</script>
 <script src="/js/casino-sounds.js"></script>
 <script src="/js/cookie-consent.js"></script>
+<script src="/js/game-wallet.js"></script>
 </body>
 </html>

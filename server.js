@@ -992,6 +992,60 @@ app.post('/api/log-game', express.json(), async (req,res)=>{
   res.json({ok:true, jackpot:await getJackpot()});
 });
 
+// ── Game Bet/Settle API ──────────────────────────────────────────────
+// Pending bets map (in-memory, keyed by betId)
+const pendingGameBets = new Map();
+
+// POST /api/game/bet — deduct bet from DB before game starts
+app.post('/api/game/bet', express.json(), async (req,res) => {
+  const token = (req.headers.authorization||'').replace('Bearer ','') || req.headers['x-session-token'];
+  const uid = await checkSession(token);
+  if(!uid) return res.status(401).json({error:'Unauthorized'});
+  const { amount, game } = req.body||{};
+  const bet = parseInt(amount)||0;
+  if(bet <= 0) return res.status(400).json({error:'Invalid bet'});
+  const user = await getUser(uid);
+  if(!user) return res.status(400).json({error:'User not found'});
+  if((user.tokens||0) < bet) return res.status(400).json({error:'Insufficient balance'});
+  user.tokens = (user.tokens||0) - bet;
+  await saveUser(user);
+  const betId = uuidv4();
+  pendingGameBets.set(betId, {uid, amount:bet, game:game||'unknown', ts:Date.now()});
+  // Cleanup bets older than 10 min
+  for(const [id,b] of pendingGameBets) if(Date.now()-b.ts>600000) pendingGameBets.delete(id);
+  // Emit balance update to any open lobby socket
+  if(sockets[uid]) sockets[uid].socket.emit('balanceSync',{tokens:user.tokens});
+  res.json({ok:true, betId, balance:user.tokens});
+});
+
+// POST /api/game/settle — credit win after game ends
+app.post('/api/game/settle', express.json(), async (req,res) => {
+  const token = (req.headers.authorization||'').replace('Bearer ','') || req.headers['x-session-token'];
+  const uid = await checkSession(token);
+  if(!uid) return res.status(401).json({error:'Unauthorized'});
+  const { betId, won, game } = req.body||{};
+  const winAmt = parseInt(won)||0;
+  const pending = betId ? pendingGameBets.get(betId) : null;
+  if(pending) {
+    if(pending.uid !== uid) return res.status(403).json({error:'Invalid betId'});
+    pendingGameBets.delete(betId);
+  }
+  const user = await getUser(uid);
+  if(!user) return res.status(400).json({error:'User not found'});
+  if(winAmt > 0) { user.tokens = (user.tokens||0) + winAmt; await saveUser(user); }
+  // Log game + XP + tournament + jackpot
+  const betAmt = pending?.amount||0;
+  const gameName = game||pending?.game||'unknown';
+  if(betAmt > 0) {
+    await logGame(uid, gameName, betAmt, winAmt>0?'win':'loss', winAmt);
+    await addToJackpot(Math.floor(betAmt*0.01));
+    await trackWagering(uid, betAmt);
+    await updateTournamentScore(uid, betAmt, gameName);
+  }
+  if(sockets[uid]) sockets[uid].socket.emit('balanceSync',{tokens:user.tokens});
+  res.json({ok:true, balance:user.tokens});
+});
+
 // Jackpot win endpoint
 app.post('/api/jackpot-win', express.json(), async (req,res)=>{
   const {uid} = req.body;

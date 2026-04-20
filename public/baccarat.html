@@ -411,6 +411,9 @@ if (!uid) { localStorage.setItem('login_return', location.href); location.href =
 
 // ── State ──
 var balance = parseInt(localStorage.getItem('casino_tokens') || '10000');
+window._gameName = 'baccarat';
+window._onBalanceSync = function(bal){ balance = bal; saveBalance(); };
+var _bacBetId = null;
 var MAX_BET = 50000;
 let betType = null;       // 'player' | 'tie' | 'banker'
 let betAmount = 10;
@@ -605,9 +608,15 @@ async function startRound() {
   btn.className = 'btn btn-full btn-lg btn-glass deal-btn';
   btn.textContent = 'DALINAMAS...';
 
-  balance -= betAmount;
-  renderBalance();
-  saveBalance();
+  // Deduct from server
+  try {
+    var gbd = await gameBet(betAmount, 'baccarat');
+    if (!gbd.ok) { setStatus(gbd.error||'Server error', 'active'); isDealing=false; btn.disabled=false; btn.className='btn btn-full btn-lg btn-gold deal-btn'; btn.textContent='DEAL'; return; }
+    balance = gbd.balance; _bacBetId = gbd.betId; renderBalance(); saveBalance();
+  } catch(e) {
+    balance -= betAmount; _bacBetId = null; renderBalance(); saveBalance();
+  }
+
   clearTable();
   buildDeck();
 
@@ -737,9 +746,9 @@ async function resolveRound(playerCards, bankerCards) {
     won = betAmount;
   }
 
-  balance += won;
-  renderBalance();
-  saveBalance();
+  // Settle with server
+  var bId = _bacBetId; _bacBetId = null;
+  gameSettle(bId, won, 'baccarat').then(function(s){ if(s.ok){ balance=s.balance; renderBalance(); saveBalance(); } else { balance+=won; renderBalance(); saveBalance(); } }).catch(function(){ balance+=won; renderBalance(); saveBalance(); });
 
   // Flash winning area
   const flashMap = {player:'feltPlayer', tie:'feltTie', banker:'feltBanker'};
@@ -911,5 +920,6 @@ setStatus('Place your bet and click DEAL');
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
 <script src="/js/casino-sounds.js"></script>
 <script src="/js/cookie-consent.js"></script>
+<script src="/js/game-wallet.js"></script>
 </body>
 </html>

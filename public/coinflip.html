@@ -337,6 +337,9 @@ var DEFAULT_TOKENS = 10000;
 var MAX_BET = 50000;
 var MAX_WIN = 500000;
 var MULTIPLIER = 1.94;
+window._gameName = 'coinflip';
+window._onBalanceSync = function(bal){ balance = bal; saveBalance(bal); updateBalEl(); };
+var _coinBetId = null;
 
 // Game state
 var balance = 0;
@@ -430,10 +433,18 @@ function doFlip() {
   flipping = true;
   setControlsDisabled(true);
 
-  // Deduct bet immediately
-  balance -= bet;
-  saveBalance(balance);
-  updateBalEl();
+  // Deduct bet via server
+  gameBet(bet, 'coinflip').then(function(d){
+    if(!d.ok){ flipping=false; setControlsDisabled(false); showToast(d.error||'Error','info'); return; }
+    balance = d.balance; _coinBetId = d.betId; saveBalance(balance); updateBalEl();
+    _doFlipAnimation(result, won, payout, bet);
+  }).catch(function(){
+    balance -= bet; _coinBetId = null; saveBalance(balance); updateBalEl();
+    _doFlipAnimation(result, won, payout, bet);
+  });
+}
+
+function _doFlipAnimation(result, won, payout, bet) {
 
   // Animate coin
   var coinEl = document.getElementById('coinEl');
@@ -457,9 +468,14 @@ function doFlip() {
       coinEl.style.transform = 'rotateY(' + baseRot + 'deg)';
 
       // Result
+      var bId = _coinBetId; _coinBetId = null;
+      gameSettle(bId, payout, 'coinflip').then(function(d){
+        if(d.ok){ balance = d.balance; saveBalance(balance); }
+        else if(won){ balance += payout; saveBalance(balance); }
+        updateBalEl();
+      }).catch(function(){ if(won){ balance += payout; saveBalance(balance); } updateBalEl(); });
+
       if (won) {
-        balance += payout;
-        saveBalance(balance);
         sessionProfit += payout - bet;
         sessionWins++;
         streak = streak > 0 ? streak + 1 : 1;
@@ -473,7 +489,6 @@ function doFlip() {
         showFloatAmt('-' + bet.toLocaleString(), 'lose');
         showToast('BUST! -' + bet.toLocaleString(), 'loss');
       }
-      updateBalEl();
 
       sessionFlips++;
       addHistory(result);
@@ -622,5 +637,6 @@ makeStars();
 <script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
 <script src="/js/casino-sounds.js"></script>
 <script src="/js/cookie-consent.js"></script>
+<script src="/js/game-wallet.js"></script>
 </body>
 </html>

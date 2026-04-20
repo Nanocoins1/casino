@@ -464,6 +464,9 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 let bal = parseInt(localStorage.getItem('casino_tokens')) || 10000;
 function saveBal(){localStorage.setItem('casino_tokens', bal);}
 function updateBalDisp(){document.getElementById('balDisp').textContent = bal.toLocaleString();}
+window._gameName = 'three-card-poker';
+window._onBalanceSync = function(b){ bal = b; updateBalDisp(); };
+let _tcpBetId = null, _tcpPlayBetId = null;
 updateBalDisp();
 
 /* ─── SOUND ─── */
@@ -708,6 +711,12 @@ function deal(){
   phase = 'decision';
   window._playPlaced = false;
 
+  gameBet(totalBet, 'three-card-poker').then(function(d){
+    if(!d.ok){ alert(d.error||'Error'); return; }
+    bal = d.balance; _tcpBetId = d.betId; saveBal(); updateBalDisp();
+  }).catch(function(){
+    _tcpBetId = null;
+  });
   bal -= totalBet;
   saveBal(); updateBalDisp();
 
@@ -760,6 +769,10 @@ function deal(){
 function play(){
   if(bal < anteBet){ alert('Not enough balance for Play bet!'); return; }
   sfxClick();
+  gameBet(anteBet, 'three-card-poker').then(function(d){
+    if(!d.ok){ return; }
+    bal = d.balance; _tcpPlayBetId = d.betId; saveBal(); updateBalDisp();
+  }).catch(function(){ _tcpPlayBetId = null; });
   bal -= anteBet;
   saveBal(); updateBalDisp();
   window._playPlaced = true;
@@ -856,8 +869,10 @@ function resolve(folded){
     const totalDeducted = anteBet + ppBet + (window._playPlaced ? anteBet : 0);
     const netResult = totalDelta - totalDeducted;
 
-    bal += totalDelta;
-    saveBal(); updateBalDisp();
+    const bId = _tcpBetId; _tcpBetId = null;
+    const bIdPlay = _tcpPlayBetId; _tcpPlayBetId = null;
+    gameSettle(bId, totalDelta, 'three-card-poker').then(function(d){ if(d&&d.ok){ bal=d.balance; saveBal(); updateBalDisp(); } }).catch(function(){ bal+=totalDelta; saveBal(); updateBalDisp(); });
+    if(bIdPlay) gameSettle(bIdPlay, 0, 'three-card-poker').catch(function(){});
 
     // Session
     session.hands++;
@@ -965,5 +980,6 @@ updatePills();
 </script>
 <script src="/js/casino-sounds.js"></script>
 <script src="/js/cookie-consent.js"></script>
+<script src="/js/game-wallet.js"></script>
 </body>
 </html>
