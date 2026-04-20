@@ -1,5 +1,5 @@
-// HATHOR Casino — Service Worker v4.1
-var CACHE = 'hathor-v4.1';
+// HATHOR Casino — Service Worker v4.2
+var CACHE = 'hathor-v4.2';
 var STATIC = [
   '/',
   '/manifest.json',

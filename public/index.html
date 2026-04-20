@@ -14442,7 +14442,7 @@ function App(){
                   <button className="btn btn-primary" style={{display:'flex',alignItems:'center',gap:7,fontSize:'13px',padding:'12px 22px',letterSpacing:'1.5px',fontWeight:900}} onClick={()=>setShowBonus(true)}>
                     <img src="/img/icon-bonus.png" className="btn-icon-img" alt="" draggable="false"/> {t.bonuses||'Bonusai'}
                   </button>
-                  <button className="btn btn-gold-outline" style={{display:'flex',alignItems:'center',gap:7,fontSize:'12px',padding:'12px 20px',letterSpacing:'.8px',backgroundImage:"url('/img/btn-secondary.png')",backgroundSize:'cover',backgroundPosition:'center',border:'1px solid rgba(201,168,76,0.4)',color:'#ffd680',borderRadius:10,fontWeight:700,boxShadow:'0 5px 0 #2a1a04, 0 7px 16px rgba(0,0,0,0.6), 0 0 18px rgba(201,168,76,0.2)'}} onClick={()=>{
+                  <button className="btn btn-primary" style={{display:'flex',alignItems:'center',gap:7,fontSize:'13px',padding:'12px 20px',letterSpacing:'1.5px',fontWeight:900}} onClick={()=>{
                     if(page!=='lobby'){nav('lobby');setTimeout(()=>document.getElementById('game-grid-section')?.scrollIntoView({behavior:'smooth',block:'start'}),350);}
                     else document.getElementById('game-grid-section')?.scrollIntoView({behavior:'smooth',block:'start'});
                   }}>
