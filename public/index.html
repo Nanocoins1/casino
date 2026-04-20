@@ -7115,8 +7115,35 @@ function InboxTabContent({tok, user}){
         {/* Main panel */}
         <div style={S.main}>
           {/* Header */}
-          <div style={{fontSize:11,fontWeight:700,color:'#c9a84c',letterSpacing:1,marginBottom:8,
-            borderBottom:'1px solid rgba(201,168,76,0.1)',paddingBottom:6}}>{activeName}</div>
+          <div style={{marginBottom:6,borderBottom:'1px solid rgba(201,168,76,0.1)',paddingBottom:6}}>
+            {activeUid==='__support'?(
+              <div style={{display:'flex',alignItems:'center',gap:6}}>
+                <span style={{fontSize:11,fontWeight:700,color:'#c9a84c',letterSpacing:1}}>🛡️ Support</span>
+                <span style={{fontSize:9,background:'rgba(74,222,128,0.15)',border:'1px solid rgba(74,222,128,0.3)',
+                  color:'#4ade80',borderRadius:4,padding:'1px 5px',fontWeight:700,letterSpacing:0.5}}>✓ OFICIALUS</span>
+              </div>
+            ):(
+              <div style={{display:'flex',alignItems:'center',gap:6}}>
+                <span style={{fontSize:11,fontWeight:700,color:'rgba(232,224,208,0.8)',letterSpacing:0.5}}>👤 {activeName}</span>
+                <span style={{fontSize:9,background:'rgba(255,100,100,0.1)',border:'1px solid rgba(255,100,100,0.2)',
+                  color:'rgba(255,150,150,0.8)',borderRadius:4,padding:'1px 5px',fontWeight:700,letterSpacing:0.5}}>ŽAIDĖJAS</span>
+              </div>
+            )}
+          </div>
+
+          {/* Security notice pinned at top */}
+          {activeUid==='__support'&&(
+            <div style={{background:'rgba(74,222,128,0.06)',border:'1px solid rgba(74,222,128,0.15)',borderRadius:7,
+              padding:'6px 10px',marginBottom:8,fontSize:10,color:'rgba(74,222,128,0.7)',lineHeight:1.5}}>
+              🔒 Tikras support <strong>niekada neprašo</strong> slaptažodžio, kortelės duomenų ar pervedimų.
+            </div>
+          )}
+          {activeUid!=='__support'&&(
+            <div style={{background:'rgba(255,180,0,0.06)',border:'1px solid rgba(255,180,0,0.15)',borderRadius:7,
+              padding:'6px 10px',marginBottom:8,fontSize:10,color:'rgba(255,200,80,0.7)',lineHeight:1.5}}>
+              ⚠️ Šis žaidėjas <strong>nėra</strong> HATHOR darbuotojas. Jei prašo duomenų ar pervedimo — pranešk support.
+            </div>
+          )}
 
           {/* Thread */}
           <div ref={threadRef} style={S.thread}>
@@ -7127,10 +7154,25 @@ function InboxTabContent({tok, user}){
             )}
             {activeMsgs.map(m=>{
               const isMe=m.from_uid===user.uid;
+              // TRUE official message — only from __support uid, can never be faked by a player
+              const isOfficial=m.from_uid==='__support';
               return(
                 <div key={m.id} style={{display:'flex',flexDirection:'column',alignItems:isMe?'flex-end':'flex-start'}}>
-                  <div style={S.bubble(isMe)}>
-                    {!isMe&&<div style={{fontSize:9,color:'#c9a84c',fontWeight:700,marginBottom:3}}>{m.from_name}</div>}
+                  {isOfficial&&(
+                    <div style={{display:'flex',alignItems:'center',gap:4,marginBottom:3}}>
+                      <span style={{fontSize:9,background:'rgba(74,222,128,0.15)',border:'1px solid rgba(74,222,128,0.3)',
+                        color:'#4ade80',borderRadius:4,padding:'1px 6px',fontWeight:700,letterSpacing:0.5}}>🛡️ OFFICIAL SUPPORT</span>
+                    </div>
+                  )}
+                  <div style={{
+                    ...S.bubble(isMe),
+                    ...(isOfficial?{
+                      background:'rgba(74,222,128,0.08)',
+                      border:'1px solid rgba(74,222,128,0.25)',
+                      borderLeft:'3px solid rgba(74,222,128,0.5)'
+                    }:{})
+                  }}>
+                    {!isMe&&!isOfficial&&<div style={{fontSize:9,color:'#c9a84c',fontWeight:700,marginBottom:3}}>{m.from_name}</div>}
                     {m.body}
                   </div>
                   <div style={{fontSize:9,color:'rgba(232,224,208,.2)',marginTop:2}}>{fmtTime(m.created_at)}</div>
@@ -7154,6 +7196,22 @@ function InboxTabContent({tok, user}){
               {sending?'⏳':'→'}
             </button>
           </div>
+          {/* Report button for player conversations */}
+          {activeUid!=='__support'&&(
+            <div style={{marginTop:6,textAlign:'right'}}>
+              <button onClick={()=>{
+                if(!window.confirm(`Pranešti apie žaidėją "${activeName}" support komandai?`)) return;
+                fetch('/api/report/player',{method:'POST',headers:{'Content-Type':'application/json','x-session-token':tok},
+                  body:JSON.stringify({reported_uid:activeUid,reason:'Galimas apsimetimas darbuotoju / sukčiavimas'})})
+                  .then(r=>r.json()).then(d=>{
+                    if(d.ok) alert('✅ Pranešimas išsiųstas! Support komanda patikrins.');
+                  });
+              }} style={{background:'none',border:'none',color:'rgba(255,100,100,0.5)',fontSize:10,cursor:'pointer',
+                textDecoration:'underline',padding:0}}>
+                🚩 Pranešti apie šį žaidėją
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

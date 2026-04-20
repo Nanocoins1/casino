@@ -1033,6 +1033,18 @@ app.get('/api/stats/:uid', async (req,res)=>{
 });
 
 // ── Update username ───────────────────────────────────────
+// Words players are FORBIDDEN to include in their display name
+const RESERVED_NAME_WORDS = [
+  'admin','administrator','administratorius','moderator','moderatorius',
+  'support','palaikymas','hathor','staff','official','offical',
+  'system','bot','operator','owner','founder','ceo','manager',
+  'помощник','администратор','модератор','поддержка'
+];
+function isReservedName(name){
+  const lower = name.toLowerCase().replace(/[^a-z0-9]/g,'');
+  return RESERVED_NAME_WORDS.some(w => lower.includes(w.replace(/[^a-z0-9]/g,'')));
+}
+
 app.post('/api/user/update-name', express.json(), async (req,res)=>{
   const token = (req.headers.authorization||'').replace('Bearer ','') || req.headers['x-session-token'];
   const uid = await checkSession(token);
@@ -1041,6 +1053,7 @@ app.post('/api/user/update-name', express.json(), async (req,res)=>{
   if(!name||name.trim().length<2) return res.status(400).json({error:'Name must be at least 2 characters'});
   if(name.trim().length>24) return res.status(400).json({error:'Name too long (max 24 chars)'});
   const clean = name.trim().replace(/[<>\"']/g,'');
+  if(isReservedName(clean)) return res.status(400).json({error:'Šis vardas yra rezervuotas. Pasirink kitą.'});
   // Check uniqueness
   const existing = await dbGet(`SELECT uid FROM users WHERE name=$1 AND uid!=$2`, [clean, uid]);
   if(existing) return res.status(400).json({error:'Name already taken'});
@@ -1220,6 +1233,31 @@ app.post('/admin/inbox/reply', adminAuth, express.json(), async (req,res) => {
     sock.socket.emit('unreadCount', {count: 1});
   }
   res.json({ok:true, id});
+});
+
+// POST /api/report/player — player reports another player
+app.post('/api/report/player', express.json(), async (req,res) => {
+  const token = (req.headers.authorization||'').replace('Bearer ','') || req.headers['x-session-token'];
+  const uid = await checkSession(token);
+  if(!uid) return res.status(401).json({error:'Unauthorized'});
+  const { reported_uid, reason } = req.body || {};
+  if(!reported_uid) return res.status(400).json({error:'Missing reported_uid'});
+  const reporter = await getUser(uid);
+  const reported = await getUser(reported_uid);
+  if(!reported) return res.status(400).json({error:'Player not found'});
+  // Create a support message from the reporter
+  const id = uuidv4();
+  const body = `🚩 PRANEŠIMAS apie žaidėją\n` +
+    `Pranešėjas: ${reporter?.name||uid} (${uid})\n` +
+    `Pranešta apie: ${reported?.name||reported_uid} (${reported_uid})\n` +
+    `Priežastis: ${reason||'Galimas apsimetimas darbuotoju / sukčiavimas'}\n` +
+    `Laikas: ${new Date().toISOString()}`;
+  await dbRun(
+    `INSERT INTO inbox_messages(id,from_uid,to_uid,from_name,body) VALUES($1,$2,$3,$4,$5)`,
+    [id, uid, '__support', reporter?.name||'Player', body]
+  );
+  io.emit('adminNewMessage', {id, from_uid:uid, from_name:'🚩 REPORT: '+(reporter?.name||uid), body, created_at:new Date()});
+  res.json({ok:true});
 });
 
 // ── Affiliate/Referral DOCX report ────────────────────────
@@ -2257,6 +2295,7 @@ app.post('/api/auth/register', express.json(), async (req, res) => {
   if(!name||!email||!password) return res.status(400).json({error:'Missing required fields'});
   if(password.length < 8) return res.status(400).json({error:'Password must be at least 8 characters'});
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({error:'Invalid email format'});
+  if(isReservedName(name)) return res.status(400).json({error:'Šis vardas yra rezervuotas. Pasirink kitą.'});
 
   // ── DEMO MODE bypass (no PostgreSQL) ──────────────────────────────────
   if (!_dbOk) {
