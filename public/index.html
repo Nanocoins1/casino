@@ -6925,92 +6925,239 @@ function PromoTabContent({tok, onUpdate}){
 // INBOX TAB CONTENT
 // ═══════════════════════════════════════════════════
 function InboxTabContent({tok, user}){
-  const [msgs,setMsgs]=useState(null);
+  // allMsgs — raw array from server
+  const [allMsgs,setAllMsgs]=useState(null);
+  // activeUid — '__support' | player uid
+  const [activeUid,setActiveUid]=useState('__support');
+  const [activeName,setActiveName]=useState('🛡️ Support');
   const [body,setBody]=useState('');
   const [sending,setSending]=useState(false);
-  const [sent,setSent]=useState(false);
+  // player search
+  const [showSearch,setShowSearch]=useState(false);
+  const [searchQ,setSearchQ]=useState('');
+  const [searchRes,setSearchRes]=useState([]);
+  const [searching,setSearching]=useState(false);
+  const threadRef=React.useRef(null);
 
-  const reloadMsgs=()=>{
-    fetch('/api/inbox',{headers:{'x-session-token':tok,'Authorization':'Bearer '+tok}})
-      .then(r=>r.json()).then(d=>{setMsgs(Array.isArray(d)?d:[]);})
-      .catch(()=>setMsgs([]));
-  };
+  // Build conversation map from allMsgs
+  const convMap=React.useMemo(()=>{
+    if(!allMsgs) return {};
+    const map={};
+    allMsgs.forEach(m=>{
+      const otherUid=m.from_uid===user.uid ? m.to_uid : m.from_uid;
+      const otherName=m.from_uid===user.uid
+        ? (m.to_uid==='__support'?'🛡️ Support': (m.to_name||m.to_uid))
+        : m.from_name;
+      if(!map[otherUid]) map[otherUid]={uid:otherUid,name:otherName,msgs:[],unread:0};
+      map[otherUid].msgs.push(m);
+      if(!m.is_read && m.to_uid===user.uid) map[otherUid].unread++;
+    });
+    // Always include Support even if empty
+    if(!map['__support']) map['__support']={uid:'__support',name:'🛡️ Support',msgs:[],unread:0};
+    return map;
+  },[allMsgs,user.uid]);
 
-  useEffect(()=>{
-    reloadMsgs();
-    // Mark as read
-    fetch('/api/inbox/read',{method:'POST',headers:{'x-session-token':tok}}).catch(()=>{});
-    // Auto-refresh when admin replies
-    window.addEventListener('inboxUpdate',reloadMsgs);
-    return()=>window.removeEventListener('inboxUpdate',reloadMsgs);
+  const activeMsgs=(convMap[activeUid]||{msgs:[]}).msgs;
+
+  const loadInbox=React.useCallback(()=>{
+    fetch('/api/inbox',{headers:{'Authorization':'Bearer '+tok,'x-session-token':tok}})
+      .then(r=>r.json()).then(d=>{if(Array.isArray(d))setAllMsgs(d);}).catch(()=>setAllMsgs([]));
   },[tok]);
 
+  useEffect(()=>{
+    loadInbox();
+    window.addEventListener('inboxUpdate',loadInbox);
+    return()=>window.removeEventListener('inboxUpdate',loadInbox);
+  },[loadInbox]);
+
+  // Scroll thread to bottom when messages update
+  useEffect(()=>{
+    if(threadRef.current) threadRef.current.scrollTop=threadRef.current.scrollHeight;
+  },[activeMsgs.length, activeUid]);
+
+  // Mark active conversation as read
+  useEffect(()=>{
+    fetch('/api/inbox/read',{method:'POST',headers:{'Content-Type':'application/json','x-session-token':tok},
+      body:JSON.stringify({from_uid:activeUid==='__support'?'__support':activeUid})}).catch(()=>{});
+  },[activeUid, tok]);
+
   const sendMsg=async()=>{
-    if(!body.trim()) return;
+    if(!body.trim()||sending) return;
     setSending(true);
-    const r=await fetch('/api/inbox/send',{method:'POST',headers:{'Content-Type':'application/json','x-session-token':tok},body:JSON.stringify({body:body.trim()})});
-    const d=await r.json();
+    const payload={body:body.trim()};
+    if(activeUid!=='__support') payload.to_uid=activeUid;
+    const r=await fetch('/api/inbox/send',{method:'POST',
+      headers:{'Content-Type':'application/json','x-session-token':tok},
+      body:JSON.stringify(payload)}).catch(()=>null);
     setSending(false);
-    if(d.ok){
-      setBody('');
-      setSent(true);
-      setTimeout(()=>setSent(false),3000);
-      // Reload messages
-      fetch('/api/inbox',{headers:{'x-session-token':tok,'Authorization':'Bearer '+tok}})
-        .then(r=>r.json()).then(d=>{setMsgs(Array.isArray(d)?d:[]);}).catch(()=>{});
-    }
+    if(r&&r.ok){setBody('');loadInbox();}
+  };
+
+  // Player search
+  useEffect(()=>{
+    if(!searchQ||searchQ.length<2){setSearchRes([]);return;}
+    setSearching(true);
+    const t=setTimeout(()=>{
+      fetch('/api/players/search?q='+encodeURIComponent(searchQ),{headers:{'Authorization':'Bearer '+tok}})
+        .then(r=>r.json()).then(d=>{setSearchRes(Array.isArray(d)?d:[]);setSearching(false);}).catch(()=>{setSearchRes([]);setSearching(false);});
+    },300);
+    return()=>clearTimeout(t);
+  },[searchQ,tok]);
+
+  const openConv=(uid,name)=>{
+    setActiveUid(uid);setActiveName(name);
+    setShowSearch(false);setSearchQ('');setSearchRes([]);
+    // Add to allMsgs so conv appears in list even if no messages yet
+    setAllMsgs(prev=>{
+      if(!prev) return [];
+      const has=prev.some(m=>(m.from_uid===uid&&m.to_uid===user.uid)||(m.to_uid===uid&&m.from_uid===user.uid));
+      if(has) return prev;
+      return prev; // will appear once first message sent
+    });
   };
 
   const fmtTime=ts=>{
     const d=new Date(ts);
-    return d.toLocaleDateString('lt-LT',{month:'short',day:'numeric'})+' '+d.toLocaleTimeString('lt-LT',{hour:'2-digit',minute:'2-digit'});
+    const now=new Date();
+    if(d.toDateString()===now.toDateString()) return d.toLocaleTimeString('lt-LT',{hour:'2-digit',minute:'2-digit'});
+    return d.toLocaleDateString('lt-LT',{month:'short',day:'numeric'});
   };
 
-  return(<>
-    <div style={{fontSize:11,letterSpacing:2,color:'rgba(201,168,76,.4)',fontFamily:'Cinzel,serif',marginBottom:14}}>ŽINUTĖS SU SUPPORT</div>
+  const convList=Object.values(convMap).sort((a,b)=>{
+    const la=a.msgs[a.msgs.length-1];const lb=b.msgs[b.msgs.length-1];
+    if(!la&&!lb) return 0; if(!la) return 1; if(!lb) return -1;
+    return new Date(lb.created_at)-new Date(la.created_at);
+  });
 
-    {/* Message thread */}
-    <div style={{maxHeight:260,overflowY:'auto',display:'flex',flexDirection:'column',gap:8,marginBottom:16,paddingRight:4}}>
-      {msgs===null&&<div style={{color:'rgba(232,224,208,.4)',fontSize:13,textAlign:'center',padding:'20px 0'}}>Kraunama...</div>}
-      {msgs&&msgs.length===0&&<div style={{color:'rgba(232,224,208,.3)',fontSize:13,textAlign:'center',padding:'20px 0'}}>Žinučių nėra. Parašyk mums! 👇</div>}
-      {msgs&&msgs.map(m=>{
-        const isMe=m.from_uid===user.uid;
-        return(
-          <div key={m.id} style={{display:'flex',flexDirection:'column',alignItems:isMe?'flex-end':'flex-start'}}>
-            <div style={{
-              maxWidth:'85%',padding:'9px 13px',borderRadius:isMe?'12px 12px 2px 12px':'12px 12px 12px 2px',
-              background:isMe?'rgba(201,168,76,0.15)':'rgba(255,255,255,0.06)',
-              border:isMe?'1px solid rgba(201,168,76,0.25)':'1px solid rgba(255,255,255,0.08)',
-              fontSize:13,color:'rgba(232,224,208,0.9)',lineHeight:1.5
-            }}>
-              {!isMe&&<div style={{fontSize:10,color:'#c9a84c',fontWeight:700,marginBottom:4}}>{m.from_name}</div>}
-              {m.body}
-            </div>
-            <div style={{fontSize:10,color:'rgba(232,224,208,.25)',marginTop:3}}>{fmtTime(m.created_at)}</div>
+  const S={
+    wrap:{display:'flex',gap:10,height:340},
+    sidebar:{width:140,flexShrink:0,display:'flex',flexDirection:'column',gap:6,overflowY:'auto'},
+    convItem:(active)=>({
+      padding:'8px 10px',borderRadius:8,cursor:'pointer',
+      background:active?'rgba(201,168,76,0.12)':'rgba(255,255,255,0.03)',
+      border:active?'1px solid rgba(201,168,76,0.25)':'1px solid rgba(255,255,255,0.06)',
+      transition:'all .15s'
+    }),
+    main:{flex:1,display:'flex',flexDirection:'column',minWidth:0},
+    thread:{flex:1,overflowY:'auto',display:'flex',flexDirection:'column',gap:6,paddingRight:2,marginBottom:8},
+    bubble:(isMe)=>({
+      maxWidth:'88%',padding:'8px 12px',
+      borderRadius:isMe?'12px 12px 2px 12px':'12px 12px 12px 2px',
+      background:isMe?'rgba(201,168,76,0.15)':'rgba(255,255,255,0.06)',
+      border:isMe?'1px solid rgba(201,168,76,0.25)':'1px solid rgba(255,255,255,0.08)',
+      fontSize:12,color:'rgba(232,224,208,0.9)',lineHeight:1.5,wordBreak:'break-word'
+    }),
+  };
+
+  return(
+    <div style={{position:'relative'}}>
+      {/* Search overlay */}
+      {showSearch&&(
+        <div style={{position:'absolute',inset:0,background:'rgba(10,8,6,0.95)',zIndex:10,borderRadius:12,padding:16,display:'flex',flexDirection:'column',gap:10}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <span style={{fontSize:12,color:'#c9a84c',fontWeight:700}}>🔍 Naujas pokalbis</span>
+            <button onClick={()=>{setShowSearch(false);setSearchQ('');}} style={{background:'none',border:'none',color:'rgba(232,224,208,.5)',cursor:'pointer',fontSize:18}}>✕</button>
           </div>
-        );
-      })}
-    </div>
+          <input
+            className="modal-input"
+            placeholder="Ieškoti žaidėjo pagal vardą..."
+            value={searchQ}
+            onChange={e=>setSearchQ(e.target.value)}
+            autoFocus
+            style={{fontSize:13}}
+          />
+          <div style={{flex:1,overflowY:'auto',display:'flex',flexDirection:'column',gap:6}}>
+            {searching&&<div style={{color:'rgba(232,224,208,.4)',fontSize:12,textAlign:'center',padding:8}}>Ieškoma...</div>}
+            {!searching&&searchQ.length>=2&&searchRes.length===0&&(
+              <div style={{color:'rgba(232,224,208,.3)',fontSize:12,textAlign:'center',padding:8}}>Žaidėjų nerasta</div>
+            )}
+            {searchRes.map(p=>(
+              <div key={p.uid} onClick={()=>openConv(p.uid,p.name)}
+                style={{display:'flex',alignItems:'center',gap:8,padding:'8px 10px',borderRadius:8,cursor:'pointer',
+                  background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.08)'}}>
+                <div style={{width:30,height:30,borderRadius:'50%',background:'rgba(201,168,76,0.15)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,flexShrink:0}}>
+                  {p.avatar?<img src={p.avatar} alt="" style={{width:'100%',height:'100%',borderRadius:'50%',objectFit:'cover'}}/>:'👤'}
+                </div>
+                <span style={{fontSize:13,color:'rgba(232,224,208,0.85)'}}>{p.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
-    {/* Compose */}
-    <div style={{borderTop:'1px solid rgba(201,168,76,.08)',paddingTop:14}}>
-      <textarea
-        className="modal-input"
-        placeholder="Rašyk žinutę support komandai..."
-        value={body}
-        onChange={e=>setBody(e.target.value)}
-        rows={3}
-        style={{width:'100%',resize:'none',marginBottom:8,fontSize:13}}
-      />
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-        {sent&&<span style={{color:'#4ade80',fontSize:12}}>✅ Išsiųsta!</span>}
-        {!sent&&<span style={{fontSize:11,color:'rgba(232,224,208,.3)'}}>Atsakome per 24h</span>}
-        <button className="btn btn-primary btn-sm" onClick={sendMsg} disabled={sending||!body.trim()}>
-          {sending?'...':'Siųsti →'}
-        </button>
+      <div style={S.wrap}>
+        {/* Sidebar — conversation list */}
+        <div style={S.sidebar}>
+          <button onClick={()=>setShowSearch(true)}
+            style={{padding:'6px 8px',background:'rgba(201,168,76,0.1)',border:'1px solid rgba(201,168,76,0.3)',
+              borderRadius:7,color:'#c9a84c',fontSize:11,fontWeight:700,cursor:'pointer',letterSpacing:0.5,whiteSpace:'nowrap'}}>
+            + Naujas
+          </button>
+          {allMsgs===null&&<div style={{color:'rgba(232,224,208,.3)',fontSize:11,textAlign:'center',padding:8}}>...</div>}
+          {convList.map(conv=>{
+            const last=conv.msgs[conv.msgs.length-1];
+            const isActive=conv.uid===activeUid;
+            return(
+              <div key={conv.uid} onClick={()=>{setActiveUid(conv.uid);setActiveName(conv.name);}} style={S.convItem(isActive)}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:2}}>
+                  <span style={{fontSize:11,fontWeight:700,color:isActive?'#c9a84c':'rgba(232,224,208,0.8)',
+                    overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:90}}>{conv.name}</span>
+                  {conv.unread>0&&<span style={{background:'#ff3d71',color:'#fff',borderRadius:10,fontSize:9,
+                    padding:'1px 5px',fontWeight:700,flexShrink:0}}>{conv.unread}</span>}
+                </div>
+                {last&&<div style={{fontSize:10,color:'rgba(232,224,208,.3)',overflow:'hidden',textOverflow:'ellipsis',
+                  whiteSpace:'nowrap'}}>{last.body.slice(0,22)}{last.body.length>22?'…':''}</div>}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Main panel */}
+        <div style={S.main}>
+          {/* Header */}
+          <div style={{fontSize:11,fontWeight:700,color:'#c9a84c',letterSpacing:1,marginBottom:8,
+            borderBottom:'1px solid rgba(201,168,76,0.1)',paddingBottom:6}}>{activeName}</div>
+
+          {/* Thread */}
+          <div ref={threadRef} style={S.thread}>
+            {activeMsgs.length===0&&(
+              <div style={{color:'rgba(232,224,208,.25)',fontSize:12,textAlign:'center',padding:'20px 0',flex:1,display:'flex',alignItems:'center',justifyContent:'center'}}>
+                {activeUid==='__support'?'Parašyk support komandai 👇':'Pradėk pokalbį 👇'}
+              </div>
+            )}
+            {activeMsgs.map(m=>{
+              const isMe=m.from_uid===user.uid;
+              return(
+                <div key={m.id} style={{display:'flex',flexDirection:'column',alignItems:isMe?'flex-end':'flex-start'}}>
+                  <div style={S.bubble(isMe)}>
+                    {!isMe&&<div style={{fontSize:9,color:'#c9a84c',fontWeight:700,marginBottom:3}}>{m.from_name}</div>}
+                    {m.body}
+                  </div>
+                  <div style={{fontSize:9,color:'rgba(232,224,208,.2)',marginTop:2}}>{fmtTime(m.created_at)}</div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Compose */}
+          <div style={{borderTop:'1px solid rgba(201,168,76,.07)',paddingTop:8,display:'flex',gap:6}}>
+            <input
+              className="modal-input"
+              placeholder="Žinutė..."
+              value={body}
+              onChange={e=>setBody(e.target.value)}
+              onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}}
+              style={{flex:1,margin:0,fontSize:12,padding:'7px 10px'}}
+            />
+            <button className="btn btn-primary btn-sm" onClick={sendMsg} disabled={sending||!body.trim()}
+              style={{flexShrink:0,padding:'7px 12px',fontSize:12}}>
+              {sending?'⏳':'→'}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
-  </>);
+  );
 }
 
 // ═══════════════════════════════════════════════════
@@ -7189,7 +7336,7 @@ function AvatarModal({user,onClose,onUpdate,defaultTab}){
 
   return(
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" style={{maxWidth:460,maxHeight:'85vh',overflowY:'auto',padding:'28px 28px 24px'}} onClick={e=>e.stopPropagation()}>
+      <div className="modal" style={{maxWidth:tab==='inbox'?520:460,maxHeight:'85vh',overflowY:'auto',padding:'28px 28px 24px',transition:'max-width .2s'}} onClick={e=>e.stopPropagation()}>
         <h3 style={{marginBottom:16}}>My Profile</h3>
 
         {/* Tabs */}
@@ -14436,9 +14583,9 @@ function App(){
     socket.on('tokensReceived',({from,amount})=>{
       setUser(u=>u?{...u,tokens:(u.tokens||0)+amount}:u);
     });
-    socket.on('newInboxMessage',()=>{
+    socket.on('newInboxMessage',(data)=>{
       setInboxUnread(u=>u+1);
-      window.dispatchEvent(new Event('inboxUpdate'));
+      window.dispatchEvent(new CustomEvent('inboxUpdate',{detail:data}));
     });
     return()=>socket.off('gameState').off('roomCreated').off('dailyBonusAvailable').off('levelUp').off('emojiReaction').off('balanceSync').off('tokensReceived').off('newInboxMessage');
   },[]);

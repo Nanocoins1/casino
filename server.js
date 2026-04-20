@@ -1117,30 +1117,63 @@ app.get('/api/inbox/unread', async (req,res) => {
   res.json({count: parseInt(row?.c||0)});
 });
 
-// POST /api/inbox/send — player sends to support
+// POST /api/inbox/send — player sends to support OR another player
 app.post('/api/inbox/send', express.json(), async (req,res) => {
   const token = (req.headers.authorization||'').replace('Bearer ','') || req.headers['x-session-token'];
   const uid = await checkSession(token);
   if(!uid) return res.status(401).json({error:'Unauthorized'});
-  const { body } = req.body || {};
+  const { body, to_uid } = req.body || {};
   if(!body || !body.trim()) return res.status(400).json({error:'Empty message'});
-  const user = await getUser(uid);
+  const sender = await getUser(uid);
+  const targetUid = to_uid || '__support';
+  // Validate target player exists (if not support)
+  if(targetUid !== '__support') {
+    const target = await getUser(targetUid);
+    if(!target) return res.status(400).json({error:'Player not found'});
+  }
   const id = uuidv4();
   await dbRun(
     `INSERT INTO inbox_messages(id,from_uid,to_uid,from_name,body) VALUES($1,$2,$3,$4,$5)`,
-    [id, uid, '__support', user?.name||'Player', body.trim()]
+    [id, uid, targetUid, sender?.name||'Player', body.trim()]
   );
-  // Notify all admin sockets
-  io.emit('adminNewMessage', {id, from_uid: uid, from_name: user?.name||'Player', body: body.trim(), created_at: new Date()});
+  if(targetUid === '__support') {
+    // Notify all admin sockets
+    io.emit('adminNewMessage', {id, from_uid: uid, from_name: sender?.name||'Player', body: body.trim(), created_at: new Date()});
+  } else {
+    // Notify target player
+    const sock = sockets[targetUid];
+    if(sock && sock.socket) {
+      sock.socket.emit('newInboxMessage', {id, from_uid: uid, from_name: sender?.name||'Player', body: body.trim(), created_at: new Date()});
+    }
+  }
   res.json({ok:true, id});
 });
 
-// POST /api/inbox/read — mark messages as read
+// GET /api/players/search — search players by name for new conversation
+app.get('/api/players/search', async (req,res) => {
+  const token = (req.headers.authorization||'').replace('Bearer ','') || req.headers['x-session-token'];
+  const uid = await checkSession(token);
+  if(!uid) return res.status(401).json({error:'Unauthorized'});
+  const q = (req.query.q||'').trim();
+  if(q.length < 2) return res.json([]);
+  const rows = await dbAll(
+    `SELECT uid, name, avatar FROM users WHERE name ILIKE $1 AND uid != $2 LIMIT 8`,
+    [`%${q}%`, uid]
+  );
+  res.json(rows);
+});
+
+// POST /api/inbox/read — mark messages as read (optionally only from a specific sender)
 app.post('/api/inbox/read', express.json(), async (req,res) => {
   const token = (req.headers.authorization||'').replace('Bearer ','') || req.headers['x-session-token'];
   const uid = await checkSession(token);
   if(!uid) return res.status(401).json({error:'Unauthorized'});
-  await dbRun(`UPDATE inbox_messages SET is_read=true WHERE to_uid=$1`, [uid]);
+  const { from_uid } = req.body || {};
+  if(from_uid) {
+    await dbRun(`UPDATE inbox_messages SET is_read=true WHERE to_uid=$1 AND from_uid=$2`, [uid, from_uid]);
+  } else {
+    await dbRun(`UPDATE inbox_messages SET is_read=true WHERE to_uid=$1`, [uid]);
+  }
   res.json({ok:true});
 });
 
