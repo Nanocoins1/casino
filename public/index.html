@@ -6924,36 +6924,55 @@ function PromoTabContent({tok, onUpdate}){
 // ═══════════════════════════════════════════════════
 // INBOX TAB CONTENT
 // ═══════════════════════════════════════════════════
+// ── Messenger avatar helper ──────────────────────────────
+const AVATAR_COLORS=['#5b7cf7','#c9a84c','#4ade80','#f97316','#a78bfa','#ec4899','#06b6d4','#84cc16'];
+function MsgAvatar({name,avatar,size=34,isSupport}){
+  if(isSupport) return(
+    <div style={{width:size,height:size,borderRadius:'50%',background:'linear-gradient(135deg,#1a3a2a,#0d2a1a)',
+      border:'2px solid rgba(74,222,128,0.4)',display:'flex',alignItems:'center',justifyContent:'center',
+      fontSize:size*0.45,flexShrink:0}}>🛡️</div>
+  );
+  if(avatar) return(
+    <div style={{width:size,height:size,borderRadius:'50%',flexShrink:0,overflow:'hidden',border:'2px solid rgba(255,255,255,0.08)'}}>
+      <img src={avatar} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+    </div>
+  );
+  const initial=(name||'?')[0].toUpperCase();
+  const color=AVATAR_COLORS[(name||'').charCodeAt(0)%AVATAR_COLORS.length];
+  return(
+    <div style={{width:size,height:size,borderRadius:'50%',background:color+'22',border:'2px solid '+color+'55',
+      display:'flex',alignItems:'center',justifyContent:'center',fontSize:size*0.42,fontWeight:700,
+      color:color,flexShrink:0,fontFamily:'Space Grotesk,sans-serif'}}>
+      {initial}
+    </div>
+  );
+}
+
+// ── Main Inbox Component ─────────────────────────────────
 function InboxTabContent({tok, user}){
-  // allMsgs — raw array from server
   const [allMsgs,setAllMsgs]=useState(null);
-  // activeUid — '__support' | player uid
   const [activeUid,setActiveUid]=useState('__support');
-  const [activeName,setActiveName]=useState('🛡️ Support');
+  const [activeName,setActiveName]=useState('Support');
   const [body,setBody]=useState('');
   const [sending,setSending]=useState(false);
-  // player search
   const [showSearch,setShowSearch]=useState(false);
   const [searchQ,setSearchQ]=useState('');
   const [searchRes,setSearchRes]=useState([]);
   const [searching,setSearching]=useState(false);
+  const [reported,setReported]=useState(false);
   const threadRef=React.useRef(null);
 
-  // Build conversation map from allMsgs
   const convMap=React.useMemo(()=>{
     if(!allMsgs) return {};
     const map={};
     allMsgs.forEach(m=>{
-      const otherUid=m.from_uid===user.uid ? m.to_uid : m.from_uid;
-      const otherName=m.from_uid===user.uid
-        ? (m.to_uid==='__support'?'🛡️ Support': (m.to_name||m.to_uid))
-        : m.from_name;
+      const otherUid=m.from_uid===user.uid?m.to_uid:m.from_uid;
+      const otherName=m.from_uid===user.uid?(m.to_uid==='__support'?'Support':(m.to_name||m.to_uid)):m.from_name;
       if(!map[otherUid]) map[otherUid]={uid:otherUid,name:otherName,msgs:[],unread:0};
       map[otherUid].msgs.push(m);
-      if(!m.is_read && m.to_uid===user.uid) map[otherUid].unread++;
+      if(!m.is_read&&m.to_uid===user.uid) map[otherUid].unread++;
     });
-    // Always include Support even if empty
-    if(!map['__support']) map['__support']={uid:'__support',name:'🛡️ Support',msgs:[],unread:0};
+    if(!map['__support']) map['__support']={uid:'__support',name:'Support',msgs:[],unread:0};
     return map;
   },[allMsgs,user.uid]);
 
@@ -6964,36 +6983,26 @@ function InboxTabContent({tok, user}){
       .then(r=>r.json()).then(d=>{if(Array.isArray(d))setAllMsgs(d);}).catch(()=>setAllMsgs([]));
   },[tok]);
 
-  useEffect(()=>{
-    loadInbox();
-    window.addEventListener('inboxUpdate',loadInbox);
-    return()=>window.removeEventListener('inboxUpdate',loadInbox);
-  },[loadInbox]);
+  useEffect(()=>{loadInbox();window.addEventListener('inboxUpdate',loadInbox);return()=>window.removeEventListener('inboxUpdate',loadInbox);},[loadInbox]);
 
-  // Scroll thread to bottom when messages update
-  useEffect(()=>{
-    if(threadRef.current) threadRef.current.scrollTop=threadRef.current.scrollHeight;
-  },[activeMsgs.length, activeUid]);
+  useEffect(()=>{if(threadRef.current)threadRef.current.scrollTop=threadRef.current.scrollHeight;},[activeMsgs.length,activeUid]);
 
-  // Mark active conversation as read
   useEffect(()=>{
     fetch('/api/inbox/read',{method:'POST',headers:{'Content-Type':'application/json','x-session-token':tok},
-      body:JSON.stringify({from_uid:activeUid==='__support'?'__support':activeUid})}).catch(()=>{});
-  },[activeUid, tok]);
+      body:JSON.stringify({from_uid:activeUid})}).catch(()=>{});
+    setReported(false);
+  },[activeUid,tok]);
 
   const sendMsg=async()=>{
     if(!body.trim()||sending) return;
     setSending(true);
     const payload={body:body.trim()};
     if(activeUid!=='__support') payload.to_uid=activeUid;
-    const r=await fetch('/api/inbox/send',{method:'POST',
-      headers:{'Content-Type':'application/json','x-session-token':tok},
-      body:JSON.stringify(payload)}).catch(()=>null);
+    const r=await fetch('/api/inbox/send',{method:'POST',headers:{'Content-Type':'application/json','x-session-token':tok},body:JSON.stringify(payload)}).catch(()=>null);
     setSending(false);
     if(r&&r.ok){setBody('');loadInbox();}
   };
 
-  // Player search
   useEffect(()=>{
     if(!searchQ||searchQ.length<2){setSearchRes([]);return;}
     setSearching(true);
@@ -7004,214 +7013,271 @@ function InboxTabContent({tok, user}){
     return()=>clearTimeout(t);
   },[searchQ,tok]);
 
-  const openConv=(uid,name)=>{
-    setActiveUid(uid);setActiveName(name);
-    setShowSearch(false);setSearchQ('');setSearchRes([]);
-    // Add to allMsgs so conv appears in list even if no messages yet
-    setAllMsgs(prev=>{
-      if(!prev) return [];
-      const has=prev.some(m=>(m.from_uid===uid&&m.to_uid===user.uid)||(m.to_uid===uid&&m.from_uid===user.uid));
-      if(has) return prev;
-      return prev; // will appear once first message sent
-    });
-  };
+  const openConv=(uid,name)=>{setActiveUid(uid);setActiveName(name);setShowSearch(false);setSearchQ('');setSearchRes([]);};
 
-  const fmtTime=ts=>{
+  const fmtMsgTime=ts=>{
     const d=new Date(ts);
-    const now=new Date();
+    return d.toLocaleTimeString('lt-LT',{hour:'2-digit',minute:'2-digit'});
+  };
+  const fmtConvTime=ts=>{
+    const d=new Date(ts),now=new Date();
     if(d.toDateString()===now.toDateString()) return d.toLocaleTimeString('lt-LT',{hour:'2-digit',minute:'2-digit'});
-    return d.toLocaleDateString('lt-LT',{month:'short',day:'numeric'});
+    return d.toLocaleDateString('lt-LT',{day:'numeric',month:'short'});
+  };
+  const fmtDateSep=ts=>{
+    const d=new Date(ts),now=new Date();
+    if(d.toDateString()===now.toDateString()) return 'Šiandien';
+    const yest=new Date(now);yest.setDate(yest.getDate()-1);
+    if(d.toDateString()===yest.toDateString()) return 'Vakar';
+    return d.toLocaleDateString('lt-LT',{year:'numeric',month:'long',day:'numeric'});
   };
 
   const convList=Object.values(convMap).sort((a,b)=>{
-    const la=a.msgs[a.msgs.length-1];const lb=b.msgs[b.msgs.length-1];
-    if(!la&&!lb) return 0; if(!la) return 1; if(!lb) return -1;
+    const la=a.msgs[a.msgs.length-1],lb=b.msgs[b.msgs.length-1];
+    if(!la&&!lb)return 0;if(!la)return 1;if(!lb)return-1;
     return new Date(lb.created_at)-new Date(la.created_at);
   });
 
-  const S={
-    wrap:{display:'flex',gap:10,height:340},
-    sidebar:{width:140,flexShrink:0,display:'flex',flexDirection:'column',gap:6,overflowY:'auto'},
-    convItem:(active)=>({
-      padding:'8px 10px',borderRadius:8,cursor:'pointer',
-      background:active?'rgba(201,168,76,0.12)':'rgba(255,255,255,0.03)',
-      border:active?'1px solid rgba(201,168,76,0.25)':'1px solid rgba(255,255,255,0.06)',
-      transition:'all .15s'
-    }),
-    main:{flex:1,display:'flex',flexDirection:'column',minWidth:0},
-    thread:{flex:1,overflowY:'auto',display:'flex',flexDirection:'column',gap:6,paddingRight:2,marginBottom:8},
-    bubble:(isMe)=>({
-      maxWidth:'88%',padding:'8px 12px',
-      borderRadius:isMe?'12px 12px 2px 12px':'12px 12px 12px 2px',
-      background:isMe?'rgba(201,168,76,0.15)':'rgba(255,255,255,0.06)',
-      border:isMe?'1px solid rgba(201,168,76,0.25)':'1px solid rgba(255,255,255,0.08)',
-      fontSize:12,color:'rgba(232,224,208,0.9)',lineHeight:1.5,wordBreak:'break-word'
-    }),
-  };
+  // Group messages by date for separators
+  const groupedMsgs=React.useMemo(()=>{
+    const groups=[];let lastDate='';
+    activeMsgs.forEach(m=>{
+      const d=new Date(m.created_at).toDateString();
+      if(d!==lastDate){groups.push({type:'sep',label:fmtDateSep(m.created_at),key:'sep-'+m.id});lastDate=d;}
+      groups.push({type:'msg',...m});
+    });
+    return groups;
+  },[activeMsgs]);
+
+  const isSupport=activeUid==='__support';
 
   return(
-    <div style={{position:'relative'}}>
-      {/* Search overlay */}
+    <div style={{position:'relative',margin:'0 -4px'}}>
+
+      {/* ── Search overlay ── */}
       {showSearch&&(
-        <div style={{position:'absolute',inset:0,background:'rgba(10,8,6,0.95)',zIndex:10,borderRadius:12,padding:16,display:'flex',flexDirection:'column',gap:10}}>
-          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-            <span style={{fontSize:12,color:'#c9a84c',fontWeight:700}}>🔍 Naujas pokalbis</span>
-            <button onClick={()=>{setShowSearch(false);setSearchQ('');}} style={{background:'none',border:'none',color:'rgba(232,224,208,.5)',cursor:'pointer',fontSize:18}}>✕</button>
+        <div style={{position:'absolute',inset:0,background:'rgba(5,5,15,0.97)',zIndex:20,borderRadius:14,
+          display:'flex',flexDirection:'column',overflow:'hidden'}}>
+          {/* Search header */}
+          <div style={{display:'flex',alignItems:'center',gap:10,padding:'14px 16px',
+            borderBottom:'1px solid rgba(255,255,255,0.07)'}}>
+            <button onClick={()=>{setShowSearch(false);setSearchQ('');}}
+              style={{background:'rgba(255,255,255,0.06)',border:'none',color:'rgba(232,224,208,0.6)',
+                cursor:'pointer',borderRadius:'50%',width:30,height:30,fontSize:16,display:'flex',alignItems:'center',justifyContent:'center'}}>←</button>
+            <input
+              autoFocus
+              value={searchQ}
+              onChange={e=>setSearchQ(e.target.value)}
+              placeholder="Ieškoti žaidėjo..."
+              style={{flex:1,background:'rgba(255,255,255,0.07)',border:'1px solid rgba(255,255,255,0.1)',
+                borderRadius:10,padding:'8px 14px',color:'rgba(232,224,208,0.9)',fontSize:13,outline:'none'}}
+            />
           </div>
-          <input
-            className="modal-input"
-            placeholder="Ieškoti žaidėjo pagal vardą..."
-            value={searchQ}
-            onChange={e=>setSearchQ(e.target.value)}
-            autoFocus
-            style={{fontSize:13}}
-          />
-          <div style={{flex:1,overflowY:'auto',display:'flex',flexDirection:'column',gap:6}}>
-            {searching&&<div style={{color:'rgba(232,224,208,.4)',fontSize:12,textAlign:'center',padding:8}}>Ieškoma...</div>}
+          {/* Results */}
+          <div style={{flex:1,overflowY:'auto',padding:'8px 6px'}}>
+            {searching&&(
+              <div style={{display:'flex',justifyContent:'center',padding:24}}>
+                <div style={{width:20,height:20,border:'2px solid rgba(201,168,76,0.3)',borderTopColor:'#c9a84c',
+                  borderRadius:'50%',animation:'spin 0.8s linear infinite'}}/>
+              </div>
+            )}
             {!searching&&searchQ.length>=2&&searchRes.length===0&&(
-              <div style={{color:'rgba(232,224,208,.3)',fontSize:12,textAlign:'center',padding:8}}>Žaidėjų nerasta</div>
+              <div style={{textAlign:'center',padding:'24px 0',color:'rgba(232,224,208,.3)',fontSize:13}}>Žaidėjų nerasta</div>
+            )}
+            {!searching&&searchQ.length<2&&(
+              <div style={{textAlign:'center',padding:'24px 0',color:'rgba(232,224,208,.2)',fontSize:12}}>Įvesk bent 2 simbolius</div>
             )}
             {searchRes.map(p=>(
               <div key={p.uid} onClick={()=>openConv(p.uid,p.name)}
-                style={{display:'flex',alignItems:'center',gap:8,padding:'8px 10px',borderRadius:8,cursor:'pointer',
-                  background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.08)'}}>
-                <div style={{width:30,height:30,borderRadius:'50%',background:'rgba(201,168,76,0.15)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,flexShrink:0}}>
-                  {p.avatar?<img src={p.avatar} alt="" style={{width:'100%',height:'100%',borderRadius:'50%',objectFit:'cover'}}/>:'👤'}
+                style={{display:'flex',alignItems:'center',gap:12,padding:'10px 12px',borderRadius:10,cursor:'pointer',
+                  transition:'background .15s'}}
+                onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.05)'}
+                onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+                <MsgAvatar name={p.name} avatar={p.avatar} size={40}/>
+                <div>
+                  <div style={{fontSize:13,fontWeight:600,color:'rgba(232,224,208,0.9)'}}>{p.name}</div>
+                  <div style={{fontSize:11,color:'rgba(232,224,208,.35)',marginTop:1}}>Žaidėjas</div>
                 </div>
-                <span style={{fontSize:13,color:'rgba(232,224,208,0.85)'}}>{p.name}</span>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      <div style={S.wrap}>
-        {/* Sidebar — conversation list */}
-        <div style={S.sidebar}>
-          <button onClick={()=>setShowSearch(true)}
-            style={{padding:'6px 8px',background:'rgba(201,168,76,0.1)',border:'1px solid rgba(201,168,76,0.3)',
-              borderRadius:7,color:'#c9a84c',fontSize:11,fontWeight:700,cursor:'pointer',letterSpacing:0.5,whiteSpace:'nowrap'}}>
-            + Naujas
-          </button>
-          {allMsgs===null&&<div style={{color:'rgba(232,224,208,.3)',fontSize:11,textAlign:'center',padding:8}}>...</div>}
-          {convList.map(conv=>{
-            const last=conv.msgs[conv.msgs.length-1];
-            const isActive=conv.uid===activeUid;
-            return(
-              <div key={conv.uid} onClick={()=>{setActiveUid(conv.uid);setActiveName(conv.name);}} style={S.convItem(isActive)}>
-                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:2}}>
-                  <span style={{fontSize:11,fontWeight:700,color:isActive?'#c9a84c':'rgba(232,224,208,0.8)',
-                    overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:90}}>{conv.name}</span>
-                  {conv.unread>0&&<span style={{background:'#ff3d71',color:'#fff',borderRadius:10,fontSize:9,
-                    padding:'1px 5px',fontWeight:700,flexShrink:0}}>{conv.unread}</span>}
+      {/* ── Main layout ── */}
+      <div style={{display:'flex',height:420,borderRadius:14,overflow:'hidden',
+        border:'1px solid rgba(255,255,255,0.07)',background:'rgba(0,0,0,0.35)'}}>
+
+        {/* ── Sidebar ── */}
+        <div style={{width:180,flexShrink:0,display:'flex',flexDirection:'column',
+          borderRight:'1px solid rgba(255,255,255,0.06)',background:'rgba(0,0,0,0.2)'}}>
+
+          {/* Sidebar header */}
+          <div style={{padding:'12px 12px 8px',borderBottom:'1px solid rgba(255,255,255,0.05)'}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+              <span style={{fontSize:11,fontWeight:700,color:'rgba(201,168,76,0.6)',letterSpacing:1.5,fontFamily:'Orbitron,monospace'}}>ŽINUTĖS</span>
+              <button onClick={()=>setShowSearch(true)}
+                style={{width:26,height:26,borderRadius:'50%',background:'rgba(201,168,76,0.12)',
+                  border:'1px solid rgba(201,168,76,0.25)',color:'#c9a84c',fontSize:16,cursor:'pointer',
+                  display:'flex',alignItems:'center',justifyContent:'center',lineHeight:1}}>+</button>
+            </div>
+          </div>
+
+          {/* Conversations */}
+          <div style={{flex:1,overflowY:'auto'}}>
+            {allMsgs===null&&[1,2].map(i=>(
+              <div key={i} style={{display:'flex',gap:10,padding:'10px 12px',alignItems:'center'}}>
+                <div style={{width:38,height:38,borderRadius:'50%',background:'rgba(255,255,255,0.05)',flexShrink:0}}/>
+                <div style={{flex:1}}>
+                  <div style={{height:10,background:'rgba(255,255,255,0.05)',borderRadius:4,marginBottom:5,width:'70%'}}/>
+                  <div style={{height:8,background:'rgba(255,255,255,0.03)',borderRadius:4,width:'90%'}}/>
                 </div>
-                {last&&<div style={{fontSize:10,color:'rgba(232,224,208,.3)',overflow:'hidden',textOverflow:'ellipsis',
-                  whiteSpace:'nowrap'}}>{last.body.slice(0,22)}{last.body.length>22?'…':''}</div>}
               </div>
-            );
-          })}
+            ))}
+            {convList.map(conv=>{
+              const last=conv.msgs[conv.msgs.length-1];
+              const isActive=conv.uid===activeUid;
+              const isSup=conv.uid==='__support';
+              return(
+                <div key={conv.uid} onClick={()=>{setActiveUid(conv.uid);setActiveName(conv.name);}}
+                  style={{display:'flex',gap:10,padding:'10px 12px',cursor:'pointer',alignItems:'center',
+                    background:isActive?'rgba(201,168,76,0.08)':'transparent',
+                    borderLeft:isActive?'3px solid #c9a84c':'3px solid transparent',
+                    transition:'all .15s'}}>
+                  <MsgAvatar name={conv.name} isSupport={isSup} size={38}/>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:2}}>
+                      <span style={{fontSize:12,fontWeight:600,color:isActive?'#c9a84c':'rgba(232,224,208,0.85)',
+                        overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:80}}>
+                        {isSup?'Support':conv.name}
+                      </span>
+                      {last&&<span style={{fontSize:9,color:'rgba(232,224,208,.25)',flexShrink:0}}>{fmtConvTime(last.created_at)}</span>}
+                    </div>
+                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                      <span style={{fontSize:10,color:'rgba(232,224,208,.3)',overflow:'hidden',textOverflow:'ellipsis',
+                        whiteSpace:'nowrap',maxWidth:conv.unread>0?90:110}}>
+                        {last?(last.from_uid===user.uid?'Tu: ':'')+last.body:'Nėra žinučių'}
+                      </span>
+                      {conv.unread>0&&(
+                        <span style={{background:'#c9a84c',color:'#0a0806',borderRadius:10,fontSize:9,
+                          padding:'1px 5px',fontWeight:800,flexShrink:0,marginLeft:2}}>{conv.unread}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Main panel */}
-        <div style={S.main}>
-          {/* Header */}
-          <div style={{marginBottom:6,borderBottom:'1px solid rgba(201,168,76,0.1)',paddingBottom:6}}>
-            {activeUid==='__support'?(
+        {/* ── Chat panel ── */}
+        <div style={{flex:1,display:'flex',flexDirection:'column',minWidth:0}}>
+
+          {/* Chat header */}
+          <div style={{display:'flex',alignItems:'center',gap:10,padding:'10px 14px',
+            borderBottom:'1px solid rgba(255,255,255,0.06)',background:'rgba(0,0,0,0.15)'}}>
+            <MsgAvatar name={activeName} isSupport={isSupport} size={36}/>
+            <div style={{flex:1,minWidth:0}}>
               <div style={{display:'flex',alignItems:'center',gap:6}}>
-                <span style={{fontSize:11,fontWeight:700,color:'#c9a84c',letterSpacing:1}}>🛡️ Support</span>
-                <span style={{fontSize:9,background:'rgba(74,222,128,0.15)',border:'1px solid rgba(74,222,128,0.3)',
-                  color:'#4ade80',borderRadius:4,padding:'1px 5px',fontWeight:700,letterSpacing:0.5}}>✓ OFICIALUS</span>
+                <span style={{fontSize:13,fontWeight:700,color:isSupport?'#4ade80':'rgba(232,224,208,0.9)'}}>
+                  {isSupport?'🛡️ Support':activeName}
+                </span>
+                {isSupport?(
+                  <span style={{fontSize:8,background:'rgba(74,222,128,0.15)',border:'1px solid rgba(74,222,128,0.3)',
+                    color:'#4ade80',borderRadius:4,padding:'1px 5px',fontWeight:700,letterSpacing:0.5}}>✓ OFICIALUS</span>
+                ):(
+                  <span style={{fontSize:8,background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',
+                    color:'rgba(232,224,208,.4)',borderRadius:4,padding:'1px 5px',fontWeight:600}}>ŽAIDĖJAS</span>
+                )}
               </div>
-            ):(
-              <div style={{display:'flex',alignItems:'center',gap:6}}>
-                <span style={{fontSize:11,fontWeight:700,color:'rgba(232,224,208,0.8)',letterSpacing:0.5}}>👤 {activeName}</span>
-                <span style={{fontSize:9,background:'rgba(255,100,100,0.1)',border:'1px solid rgba(255,100,100,0.2)',
-                  color:'rgba(255,150,150,0.8)',borderRadius:4,padding:'1px 5px',fontWeight:700,letterSpacing:0.5}}>ŽAIDĖJAS</span>
+              <div style={{fontSize:10,color:isSupport?'rgba(74,222,128,0.5)':'rgba(232,224,208,.25)',marginTop:1}}>
+                {isSupport?'🔒 Niekada neprašo slaptažodžio ar mokėjimo':'⚠️ Nėra HATHOR darbuotojas'}
               </div>
+            </div>
+            {!isSupport&&(
+              <button onClick={()=>{
+                if(!window.confirm(`Pranešti apie žaidėją "${activeName}"?`)) return;
+                fetch('/api/report/player',{method:'POST',headers:{'Content-Type':'application/json','x-session-token':tok},
+                  body:JSON.stringify({reported_uid:activeUid,reason:'Galimas apsimetimas / sukčiavimas'})})
+                  .then(r=>r.json()).then(d=>{if(d.ok)setReported(true);});
+              }} title="Pranešti apie žaidėją"
+                style={{background:'none',border:'none',color:reported?'#4ade80':'rgba(255,100,100,0.4)',
+                  cursor:'pointer',fontSize:16,padding:4,flexShrink:0}}>
+                {reported?'✅':'🚩'}
+              </button>
             )}
           </div>
 
-          {/* Security notice pinned at top */}
-          {activeUid==='__support'&&(
-            <div style={{background:'rgba(74,222,128,0.06)',border:'1px solid rgba(74,222,128,0.15)',borderRadius:7,
-              padding:'6px 10px',marginBottom:8,fontSize:10,color:'rgba(74,222,128,0.7)',lineHeight:1.5}}>
-              🔒 Tikras support <strong>niekada neprašo</strong> slaptažodžio, kortelės duomenų ar pervedimų.
-            </div>
-          )}
-          {activeUid!=='__support'&&(
-            <div style={{background:'rgba(255,180,0,0.06)',border:'1px solid rgba(255,180,0,0.15)',borderRadius:7,
-              padding:'6px 10px',marginBottom:8,fontSize:10,color:'rgba(255,200,80,0.7)',lineHeight:1.5}}>
-              ⚠️ Šis žaidėjas <strong>nėra</strong> HATHOR darbuotojas. Jei prašo duomenų ar pervedimo — pranešk support.
-            </div>
-          )}
-
           {/* Thread */}
-          <div ref={threadRef} style={S.thread}>
+          <div ref={threadRef} style={{flex:1,overflowY:'auto',padding:'12px 14px',
+            display:'flex',flexDirection:'column',gap:2,scrollBehavior:'smooth'}}>
             {activeMsgs.length===0&&(
-              <div style={{color:'rgba(232,224,208,.25)',fontSize:12,textAlign:'center',padding:'20px 0',flex:1,display:'flex',alignItems:'center',justifyContent:'center'}}>
-                {activeUid==='__support'?'Parašyk support komandai 👇':'Pradėk pokalbį 👇'}
+              <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
+                gap:8,color:'rgba(232,224,208,.2)'}}>
+                <div style={{fontSize:36}}>{isSupport?'🛡️':'💬'}</div>
+                <div style={{fontSize:12}}>{isSupport?'Parašyk support komandai':'Pradėk pokalbį'}</div>
               </div>
             )}
-            {activeMsgs.map(m=>{
-              const isMe=m.from_uid===user.uid;
-              // TRUE official message — only from __support uid, can never be faked by a player
-              const isOfficial=m.from_uid==='__support';
+            {groupedMsgs.map(item=>{
+              if(item.type==='sep') return(
+                <div key={item.key} style={{display:'flex',alignItems:'center',gap:8,margin:'8px 0',flexShrink:0}}>
+                  <div style={{flex:1,height:1,background:'rgba(255,255,255,0.06)'}}/>
+                  <span style={{fontSize:10,color:'rgba(232,224,208,.2)',padding:'0 6px',whiteSpace:'nowrap'}}>{item.label}</span>
+                  <div style={{flex:1,height:1,background:'rgba(255,255,255,0.06)'}}/>
+                </div>
+              );
+              const isMe=item.from_uid===user.uid;
+              const isOff=item.from_uid==='__support';
               return(
-                <div key={m.id} style={{display:'flex',flexDirection:'column',alignItems:isMe?'flex-end':'flex-start'}}>
-                  {isOfficial&&(
-                    <div style={{display:'flex',alignItems:'center',gap:4,marginBottom:3}}>
-                      <span style={{fontSize:9,background:'rgba(74,222,128,0.15)',border:'1px solid rgba(74,222,128,0.3)',
-                        color:'#4ade80',borderRadius:4,padding:'1px 6px',fontWeight:700,letterSpacing:0.5}}>🛡️ OFFICIAL SUPPORT</span>
-                    </div>
+                <div key={item.id} style={{display:'flex',flexDirection:'column',
+                  alignItems:isMe?'flex-end':'flex-start',marginBottom:4}}>
+                  {!isMe&&!isOff&&(
+                    <span style={{fontSize:10,color:'#c9a84c',fontWeight:600,marginBottom:2,marginLeft:2}}>{item.from_name}</span>
                   )}
                   <div style={{
-                    ...S.bubble(isMe),
-                    ...(isOfficial?{
-                      background:'rgba(74,222,128,0.08)',
-                      border:'1px solid rgba(74,222,128,0.25)',
-                      borderLeft:'3px solid rgba(74,222,128,0.5)'
-                    }:{})
+                    maxWidth:'78%',padding:'8px 12px',wordBreak:'break-word',fontSize:13,lineHeight:1.55,
+                    color: isMe?'rgba(240,220,160,0.95)': isOff?'rgba(200,255,220,0.9)':'rgba(232,224,208,0.88)',
+                    background: isMe?'rgba(201,168,76,0.18)': isOff?'rgba(74,222,128,0.1)':'rgba(255,255,255,0.07)',
+                    border: isMe?'1px solid rgba(201,168,76,0.28)': isOff?'1px solid rgba(74,222,128,0.22)':'1px solid rgba(255,255,255,0.09)',
+                    borderRadius: isMe?'18px 18px 4px 18px': isOff?'4px 18px 18px 18px':'4px 18px 18px 18px',
+                    boxShadow: isMe?'0 2px 8px rgba(201,168,76,0.08)': isOff?'0 2px 8px rgba(74,222,128,0.06)':'none',
+                    position:'relative',
                   }}>
-                    {!isMe&&!isOfficial&&<div style={{fontSize:9,color:'#c9a84c',fontWeight:700,marginBottom:3}}>{m.from_name}</div>}
-                    {m.body}
+                    {isOff&&<div style={{fontSize:9,color:'rgba(74,222,128,0.7)',fontWeight:700,marginBottom:3,letterSpacing:0.5}}>🛡️ OFFICIAL SUPPORT</div>}
+                    {item.body}
+                    <span style={{display:'block',textAlign:'right',fontSize:9,
+                      color:isMe?'rgba(201,168,76,.35)':isOff?'rgba(74,222,128,.3)':'rgba(232,224,208,.2)',
+                      marginTop:4,marginBottom:-2}}>{fmtMsgTime(item.created_at)}</span>
                   </div>
-                  <div style={{fontSize:9,color:'rgba(232,224,208,.2)',marginTop:2}}>{fmtTime(m.created_at)}</div>
                 </div>
               );
             })}
           </div>
 
           {/* Compose */}
-          <div style={{borderTop:'1px solid rgba(201,168,76,.07)',paddingTop:8,display:'flex',gap:6}}>
+          <div style={{padding:'8px 12px',borderTop:'1px solid rgba(255,255,255,0.06)',
+            background:'rgba(0,0,0,0.15)',display:'flex',gap:8,alignItems:'flex-end'}}>
             <input
-              className="modal-input"
-              placeholder="Žinutė..."
               value={body}
               onChange={e=>setBody(e.target.value)}
               onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}}
-              style={{flex:1,margin:0,fontSize:12,padding:'7px 10px'}}
+              placeholder="Žinutė..."
+              style={{flex:1,background:'rgba(255,255,255,0.07)',border:'1px solid rgba(255,255,255,0.1)',
+                borderRadius:22,padding:'9px 16px',color:'rgba(232,224,208,0.9)',fontSize:13,outline:'none',
+                fontFamily:'inherit',transition:'border-color .15s'}}
+              onFocus={e=>e.target.style.borderColor='rgba(201,168,76,0.35)'}
+              onBlur={e=>e.target.style.borderColor='rgba(255,255,255,0.1)'}
             />
-            <button className="btn btn-primary btn-sm" onClick={sendMsg} disabled={sending||!body.trim()}
-              style={{flexShrink:0,padding:'7px 12px',fontSize:12}}>
-              {sending?'⏳':'→'}
+            <button onClick={sendMsg} disabled={sending||!body.trim()}
+              style={{width:38,height:38,borderRadius:'50%',flexShrink:0,cursor:body.trim()?'pointer':'default',
+                background:body.trim()?'linear-gradient(135deg,#c9a84c,#a07830)':'rgba(255,255,255,0.06)',
+                border:'none',color:body.trim()?'#0a0806':'rgba(232,224,208,.25)',
+                fontSize:16,display:'flex',alignItems:'center',justifyContent:'center',
+                transition:'all .2s',transform:body.trim()?'scale(1)':'scale(0.92)'}}>
+              {sending?'⏳':'➤'}
             </button>
           </div>
-          {/* Report button for player conversations */}
-          {activeUid!=='__support'&&(
-            <div style={{marginTop:6,textAlign:'right'}}>
-              <button onClick={()=>{
-                if(!window.confirm(`Pranešti apie žaidėją "${activeName}" support komandai?`)) return;
-                fetch('/api/report/player',{method:'POST',headers:{'Content-Type':'application/json','x-session-token':tok},
-                  body:JSON.stringify({reported_uid:activeUid,reason:'Galimas apsimetimas darbuotoju / sukčiavimas'})})
-                  .then(r=>r.json()).then(d=>{
-                    if(d.ok) alert('✅ Pranešimas išsiųstas! Support komanda patikrins.');
-                  });
-              }} style={{background:'none',border:'none',color:'rgba(255,100,100,0.5)',fontSize:10,cursor:'pointer',
-                textDecoration:'underline',padding:0}}>
-                🚩 Pranešti apie šį žaidėją
-              </button>
-            </div>
-          )}
+
         </div>
       </div>
     </div>
@@ -7394,7 +7460,7 @@ function AvatarModal({user,onClose,onUpdate,defaultTab}){
 
   return(
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" style={{maxWidth:tab==='inbox'?520:460,maxHeight:'85vh',overflowY:'auto',padding:'28px 28px 24px',transition:'max-width .2s'}} onClick={e=>e.stopPropagation()}>
+      <div className="modal" style={{maxWidth:tab==='inbox'?580:460,maxHeight:'92vh',overflowY:tab==='inbox'?'visible':'auto',padding:tab==='inbox'?'20px 20px 16px':'28px 28px 24px',transition:'max-width .2s,padding .2s'}} onClick={e=>e.stopPropagation()}>
         <h3 style={{marginBottom:16}}>My Profile</h3>
 
         {/* Tabs */}
