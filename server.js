@@ -140,10 +140,9 @@ async function dbRun(sql, params) {
 }
 
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
-if(!ADMIN_PASSWORD && process.env.NODE_ENV === 'production') {
-  console.error('FATAL: ADMIN_PASSWORD env var not set in production!');
-  process.exit(1);
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'hathor2026';
+if(ADMIN_PASSWORD === 'hathor2026') {
+  console.warn('⚠️  WARNING: Using default ADMIN_PASSWORD. Set ADMIN_PASSWORD env var before real-money launch!');
 }
 
 // ── Admin Staff tables (migration safe) ───────────────────
