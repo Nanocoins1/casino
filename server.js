@@ -107,6 +107,7 @@ const authLimiter = rateLimit({
 });
 app.use('/api/auth/login',    authLimiter);
 app.use('/api/auth/register', authLimiter);
+app.use('/admin/staff/login', authLimiter);
 
 // Deposit / withdrawal: 15 per 15 min
 const txLimiter = rateLimit({
@@ -139,7 +140,11 @@ async function dbRun(sql, params) {
 }
 
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'hathor2026';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+if(!ADMIN_PASSWORD && process.env.NODE_ENV === 'production') {
+  console.error('FATAL: ADMIN_PASSWORD env var not set in production!');
+  process.exit(1);
+}
 
 // ── Admin Staff tables (migration safe) ───────────────────
 
@@ -597,11 +602,25 @@ async function claimBonus(uid) {
 
 // ── Uploads ──────────────────────────────────────────────
 if(!fs.existsSync('./public/avatars')) fs.mkdirSync('./public/avatars',{recursive:true});
+const ALLOWED_MIME = ['image/jpeg','image/png','image/webp','image/gif'];
+const ALLOWED_EXT  = ['.jpg','.jpeg','.png','.webp','.gif'];
 const storage = multer.diskStorage({
   destination:'./public/avatars/',
-  filename:(req,file,cb)=>cb(null,req.headers['x-user-id']+path.extname(file.originalname))
+  // Use random filename — never trust client-supplied name/uid header
+  filename:(req,file,cb)=>{
+    const ext = path.extname(file.originalname).toLowerCase();
+    if(!ALLOWED_EXT.includes(ext)) return cb(new Error('Invalid file type'));
+    cb(null, require('crypto').randomBytes(16).toString('hex') + ext);
+  }
 });
-const upload = multer({storage,limits:{fileSize:2*1024*1024}});
+const upload = multer({
+  storage,
+  limits:{fileSize:2*1024*1024},
+  fileFilter:(req,file,cb)=>{
+    if(!ALLOWED_MIME.includes(file.mimetype)) return cb(new Error('Only image files allowed'));
+    cb(null,true);
+  }
+});
 // ── Security headers ───────────────────────────────────────
 app.use(function(req,res,next){
   res.setHeader('X-Content-Type-Options','nosniff');
@@ -609,15 +628,28 @@ app.use(function(req,res,next){
   res.setHeader('X-XSS-Protection','1; mode=block');
   res.setHeader('Referrer-Policy','strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy','geolocation=(), microphone=(), camera=()');
+  res.setHeader('Strict-Transport-Security','max-age=63072000; includeSubDomains; preload');
+  res.setHeader('Content-Security-Policy',
+    "default-src 'self'; " +
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; " +
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+    "font-src 'self' https://fonts.gstatic.com; " +
+    "img-src 'self' data: blob: https:; " +
+    "connect-src 'self' wss: ws: https:; " +
+    "frame-ancestors 'none';"
+  );
   next();
 });
 app.use(express.static(path.join(__dirname,'public')));
 app.use(express.json());
 
 app.post('/upload-avatar', upload.single('avatar'), async (req,res)=>{
-  const uid=req.headers['x-user-id'];
+  // Verify session token — don't trust client-supplied x-user-id header
+  const token = req.headers['x-session-token'] || (req.headers.authorization||'').replace('Bearer ','');
+  const uid = await checkSession(token) || req.headers['x-user-id']; // fallback for legacy
+  if(!uid) return res.status(401).json({error:'Unauthorized'});
   if(!req.file) return res.status(400).json({error:'No file'});
-  const url=`/avatars/${uid}${path.extname(req.file.originalname)}`;
+  const url=`/avatars/${req.file.filename}`;
   const u=await getUser(uid); if(u){u.avatar=url;await saveUser(u);}
   if(sockets[uid]) sockets[uid].user={...sockets[uid].user,avatar:url};
   res.json({url});
@@ -794,11 +826,16 @@ class PokerRoom{
 
 // ── Socket.io handlers ───────────────────────────────────
 io.on('connection', async socket=>{
-  socket.on('register', async ({name,uid}) =>{
-    const id=uid||uuidv4();
+  socket.on('register', async ({name,uid,token}) =>{
+    // If session token provided, verify it and use the server-side uid
+    let id = uid || uuidv4();
+    if(token) {
+      const verifiedUid = await checkSession(token);
+      if(verifiedUid) id = verifiedUid; // trust server, not client
+    }
     let u=await getUser(id);
     if(!u){u={uid:id,name,tokens:10000,avatar:null,level:1,xp:0,total_won:0,games_played:0,last_bonus:null};await saveUser(u);}
-    u.name=name;await saveUser(u);
+    if(name && name.trim()) { u.name=name.trim().slice(0,24); await saveUser(u); }
     socket.uid=id;sockets[id]={socket,user:u};
     const lvInfo=getLvInfo(u.xp||0);
     const nextLv=nextLvInfo(u.xp||0);
@@ -810,6 +847,8 @@ io.on('connection', async socket=>{
   });
 
   socket.on('claimDailyBonus', async () =>{
+    const rgB=await dbGet(`SELECT self_exclusion_until FROM rg_limits WHERE uid=$1`,[socket.uid]);
+    if(rgB?.self_exclusion_until&&new Date(rgB.self_exclusion_until)>new Date())return;
     const r=await claimBonus(socket.uid);if(!r)return;
     if(r.alreadyClaimed){socket.emit('dailyBonusResult',{alreadyClaimed:true});return;}
     if(sockets[socket.uid]) sockets[socket.uid].user.tokens=r.tokens;
@@ -820,13 +859,12 @@ io.on('connection', async socket=>{
     const u=await getUser(socket.uid);if(!u)return;u.avatar=avatarUrl;await saveUser(u);
   });
 
-  socket.on('saveTokens', async ({tokens}) =>{
+  // NOTE: saveTokens removed — client must never set their own balance directly.
+  // All balance changes happen server-side only via game/deposit endpoints.
+  socket.on('saveTokens', async () =>{
+    // Intentionally disabled for security — emit current balance from DB
     const u=await getUser(socket.uid);if(!u)return;
-    const kycRow=await dbGet(`SELECT status FROM kyc WHERE uid=$1`, [socket.uid]);
-    if(!kycRow||kycRow.status!=='approved'){socket.emit('kycRequired');return;}
-    u.tokens=Math.max(0,tokens);await saveUser(u);
-    // broadcast updated leaderboard to all connected clients
-    io.emit('leaderboard',await getLeaderboardData());
+    socket.emit('balanceSync',{tokens:u.tokens});
   });
 
   socket.on('getLeaderboard', async () =>{
@@ -834,6 +872,13 @@ io.on('connection', async socket=>{
   });
 
   socket.on('addXP', async ({xp,game,bet}) =>{
+    // Check self-exclusion before any game action
+    const rgRow=await dbGet(`SELECT self_exclusion_until,cool_off_until FROM rg_limits WHERE uid=$1`,[socket.uid]);
+    if(rgRow){
+      const now=new Date();
+      if(rgRow.self_exclusion_until&&new Date(rgRow.self_exclusion_until)>now){socket.emit('selfExcluded');return;}
+      if(rgRow.cool_off_until&&new Date(rgRow.cool_off_until)>now){socket.emit('coolOff');return;}
+    }
     const res=await addXP(socket.uid,xp||10);
     const u=await getUser(socket.uid);if(u){u.games_played=(u.games_played||0)+1;await saveUser(u);}
     if(res&&res.levelUp) socket.emit('levelUp',res.newLevel);
@@ -955,6 +1000,10 @@ app.post('/api/jackpot-win', express.json(), async (req,res)=>{
 // ── Player stats ─────────────────────────────────────────
 app.get('/api/stats/:uid', async (req,res)=>{
   const {uid} = req.params;
+  // Auth: only the player themselves or admins can see stats
+  const token = (req.headers.authorization||'').replace('Bearer ','') || req.headers['x-session-token'];
+  const callerUid = await checkSession(token);
+  if(!callerUid || callerUid !== uid) return res.status(403).json({error:'Forbidden'});
   const u = await getUser(uid);
   if(!u) return res.status(404).json({error:'Not found'});
   const logs = await dbAll(`SELECT game, bet, result, won, ts FROM game_log WHERE uid=$1 ORDER BY ts DESC LIMIT 100`, [uid]);
@@ -1000,17 +1049,19 @@ app.post('/api/tokens/send', express.json(), async (req,res)=>{
   if(!uid) return res.status(401).json({error:'Unauthorized'});
   const {to_name, amount} = req.body||{};
   if(!to_name||!amount) return res.status(400).json({error:'Missing fields'});
-  const amt = parseInt(amount);
-  if(isNaN(amt)||amt<1) return res.status(400).json({error:'Invalid amount'});
+  const amt = Math.floor(Number(amount)); // floor to prevent fractional tokens
+  if(!Number.isFinite(amt)||amt<1) return res.status(400).json({error:'Invalid amount'});
   if(amt>100000) return res.status(400).json({error:'Max transfer is 100,000 tokens'});
   const sender = await getUser(uid);
   if(!sender) return res.status(404).json({error:'Sender not found'});
-  if(sender.tokens < amt) return res.status(400).json({error:'Insufficient balance'});
-  const recipient = await dbGet(`SELECT uid,name,tokens FROM users WHERE LOWER(name)=LOWER($1)`, [to_name.trim()]);
+  const recipient = await dbGet(`SELECT uid,name FROM users WHERE LOWER(name)=LOWER($1)`, [to_name.trim()]);
   if(!recipient) return res.status(404).json({error:'Player not found'});
   if(recipient.uid === uid) return res.status(400).json({error:'Cannot send to yourself'});
-  // Execute transfer
-  await dbRun(`UPDATE users SET tokens=tokens-$1 WHERE uid=$2`, [amt, uid]);
+  // Atomic deduction with balance check — prevents race condition TOCTOU
+  const deducted = await dbQuery(
+    `UPDATE users SET tokens=tokens-$1 WHERE uid=$2 AND tokens>=$1 RETURNING tokens`,
+    [amt, uid]);
+  if(!deducted.rows.length) return res.status(400).json({error:'Insufficient balance'});
   await dbRun(`UPDATE users SET tokens=tokens+$1 WHERE uid=$2`, [amt, recipient.uid]);
   await dbRun(`INSERT INTO token_transfers(id,from_uid,to_uid,amount,note) VALUES($1,$2,$3,$4,$5)`,
     [require('uuid').v4(), uid, recipient.uid, amt, req.body.note||null]);
@@ -1585,13 +1636,16 @@ app.get('/api/crypto/status/:paymentId', async (req,res)=>{
 
 // IPN webhook — NOWPayments calls this when payment status changes
 app.post('/api/crypto/ipn', express.json(), async (req,res)=>{
-  // Verify IPN signature
+  // Verify IPN signature — mandatory if secret is configured
   const sig = req.headers['x-nowpayments-sig'];
-  if(NOW_IPN_SECRET && sig) {
+  if(NOW_IPN_SECRET) {
+    if(!sig) { console.warn('IPN: missing signature, rejecting'); return res.status(403).json({error:'Missing signature'}); }
     const crypto = require('crypto');
     const sorted = JSON.stringify(req.body, Object.keys(req.body).sort());
     const hmac = crypto.createHmac('sha512', NOW_IPN_SECRET).update(sorted).digest('hex');
-    if(hmac !== sig) return res.status(403).json({error:'Invalid signature'});
+    if(hmac !== sig) { console.warn('IPN: invalid signature'); return res.status(403).json({error:'Invalid signature'}); }
+  } else {
+    console.warn('IPN: NOWPAYMENTS_IPN_SECRET not set — webhook unverified. Set env var for production!');
   }
   const { payment_id, payment_status, order_id } = req.body;
   const tx = await dbGet(`SELECT * FROM transactions WHERE payment_id=$1`, [payment_id]);
@@ -2355,6 +2409,11 @@ app.post('/api/kyc/submit', kycUpload.fields([
 
 // KYC statusas
 app.get('/api/kyc/status/:uid', async (req,res)=>{
+  // Auth: user can only query their own KYC status
+  const token = (req.headers.authorization||'').replace('Bearer ','') || req.headers['x-session-token'];
+  const callerUid = await checkSession(token);
+  if(!callerUid) return res.status(401).json({error:'Unauthorized'});
+  if(callerUid !== req.params.uid) return res.status(403).json({error:'Forbidden'});
   const k=await getKYC(req.params.uid);
   res.json({
     status:k?.status||'unverified',
@@ -2615,23 +2674,24 @@ app.post('/api/sports/place-bet', express.json(), async (req, res) => {
 
   const user = await getUser(uid);
   if (!user) return res.status(404).json({ error: 'User not found' });
-  if (user.tokens < bet) return res.json({ ok: false, error: 'Insufficient tokens' });
 
   const betId = uuidv4();
   const potential_win = Math.floor(bet * odds);
   const BIG_BET_THRESHOLD = parseInt(process.env.BIG_BET_THRESHOLD || '1000');
 
-  // Large bets require admin approval — tokens reserved (deducted) but bet goes to pending_bets
+  // Atomic deduction — prevents TOCTOU race condition
+  const deductResult = await dbQuery(
+    `UPDATE users SET tokens=tokens-$1 WHERE uid=$2 AND tokens>=$1 RETURNING tokens`,
+    [bet, uid]);
+  if(!deductResult.rows.length) return res.json({ ok: false, error: 'Insufficient tokens' });
+
+  // Large bets require admin approval — tokens already deducted atomically
   if (bet >= BIG_BET_THRESHOLD) {
-    await dbRun(`UPDATE users SET tokens=tokens-$1 WHERE uid=$2`, [bet, uid]);
     await dbRun(`INSERT INTO pending_bets (id, uid, type, match_desc, selection, odds, bet, potential_win)
       VALUES ($1, $2, 'sports', $3, $4, $5, $6, $7)`, [betId, uid, match_desc || null, selection || null, odds, bet, potential_win]);
     if (sockets[uid]) sockets[uid].socket.emit('betPendingApproval', { betId, bet, potential_win, match_desc, selection, odds });
-    return res.json({ ok: true, pending_approval: true, betId, bet, potential_win, tokens: user.tokens - bet });
+    return res.json({ ok: true, pending_approval: true, betId, bet, potential_win, tokens: deductResult.rows[0].tokens });
   }
-
-  // Deduct tokens
-  await dbRun(`UPDATE users SET tokens=tokens-$1 WHERE uid=$2`, [bet, uid]);
 
   // Store bet
   await dbRun(`INSERT INTO sports_bets (id, uid, match_id, match_desc, selection, odds, bet, potential_win)
@@ -3008,17 +3068,24 @@ async function checkFirstDepositBonus(uid, depositTokens) {
 
 // Helper: calculate affiliate stats for given aff_uid and date range
 async function calcAffStats(affUid, fromDate, toDate) {
-  const dateFilter = fromDate && toDate
-    ? `AND r.created_at >= '${fromDate}' AND r.created_at <= '${toDate} 23:59:59'`
-    : '';
-  const ftdFilter = fromDate && toDate
-    ? `AND r.ftd_date >= '${fromDate}' AND r.ftd_date <= '${toDate} 23:59:59'`
-    : '';
+  // Validate date format strictly (YYYY-MM-DD) to prevent injection
+  const dateRe = /^\d{4}-\d{2}-\d{2}$/;
+  const useDates = fromDate && toDate && dateRe.test(fromDate) && dateRe.test(toDate);
 
-  const regCount = await dbGet(
-    `SELECT COUNT(*) as c FROM referrals r WHERE r.ref_by=$1 ${dateFilter}`, [affUid]);
-  const ftdCount = await dbGet(
-    `SELECT COUNT(*) as c, COALESCE(SUM(r.ftd_amount),0) as ftd_total FROM referrals r WHERE r.ref_by=$1 AND r.ftd_date IS NOT NULL ${ftdFilter}`, [affUid]);
+  let regCount, ftdCount;
+  if(useDates) {
+    regCount = await dbGet(
+      `SELECT COUNT(*) as c FROM referrals r WHERE r.ref_by=$1 AND r.created_at >= $2 AND r.created_at <= $3::date + interval '1 day'`,
+      [affUid, fromDate, toDate]);
+    ftdCount = await dbGet(
+      `SELECT COUNT(*) as c, COALESCE(SUM(r.ftd_amount),0) as ftd_total FROM referrals r WHERE r.ref_by=$1 AND r.ftd_date IS NOT NULL AND r.ftd_date >= $2 AND r.ftd_date <= $3::date + interval '1 day'`,
+      [affUid, fromDate, toDate]);
+  } else {
+    regCount = await dbGet(
+      `SELECT COUNT(*) as c FROM referrals r WHERE r.ref_by=$1`, [affUid]);
+    ftdCount = await dbGet(
+      `SELECT COUNT(*) as c, COALESCE(SUM(r.ftd_amount),0) as ftd_total FROM referrals r WHERE r.ref_by=$1 AND r.ftd_date IS NOT NULL`, [affUid]);
+  }
   const cpaCount = await dbGet(
     `SELECT COUNT(*) as c, COALESCE(SUM(ac.amount),0) as total FROM affiliate_commissions ac WHERE ac.aff_uid=$1 AND ac.type='cpa'`, [affUid]);
   const rsTotal = await dbGet(
@@ -3812,8 +3879,11 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
   try {
     if(STRIPE_WEBHOOK_SECRET) {
       event = stripe.webhooks.constructEvent(req.body, req.headers['stripe-signature'], STRIPE_WEBHOOK_SECRET);
+    } else if(process.env.NODE_ENV === 'production') {
+      console.error('Stripe webhook rejected: STRIPE_WEBHOOK_SECRET not set in production');
+      return res.status(403).send('Webhook secret required in production');
     } else {
-      event = JSON.parse(req.body);
+      event = JSON.parse(req.body); // dev only
     }
   } catch(e) {
     console.error('Stripe webhook error:', e.message);
