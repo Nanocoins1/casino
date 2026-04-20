@@ -203,6 +203,8 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 // Return URL support
 const _returnUrl = new URLSearchParams(location.search).get('return') || localStorage.getItem('login_return') || '/';
 function _getReturn(){ const u=_returnUrl; localStorage.removeItem('login_return'); return u; }
+// Auto-switch to register tab if ?mode=register
+if(new URLSearchParams(location.search).get('mode')==='register') switchTab('register');
 
 // Redirect if already logged in
 (async function(){
