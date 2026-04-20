@@ -3279,6 +3279,18 @@ body { color: #e8e2d4 !important; }
 .sb-item.active { background:rgba(201,168,76,.08); color:var(--gold2); border-left-color:var(--gold); }
 .sb-item-icon { font-size:16px; width:22px; text-align:center; flex-shrink:0; filter:saturate(0) brightness(0.7); }
 .sb-item.active .sb-item-icon, .sb-item:hover .sb-item-icon { filter:none; }
+/* DALL-E gold icon images in sidebar */
+.sb-icon-img {
+  width:22px; height:22px; object-fit:contain; flex-shrink:0; border-radius:5px;
+  filter:grayscale(60%) brightness(0.75); transition:filter .2s;
+}
+.sb-item:hover .sb-icon-img { filter:grayscale(10%) brightness(1.05) drop-shadow(0 0 4px rgba(240,192,96,.35)); }
+.sb-item.active .sb-icon-img { filter:none drop-shadow(0 0 6px rgba(240,192,96,.5)) brightness(1.1); }
+/* Icon images inside CTA buttons */
+.btn-icon-img {
+  width:18px; height:18px; object-fit:contain; flex-shrink:0;
+  filter:brightness(1.1); vertical-align:middle; margin-top:-2px;
+}
 .sb-item-badge {
   margin-left:auto; font-size:8px; font-weight:700; padding:2px 7px; border-radius:8px;
   background:rgba(192,57,76,.6); color:#f0a0a8; letter-spacing:.5px;
@@ -14222,39 +14234,39 @@ function App(){
     {id:'lobby',icon:'🏠',label:t.lobby||'Lobby'},
     {id:'__div1'},
     {id:'__label1',label:t.sbCasino||'CASINO'},
-    {id:'prempoker',icon:'♛',label:(t.games&&t.games.premiumPoker&&t.games.premiumPoker.title)||'VIP Poker',badge:'VIP',badgeCls:'new'},
-    {id:'slots',icon:'🎰',label:t.slots||'Slots',badge:'HOT',badgeCls:'hot'},
-    {id:'__link_blackjack',icon:'🃏',label:t.bj||'Blackjack',href:'/blackjack.html',badge:'HOT',badgeCls:'hot'},
-    {id:'__link_roulette',icon:'⭕',label:t.roulette||'Roulette',href:'/roulette.html',badge:'LIVE',badgeCls:'live'},
-    {id:'poker',icon:'♠️',label:t.poker||'Poker',badge:'LIVE',badgeCls:'live'},
-    {id:'pyramid',icon:'🏺',label:(t.games&&t.games.pyramid&&t.games.pyramid.title)||'Pyramid Drop'},
+    {id:'prempoker',icon:'♛',img:'/img/icon-vip.png',label:(t.games&&t.games.premiumPoker&&t.games.premiumPoker.title)||'VIP Poker',badge:'VIP',badgeCls:'new'},
+    {id:'slots',icon:'🎰',img:'/img/icon-slots.png',label:t.slots||'Slots',badge:'HOT',badgeCls:'hot'},
+    {id:'__link_blackjack',icon:'🃏',img:'/img/icon-blackjack.png',label:t.bj||'Blackjack',href:'/blackjack.html',badge:'HOT',badgeCls:'hot'},
+    {id:'__link_roulette',icon:'⭕',img:'/img/icon-roulette.png',label:t.roulette||'Roulette',href:'/roulette.html',badge:'LIVE',badgeCls:'live'},
+    {id:'poker',icon:'♠️',img:'/img/icon-poker.png',label:t.poker||'Poker',badge:'LIVE',badgeCls:'live'},
+    {id:'pyramid',icon:'🏺',img:'/img/icon-pyramid-game.png',label:(t.games&&t.games.pyramid&&t.games.pyramid.title)||'Pyramid Drop'},
     {id:'__div2'},
     {id:'__label2',label:t.sbGames||'GAMES'},
-    {id:'__link_dragon_crash',icon:'🐉',label:(t.games&&t.games.dragonCrash&&t.games.dragonCrash.title)||'Dragon Crash',href:'/dragon-crash.html',badge:'NEW',badgeCls:'new'},
-    {id:'__link_nexus',icon:'🎰',label:(t.games&&t.games.nexusSlots&&t.games.nexusSlots.title)||'NEXUS SLOTS',href:'/nexus-slots.html',badge:'NEW',badgeCls:'new'},
-    {id:'__link_crash',icon:'🚀',label:(t.games&&t.games.crash&&t.games.crash.title)||'Crash',href:'/crash.html',badge:'HOT',badgeCls:'hot'},
-    {id:'__link_slots',icon:'🎰',label:(t.games&&t.games.slotsClassic&&t.games.slotsClassic.title)||'Slots',href:'/slots.html'},
-    {id:'__link_dragon',icon:'🐉',label:(t.games&&t.games.dragonTower&&t.games.dragonTower.title)||'Dragon Tower',href:'/dragon-tower.html',badge:'NEW',badgeCls:'new'},
+    {id:'__link_dragon_crash',icon:'🐉',img:'/img/icon-crash.png',label:(t.games&&t.games.dragonCrash&&t.games.dragonCrash.title)||'Dragon Crash',href:'/dragon-crash.html',badge:'NEW',badgeCls:'new'},
+    {id:'__link_nexus',icon:'🎰',img:'/img/icon-slots.png',label:(t.games&&t.games.nexusSlots&&t.games.nexusSlots.title)||'NEXUS SLOTS',href:'/nexus-slots.html',badge:'NEW',badgeCls:'new'},
+    {id:'__link_crash',icon:'🚀',img:'/img/icon-crash.png',label:(t.games&&t.games.crash&&t.games.crash.title)||'Crash',href:'/crash.html',badge:'HOT',badgeCls:'hot'},
+    {id:'__link_slots',icon:'🎰',img:'/img/icon-slots.png',label:(t.games&&t.games.slotsClassic&&t.games.slotsClassic.title)||'Slots',href:'/slots.html'},
+    {id:'__link_dragon',icon:'🐉',img:'/img/icon-crash.png',label:(t.games&&t.games.dragonTower&&t.games.dragonTower.title)||'Dragon Tower',href:'/dragon-tower.html',badge:'NEW',badgeCls:'new'},
     {id:'__link_coinflip',icon:'🪙',label:(t.games&&t.games.coinFlip&&t.games.coinFlip.title)||'Coin Flip',href:'/coinflip.html',badge:'NEW',badgeCls:'new'},
     {id:'__link_limbo',icon:'⚡',label:(t.games&&t.games.limbo&&t.games.limbo.title)||'Limbo',href:'/limbo.html',badge:'NEW',badgeCls:'new'},
     {id:'__link_mines',icon:'💣',label:(t.games&&t.games.mines&&t.games.mines.title)||'Mines',href:'/mines.html'},
     {id:'__link_hilo',icon:'📈',label:(t.games&&t.games.hilo&&t.games.hilo.title)||'HiLo',href:'/hilo.html'},
     {id:'__link_krioklis',icon:'🔮',label:(t.games&&t.games.krioklis&&t.games.krioklis.title)||'Plinko',href:'/plinko.html'},
-    {id:'__link_dice',icon:'🎲',label:(t.games&&t.games.dice&&t.games.dice.title)||'Dice',href:'/dice.html'},
-    {id:'__link_wheel',icon:'🎡',label:(t.games&&t.games.nexusWheel&&t.games.nexusWheel.title)||'NEXUS WHEEL',href:'/wheel.html',badge:'NEW',badgeCls:'new'},
+    {id:'__link_dice',icon:'🎲',img:'/img/icon-dice.png',label:(t.games&&t.games.dice&&t.games.dice.title)||'Dice',href:'/dice.html'},
+    {id:'__link_wheel',icon:'🎡',img:'/img/icon-roulette.png',label:(t.games&&t.games.nexusWheel&&t.games.nexusWheel.title)||'NEXUS WHEEL',href:'/wheel.html',badge:'NEW',badgeCls:'new'},
     {id:'__link_keno',icon:'🎱',label:(t.games&&t.games.keno&&t.games.keno.title)||'Keno',href:'/keno.html'},
-    {id:'__link_baccarat',icon:'🎴',label:(t.games&&t.games.baccarat&&t.games.baccarat.title)||'Baccarat',href:'/baccarat.html'},
-    {id:'__link_vp',icon:'🂡',label:(t.games&&t.games.videoPoker&&t.games.videoPoker.title)||'Video Poker',href:'/videopoker.html'},
+    {id:'__link_baccarat',icon:'🎴',img:'/img/icon-blackjack.png',label:(t.games&&t.games.baccarat&&t.games.baccarat.title)||'Baccarat',href:'/baccarat.html'},
+    {id:'__link_vp',icon:'🂡',img:'/img/icon-poker.png',label:(t.games&&t.games.videoPoker&&t.games.videoPoker.title)||'Video Poker',href:'/videopoker.html'},
     {id:'__div3'},
     {id:'__label3',label:t.sbMore||'MORE'},
-    {id:'sports',icon:'⚽',label:t.sports||'Sports',badge:'LIVE',badgeCls:'live'},
+    {id:'sports',icon:'⚽',img:'/img/nav-sports.png',label:t.sports||'Sports',badge:'LIVE',badgeCls:'live'},
     {id:'tournaments',icon:'🏆',label:t.tournaments||'Tournaments',badge:'NEW',badgeCls:'new'},
     {id:'leaderboard',icon:'🥇',label:t.leaderboard||'Leaderboard'},
     {id:'stats',icon:'📊',label:t.stats||'Stats'},
     {id:'referral',icon:'👥',label:(t.referral)||'Refer a Friend'},
-    {id:'cashier',icon:'💳',label:t.cashier||'Cashier'},
+    {id:'cashier',icon:'💳',img:'/img/icon-deposit.png',label:t.cashier||'Cashier'},
     {id:'__div4'},
-    {id:'vip',icon:'🌟',label:t.vip||'VIP',badge:'NEW',badgeCls:'new'},
+    {id:'vip',icon:'🌟',img:'/img/icon-vip.png',label:t.vip||'VIP',badge:'NEW',badgeCls:'new'},
     {id:'viktor',icon:'🎩',label:'Viktor AI',badge:'AI',badgeCls:'live'},
     {id:'support',icon:'🎧',label:t.support||'Support',badge:'●',badgeCls:'live'},
     {id:'__div5'},
@@ -14353,16 +14365,19 @@ function App(){
           {SB_ITEMS.map((item,i)=>{
             if(item.id.startsWith('__div')) return <div key={i} className="sb-divider"/>;
             if(item.id.startsWith('__label')) return <div key={i} className="sb-section-label">{item.label}</div>;
+            const iconEl = item.img
+              ? <img src={item.img} className="sb-icon-img" alt="" draggable="false"/>
+              : <span className="sb-item-icon">{item.icon}</span>;
             if(item.href) return (
               <a key={i} href={item.href} className={`sb-item`} style={{textDecoration:'none'}}>
-                <span className="sb-item-icon">{item.icon}</span>
+                {iconEl}
                 <span>{item.label}</span>
                 {item.badge&&<span className={`sb-item-badge ${item.badgeCls||''}`}>{item.badge}</span>}
               </a>
             );
             return (
               <div key={i} className={`sb-item${page===item.id?' active':''}`} onClick={()=>nav(item.id)}>
-                <span className="sb-item-icon">{item.icon}</span>
+                {iconEl}
                 <span>{item.label}</span>
                 {item.badge&&<span className={`sb-item-badge ${item.badgeCls||''}`}>{item.badge}</span>}
               </div>
@@ -14416,17 +14431,17 @@ function App(){
                 </div>
                 {/* CTA buttons */}
                 <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-                  <button className="btn btn-primary" style={{fontSize:'13px',padding:'12px 26px',letterSpacing:'1.5px',fontWeight:900}} onClick={()=>window.open('/cashier.html','_self')}>
-                    💳 {t.deposit2||'Papildyti'}
+                  <button className="btn btn-primary" style={{display:'flex',alignItems:'center',gap:7,fontSize:'13px',padding:'12px 26px',letterSpacing:'1.5px',fontWeight:900}} onClick={()=>window.open('/cashier.html','_self')}>
+                    <img src="/img/icon-deposit.png" className="btn-icon-img" alt="" draggable="false"/> {t.deposit2||'Papildyti'}
                   </button>
-                  <button className="btn btn-vip" style={{fontSize:'13px',padding:'12px 22px',letterSpacing:'1.5px'}} onClick={()=>setShowBonus(true)}>
-                    🎁 {t.bonuses||'Bonusai'}
+                  <button className="btn btn-vip" style={{display:'flex',alignItems:'center',gap:7,fontSize:'13px',padding:'12px 22px',letterSpacing:'1.5px'}} onClick={()=>setShowBonus(true)}>
+                    <img src="/img/icon-bonus.png" className="btn-icon-img" alt="" draggable="false"/> {t.bonuses||'Bonusai'}
                   </button>
-                  <button className="btn" style={{fontSize:'12px',padding:'12px 20px',letterSpacing:'.8px',background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.1)',color:'rgba(232,220,200,.7)',borderRadius:100}} onClick={()=>{
+                  <button className="btn" style={{display:'flex',alignItems:'center',gap:7,fontSize:'12px',padding:'12px 20px',letterSpacing:'.8px',background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.1)',color:'rgba(232,220,200,.7)',borderRadius:100}} onClick={()=>{
                     if(page!=='lobby'){nav('lobby');setTimeout(()=>document.getElementById('game-grid-section')?.scrollIntoView({behavior:'smooth',block:'start'}),350);}
                     else document.getElementById('game-grid-section')?.scrollIntoView({behavior:'smooth',block:'start'});
                   }}>
-                    🎰 {t.allGames||'All Games'}
+                    <img src="/img/icon-all-games.png" className="btn-icon-img" alt="" draggable="false"/> {t.allGames||'All Games'}
                   </button>
                 </div>
                 {aiInsight&&<div className="ai-insight" style={{marginTop:14,maxWidth:380}}>🤖 {aiInsight}</div>}

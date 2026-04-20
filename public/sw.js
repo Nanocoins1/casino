@@ -1,5 +1,5 @@
-// HATHOR Casino — Service Worker v3.7
-var CACHE = 'hathor-v3.7';
+// HATHOR Casino — Service Worker v3.8
+var CACHE = 'hathor-v3.8';
 var STATIC = [
   '/',
   '/manifest.json',
@@ -46,6 +46,16 @@ var IMG_CACHE = [
   '/img/nav-pyramid.png',
   '/img/nav-cashier.png',
   // Sports hero + sport tab icons (DALL-E 3)
+  '/img/icon-deposit.png',
+  '/img/icon-bonus.png',
+  '/img/icon-all-games.png',
+  '/img/icon-slots.png',
+  '/img/icon-poker.png',
+  '/img/icon-blackjack.png',
+  '/img/icon-roulette.png',
+  '/img/icon-crash.png',
+  '/img/icon-pyramid-game.png',
+  '/img/icon-vip.png',
   '/img/sports-hero.jpg',
   '/img/sport-icon-soccer.png',
   '/img/sport-icon-basketball.png',
