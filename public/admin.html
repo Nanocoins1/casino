@@ -1236,7 +1236,12 @@ function showTab(name, el) {
   if(name === 'analytics') loadAnalytics();
   if(name === 'tournaments') { loadActiveTournament(); loadAdminTournaments(); }
   if(name === 'vip-admin') loadVIPDistribution();
-  if(name === 'inbox-admin') loadInboxConversations();
+  if(name === 'inbox-admin'){
+    loadInboxConversations();
+    // Clear notification badge
+    const badge = document.querySelector('.tab[onclick*="inbox-admin"] .inbox-badge');
+    if(badge) badge.remove();
+  }
   if(name === 'push') loadPushStatus();
   if(name === 'staff') loadStaff();
   if(name === 'affiliates') loadAffReport();
@@ -2574,6 +2579,33 @@ async function saveBonusSettings() {
     toast('Bonus settings saved!', 'ok');
   } catch(e) { toast('Klaida: '+e.message, 'err'); }
 }
+
+// ── Admin real-time socket for inbox badge ──────────────────
+(function initAdminSocket(){
+  const script = document.createElement('script');
+  script.src = '/socket.io/socket.io.js';
+  script.onload = function(){
+    const socket = io({ transports: ['websocket','polling'] });
+    socket.on('adminNewMessage', function(msg){
+      // Update badge on the Žinutės tab
+      const tab = document.querySelector('.tab[onclick*="inbox-admin"]');
+      if(tab && !tab.querySelector('.inbox-badge')){
+        const badge = document.createElement('span');
+        badge.className = 'inbox-badge';
+        badge.style.cssText = 'display:inline-flex;align-items:center;justify-content:center;background:#ff3d71;color:#fff;border-radius:50%;font-size:9px;width:15px;height:15px;font-weight:700;margin-left:4px;';
+        badge.textContent = '1';
+        tab.appendChild(badge);
+      } else if(tab){
+        const badge = tab.querySelector('.inbox-badge');
+        if(badge) badge.textContent = parseInt(badge.textContent||'0')+1;
+      }
+      // If inbox tab is open, reload conversations
+      const inboxSection = document.getElementById('sec-inbox-admin');
+      if(inboxSection && inboxSection.classList.contains('active')) loadInboxConversations();
+    });
+  };
+  document.body.appendChild(script);
+})();
 </script>
 <script src="/js/casino-sounds.js"></script>
 <script src="/js/cookie-consent.js"></script>

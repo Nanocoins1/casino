@@ -6930,12 +6930,19 @@ function InboxTabContent({tok, user}){
   const [sending,setSending]=useState(false);
   const [sent,setSent]=useState(false);
 
-  useEffect(()=>{
+  const reloadMsgs=()=>{
     fetch('/api/inbox',{headers:{'x-session-token':tok,'Authorization':'Bearer '+tok}})
       .then(r=>r.json()).then(d=>{setMsgs(Array.isArray(d)?d:[]);})
       .catch(()=>setMsgs([]));
+  };
+
+  useEffect(()=>{
+    reloadMsgs();
     // Mark as read
     fetch('/api/inbox/read',{method:'POST',headers:{'x-session-token':tok}}).catch(()=>{});
+    // Auto-refresh when admin replies
+    window.addEventListener('inboxUpdate',reloadMsgs);
+    return()=>window.removeEventListener('inboxUpdate',reloadMsgs);
   },[tok]);
 
   const sendMsg=async()=>{
@@ -7053,10 +7060,10 @@ const AVATAR_IMAGES=[
   {src:'/img/av-diamond.png', label:'Diamond'},
 ];
 
-function AvatarModal({user,onClose,onUpdate}){
+function AvatarModal({user,onClose,onUpdate,defaultTab}){
   const [preview,setPreview]=useState(user.avatar||null);
   const [file,setFile]=useState(null);
-  const [tab,setTab]=useState('profile'); // 'profile'|'stats'|'history'|'transfer'|'security'
+  const [tab,setTab]=useState(defaultTab||'profile'); // 'profile'|'stats'|'history'|'transfer'|'security'
   const [twoFaStatus,setTwoFaStatus]=useState(null);
   const [twoFaSetup,setTwoFaSetup]=useState(null);
   const [twoFaCode,setTwoFaCode]=useState('');
@@ -14262,6 +14269,7 @@ function App(){
   const [roomId,setRoomId]=useState(null);
   const [gameState,setGameState]=useState(null);
   const [showAvatar,setShowAvatar]=useState(false);
+  const [profileDefaultTab,setProfileDefaultTab]=useState('profile');
   const [showBonus,setShowBonus]=useState(false);
   const [lvUp,setLvUp]=useState(null);
   const [sbOpen,setSbOpen]=useState(false);
@@ -14430,6 +14438,7 @@ function App(){
     });
     socket.on('newInboxMessage',()=>{
       setInboxUnread(u=>u+1);
+      window.dispatchEvent(new Event('inboxUpdate'));
     });
     return()=>socket.off('gameState').off('roomCreated').off('dailyBonusAvailable').off('levelUp').off('emojiReaction').off('balanceSync').off('tokensReceived').off('newInboxMessage');
   },[]);
@@ -14637,8 +14646,8 @@ function App(){
                 <div className="tb-bal-amount">🪙 {fmt(user.tokens||0)}</div>
               </div>
               <button className="tb-cashier" onClick={()=>window.open('/cashier.html','_self')}>💳 {t.cashier||'Cashier'}</button>
-              <div className="tb-user-btn" onClick={()=>setShowAvatar(true)}>{user.avatar?<img src={user.avatar} alt="" style={{width:'100%',height:'100%',borderRadius:10,objectFit:'cover'}}/>:'👤'}</div>
-              <button className="tb-notify" onClick={()=>{setInboxUnread(0);setShowAvatar(true);}} style={{position:'relative',background:'none',border:'none',cursor:'pointer',fontSize:18,color:'rgba(232,224,208,0.6)',padding:'4px 6px'}}>
+              <div className="tb-user-btn" onClick={()=>{setProfileDefaultTab('profile');setShowAvatar(true);}}>{user.avatar?<img src={user.avatar} alt="" style={{width:'100%',height:'100%',borderRadius:10,objectFit:'cover'}}/>:'👤'}</div>
+              <button className="tb-notify" onClick={()=>{setInboxUnread(0);setProfileDefaultTab('inbox');setShowAvatar(true);}} style={{position:'relative',background:'none',border:'none',cursor:'pointer',fontSize:18,color:'rgba(232,224,208,0.6)',padding:'4px 6px'}}>
                 🔔
                 {inboxUnread>0&&<span style={{position:'absolute',top:0,right:0,background:'#ff3d71',color:'white',borderRadius:'50%',fontSize:9,width:16,height:16,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700}}>{inboxUnread>9?'9+':inboxUnread}</span>}
               </button>
@@ -15213,7 +15222,7 @@ function App(){
         setPendingReward(null);
       }}/>}
       {showGuestModal&&<GuestModal onClose={()=>setShowGuestModal(false)}/>}
-      {showAvatar&&user&&<AvatarModal user={user} onClose={()=>setShowAvatar(false)} onUpdate={url=>setUser(u=>({...u,avatar:url}))}/>}
+      {showAvatar&&user&&<AvatarModal user={user} onClose={()=>{setShowAvatar(false);setProfileDefaultTab('profile');}} onUpdate={url=>setUser(u=>({...u,avatar:url}))} defaultTab={profileDefaultTab}/>}
       {showBonus&&user&&<DailyBonus onClose={()=>setShowBonus(false)} onClaim={amt=>bumpTokens(amt)} t={t}/>}
       {lvUp&&(
         <>
