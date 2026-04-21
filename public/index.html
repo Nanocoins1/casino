@@ -3822,11 +3822,18 @@ body { color: #e8e2d4 !important; }
 
 /* ── NEON: Hero grid → single column on mobile ── */
 @media(max-width:768px){
-  /* Opulent hero compact padding */
+  /* Opulent hero — compact on mobile */
   .opulent-hero-section { padding: 14px 14px 20px !important; }
+  .opulent-top-meta { margin-bottom: 16px !important; }
+  .opulent-top-hr { margin-bottom: 20px !important; }
+  .opulent-hero-grid { grid-template-columns: 1fr !important; gap: 20px !important; }
   .opulent-text-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
   .opulent-text-grid-quote { display: none !important; }
-  .opulent-hero-grid { gap: 20px !important; }
+  /* Opulent stats: 2×2 on mobile */
+  .opulent-stats-grid { grid-template-columns: repeat(2,1fr) !important; gap: 12px 0 !important; padding-top: 18px !important; }
+  .opulent-stats-grid > div { padding: 0 10px !important; }
+  /* h1 smaller on mobile */
+  .opulent-hero-section h1 { font-size: clamp(44px,12vw,80px) !important; margin-bottom: 18px !important; }
   /* Neon hero: force single column */
   [data-theme="neon"] .neon-hero-grid {
     grid-template-columns: 1fr !important;
@@ -7507,11 +7514,11 @@ function OpulentLobbyHero({ nav }) {
       {/* Warm cream overlay — preserves paper feel */}
       <div style={{position:'absolute',inset:0,background:'linear-gradient(135deg,rgba(245,239,230,0.88) 0%,rgba(240,232,218,0.82) 50%,rgba(245,239,230,0.75) 100%)',pointerEvents:'none'}}/>
       <div style={{position:'relative'}}>
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',marginBottom:40,flexWrap:'wrap',gap:16}}>
-        <div className="o-mono" style={{fontSize:10,letterSpacing:'0.28em',color:O.inkMuted}}>VOL. XXVI · THE WINTER EDITION · 18,942 PLAYING ONLINE</div>
-        <div className="o-mono" style={{fontSize:10,letterSpacing:'0.2em',color:O.inkMuted}}>ESTABLISHED MMXXVI · ANJOUAN</div>
+      <div className="opulent-top-meta" style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',marginBottom:40,flexWrap:'wrap',gap:8}}>
+        <div className="o-mono" style={{fontSize:10,letterSpacing:'0.18em',color:O.inkMuted}}>VOL. XXVI · 18,942 PLAYING</div>
+        <div className="o-mono" style={{fontSize:10,letterSpacing:'0.18em',color:O.inkMuted}}>MMXXVI · ANJOUAN</div>
       </div>
-      <hr className="o-rule" style={{marginBottom:40}}/>
+      <hr className="o-rule opulent-top-hr" style={{marginBottom:40}}/>
       <div className="opulent-hero-grid" style={{display:'grid',gridTemplateColumns:'1.3fr 1fr',gap:48,alignItems:'start'}}>
         <div>
           <div className="o-mono" style={{fontSize:10,letterSpacing:'0.32em',color:O.burgundy,marginBottom:18}}>THE HOUSE OF HATHOR —</div>
@@ -7533,11 +7540,11 @@ function OpulentLobbyHero({ nav }) {
             <button className="o-btn-dark" style={{padding:'16px 28px',fontSize:11,fontWeight:600}} onClick={()=>window.location.href='/cashier.html'}>ENTER THE SALON →</button>
             <button className="o-btn-outline" style={{padding:'16px 28px',fontSize:11,fontWeight:600}} onClick={()=>nav&&nav('lobby')}>BROWSE GAMES</button>
           </div>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:0,paddingTop:24,borderTop:`1px solid ${O.line}`}}>
-            {[{k:'CURATED GAMES',v:'4,280'},{k:"TONIGHT'S POOL",v:'₿ 12.84'},{k:'MEDIAN WITHDRAW',v:'48s'},{k:'LIVE DEALERS',v:'218'}].map((s,i)=>(
-              <div key={i} style={{padding:'0 18px',borderLeft:i?`1px solid ${O.line}`:'none'}}>
-                <div className="o-mono" style={{fontSize:9,letterSpacing:'0.24em',color:O.inkDim,marginBottom:8}}>{s.k}</div>
-                <div className="o-serif" style={{fontSize:32,fontWeight:400,color:O.ink,letterSpacing:'-0.02em'}}>{s.v}</div>
+          <div className="opulent-stats-grid" style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:0,paddingTop:24,borderTop:`1px solid ${O.line}`}}>
+            {[{k:'GAMES',v:'4,280'},{k:"POOL",v:'₿ 12.84'},{k:'WITHDRAW',v:'48s'},{k:'DEALERS',v:'218'}].map((s,i)=>(
+              <div key={i} style={{padding:'0 10px',borderLeft:i?`1px solid ${O.line}`:'none'}}>
+                <div className="o-mono" style={{fontSize:9,letterSpacing:'0.14em',color:O.inkDim,marginBottom:8}}>{s.k}</div>
+                <div className="o-serif" style={{fontSize:28,fontWeight:400,color:O.ink,letterSpacing:'-0.02em'}}>{s.v}</div>
               </div>
             ))}
           </div>
