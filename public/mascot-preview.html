@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cleopatra Mascot Preview – HATHOR Casino</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0f;
+    font-family: 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* Background stars */
+  .stars {
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(180,130,40,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 50%, rgba(90,60,200,0.08) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .stars::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 10% 15%, rgba(255,220,100,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 25% 40%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 40% 10%, rgba(255,220,100,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 60% 30%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 75% 60%, rgba(255,220,100,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 85% 20%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 80%, rgba(255,220,100,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 15% 75%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 50% 85%, rgba(255,220,100,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 35% 65%, rgba(255,255,255,0.3) 0%, transparent 100%);
+  }
+
+  /* Hero section */
+  .hero {
+    display: flex;
+    align-items: center;
+    gap: 60px;
+    max-width: 1100px;
+    width: 100%;
+    padding: 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Mascot container */
+  .mascot-wrap {
+    position: relative;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Glowing ring behind mascot */
+  .mascot-glow {
+    position: absolute;
+    width: 340px;
+    height: 340px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(196,157,60,0.25) 0%, rgba(196,157,60,0.05) 60%, transparent 75%);
+    animation: pulseGlow 3s ease-in-out infinite;
+  }
+  @keyframes pulseGlow {
+    0%, 100% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.12); opacity: 1; }
+  }
+
+  /* Rotating decorative ring */
+  .mascot-ring {
+    position: absolute;
+    width: 360px;
+    height: 360px;
+    border-radius: 50%;
+    border: 1px solid rgba(196,157,60,0.3);
+    border-top-color: rgba(196,157,60,0.8);
+    border-right-color: rgba(196,157,60,0.5);
+    animation: spinRing 8s linear infinite;
+  }
+  .mascot-ring::before {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border-radius: 50%;
+    border: 1px solid rgba(196,157,60,0.15);
+    border-bottom-color: rgba(196,157,60,0.6);
+    animation: spinRing 12s linear infinite reverse;
+  }
+  @keyframes spinRing {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* Floating diamonds */
+  .diamond {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #c49d3c;
+    transform: rotate(45deg);
+    animation: floatDiamond 4s ease-in-out infinite;
+  }
+  .diamond:nth-child(1) { top: 10px; left: 50%; animation-delay: 0s; }
+  .diamond:nth-child(2) { bottom: 15px; right: 30%; animation-delay: 1s; }
+  .diamond:nth-child(3) { left: 10px; top: 45%; animation-delay: 2s; }
+  .diamond:nth-child(4) { right: 5px; top: 30%; animation-delay: 0.5s; }
+  @keyframes floatDiamond {
+    0%, 100% { transform: rotate(45deg) translateY(0) scale(1); opacity: 0.6; }
+    50% { transform: rotate(45deg) translateY(-8px) scale(1.3); opacity: 1; }
+  }
+
+  /* The mascot image itself */
+  .mascot-img {
+    width: 290px;
+    height: 290px;
+    object-fit: contain;
+    position: relative;
+    z-index: 2;
+    animation: floatMascot 4s ease-in-out infinite;
+    filter: drop-shadow(0 8px 30px rgba(196,157,60,0.5));
+    clip-path: circle(47% at 50% 48%);
+  }
+  @keyframes floatMascot {
+    0%, 100% { transform: translateY(0px) rotate(-0.5deg); }
+    50% { transform: translateY(-14px) rotate(0.5deg); }
+  }
+
+  /* Sparkle particles */
+  .sparkle {
+    position: absolute;
+    pointer-events: none;
+    z-index: 3;
+  }
+  .sparkle span {
+    position: absolute;
+    font-size: 14px;
+    animation: sparklePop 3s ease-in-out infinite;
+    opacity: 0;
+  }
+  .sparkle span:nth-child(1) { top: 20px; left: 60px; animation-delay: 0.3s; }
+  .sparkle span:nth-child(2) { top: 40px; right: 50px; animation-delay: 1.1s; }
+  .sparkle span:nth-child(3) { bottom: 60px; left: 30px; animation-delay: 2.0s; }
+  .sparkle span:nth-child(4) { bottom: 30px; right: 70px; animation-delay: 0.7s; }
+  .sparkle span:nth-child(5) { top: 50%; left: 5px; animation-delay: 1.5s; }
+  @keyframes sparklePop {
+    0% { opacity: 0; transform: scale(0.5) translateY(0); }
+    30% { opacity: 1; transform: scale(1.2) translateY(-5px); }
+    60% { opacity: 0.5; transform: scale(0.9) translateY(-10px); }
+    100% { opacity: 0; transform: scale(0.3) translateY(-20px); }
+  }
+
+  /* Right side text */
+  .hero-text {
+    flex: 1;
+    color: #fff;
+  }
+
+  .hero-label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #c49d3c;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+
+  .hero-title {
+    font-size: 54px;
+    font-weight: 800;
+    line-height: 1.05;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #ffffff 0%, #c49d3c 50%, #ffffff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-size: 18px;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 32px;
+    line-height: 1.5;
+  }
+
+  .hero-sub strong {
+    color: #c49d3c;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    padding: 14px 36px;
+    background: linear-gradient(135deg, #c49d3c, #f0c84a, #c49d3c);
+    background-size: 200% 100%;
+    border: none;
+    border-radius: 50px;
+    color: #0a0a0f;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    animation: shimmerBtn 3s linear infinite;
+    box-shadow: 0 4px 20px rgba(196,157,60,0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(196,157,60,0.6);
+  }
+  @keyframes shimmerBtn {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+
+  .btn-secondary {
+    padding: 14px 30px;
+    background: transparent;
+    border: 1px solid rgba(196,157,60,0.4);
+    border-radius: 50px;
+    color: rgba(255,255,255,0.8);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover {
+    border-color: #c49d3c;
+    color: #c49d3c;
+    background: rgba(196,157,60,0.07);
+  }
+
+  /* Stats row */
+  .stats {
+    display: flex;
+    gap: 32px;
+    margin-top: 36px;
+    padding-top: 28px;
+    border-top: 1px solid rgba(196,157,60,0.15);
+  }
+  .stat-item { text-align: left; }
+  .stat-value {
+    font-size: 24px;
+    font-weight: 800;
+    color: #c49d3c;
+    display: block;
+  }
+  .stat-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* Bottom VIP badge */
+  .vip-badge {
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #1a1008, #2a1e0a);
+    border: 1px solid #c49d3c;
+    border-radius: 20px;
+    padding: 5px 16px;
+    font-size: 11px;
+    color: #c49d3c;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    z-index: 5;
+    box-shadow: 0 2px 12px rgba(196,157,60,0.3);
+  }
+
+  /* Outfit selector */
+  .outfit-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    align-items: center;
+  }
+  .outfit-label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.35);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .outfit-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .outfit-dot.bronze { background: linear-gradient(135deg, #cd7f32, #a0522d); }
+  .outfit-dot.gold   { background: linear-gradient(135deg, #ffd700, #c49d3c); border-color: #ffd700; }
+  .outfit-dot.diamond{ background: linear-gradient(135deg, #b9f2ff, #7ec8e3); }
+  .outfit-dot:hover  { transform: scale(1.25); border-color: rgba(255,255,255,0.5); }
+
+  /* Preview label */
+  .preview-note {
+    position: fixed;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(196,157,60,0.15);
+    border: 1px solid rgba(196,157,60,0.3);
+    border-radius: 20px;
+    padding: 6px 18px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    z-index: 10;
+  }
+</style>
+</head>
+<body>
+
+<div class="stars"></div>
+
+<div class="hero">
+  <!-- Mascot side -->
+  <div class="mascot-wrap">
+    <div class="mascot-glow"></div>
+    <div class="mascot-ring"></div>
+    <div class="diamond"></div>
+    <div class="diamond"></div>
+    <div class="diamond"></div>
+    <div class="diamond"></div>
+    <img src="/img/cleopatra-mascot.png" class="mascot-img" alt="Cleopatra Mascot" id="mascotImg">
+    <div class="sparkle">
+      <span>✨</span>
+      <span>⭐</span>
+      <span>💫</span>
+      <span>✨</span>
+      <span>⭐</span>
+    </div>
+    <div class="vip-badge">👑 HATHOR VIP</div>
+  </div>
+
+  <!-- Text side -->
+  <div class="hero-text">
+    <div class="hero-label">✦ Egipto karalienė ✦</div>
+    <div class="hero-title">HATHOR<br>Casino</div>
+    <div class="hero-sub">
+      Sveiki atvykę į <strong>Kleopatros valdas</strong>.<br>
+      Žaisk, laimėk ir pasiekk aukso sostą.
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-primary">⚡ Pradėti žaisti</button>
+      <button class="btn-secondary">🎁 Gauti bonusą</button>
+    </div>
+
+    <!-- VIP outfit switcher preview -->
+    <div class="outfit-row" style="margin-top:24px;">
+      <span class="outfit-label">VIP lygis:</span>
+      <div class="outfit-dot bronze" title="Bronze" onclick="setOutfit('bronze')"></div>
+      <div class="outfit-dot gold"   title="Gold"   onclick="setOutfit('gold')"></div>
+      <div class="outfit-dot diamond" title="Diamond" onclick="setOutfit('diamond')"></div>
+    </div>
+
+    <div class="stats">
+      <div class="stat-item">
+        <span class="stat-value" id="jackpot">€24,817</span>
+        <span class="stat-label">Jackpot</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">19+</span>
+        <span class="stat-label">Žaidimų</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="onlineCount">247</span>
+        <span class="stat-label">Online</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="preview-note">📐 Preview – neliečia pagrindinio saito</div>
+
+<script>
+// Animated jackpot counter
+let jackpot = 24817;
+setInterval(() => {
+  jackpot += Math.floor(Math.random() * 5) + 1;
+  document.getElementById('jackpot').textContent = '€' + jackpot.toLocaleString('lt-LT');
+}, 2000);
+
+// Animated online counter
+let online = 247;
+setInterval(() => {
+  online += (Math.random() > 0.5 ? 1 : -1);
+  online = Math.max(200, Math.min(350, online));
+  document.getElementById('onlineCount').textContent = online;
+}, 4000);
+
+// VIP outfit switcher (demo - same image for now, future: different outfits)
+function setOutfit(level) {
+  const img = document.getElementById('mascotImg');
+  const glow = document.querySelector('.mascot-glow');
+  const vipBadge = document.querySelector('.vip-badge');
+  const titles = { bronze: '🥉 BRONZE VIP', gold: '👑 HATHOR VIP', diamond: '💎 DIAMOND VIP' };
+  const glows = {
+    bronze: 'radial-gradient(circle, rgba(205,127,50,0.3) 0%, rgba(205,127,50,0.06) 60%, transparent 75%)',
+    gold:   'radial-gradient(circle, rgba(196,157,60,0.25) 0%, rgba(196,157,60,0.05) 60%, transparent 75%)',
+    diamond:'radial-gradient(circle, rgba(126,200,227,0.3) 0%, rgba(126,200,227,0.06) 60%, transparent 75%)'
+  };
+  // Fade out/in
+  img.style.transition = 'opacity 0.3s';
+  img.style.opacity = '0';
+  setTimeout(() => {
+    glow.style.background = glows[level];
+    vipBadge.textContent = titles[level];
+    img.style.opacity = '1';
+  }, 300);
+}
+</script>
+
+</body>
+</html>
