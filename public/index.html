@@ -6959,6 +6959,16 @@ if(!document.getElementById('hathor-base-css')) {
     [data-theme="neon"] .ucard-badge.hot  { background: rgba(107,225,255,0.9) !important; color: #030309 !important; }
     [data-theme="neon"] .ucard-badge.new  { background: rgba(200,156,255,0.9) !important; color: #030309 !important; }
     [data-theme="neon"] .ucard.has-img .ucard-symbol { background: rgba(124,240,194,0.12) !important; border-color: rgba(124,240,194,0.3) !important; color: #7cf0c2 !important; }
+    /* Neon card background tint — cyberpunk overlay */
+    [data-theme="neon"] .ucard-img-overlay { background: linear-gradient(to bottom, rgba(3,3,9,0.08) 0%, rgba(6,20,18,0.22) 40%, rgba(3,12,10,0.72) 72%, rgba(3,9,8,0.96) 100%) !important; }
+    [data-theme="neon"] .ucard-icon-badge { border-color: rgba(124,240,194,0.4) !important; background: rgba(3,8,8,0.82) !important; }
+    [data-theme="neon"] .ucard-wrap:hover .ucard-icon-badge { border-color: rgba(124,240,194,0.75) !important; box-shadow: 0 4px 14px rgba(0,0,0,0.7), 0 0 12px rgba(124,240,194,0.35), inset 0 1px 0 rgba(124,240,194,0.1) !important; }
+    /* Royal card background tint — golden baroque overlay */
+    [data-theme="royal"] .ucard-img-overlay { background: linear-gradient(to bottom, rgba(0,0,0,0.06) 0%, rgba(10,8,2,0.2) 40%, rgba(8,6,1,0.68) 72%, rgba(5,4,1,0.95) 100%) !important; }
+    [data-theme="royal"] .ucard-icon-badge { border-color: rgba(201,168,76,0.45) !important; }
+    /* Opulent card icon badge */
+    [data-theme="opulent"] .ucard-icon-badge { border-color: rgba(168,134,66,0.45) !important; background: rgba(250,244,235,0.88) !important; }
+    [data-theme="opulent"] .ucard-wrap:hover .ucard-icon-badge { border-color: rgba(168,134,66,0.7) !important; box-shadow: 0 3px 10px rgba(26,20,20,0.15) !important; }
     /* Neon promo cards */
     [data-theme="neon"] .pc-welcome { background: linear-gradient(135deg,rgba(6,6,13,0.9) 0%,rgba(12,22,18,0.88) 100%) !important; border-color: rgba(124,240,194,0.3) !important; box-shadow: 0 8px 32px rgba(0,0,0,0.65), 0 0 24px rgba(124,240,194,0.08) !important; }
     [data-theme="neon"] .pc-welcome::before { background: linear-gradient(90deg,transparent,rgba(124,240,194,0.7),transparent) !important; }
@@ -14376,68 +14386,47 @@ const GAME_META = {
 };
 
 // ── DALL-E thumbnail vaizdų žemėlapis (Royal / default) ──
+// ── AI-generated themed card backgrounds ──
+// Royal  → baroque golden treasure (DALL-E 3)
+// Neon   → cyberpunk neon (DALL-E 3)
+// Opulent→ Art Deco elegant dame (DALL-E 3)
+const _R = '/images/cards/card-royal.png';
+const _N = '/images/cards/card-neon.png';
+const _O = '/images/cards/card-opulent.png';
+
 const THUMB_MAP_ROYAL = {
-  slots:       '/img/thumb-slots.png',
-  roulette:    '/img/thumb-roulette.png',
-  blackjack:   '/img/thumb-blackjack.png',
-  bj:          '/img/thumb-blackjack.png',
-  poker:       '/img/thumb-poker.png',
-  prempoker:   '/img/thumb-prempoker.png',
-  videopoker:  '/img/thumb-videopoker.png',
-  crash:       '/img/thumb-crash.png',
-  dragon:      '/img/thumb-dragon.png',
-  mines:       '/img/thumb-mines.png',
-  sports:      '/img/thumb-sports.png',
-  wheel:       '/img/thumb-wheel.png',
-  dice:        '/img/thumb-dice.png',
-  hilo:        '/img/thumb-hilo.png',
-  coin:        '/img/thumb-coinflip.png',
-  coinflip:    '/img/thumb-coinflip.png',
-  limbo:       '/img/thumb-limbo.png',
-  baccarat:    '/img/thumb-baccarat.png',
-  keno:        '/img/thumb-keno.png',
-  krioklis:    '/img/thumb-krioklis.png',
-  pyramid:     '/img/thumb-pyramid.png',
-  dragontower: '/img/thumb-dragontower.png',
-  slotsclassic:'/img/thumb-slots-classic.png',
+  slots:       _R, roulette:    _R, blackjack:   _R,
+  bj:          _R, poker:       _R, prempoker:   _R,
+  videopoker:  _R, crash:       _R, dragon:      _R,
+  mines:       _R, sports:      _R, wheel:       _R,
+  dice:        _R, hilo:        _R, coin:        _R,
+  coinflip:    _R, limbo:       _R, baccarat:    _R,
+  keno:        _R, krioklis:    _R, pyramid:     _R,
+  dragontower: _R, slotsclassic:_R,
 };
 
 // ── Neon temos paveikslėliai ──
 const THUMB_MAP_NEON = {
-  ...THUMB_MAP_ROYAL,
-  slots:     '/img/thumb-slots-neon.png',
-  roulette:  '/img/thumb-roulette-neon.png',
-  blackjack: '/img/thumb-blackjack-neon.png',
-  bj:        '/img/thumb-blackjack-neon.png',
-  poker:     '/img/thumb-poker-neon.png',
-  prempoker: '/img/thumb-prempoker-neon.png',
-  crash:     '/img/thumb-crash-neon.png',
-  dragon:    '/img/thumb-dragon-neon.png',
-  mines:     '/img/thumb-mines-neon.png',
-  wheel:     '/img/thumb-wheel-neon.png',
-  dice:      '/img/thumb-dice-neon.png',
-  baccarat:  '/img/thumb-baccarat-neon.png',
-  pyramid:   '/img/thumb-pyramid-neon.png',
-  sports:    '/img/thumb-sports-neon.png',
+  slots:       _N, roulette:    _N, blackjack:   _N,
+  bj:          _N, poker:       _N, prempoker:   _N,
+  videopoker:  _N, crash:       _N, dragon:      _N,
+  mines:       _N, sports:      _N, wheel:       _N,
+  dice:        _N, hilo:        _N, coin:        _N,
+  coinflip:    _N, limbo:       _N, baccarat:    _N,
+  keno:        _N, krioklis:    _N, pyramid:     _N,
+  dragontower: _N, slotsclassic:_N,
 };
 
 // ── Opulent temos paveikslėliai ──
 const THUMB_MAP_OPULENT = {
-  ...THUMB_MAP_ROYAL,
-  slots:     '/img/thumb-slots-opulent.png',
-  roulette:  '/img/thumb-roulette-opulent.png',
-  blackjack: '/img/thumb-blackjack-opulent.png',
-  bj:        '/img/thumb-blackjack-opulent.png',
-  poker:     '/img/thumb-poker-opulent.png',
-  prempoker: '/img/thumb-prempoker-opulent.png',
-  crash:     '/img/thumb-crash-opulent.png',
-  dragon:    '/img/thumb-dragon-opulent.png',
-  mines:     '/img/thumb-mines-opulent.png',
-  wheel:     '/img/thumb-wheel-opulent.png',
-  dice:      '/img/thumb-dice-opulent.png',
-  baccarat:  '/img/thumb-baccarat-opulent.png',
-  pyramid:   '/img/thumb-pyramid-opulent.png',
-  sports:    '/img/thumb-sports-opulent.png',
+  slots:       _O, roulette:    _O, blackjack:   _O,
+  bj:          _O, poker:       _O, prempoker:   _O,
+  videopoker:  _O, crash:       _O, dragon:      _O,
+  mines:       _O, sports:      _O, wheel:       _O,
+  dice:        _O, hilo:        _O, coin:        _O,
+  coinflip:    _O, limbo:       _O, baccarat:    _O,
+  keno:        _O, krioklis:    _O, pyramid:     _O,
+  dragontower: _O, slotsclassic:_O,
 };
 
 // ── Pagalbinė funkcija: gauti žemėlapį pagal temą ──
