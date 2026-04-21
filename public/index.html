@@ -14386,46 +14386,78 @@ const GAME_META = {
 };
 
 // ── DALL-E thumbnail vaizdų žemėlapis (Royal / default) ──
-// ── AI-generated themed card backgrounds ──
-// Royal  → baroque golden treasure (DALL-E 3)
-// Neon   → cyberpunk neon (DALL-E 3)
-// Opulent→ Art Deco elegant dame (DALL-E 3)
-const _R = '/images/cards/card-royal.png';
-const _N = '/images/cards/card-neon.png';
-const _O = '/images/cards/card-opulent.png';
-
 const THUMB_MAP_ROYAL = {
-  slots:       _R, roulette:    _R, blackjack:   _R,
-  bj:          _R, poker:       _R, prempoker:   _R,
-  videopoker:  _R, crash:       _R, dragon:      _R,
-  mines:       _R, sports:      _R, wheel:       _R,
-  dice:        _R, hilo:        _R, coin:        _R,
-  coinflip:    _R, limbo:       _R, baccarat:    _R,
-  keno:        _R, krioklis:    _R, pyramid:     _R,
-  dragontower: _R, slotsclassic:_R,
+  slots:       '/img/thumb-slots.png',
+  roulette:    '/img/thumb-roulette.png',
+  blackjack:   '/img/thumb-blackjack.png',
+  bj:          '/img/thumb-blackjack.png',
+  poker:       '/img/thumb-poker.png',
+  prempoker:   '/img/thumb-prempoker.png',
+  videopoker:  '/img/thumb-videopoker.png',
+  crash:       '/img/thumb-crash.png',
+  dragon:      '/img/thumb-dragon.png',
+  mines:       '/img/thumb-mines.png',
+  sports:      '/img/thumb-sports.png',
+  wheel:       '/img/thumb-wheel.png',
+  dice:        '/img/thumb-dice.png',
+  hilo:        '/img/thumb-hilo.png',
+  coin:        '/img/thumb-coinflip.png',
+  coinflip:    '/img/thumb-coinflip.png',
+  limbo:       '/img/thumb-limbo.png',
+  baccarat:    '/img/thumb-baccarat.png',
+  keno:        '/img/thumb-keno.png',
+  krioklis:    '/img/thumb-krioklis.png',
+  pyramid:     '/img/thumb-pyramid.png',
+  dragontower: '/img/thumb-dragontower.png',
+  slotsclassic:'/img/thumb-slots-classic.png',
 };
 
 // ── Neon temos paveikslėliai ──
 const THUMB_MAP_NEON = {
-  slots:       _N, roulette:    _N, blackjack:   _N,
-  bj:          _N, poker:       _N, prempoker:   _N,
-  videopoker:  _N, crash:       _N, dragon:      _N,
-  mines:       _N, sports:      _N, wheel:       _N,
-  dice:        _N, hilo:        _N, coin:        _N,
-  coinflip:    _N, limbo:       _N, baccarat:    _N,
-  keno:        _N, krioklis:    _N, pyramid:     _N,
-  dragontower: _N, slotsclassic:_N,
+  ...THUMB_MAP_ROYAL,
+  slots:     '/img/thumb-slots-neon.png',
+  roulette:  '/img/thumb-roulette-neon.png',
+  blackjack: '/img/thumb-blackjack-neon.png',
+  bj:        '/img/thumb-blackjack-neon.png',
+  poker:     '/img/thumb-poker-neon.png',
+  prempoker: '/img/thumb-prempoker-neon.png',
+  crash:     '/img/thumb-crash-neon.png',
+  dragon:    '/img/thumb-dragon-neon.png',
+  mines:     '/img/thumb-mines-neon.png',
+  wheel:     '/img/thumb-wheel-neon.png',
+  dice:      '/img/thumb-dice-neon.png',
+  baccarat:  '/img/thumb-baccarat-neon.png',
+  pyramid:   '/img/thumb-pyramid-neon.png',
+  sports:    '/img/thumb-sports-neon.png',
 };
 
 // ── Opulent temos paveikslėliai ──
 const THUMB_MAP_OPULENT = {
-  slots:       _O, roulette:    _O, blackjack:   _O,
-  bj:          _O, poker:       _O, prempoker:   _O,
-  videopoker:  _O, crash:       _O, dragon:      _O,
-  mines:       _O, sports:      _O, wheel:       _O,
-  dice:        _O, hilo:        _O, coin:        _O,
-  coinflip:    _O, limbo:       _O, baccarat:    _O,
-  keno:        _O, krioklis:    _O, pyramid:     _O,
+  ...THUMB_MAP_ROYAL,
+  slots:     '/img/thumb-slots-opulent.png',
+  roulette:  '/img/thumb-roulette-opulent.png',
+  blackjack: '/img/thumb-blackjack-opulent.png',
+  bj:        '/img/thumb-blackjack-opulent.png',
+  poker:     '/img/thumb-poker-opulent.png',
+  prempoker: '/img/thumb-prempoker-opulent.png',
+  crash:     '/img/thumb-crash-opulent.png',
+  dragon:    '/img/thumb-dragon-opulent.png',
+  mines:     '/img/thumb-mines-opulent.png',
+  wheel:     '/img/thumb-wheel-opulent.png',
+  dice:      '/img/thumb-dice-opulent.png',
+  baccarat:  '/img/thumb-baccarat-opulent.png',
+  pyramid:   '/img/thumb-pyramid-opulent.png',
+  sports:    '/img/thumb-sports-opulent.png',
+  // (remaining games inherit from ROYAL)
+  videopoker:  '/img/thumb-videopoker.png',
+  hilo:        '/img/thumb-hilo.png',
+  coin:        '/img/thumb-coinflip.png',
+  coinflip:    '/img/thumb-coinflip.png',
+  limbo:       '/img/thumb-limbo.png',
+  keno:        '/img/thumb-keno.png',
+  krioklis:    '/img/thumb-krioklis.png',
+  dragontower: '/img/thumb-dragontower.png',
+  slotsclassic:'/img/thumb-slots-classic.png',
   dragontower: _O, slotsclassic:_O,
 };
 
@@ -16762,38 +16794,51 @@ function App(){
             </div>
             {/* Games grid */}
             <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))',gap:12}}>
-              {PP_GAMES.filter(g=>ppFilter==='all'||g.cat===ppFilter).map(g=>(
+              {(()=>{
+                // Theme-specific card visuals
+                const cardBg   = theme==='neon'?'/images/cards/card-neon.png':theme==='opulent'?'/images/cards/card-opulent.png':'/images/cards/card-royal.png';
+                const overlayGrad = theme==='neon'
+                  ? 'linear-gradient(to bottom,rgba(3,8,6,0.05) 0%,rgba(3,12,10,0.18) 40%,rgba(3,10,8,0.75) 72%,rgba(2,8,6,0.97) 100%)'
+                  : theme==='opulent'
+                    ? 'linear-gradient(to bottom,rgba(245,235,215,0.04) 0%,rgba(40,20,14,0.15) 45%,rgba(26,16,10,0.78) 72%,rgba(20,12,8,0.97) 100%)'
+                    : 'linear-gradient(to bottom,rgba(0,0,0,0.05) 0%,rgba(8,6,0,0.18) 40%,rgba(8,6,0,0.75) 72%,rgba(5,4,0,0.97) 100%)';
+                const borderClr   = theme==='neon'?'rgba(124,240,194,0.14)':theme==='opulent'?'rgba(168,134,66,0.18)':'rgba(201,168,76,0.12)';
+                const borderHover = theme==='neon'?'rgba(124,240,194,0.5)':theme==='opulent'?'rgba(168,134,66,0.55)':'rgba(201,168,76,0.45)';
+                const nameClr     = theme==='opulent'?'#1a1410':'#e8e0d0';
+                const rtpClr      = theme==='neon'?'rgba(124,240,194,0.65)':theme==='opulent'?'rgba(138,92,40,0.75)':'rgba(201,168,76,0.65)';
+                const catIcon = {slots:'🎰',blackjack:'🃏',roulette:'🎡',baccarat:'♠',crash:'🚀',dice:'🎲'};
+                const hotBg   = theme==='neon'?'rgba(107,225,255,0.9)':theme==='opulent'?'#8a1e2e':'#c0394c';
+                const hotClr  = theme==='neon'?'#030309':'#fff';
+                return PP_GAMES.filter(g=>ppFilter==='all'||g.cat===ppFilter).map(g=>(
                 <div key={g.s}
                   onClick={()=>setIframeGame(g)}
-                  style={{borderRadius:10,overflow:'hidden',cursor:'pointer',position:'relative',aspectRatio:'3/4',background:'#0d0d18',border:'1px solid rgba(201,168,76,0.1)',transition:'all .2s',flexShrink:0}}
-                  onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-3px)';e.currentTarget.style.boxShadow='0 8px 24px rgba(0,0,0,0.5)';e.currentTarget.style.borderColor='rgba(201,168,76,0.35)';const ov=e.currentTarget.querySelector('.pp-play-overlay');if(ov){ov.style.background='rgba(0,0,0,0.3)';const d=ov.querySelector('div');if(d){d.style.opacity='1';d.style.transform='scale(1)';}};}}
-                  onMouseLeave={e=>{e.currentTarget.style.transform='';e.currentTarget.style.boxShadow='';e.currentTarget.style.borderColor='rgba(201,168,76,0.1)';const ov=e.currentTarget.querySelector('.pp-play-overlay');if(ov){ov.style.background='rgba(0,0,0,0)';const d=ov.querySelector('div');if(d){d.style.opacity='0';d.style.transform='scale(0.8)';}};}}>
-                  <img
-                    src={PP_THUMB(g.s)}
-                    alt={g.n}
-                    style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}
-                    onError={e=>{e.target.style.display='none';e.target.nextSibling.style.display='flex';}}
-                  />
-                  {/* Fallback if image fails */}
-                  <div style={{display:'none',position:'absolute',inset:0,alignItems:'center',justifyContent:'center',flexDirection:'column',gap:8,background:'linear-gradient(135deg,#0d0d18,#1a1428)',padding:12}}>
-                    <div style={{fontSize:28}}>🎰</div>
-                    <div style={{fontSize:11,fontWeight:600,color:'#e8e0d0',textAlign:'center',lineHeight:1.3}}>{g.n}</div>
+                  style={{borderRadius:12,overflow:'hidden',cursor:'pointer',position:'relative',aspectRatio:'3/4',border:`1px solid ${borderClr}`,transition:'transform .2s,box-shadow .2s,border-color .2s'}}
+                  onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-4px) scale(1.02)';e.currentTarget.style.boxShadow='0 10px 30px rgba(0,0,0,0.55)';e.currentTarget.style.borderColor=borderHover;const ov=e.currentTarget.querySelector('.pp-play-overlay');if(ov){ov.style.opacity='1';}}}
+                  onMouseLeave={e=>{e.currentTarget.style.transform='';e.currentTarget.style.boxShadow='';e.currentTarget.style.borderColor=borderClr;const ov=e.currentTarget.querySelector('.pp-play-overlay');if(ov){ov.style.opacity='0';}}}>
+                  {/* Themed card background */}
+                  <img src={cardBg} alt="" style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',objectPosition:'center 20%',userSelect:'none',pointerEvents:'none'}}/>
+                  {/* Gradient overlay */}
+                  <div style={{position:'absolute',inset:0,background:overlayGrad}}/>
+                  {/* Category icon — center */}
+                  <div style={{position:'absolute',top:'36%',left:'50%',transform:'translate(-50%,-50%)',fontSize:36,filter:'drop-shadow(0 2px 10px rgba(0,0,0,0.8))',userSelect:'none',pointerEvents:'none',lineHeight:1}}>
+                    {catIcon[g.cat]||'🎮'}
                   </div>
                   {/* HOT badge */}
-                  {g.hot&&<div style={{position:'absolute',top:8,left:8,fontSize:8,padding:'2px 6px',background:'#c0394c',color:'#fff',borderRadius:3,fontWeight:700,letterSpacing:'1px',fontFamily:"'Space Grotesk',sans-serif"}}>HOT</div>}
+                  {g.hot&&<div style={{position:'absolute',top:8,right:8,fontSize:8,padding:'3px 7px',background:hotBg,color:hotClr,borderRadius:4,fontWeight:700,letterSpacing:'1px',fontFamily:"'Space Grotesk',sans-serif",zIndex:2}}>HOT</div>}
                   {/* Game name overlay */}
-                  <div style={{position:'absolute',bottom:0,left:0,right:0,padding:'18px 10px 10px',background:'linear-gradient(transparent,rgba(0,0,0,0.85))',pointerEvents:'none'}}>
-                    <div style={{fontSize:11,fontWeight:600,color:'#e8e0d0',lineHeight:1.25}}>{g.n}</div>
-                    <div style={{fontSize:9,color:'rgba(201,168,76,0.6)',marginTop:2,fontFamily:"'Space Grotesk',sans-serif"}}>RTP {g.rtp}%</div>
+                  <div style={{position:'absolute',bottom:0,left:0,right:0,padding:'22px 10px 11px',pointerEvents:'none',zIndex:2}}>
+                    <div style={{fontSize:11,fontWeight:700,color:nameClr,lineHeight:1.25,letterSpacing:'0.01em'}}>{g.n}</div>
+                    <div style={{fontSize:9,color:rtpClr,marginTop:3,fontFamily:"'Space Grotesk',sans-serif",letterSpacing:'0.04em'}}>RTP {g.rtp}%</div>
                   </div>
                   {/* Play overlay on hover */}
-                  <div className="pp-play-overlay" style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0)',transition:'background .2s',pointerEvents:'none'}}>
-                    <div style={{width:44,height:44,borderRadius:'50%',background:'rgba(201,168,76,0.9)',display:'flex',alignItems:'center',justifyContent:'center',opacity:0,transform:'scale(0.8)',transition:'all .2s'}}>
-                      <span style={{fontSize:16,marginLeft:2}}>▶</span>
+                  <div className="pp-play-overlay" style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.28)',pointerEvents:'none',opacity:0,transition:'opacity .18s'}}>
+                    <div style={{width:48,height:48,borderRadius:'50%',background:theme==='neon'?'rgba(124,240,194,0.92)':theme==='opulent'?'rgba(168,134,66,0.92)':'rgba(201,168,76,0.92)',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 4px 20px rgba(0,0,0,0.5)'}}>
+                      <span style={{fontSize:18,marginLeft:3,color:theme==='opulent'?'#fffaf2':'#0a0806'}}>▶</span>
                     </div>
                   </div>
                 </div>
-              ))}
+                ));
+              })()}
             </div>
           </div>
 
