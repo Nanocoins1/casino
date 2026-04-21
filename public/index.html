@@ -16044,6 +16044,7 @@ function App(){
     {id:'vip',icon:'🌟',img:'/img/icon-vip.png',label:t.vip||'VIP',badge:'NEW',badgeCls:'new'},
     {id:'viktor',icon:'🎩',label:'Viktor AI',badge:'AI',badgeCls:'live'},
     {id:'support',icon:'🎧',label:t.support||'Support',badge:'●',badgeCls:'live'},
+    ...(user?[{id:'__inbox_action',icon:'✉️',label:t.inbox||'Žinutės',badge:inboxUnread>0?String(inboxUnread):undefined,badgeCls:'live',action:()=>{setInboxUnread(0);setProfileDefaultTab('inbox');setShowAvatar(true);}}]:[]),
     {id:'__div5'},
     {id:'privacy',icon:'🔒',label:(t.footer&&t.footer.privacy)||'Privacy Policy',href:'/privacy.html'},
     {id:'terms',icon:'📋',label:(t.footer&&t.footer.terms)||'Terms',href:'/terms.html'},
@@ -16174,7 +16175,7 @@ function App(){
               </a>
             );
             return (
-              <div key={i} className={`sb-item${page===item.id?' active':''}`} onClick={()=>nav(item.id)}>
+              <div key={i} className={`sb-item${page===item.id?' active':''}`} onClick={()=>item.action?item.action():nav(item.id)}>
                 {iconEl}
                 <span>{item.label}</span>
                 {item.badge&&<span className={`sb-item-badge ${item.badgeCls||''}`}>{item.badge}</span>}
@@ -16781,30 +16782,27 @@ function App(){
       {/* ── MOBILE BOTTOM NAV ── */}
       <div className="bottom-nav">
         {(()=>{
-          // Theme-specific nav items — last item always opens Inbox if logged in, Menu if not
-          const inboxItem = user
-            ? {p:'__inbox', i:'✉️', l:'Inbox', inbox:true}
-            : {p:'__menu', i:'☰', l:(t.menu||'Meniu')};
+          // Theme-specific nav items
           const royalItems = [
             {p:'lobby', i:'🏛️', l:'Lobby'},
             {p:'slots',  i:'🎰', l:(t.slots||'Slots')},
             {p:'__deposit', i:'💳', l:(t.deposit2||'Papildyti'), special:true},
             {p:'live',  i:'🔴', l:'Live'},
-            inboxItem,
+            {p:'__menu', i:'☰', l:(t.menu||'Meniu')},
           ];
           const neonItems = [
             {p:'lobby', i:'🏠', l:'Home'},
             {p:'slots',  i:'🎮', l:'Games'},
             {p:'__deposit', i:'💎', l:'Deposit', special:true},
             {p:'live',  i:'📡', l:'Live'},
-            inboxItem,
+            {p:'__menu', i:'☰', l:'Menu'},
           ];
           const opulentItems = [
             {p:'lobby', i:'🏛', l:'Lobby'},
             {p:'slots',  i:'♠️', l:'Games'},
             {p:'__deposit', i:'💰', l:'Cashier', special:true},
             {p:'live',  i:'🎴', l:'Live'},
-            inboxItem,
+            {p:'__menu', i:'☰', l:'More'},
           ];
           const items = theme==='neon' ? neonItems : theme==='opulent' ? opulentItems : royalItems;
           return items.map(x=>(
@@ -16813,17 +16811,6 @@ function App(){
                 className="bn-item bn-deposit-btn"
                 onClick={()=>{ window.open('/cashier.html','_self'); }}>
                 <span className="bn-icon" style={{fontSize:20}}>{x.i}</span>
-                <span className="bn-label">{x.l}</span>
-              </button>
-            ) : x.inbox ? (
-              <button key={x.p}
-                className="bn-item"
-                style={{position:'relative'}}
-                onClick={()=>{ setInboxUnread(0); setProfileDefaultTab('inbox'); setShowAvatar(true); }}>
-                <span className="bn-icon" style={{fontSize:20,position:'relative',display:'inline-block'}}>
-                  {x.i}
-                  {inboxUnread>0&&<span style={{position:'absolute',top:-4,right:-6,background:'#ff3d71',color:'#fff',borderRadius:'50%',fontSize:8,width:14,height:14,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,lineHeight:1}}>{inboxUnread>9?'9+':inboxUnread}</span>}
-                </span>
                 <span className="bn-label">{x.l}</span>
               </button>
             ) : (
