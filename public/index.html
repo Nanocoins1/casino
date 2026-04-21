@@ -11,17 +11,49 @@
 <link rel="manifest" href="/manifest.json"/>
 <link rel="icon" type="image/png" href="/img/icon-192.png"/>
 <link rel="apple-touch-icon" href="/img/icon-512.png"/>
-<title>HATHOR Royal Casino — Las Vegas Premium</title>
-<meta name="description" content="HATHOR Royal Casino — 1,000+ premium casino games: Blackjack, Roulette, Slots, Crash, Live Poker & Sports Betting. Instant crypto payouts. Join free today!"/>
-<meta property="og:title" content="HATHOR Royal Casino — Premium Online Casino"/>
-<meta property="og:description" content="1,000+ premium games · Live Casino · Instant Crypto Payouts. Join HATHOR Royal Casino and play Slots, Blackjack, Roulette, Crash & more!"/>
-<meta property="og:image" content="/img/loading-screen.png"/>
+<title>HATHOR Casino — Premium Crypto Casino | Slots, Live Casino & Sports Betting</title>
+<meta name="description" content="HATHOR Casino — Play 1,000+ premium casino games with instant crypto payouts. Slots, Blackjack, Roulette, Live Poker, Crash & Sports Betting. Anjouan licensed. Join free!"/>
+<meta name="keywords" content="crypto casino, online casino, bitcoin casino, slots, blackjack, roulette, live casino, sports betting, crash game, HATHOR casino"/>
+<meta name="robots" content="index, follow"/>
+<meta name="author" content="HATHOR Casino"/>
+<meta name="rating" content="adult"/>
+<link rel="canonical" href="https://hathor.casino"/>
+<!-- Open Graph -->
+<meta property="og:title" content="HATHOR Casino — Premium Crypto Casino"/>
+<meta property="og:description" content="1,000+ games · Instant Crypto Payouts · Sports Betting · Live Casino. Join HATHOR and play Slots, Blackjack, Roulette, Crash & more!"/>
+<meta property="og:image" content="https://hathor.casino/img/loading-screen.png"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="https://hathor.casino"/>
+<meta property="og:site_name" content="HATHOR Casino"/>
+<meta property="og:locale" content="en_US"/>
+<!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:title" content="HATHOR Royal Casino"/>
-<meta name="twitter:description" content="1,000+ premium casino games · Instant crypto payouts"/>
-<meta name="twitter:image" content="/img/loading-screen.png"/>
+<meta name="twitter:site" content="@HathorCasino"/>
+<meta name="twitter:title" content="HATHOR Casino — Premium Crypto Casino"/>
+<meta name="twitter:description" content="1,000+ games · Instant Crypto Payouts · Sports Betting · Crash & more!"/>
+<meta name="twitter:image" content="https://hathor.casino/img/loading-screen.png"/>
+<!-- Google Analytics GA4 — replace G-XXXXXXXXXX with your Measurement ID -->
+<!-- Get your ID at: https://analytics.google.com → Admin → Data Streams → Web stream details -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXXXXX', {
+    page_title: 'HATHOR Casino',
+    page_location: window.location.href,
+    anonymize_ip: true,
+    cookie_flags: 'SameSite=None;Secure'
+  });
+  // Helper to track custom events
+  window.trackEvent = function(action, category, label, value) {
+    if(typeof gtag !== 'undefined') {
+      gtag('event', action, { event_category: category, event_label: label, value: value });
+    }
+  };
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@400;600;700;900&family=DM+Mono:wght@400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
@@ -12084,7 +12116,7 @@ const LANGS = {
     won:'won',
     vip:'VIP', support:'Support',
     viktor:{greeting:'Welcome! I am Viktor, your personal croupier. Ask me anything!'},
-    disclaimer:'VIRTUAL TOKENS ONLY · ENTERTAINMENT ONLY · NO REAL MONEY',
+    disclaimer:'HATHOR CASINO · ANJOUAN LICENSED · 18+ · GAMBLE RESPONSIBLY · BEGAMBLEAWARE.ORG',
     playBold:'PLAY BOLD.', winRoyal:'WIN ROYAL.',
     premiumSub:'Premium crypto casino · Instant payouts',
     deposit2:'Deposit', bonuses:'Bonuses',
@@ -12166,7 +12198,7 @@ const LANGS = {
     won:'laimėjo',
     vip:'VIP', support:'Palaikymas',
     viktor:{greeting:'Sveiki! Aš esu Viktoras, jūsų asmeninis krupjė. Klauskite viską!'},
-    disclaimer:'TIK VIRTUALŪS ŽETONAI · TIK PRAMOGA · BE REALIŲ PINIGŲ',
+    disclaimer:'HATHOR CASINO · ANJOUAN LICENCIJA · 18+ · LOŠK ATSAKINGAI · PAGALBOS LINIJA: 116 123',
     playBold:'ŽAISK DRĄSIAI.', winRoyal:'LAIMEIK KARALIŠKA.',
     premiumSub:'Premium kripto kazino · Momentiniai išmokėjimai',
     deposit2:'Papildyti', bonuses:'Bonusai',
@@ -12248,7 +12280,7 @@ const LANGS = {
     won:'выиграл',
     vip:'VIP', support:'Поддержка',
     viktor:{greeting:'Добро пожаловать! Я Виктор, ваш личный крупье. Спрашивайте всё!'},
-    disclaimer:'ТОЛЬКО ВИРТУАЛЬНЫЕ ЖЕТОНЫ · ТОЛЬКО РАЗВЛЕЧЕНИЕ · БЕЗ РЕАЛЬНЫХ ДЕНЕГ',
+    disclaimer:'HATHOR CASINO · ЛИЦЕНЗИЯ ANJOUAN · 18+ · ИГРАЙТЕ ОТВЕТСТВЕННО',
     playBold:'ИГРАЙ СМЕЛО.', winRoyal:'ПОБЕЖДАЙ РОСКОШНО.',
     premiumSub:'Премиум крипто казино · Мгновенные выплаты',
     deposit2:'Пополнить', bonuses:'Бонусы',
@@ -12329,7 +12361,7 @@ const LANGS = {
     won:'gewonnen',
     vip:'VIP', support:'Support',
     viktor:{greeting:'Willkommen! Ich bin Viktor, Ihr persönlicher Croupier. Fragen Sie alles!'},
-    disclaimer:'NUR VIRTUELLE CHIPS · NUR UNTERHALTUNG · KEIN ECHTES GELD',
+    disclaimer:'HATHOR CASINO · ANJOUAN-LIZENZ · 18+ · SPIELEN SIE VERANTWORTUNGSVOLL',
     playBold:'SPIEL MUTIG.', winRoyal:'GEWINNE KÖNIGLICH.',
     premiumSub:'Premium Krypto-Casino · Sofortige Auszahlungen',
     deposit2:'Einzahlen', bonuses:'Boni',
@@ -12406,7 +12438,7 @@ const LANGS = {
     won:'wygrał',
     vip:'VIP', support:'Wsparcie',
     viktor:{greeting:'Witaj! Jestem Viktor, Twój osobisty krupier. Zapytaj mnie o cokolwiek!'},
-    disclaimer:'TYLKO WIRTUALNE ŻETONY · TYLKO ROZRYWKA · BEZ PRAWDZIWYCH PIENIĘDZY',
+    disclaimer:'HATHOR CASINO · LICENCJA ANJOUAN · 18+ · GRAĆ ODPOWIEDZIALNIE',
     playBold:'GRAJ ODWAŻNIE.', winRoyal:'WYGRYWAJ KRÓLEWSKO.',
     premiumSub:'Premium krypto kasyno · Natychmiastowe wypłaty',
     deposit2:'Wpłać', bonuses:'Bonusy',
@@ -12482,7 +12514,7 @@ const LANGS = {
     won:'a gagné',
     vip:'VIP', support:'Support',
     viktor:{greeting:'Bienvenue! Je suis Viktor, votre croupier personnel. Posez-moi vos questions!'},
-    disclaimer:'JETONS VIRTUELS UNIQUEMENT · DIVERTISSEMENT UNIQUEMENT · SANS ARGENT RÉEL',
+    disclaimer:'HATHOR CASINO · LICENCE ANJOUAN · 18+ · JOUEZ DE MANIÈRE RESPONSABLE',
     playBold:'JOUEZ HARDIMENT.', winRoyal:'GAGNEZ ROYALEMENT.',
     premiumSub:'Casino crypto premium · Paiements instantanés',
     deposit2:'Dépôt', bonuses:'Bonus',
@@ -12558,7 +12590,7 @@ const LANGS = {
     won:'kazandı',
     vip:'VIP', support:'Destek',
     viktor:{greeting:'Hoş geldiniz! Ben Viktor, kişisel krupiyenizim. Her şeyi sorabilirsiniz!'},
-    disclaimer:'SADECE SANAL JETONLAR · SADECE EĞLENCE · GERÇEK PARA YOK',
+    disclaimer:'HATHOR CASINO · ANJOUAN LİSANSI · 18+ · SORUMLU OYNAYINIZ',
     playBold:'CESURCA OYNA.', winRoyal:'KRALIÇA GİBİ KAZAN.',
     premiumSub:'Premium kripto kumarhane · Anında ödemeler',
     deposit2:'Yatır', bonuses:'Bonuslar',
@@ -12634,7 +12666,7 @@ const LANGS = {
     won:'فاز',
     vip:'VIP', support:'الدعم',
     viktor:{greeting:'مرحباً! أنا فيكتور، كروبييرك الشخصي. اسألني عن أي شيء!'},
-    disclaimer:'رموز افتراضية فقط · للترفيه فقط · لا أموال حقيقية',
+    disclaimer:'HATHOR CASINO · ترخيص أنجوان · +18 · العب بمسؤولية',
     playBold:'العب بجرأة.', winRoyal:'اربح بروعة.',
     premiumSub:'كازينو كريبتو مميز · مدفوعات فورية',
     deposit2:'إيداع', bonuses:'مكافآت',
@@ -12710,7 +12742,7 @@ const LANGS = {
     won:'赢了',
     vip:'VIP', support:'客服',
     viktor:{greeting:'欢迎！我是维克托，您的专属荷官。有任何问题请随时问我！'},
-    disclaimer:'仅限虚拟代币 · 仅供娱乐 · 无真实金钱',
+    disclaimer:'HATHOR CASINO · ANJOUAN许可证 · 18+ · 负责任博彩',
     playBold:'大胆游戏。', winRoyal:'赢得荣耀。',
     premiumSub:'高级加密货币赌场 · 即时支付',
     deposit2:'存款', bonuses:'奖励',
@@ -12773,7 +12805,7 @@ const LANGS = {
     won:'जीता',
     vip:'VIP', support:'सहायता',
     viktor:{greeting:'स्वागत है! मैं विक्टर हूँ, आपका निजी क्रूपियर। कुछ भी पूछें!'},
-    disclaimer:'केवल वर्चुअल टोकन · केवल मनोरंजन · कोई वास्तविक पैसा नहीं',
+    disclaimer:'HATHOR CASINO · ANJOUAN लाइसेंस · 18+ · जिम्मेदारी से खेलें',
     playBold:'साहसपूर्वक खेलें।', winRoyal:'शाही जीत हासिल करें।',
     premiumSub:'प्रीमियम क्रिप्टो कैसीनो · तत्काल भुगतान',
     deposit2:'जमा', bonuses:'बोनस',
@@ -15792,6 +15824,18 @@ const PP_GAMES = [
   {s:'vs40streetracer',  n:'Street Racer',             cat:'slots', rtp:96.5},
   // 🌌 UNIQUE
   {s:'vs1ball',          n:'Spaceman',                 cat:'crash',  rtp:96.5, hot:true},
+  // 🆕 Naujai pridėti (patikrinti)
+  {s:'vs5joker',         n:'Joker King',           cat:'slots', rtp:96.5},
+  {s:'vs10egypt',        n:'Egypt',                cat:'slots', rtp:96.5},
+  {s:'vs20mammoth',      n:'Mammoth Gold',          cat:'slots', rtp:96.5},
+  {s:'vs10spiritadv',    n:'Spirit of Adventure',  cat:'slots', rtp:96.5},
+  {s:'vs25mustang',      n:'Mustang Gold',          cat:'slots', rtp:96.5, hot:true},
+  {s:'vs20beefed',       n:'Beef Lightning',        cat:'slots', rtp:96.5},
+  {s:'vs25dragonkingdom',n:'Dragon Kingdom',        cat:'slots', rtp:96.5},
+  {s:'vs10eyestorm',     n:'Eye of the Storm',     cat:'slots', rtp:96.5},
+  {s:'vs5firehot',       n:'Fire Hot 5',            cat:'slots', rtp:96.5},
+  {s:'vs40firehot',      n:'Fire Hot 40',           cat:'slots', rtp:96.5},
+  {s:'vs100firehot',     n:'Fire Hot 100',          cat:'slots', rtp:96.5},
 ];
 
 function GameIframeModal({ game, onClose }) {
@@ -15876,6 +15920,8 @@ function App(){
       return next;
     });
     if(navigator.vibrate) navigator.vibrate(30);
+    // GA4 event
+    if(window.trackEvent) window.trackEvent('game_open','games',thumbKey);
   },[]);
 
   // ── Confetti ──────────────────────────────────────────────
@@ -16762,7 +16808,7 @@ function App(){
                 const hotClr  = theme==='neon'?'#030309':'#fff';
                 return PP_GAMES.filter(g=>ppFilter==='all'||g.cat===ppFilter).map(g=>(
                 <div key={g.s}
-                  onClick={()=>setIframeGame(g)}
+                  onClick={()=>{ setIframeGame(g); if(window.trackEvent) window.trackEvent('pp_game_open','pragmatic_play',g.n); }}
                   style={{borderRadius:12,overflow:'hidden',cursor:'pointer',position:'relative',aspectRatio:'3/4',border:`1px solid ${borderClr}`,transition:'transform .2s,box-shadow .2s,border-color .2s'}}
                   onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-4px) scale(1.02)';e.currentTarget.style.boxShadow='0 10px 30px rgba(0,0,0,0.55)';e.currentTarget.style.borderColor=borderHover;const ov=e.currentTarget.querySelector('.pp-play-overlay');if(ov){ov.style.opacity='1';}}}
                   onMouseLeave={e=>{e.currentTarget.style.transform='';e.currentTarget.style.boxShadow='';e.currentTarget.style.borderColor=borderClr;const ov=e.currentTarget.querySelector('.pp-play-overlay');if(ov){ov.style.opacity='0';}}}>
@@ -17034,8 +17080,45 @@ function App(){
   );
 }
 
+// ── Error Boundary — prevents full black screen on crash ─────────
+class ErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { hasError: false, error: null }; }
+  static getDerivedStateFromError(error) { return { hasError: true, error }; }
+  componentDidCatch(error, info) {
+    console.error('HATHOR ErrorBoundary caught:', error, info);
+    if(window.trackEvent) window.trackEvent('app_error', 'errors', error.message);
+  }
+  render() {
+    if (!this.state.hasError) return this.props.children;
+    return React.createElement('div', {
+      style: {
+        minHeight: '100vh', display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        background: '#050508', color: '#e8e0d0', fontFamily: "'Space Grotesk',sans-serif",
+        padding: 32, textAlign: 'center', gap: 16
+      }
+    },
+      React.createElement('div', {style:{fontSize:48, marginBottom:8}}, '⚠️'),
+      React.createElement('div', {style:{fontFamily:"'Cinzel',serif", fontSize:18, letterSpacing:'3px', color:'#c9a84c', marginBottom:8}}, 'HATHOR'),
+      React.createElement('div', {style:{fontSize:15, fontWeight:600, marginBottom:6}}, 'Something went wrong'),
+      React.createElement('div', {style:{fontSize:12, color:'rgba(232,224,208,0.45)', marginBottom:24, maxWidth:320}},
+        'An unexpected error occurred. Your balance and progress are safe.'),
+      React.createElement('button', {
+        onClick: () => { this.setState({hasError:false,error:null}); window.location.reload(); },
+        style: {
+          padding:'12px 28px', background:'linear-gradient(135deg,#c9a84c,#f0c060)',
+          border:'none', borderRadius:8, color:'#0a0806', fontWeight:700,
+          fontSize:13, cursor:'pointer', letterSpacing:'0.05em'
+        }
+      }, '↺ Reload Casino')
+    );
+  }
+}
+
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <ThemeProvider><App/></ThemeProvider>
+  React.createElement(ErrorBoundary, null,
+    React.createElement(ThemeProvider, null, React.createElement(App, null))
+  )
 );
 </script>
 
@@ -17242,5 +17325,51 @@ if(isIOS() && !isInStandaloneMode() && !pwaInstalled) {
 }
 </script>
 <script src="/js/casino-sounds.js"></script>
+
+<!-- ── Tawk.to Live Chat ────────────────────────────────────────────
+  FREE live chat widget. Setup:
+  1. Go to https://www.tawk.to and create a FREE account
+  2. Create a Property → copy your Property ID and Widget ID
+  3. Replace TAWK_PROPERTY_ID and TAWK_WIDGET_ID below
+  Format: https://embed.tawk.to/{PROPERTY_ID}/{WIDGET_ID}
+  Example: https://embed.tawk.to/64abc123abc/1h2de3fg4
+──────────────────────────────────────────────────────────────────── -->
+<script>
+(function(){
+  // Only load if user has accepted analytics cookies
+  var consent = null;
+  try { consent = JSON.parse(localStorage.getItem('hrc_cookie_consent')); } catch(e){}
+  if(consent && consent.essential === false) return; // respect cookie refusal
+
+  var TAWK_PROPERTY_ID = 'REPLACE_WITH_YOUR_PROPERTY_ID';
+  var TAWK_WIDGET_ID   = 'REPLACE_WITH_YOUR_WIDGET_ID';
+
+  // Skip if not configured yet
+  if(TAWK_PROPERTY_ID.includes('REPLACE')) return;
+
+  var Tawk_API = window.Tawk_API || {};
+  var Tawk_LoadStart = new Date();
+  (function(){
+    var s1=document.createElement("script"), s0=document.getElementsByTagName("script")[0];
+    s1.async=true;
+    s1.src='https://embed.tawk.to/'+TAWK_PROPERTY_ID+'/'+TAWK_WIDGET_ID;
+    s1.charset='UTF-8';
+    s1.setAttribute('crossorigin','*');
+    s0.parentNode.insertBefore(s1,s0);
+  })();
+
+  // Hide Tawk button on mobile when bottom nav is visible (avoid overlap)
+  window.addEventListener('load', function(){
+    var checkTawk = setInterval(function(){
+      if(window.Tawk_API && window.Tawk_API.hideWidget) {
+        clearInterval(checkTawk);
+        if(window.innerWidth <= 768) {
+          window.Tawk_API.hideWidget();
+        }
+      }
+    }, 500);
+  });
+})();
+</script>
 </body>
 </html>

@@ -85,7 +85,27 @@ function emailTemplate(title, content) {
 
 const app    = express();
 const server = http.createServer(app);
-const io     = new Server(server, { cors: { origin: '*' } });
+const ALLOWED_ORIGINS = [
+  'https://hathor.casino',
+  'https://www.hathor.casino',
+  process.env.RAILWAY_STATIC_URL ? `https://${process.env.RAILWAY_STATIC_URL}` : null,
+  process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : null,
+  // Dev
+  'http://localhost:3000',
+  'http://localhost:5000',
+  'http://127.0.0.1:3000',
+].filter(Boolean);
+
+const io     = new Server(server, {
+  cors: {
+    origin: (origin, cb) => {
+      // Allow requests with no origin (mobile apps, Postman, same-origin)
+      if (!origin || ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+      cb(new Error('CORS: origin not allowed'));
+    },
+    credentials: true
+  }
+});
 app.set('io', io);
 
 // ── Rate limiting ─────────────────────────────────────────────
