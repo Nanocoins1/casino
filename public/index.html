@@ -3797,6 +3797,217 @@ body { color: #e8e2d4 !important; }
   .hero-stat { padding:8px 10px !important; }
   .hero-stat-val { font-size:13px !important; }
 }
+/* ══ THEME-SPECIFIC MOBILE OVERRIDES ══════════════════════ */
+
+/* ── NEON: Hero grid → single column on mobile ── */
+@media(max-width:768px){
+  /* Neon hero: force single column */
+  [data-theme="neon"] .neon-hero-grid {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto !important;
+  }
+  [data-theme="neon"] .neon-hero-main { grid-row: 1 !important; min-height: 300px !important; padding: 24px 20px !important; }
+  [data-theme="neon"] .neon-hero-bonus { display: none !important; }
+  [data-theme="neon"] .neon-hero-jackpot { display: none !important; }
+
+  /* Neon hero — show mobile bento instead */
+  [data-theme="neon"] .neon-mobile-bento { display: grid !important; }
+
+  /* Opulent hero: single column */
+  [data-theme="opulent"] .opulent-hero-grid { grid-template-columns: 1fr !important; }
+  [data-theme="opulent"] .opulent-hero-right { display: none !important; }
+  [data-theme="opulent"] .opulent-hero-stats { display: none !important; }
+  [data-theme="opulent"] .opulent-hero-main { padding: 28px 20px 24px !important; }
+  [data-theme="opulent"] .opulent-hero-section { padding: 20px 18px 20px !important; }
+
+  /* Royal mint hero */
+  [data-theme="royal"] .mint-hero-right { display: none !important; }
+}
+
+/* ── NEON BOTTOM NAV ── */
+[data-theme="neon"] .bottom-nav {
+  background: rgba(6,6,13,0.75) !important;
+  backdrop-filter: blur(28px) saturate(1.4) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(1.4) !important;
+  border-top: 1px solid rgba(124,240,194,0.18) !important;
+  box-shadow: none !important;
+}
+[data-theme="neon"] .bn-label { color: rgba(232,236,245,0.38) !important; font-family: 'JetBrains Mono', monospace !important; font-size: 8px !important; letter-spacing: 0.08em !important; }
+[data-theme="neon"] .bn-item.active .bn-label { color: #7cf0c2 !important; }
+[data-theme="neon"] .bn-item.active {
+  background: rgba(124,240,194,0.1) !important;
+  border-radius: 14px !important;
+}
+[data-theme="neon"] .bn-item.active .bn-icon {
+  filter: drop-shadow(0 0 10px rgba(124,240,194,0.85)) !important;
+}
+[data-theme="neon"] .bn-deposit-btn {
+  background: linear-gradient(135deg, #7cf0c2 0%, #6be1ff 100%) !important;
+  color: #030309 !important;
+  border: none !important;
+  border-radius: 16px !important;
+  box-shadow: 0 0 24px rgba(124,240,194,0.45), 0 4px 12px rgba(0,0,0,0.5) !important;
+  margin: -6px 2px !important;
+}
+[data-theme="neon"] .bn-deposit-btn:active {
+  transform: translateY(2px) !important;
+  box-shadow: 0 0 12px rgba(124,240,194,0.3) !important;
+}
+
+/* ── OPULENT BOTTOM NAV ── */
+[data-theme="opulent"] .bottom-nav {
+  background: #f0e8d8 !important;
+  border-top: 1px solid rgba(138,30,46,0.12) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 -1px 8px rgba(138,30,46,0.06) !important;
+  height: 72px !important;
+}
+[data-theme="opulent"] .bn-label {
+  color: rgba(26,20,20,0.38) !important;
+  font-family: "Cormorant Garamond", "Playfair Display", Georgia, serif !important;
+  font-size: 13px !important;
+  letter-spacing: 0.02em !important;
+  font-weight: 400 !important;
+}
+[data-theme="opulent"] .bn-item.active .bn-label {
+  color: #8a1e2e !important;
+  font-style: italic !important;
+  font-weight: 500 !important;
+}
+[data-theme="opulent"] .bn-item.active .bn-icon { filter: none !important; }
+[data-theme="opulent"] .bn-item.active {
+  background: transparent !important;
+  position: relative !important;
+}
+[data-theme="opulent"] .bn-item.active::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 20px !important;
+  height: 1px !important;
+  background: #8a1e2e !important;
+}
+[data-theme="opulent"] .bn-deposit-btn {
+  background: #8a1e2e !important;
+  color: #f5efe6 !important;
+  border: 1px solid rgba(168,134,66,0.35) !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  margin: -2px 0 !important;
+  letter-spacing: 0.1em !important;
+  font-weight: 600 !important;
+}
+[data-theme="opulent"] .bn-deposit-btn .bn-label { color: #f5efe6 !important; font-style: normal !important; }
+[data-theme="opulent"] .bn-deposit-btn:active { transform: none !important; opacity: 0.85 !important; }
+
+/* ── ROYAL BOTTOM NAV (improved) ── */
+[data-theme="royal"] .bn-item.active {
+  position: relative !important;
+}
+[data-theme="royal"] .bn-item.active::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 28px !important;
+  height: 2px !important;
+  background: var(--gold2) !important;
+  border-radius: 1px !important;
+  box-shadow: 0 0 8px var(--gold2) !important;
+}
+
+/* ── NEON HERO MOBILE BENTO ── */
+.neon-mobile-bento {
+  display: none; /* shown only on mobile via media query above */
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 16px;
+}
+.neon-mobile-bento-card {
+  background: rgba(16,18,32,0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(124,240,194,0.18);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+/* ── OPULENT MOBILE AFFICHE ── */
+.opulent-mobile-affiche {
+  display: none;
+}
+@media(max-width:768px){
+  .opulent-mobile-affiche { display: block !important; margin: 0 18px 24px; }
+}
+
+/* ── FEATURED GAMES HORIZONTAL SCROLL ── */
+@media(max-width:768px) {
+  .featured-scroll-row {
+    display: flex !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    scrollbar-width: none !important;
+    gap: 10px !important;
+    padding: 0 14px 4px !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .featured-scroll-row::-webkit-scrollbar { display: none !important; }
+  .featured-scroll-row .ucard-wrap {
+    flex-shrink: 0 !important;
+    width: 148px !important;
+    scroll-snap-align: start !important;
+  }
+
+  /* Category pills */
+  .cat-tabs-row {
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    flex-wrap: nowrap !important;
+    padding-bottom: 4px !important;
+  }
+  .cat-tabs-row::-webkit-scrollbar { display: none !important; }
+
+  /* Neon lobby sections */
+  [data-theme="neon"] .neon-lobby-section { padding: 0 14px !important; }
+  [data-theme="neon"] .neon-hero-grid { padding: 14px !important; }
+
+  /* Opulent lobby */
+  [data-theme="opulent"] .opulent-lobby-wrap { padding: 0 !important; }
+  [data-theme="opulent"] .o-lobby-section { padding: 0 14px 20px !important; }
+}
+
+/* ── TOPBAR NEON MOBILE ── */
+@media(max-width:768px){
+  [data-theme="neon"] .topbar {
+    background: rgba(6,6,13,0.82) !important;
+    backdrop-filter: blur(20px) !important;
+    border-bottom: 1px solid rgba(124,240,194,0.1) !important;
+  }
+  [data-theme="neon"] .topbar-logo-wordmark { color: #7cf0c2 !important; }
+  [data-theme="neon"] .topbar-logo-sub { color: rgba(107,225,255,0.5) !important; }
+
+  [data-theme="opulent"] .topbar {
+    background: #f5efe6 !important;
+    border-bottom: 1px solid rgba(138,30,46,0.12) !important;
+  }
+  [data-theme="opulent"] .topbar-logo-wordmark {
+    font-family: "Cormorant Garamond", Georgia, serif !important;
+    color: #1a1414 !important;
+    letter-spacing: 0.18em !important;
+  }
+  [data-theme="opulent"] .topbar-logo-sub { color: #8a1e2e !important; }
+  [data-theme="opulent"] .ham-btn span { background: #1a1414 !important; }
+  [data-theme="opulent"] .tb-balance {
+    background: transparent !important;
+    border: 1px solid rgba(138,30,46,0.25) !important;
+    color: #1a1414 !important;
+  }
+  [data-theme="opulent"] .tb-bal-amount { color: #8a1e2e !important; }
+}
 /* support + croupier in sidebar — hide floating buttons on ALL screens */
 .support-btn { display:none !important; }
 .croupier-btn { display:none !important; }
@@ -7125,9 +7336,9 @@ function NeonLobbyHero({ nav }) {
       borderRadius:24, overflow:'hidden', marginBottom:0}}>
       {/* Dark overlay over photo */}
       <div style={{position:'absolute',inset:0,background:'linear-gradient(135deg,rgba(6,6,13,0.82) 0%,rgba(6,6,13,0.70) 50%,rgba(6,6,13,0.55) 100%)',pointerEvents:'none',zIndex:0}}/>
-      <div style={{position:'relative',zIndex:1,display:'grid', gridTemplateColumns:'1.6fr 1fr', gridTemplateRows:'auto auto', gap:16}}>
+      <div className="neon-hero-grid" style={{position:'relative',zIndex:1,display:'grid', gridTemplateColumns:'1.6fr 1fr', gridTemplateRows:'auto auto', gap:16}}>
         <div ref={ref} onMouseMove={onMove} onMouseLeave={()=>setTilt({x:0,y:0})}
-          className="n-glass-hi n-scan-host n-tilt"
+          className="n-glass-hi n-scan-host n-tilt neon-hero-main"
           style={{gridRow:'span 2', padding:40, minHeight:480, position:'relative', overflow:'hidden',
             transform:`perspective(1400px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`}}>
           <div style={{position:'absolute',top:'-30%',right:'-20%',width:'80%',height:'140%',
@@ -7162,7 +7373,7 @@ function NeonLobbyHero({ nav }) {
             ))}
           </div>
         </div>
-        <div className="n-glass-hi" style={{padding:28,minHeight:240,position:'relative',overflow:'hidden',display:'flex',flexDirection:'column',justifyContent:'space-between'}}>
+        <div className="n-glass-hi neon-hero-bonus" style={{padding:28,minHeight:240,position:'relative',overflow:'hidden',display:'flex',flexDirection:'column',justifyContent:'space-between'}}>
           <div style={{position:'absolute',top:'-40%',right:'-30%',width:'120%',height:'160%',
             background:`radial-gradient(ellipse at center,${N.violet}33 0%,${N.mint}22 40%,transparent 70%)`,
             filter:'blur(50px)',pointerEvents:'none'}} className="n-float"/>
@@ -7175,7 +7386,7 @@ function NeonLobbyHero({ nav }) {
             Claim bonus →
           </button>
         </div>
-        <div className="n-glass" style={{padding:24,minHeight:140,display:'flex',flexDirection:'column',justifyContent:'space-between',position:'relative',overflow:'hidden'}}>
+        <div className="n-glass neon-hero-jackpot" style={{padding:24,minHeight:140,display:'flex',flexDirection:'column',justifyContent:'space-between',position:'relative',overflow:'hidden'}}>
           <div style={{position:'absolute',inset:0,background:`radial-gradient(circle at 80% 20%,${N.jackpot}22 0%,transparent 50%)`,pointerEvents:'none'}}/>
           <div style={{fontSize:9,letterSpacing:'0.28em',fontFamily:N.mono,color:N.jackpot,position:'relative'}}>MEGA JACKPOT · EVERYONE PLAYS</div>
           <div style={{position:'relative'}}>
@@ -7186,6 +7397,23 @@ function NeonLobbyHero({ nav }) {
           </div>
         </div>
       </div>{/* end grid */}
+      {/* Mobile bento — shown only on mobile via CSS */}
+      <div className="neon-mobile-bento" style={{padding:'0 14px 16px',position:'relative',zIndex:1}}>
+        <div className="neon-mobile-bento-card">
+          <div style={{fontSize:8,letterSpacing:'0.26em',color:N.violet,fontFamily:N.mono,marginBottom:6}}>WELCOME BONUS</div>
+          <div className="n-grad-text" style={{fontSize:40,fontStyle:'italic',fontFamily:N.display,fontWeight:400,lineHeight:0.95}}>500%</div>
+          <div style={{fontSize:10,color:N.inkMuted,marginTop:6}}>up to 5₿</div>
+        </div>
+        <div className="neon-mobile-bento-card">
+          <div style={{fontSize:8,letterSpacing:'0.26em',color:N.cyan,fontFamily:N.mono,marginBottom:6}}>LIVE NOW</div>
+          <div style={{fontSize:26,fontWeight:600,fontFamily:N.mono,letterSpacing:'-0.02em'}}>12.8K</div>
+          <div style={{fontSize:10,color:N.inkMuted,marginTop:3}}>players online</div>
+          <div style={{display:'flex',alignItems:'center',gap:5,marginTop:8,paddingTop:8,borderTop:`1px solid ${N.line}`}}>
+            <span style={{width:5,height:5,borderRadius:'50%',background:N.mint,boxShadow:`0 0 6px ${N.mint}`}}/>
+            <span style={{fontSize:9,color:N.inkMuted,fontFamily:N.mono}}>₿284.7 TODAY</span>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }
@@ -7247,7 +7475,7 @@ window.O = O;
 
 function OpulentLobbyHero({ nav }) {
   return (
-    <section style={{position:'relative',padding:'60px 40px 40px',maxWidth:'100%',margin:'0',
+    <section className="opulent-hero-section" style={{position:'relative',padding:'60px 40px 40px',maxWidth:'100%',margin:'0',
       backgroundImage:"url('/img/hero-opulent.png')",
       backgroundSize:'cover', backgroundPosition:'center 35%'}}>
       {/* Warm cream overlay — preserves paper feel */}
@@ -7258,7 +7486,7 @@ function OpulentLobbyHero({ nav }) {
         <div className="o-mono" style={{fontSize:10,letterSpacing:'0.2em',color:O.inkMuted}}>ESTABLISHED MMXXVI · ANJOUAN</div>
       </div>
       <hr className="o-rule" style={{marginBottom:40}}/>
-      <div style={{display:'grid',gridTemplateColumns:'1.3fr 1fr',gap:48,alignItems:'start'}}>
+      <div className="opulent-hero-grid" style={{display:'grid',gridTemplateColumns:'1.3fr 1fr',gap:48,alignItems:'start'}}>
         <div>
           <div className="o-mono" style={{fontSize:10,letterSpacing:'0.32em',color:O.burgundy,marginBottom:18}}>THE HOUSE OF HATHOR —</div>
           <h1 className="o-serif" style={{fontSize:'clamp(64px,9vw,148px)',lineHeight:.92,fontWeight:400,margin:'0 0 28px',letterSpacing:'-0.02em',color:O.ink}}>
@@ -7288,7 +7516,7 @@ function OpulentLobbyHero({ nav }) {
             ))}
           </div>
         </div>
-        <div>
+        <div className="opulent-hero-right">
           <div style={{position:'relative',aspectRatio:'3/4',background:`linear-gradient(180deg,${O.burgundyDeep} 0%,${O.burgundy} 100%)`,overflow:'hidden',display:'flex',flexDirection:'column',justifyContent:'space-between',padding:36,color:O.paper}}>
             <div style={{position:'absolute',inset:16,border:`1px solid ${O.brass}88`,pointerEvents:'none'}}/>
             <div style={{position:'absolute',inset:22,border:`1px solid ${O.brass}44`,pointerEvents:'none'}}/>
@@ -16526,29 +16754,48 @@ function App(){
 
       {/* ── MOBILE BOTTOM NAV ── */}
       <div className="bottom-nav">
-        {[
-          {p:'slots',  i:'🎰', l:(t.slots||'Slots')},
-          {p:'sports', i:'⚽', l:(t.sports||'Sports')},
-          {p:'__deposit', i:'💳', l:(t.deposit2||'Papildyti'), special:true},
-          {p:'stats',  i:'📊', l:(t.stats||'Stats')},
-          {p:'__menu', i:'☰',  l:(t.menu||'Menu')},
-        ].map(x=>(
-          x.special ? (
-            <button key={x.p}
-              className="bn-item bn-deposit-btn"
-              onClick={()=>{ window.open('/cashier.html','_self'); }}>
-              <span className="bn-icon" style={{fontSize:20}}>{x.i}</span>
-              <span className="bn-label">{x.l}</span>
-            </button>
-          ) : (
-            <button key={x.p}
-              className={`bn-item${(x.p==='__menu'?sbOpen:page===x.p)?' active':''}`}
-              onClick={()=>{ if(x.p==='__menu'){setSbOpen(o=>!o);}else{nav(x.p);} }}>
-              <span className="bn-icon">{x.i}</span>
-              <span className="bn-label">{x.l}</span>
-            </button>
-          )
-        ))}
+        {(()=>{
+          // Theme-specific nav items
+          const royalItems = [
+            {p:'lobby', i:'🏛️', iN:'⬡', l:'Lobby'},
+            {p:'slots',  i:'🎰', iN:'◈', l:(t.slots||'Slots')},
+            {p:'__deposit', i:'💛', iN:'⬟', l:(t.deposit2||'Depozitas'), special:true},
+            {p:'live',  i:'🔴', iN:'◉', l:'Live'},
+            {p:'__menu', i:'☰', iN:'≡', l:(t.menu||'Meniu')},
+          ];
+          const neonItems = [
+            {p:'lobby', i:'⬡', l:'Home'},
+            {p:'slots',  i:'◈', l:'Games'},
+            {p:'__deposit', i:'⬟', l:'Deposit', special:true},
+            {p:'live',  i:'◉', l:'Live'},
+            {p:'__menu', i:'≡', l:'Me'},
+          ];
+          const opulentItems = [
+            {p:'lobby', i:'I', l:'Lobby'},
+            {p:'slots',  i:'II', l:'Games'},
+            {p:'__deposit', i:'→', l:'Cashier', special:true},
+            {p:'live',  i:'III', l:'Live'},
+            {p:'__menu', i:'IV', l:'More'},
+          ];
+          const items = theme==='neon' ? neonItems : theme==='opulent' ? opulentItems : royalItems;
+          return items.map(x=>(
+            x.special ? (
+              <button key={x.p}
+                className="bn-item bn-deposit-btn"
+                onClick={()=>{ window.open('/cashier.html','_self'); }}>
+                <span className="bn-icon" style={{fontSize:theme==='opulent'?18:20}}>{x.i}</span>
+                <span className="bn-label">{x.l}</span>
+              </button>
+            ) : (
+              <button key={x.p}
+                className={`bn-item${(x.p==='__menu'?sbOpen:page===x.p)?' active':''}`}
+                onClick={()=>{ if(x.p==='__menu'){setSbOpen(o=>!o);}else{nav(x.p);} }}>
+                <span className="bn-icon" style={{fontSize:theme==='opulent'?13:20}}>{x.i}</span>
+                <span className="bn-label">{x.l}</span>
+              </button>
+            )
+          ));
+        })()}
       </div>
     </div>
     </div>
