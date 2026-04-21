@@ -6762,6 +6762,11 @@ body { background: var(--ds-bg) !important; color: var(--ds-text) !important; }
   0%   { opacity: 0.8; }
   100% { opacity: 1; }
 }
+.pp-play-overlay:hover { background: rgba(0,0,0,0.3) !important; }
+.pp-play-overlay:hover > div { opacity: 1 !important; transform: scale(1) !important; }
+@media(max-width:600px) {
+  /* PP games grid already uses auto-fill minmax(150px) so it adapts */
+}
 
 </style>
   <!-- OneSignal Push (activates automatically when ONESIGNAL_APP_ID is set) -->
@@ -15710,6 +15715,152 @@ function LiveTicker({t=LANGS.en}){
   );
 }
 
+// ── Pragmatic Play Demo Games Catalog ─────────────────────
+const PP_THUMB = s => `https://static.pragmaticplay.net/game-icons/1.0/${s}/${s}.jpg`;
+const PP_URL   = s => `https://demogamesfree.pragmaticplay.net/gs2c/openGame.do?gameSymbol=${s}&websiteUrl=https://hathor.casino&jurisdiction=99&lang=en`;
+
+const PP_GAMES = [
+  // 🏺 EGYPTIAN / ADVENTURE
+  {s:'vs10bookoftut',       n:'Book of Tut',             cat:'slots', rtp:96.5},
+  {s:'vs25journey',         n:'John Hunter – Book of Tut',cat:'slots', rtp:96.7},
+  {s:'vs40cleocatra',       n:'Cleocatra',               cat:'slots', rtp:95.9},
+  {s:'vs5aztecgems',        n:'Aztec Gems',              cat:'slots', rtp:96.5},
+  {s:'vs10egyptcls',        n:'Ancient Egypt Classic',   cat:'slots', rtp:95.0},
+  {s:'vs25minesweeper',     n:'Mines of the Aztec',      cat:'slots', rtp:96.5},
+  {s:'vs20wildboost',       n:'Wild Booster',            cat:'slots', rtp:96.5},
+  {s:'vs20olympgate',       n:'Gates of Olympus',        cat:'slots', rtp:96.5, hot:true},
+  {s:'vs20olympx',          n:'Gates of Olympus 1000',   cat:'slots', rtp:96.5, hot:true},
+  {s:'vs20hercpeg',         n:'Hercules & Pegasus',      cat:'slots', rtp:96.5},
+  // 🌟 TOP HITS
+  {s:'vs20doghouse',        n:'The Dog House',           cat:'slots', rtp:96.5, hot:true},
+  {s:'vs20starlightx',      n:'Starlight Princess',      cat:'slots', rtp:96.5, hot:true},
+  {s:'vs10bbbonanza',       n:'Big Bass Bonanza',        cat:'slots', rtp:96.7, hot:true},
+  {s:'vs20fruitswld',       n:'Fruit Party',             cat:'slots', rtp:96.5},
+  {s:'vs20wolfgold',        n:'Wolf Gold',               cat:'slots', rtp:96.0},
+  {s:'vs20rhinolah',        n:'Great Rhino Megaways',    cat:'slots', rtp:96.6},
+  {s:'vs40piggies',         n:'Piggy Bank Bills',        cat:'slots', rtp:96.4},
+  {s:'vs20muertos',         n:'Day of Dead',             cat:'slots', rtp:96.5},
+  {s:'vs20vegasmagic',      n:'Vegas Magic',             cat:'slots', rtp:96.5},
+  {s:'vs9fire88',           n:'Fire 88',                 cat:'slots', rtp:96.6},
+  // 🎰 MEGAWAYS & BONUS BUY
+  {s:'vs20dogswild',        n:'The Dog House Megaways',  cat:'slots', rtp:96.5, hot:true},
+  {s:'vs20superx',          n:'Super X',                 cat:'slots', rtp:96.6},
+  {s:'vs10floatdrg',        n:'Floating Dragon',         cat:'slots', rtp:96.7},
+  {s:'vs20emoticoins',      n:'Emoticoins',              cat:'slots', rtp:96.0},
+  {s:'vs25goldparty',       n:'Gold Party',              cat:'slots', rtp:96.5},
+  {s:'vs20multiup',         n:'Multi Dice',              cat:'slots', rtp:96.5},
+  {s:'vs20gorillamayhem',   n:'Gorilla Mayhem',          cat:'slots', rtp:96.5},
+  {s:'vs20pandagold',       n:'Panda Fortune',           cat:'slots', rtp:96.4},
+  {s:'vs20asgard',          n:'Asgard',                  cat:'slots', rtp:96.5},
+  {s:'vs20candyland',       n:'Candy Stars',             cat:'slots', rtp:96.5},
+  // 🎣 BIG BASS SERIES
+  {s:'vs10bbb',             n:'Big Bass – Bonanza Xmas', cat:'slots', rtp:96.7},
+  {s:'vs10bbbnz',           n:'Big Bass – Keeping It Reel',cat:'slots',rtp:96.7},
+  {s:'vs10bbhas',           n:'Big Bass – Amazon Xtreme',cat:'slots', rtp:96.7},
+  {s:'vs10bbextreme',       n:'Big Bass – Crash Glass',  cat:'slots', rtp:96.7},
+  // 💎 GEMS & CLASSIC
+  {s:'vs5aztecgemsd',       n:'Aztec Gems Deluxe',       cat:'slots', rtp:96.5},
+  {s:'vs20clspwild',        n:'5 Lions Gold',            cat:'slots', rtp:96.5},
+  {s:'vs9goldmine',         n:'Gold Mine',               cat:'slots', rtp:96.5},
+  {s:'vs20monkeywar',       n:'Monkey Warrior',          cat:'slots', rtp:96.5},
+  {s:'vs10eirich',          n:'Extra Juicy',             cat:'slots', rtp:96.5},
+  {s:'vs25crzbombs',        n:'Crazy Bomb Megaways',     cat:'slots', rtp:96.5},
+  // 🚀 ACTION & ADVENTURE
+  {s:'vs20sknights',        n:'Star Knights',            cat:'slots', rtp:96.5},
+  {s:'vs25archer',          n:'Fire Archer',             cat:'slots', rtp:96.5},
+  {s:'vs25pandagold',       n:'Panda Fortune 2',         cat:'slots', rtp:96.4},
+  {s:'vs20piratgold',       n:'Pirate Gold',             cat:'slots', rtp:96.5},
+  {s:'vs10goldfish',        n:'Gold Fish',               cat:'slots', rtp:96.5},
+  {s:'vs20moneymouse',      n:'Money Mouse',             cat:'slots', rtp:96.5},
+  {s:'vs25tiger',           n:'Fire Strike',             cat:'slots', rtp:96.5},
+  {s:'vs20ultrab',          n:'Ultra Burn',              cat:'slots', rtp:96.5},
+  {s:'vs20fltdrg2',         n:'Floating Dragon Hold&Spin',cat:'slots',rtp:96.7},
+  {s:'vs20sugarrush',       n:'Sugar Rush',              cat:'slots', rtp:96.5, hot:true},
+  // 🌺 NATURE & ANIMALS
+  {s:'vs10crzbomb',         n:'Crazy Bomb',              cat:'slots', rtp:96.5},
+  {s:'vs20pbonanza',        n:'Pyramid Bonanza',         cat:'slots', rtp:96.5},
+  {s:'vs20bufking',         n:'Buffalo King',            cat:'slots', rtp:96.6},
+  {s:'vs50chinesecharms',   n:'Lucky New Year',          cat:'slots', rtp:96.5},
+  {s:'vs20trtamb',          n:'Tropical Tiki',           cat:'slots', rtp:96.5},
+  {s:'vs25pandagoldd',      n:'Lucky Dragon Ball',       cat:'slots', rtp:96.5},
+  {s:'vs20bnnzpanda',       n:'Bamboo Panda',            cat:'slots', rtp:96.5},
+  {s:'vs20magicpot',        n:'Magic Crystals',          cat:'slots', rtp:96.5},
+  {s:'vs20mvampire',        n:'Monster Superlanche',     cat:'slots', rtp:96.5},
+  {s:'vs10cowgold',         n:'Cowboys Gold',            cat:'slots', rtp:96.5},
+  // 🎭 FUN & FRUITY
+  {s:'vs20jokerking',       n:'Joker King',              cat:'slots', rtp:96.5},
+  {s:'vs20jkrwild',         n:'Joker Wild',              cat:'slots', rtp:96.5},
+  {s:'vs25dwarves',         n:'7 Dwarfs Wild',           cat:'slots', rtp:96.5},
+  {s:'vs20santarun',        n:'Santa\'s Wonderland',     cat:'slots', rtp:96.5},
+  {s:'vs1ball',             n:'Spaceman',                cat:'crash',  rtp:97.0, hot:true},
+  {s:'vs40luxlife',         n:'Luxury Life',             cat:'slots', rtp:96.5},
+  {s:'vs25safari',          n:'Hot Safari',              cat:'slots', rtp:96.5},
+  {s:'vs243goldmine',       n:'Wild West Gold',          cat:'slots', rtp:96.5},
+  {s:'vs20wildwest',        n:'Wild Wild Riches',        cat:'slots', rtp:96.5},
+  {s:'vs20goldrush',        n:'Gold Rush',               cat:'slots', rtp:96.5},
+  // 🃏 TABLE GAMES
+  {s:'multihand_bj1',       n:'Blackjack',               cat:'blackjack', rtp:99.5},
+  {s:'eur_bac',             n:'Baccarat',                cat:'baccarat',  rtp:98.9},
+  {s:'200_00001',           n:'Roulette',                cat:'roulette',  rtp:97.3},
+  {s:'eur_rou',             n:'European Roulette',       cat:'roulette',  rtp:97.3},
+  {s:'200_00004',           n:'Auto Roulette',           cat:'roulette',  rtp:97.3},
+  // ⚡ MORE SLOTS
+  {s:'vs20olympgatemeg',    n:'Gates of Olympus Megaways',cat:'slots', rtp:96.5},
+  {s:'vs20drgbless',        n:'Dragon Blessing',         cat:'slots', rtp:96.5},
+  {s:'vs20splmystery',      n:'Mysterious Egypt',        cat:'slots', rtp:96.5},
+  {s:'vs20starlightprincess1000', n:'Starlight Princess 1000', cat:'slots', rtp:96.5, hot:true},
+  {s:'vs20sugarrush1000',   n:'Sugar Rush 1000',         cat:'slots', rtp:96.5, hot:true},
+  {s:'vs20doghouse1000',    n:'Dog House 1000',          cat:'slots', rtp:96.5},
+  {s:'vs20bbhas1000',       n:'Big Bass 1000',           cat:'slots', rtp:96.7},
+  {s:'vs20swordofd',        n:'Sword of Ares',           cat:'slots', rtp:96.5},
+  {s:'vs20aztecblaze',      n:'Aztec Blaze',             cat:'slots', rtp:96.5},
+  {s:'vs20knifebt',         n:'Knife Hit',               cat:'slots', rtp:96.5},
+  {s:'vs20bronco',          n:'Bronco Spirit',           cat:'slots', rtp:96.5},
+  {s:'vs40hotburnx',        n:'Hot to Burn Extreme',     cat:'slots', rtp:96.7},
+  {s:'vs20hotburn',         n:'Hot to Burn',             cat:'slots', rtp:96.5},
+  {s:'vs20goldfishh',       n:'Gold Blitz',              cat:'slots', rtp:96.5},
+  {s:'vs20rxtheme',         n:'Bigger Bass Blizzard',    cat:'slots', rtp:96.7},
+  {s:'vs20cakesm',          n:'Cake & Ice Cream',        cat:'slots', rtp:96.5},
+  {s:'vs9koyoteking',       n:'Coyote King',             cat:'slots', rtp:96.5},
+  {s:'vs25minesweeper',     n:'Bomb Bonanza',            cat:'slots', rtp:96.5},
+  {s:'vs20magicjrny',       n:'Magic Journey',           cat:'slots', rtp:96.5},
+  {s:'vs40streetracer',     n:'Street Racer',            cat:'slots', rtp:96.5},
+];
+
+function GameIframeModal({ game, onClose }) {
+  React.useEffect(() => {
+    const esc = e => { if(e.key==='Escape') onClose(); };
+    document.addEventListener('keydown', esc);
+    return () => document.removeEventListener('keydown', esc);
+  }, [onClose]);
+  if(!game) return null;
+  return (
+    <div style={{position:'fixed',inset:0,zIndex:9999,background:'rgba(0,0,0,0.96)',display:'flex',flexDirection:'column'}}>
+      {/* Header bar */}
+      <div style={{height:48,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 16px',background:'rgba(0,0,0,0.8)',borderBottom:'1px solid rgba(201,168,76,0.15)',flexShrink:0}}>
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
+          <span style={{fontFamily:"'Cinzel',serif",fontSize:11,letterSpacing:'3px',color:'rgba(201,168,76,0.5)'}}>HATHOR</span>
+          <span style={{color:'rgba(255,255,255,0.2)'}}>·</span>
+          <span style={{fontSize:13,fontWeight:600,color:'#e8e0d0'}}>{game.n}</span>
+          <span style={{fontSize:9,padding:'2px 6px',background:'rgba(201,168,76,0.12)',border:'1px solid rgba(201,168,76,0.2)',borderRadius:3,color:'rgba(201,168,76,0.7)',letterSpacing:'1px',fontFamily:"'Space Grotesk',sans-serif"}}>DEMO</span>
+        </div>
+        <button onClick={onClose} style={{background:'none',border:'1px solid rgba(255,255,255,0.1)',borderRadius:8,color:'rgba(255,255,255,0.5)',cursor:'pointer',padding:'6px 14px',fontSize:12,fontFamily:"'Space Grotesk',sans-serif",transition:'all .15s'}}
+          onMouseEnter={e=>e.target.style.borderColor='rgba(201,168,76,0.4)'}
+          onMouseLeave={e=>e.target.style.borderColor='rgba(255,255,255,0.1)'}>
+          ✕ Close
+        </button>
+      </div>
+      {/* iframe */}
+      <iframe
+        src={PP_URL(game.s)}
+        style={{flex:1,border:'none',width:'100%',background:'#000'}}
+        allow="fullscreen"
+        title={game.n}
+      />
+    </div>
+  );
+}
+
 function App(){
   const [lang,setLang]=useLang();
   const t=lang;
@@ -15733,6 +15884,8 @@ function App(){
   const [particles,setParticles]=useState([]);
   const [tokenBump,setTokenBump]=useState(false);
   const [gameFilter,setGameFilter]=useState('visi');
+  const [iframeGame,setIframeGame]=useState(null);
+  const [ppFilter,setPpFilter]=useState('all');
   const [gameSearch,setGameSearch]=useState('');
   const [favGames,setFavGames]=useState(function(){
     try{return new Set(JSON.parse(localStorage.getItem('hrc_favs')||'[]'));}
@@ -16594,6 +16747,67 @@ function App(){
             })}
           </div>
 
+          {/* ══ PRAGMATIC PLAY PROVIDER GAMES ══ */}
+          <div style={{marginTop:32,marginBottom:8}}>
+            {/* Section header */}
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16,padding:'0 4px'}}>
+              <div style={{display:'flex',alignItems:'center',gap:12}}>
+                <div className="sec-title-v3">🎰 PROVIDER GAMES</div>
+                <span style={{fontSize:9,padding:'2px 7px',background:'rgba(201,168,76,0.1)',border:'1px solid rgba(201,168,76,0.2)',borderRadius:3,color:'rgba(201,168,76,0.6)',letterSpacing:'1px',fontFamily:"'Space Grotesk',sans-serif"}}>PRAGMATIC PLAY · DEMO</span>
+              </div>
+              <span style={{fontSize:10,color:'rgba(201,168,76,0.45)',fontFamily:"'Space Grotesk',sans-serif"}}>{PP_GAMES.length} games</span>
+            </div>
+            {/* Filter tabs */}
+            <div style={{display:'flex',gap:6,marginBottom:16,overflowX:'auto',scrollbarWidth:'none',paddingBottom:4}}>
+              {['all','slots','blackjack','roulette','baccarat','crash'].map(cat=>(
+                <button key={cat}
+                  onClick={()=>setPpFilter(cat)}
+                  style={{padding:'6px 14px',borderRadius:999,border:'1px solid',flexShrink:0,fontSize:11,fontWeight:600,letterSpacing:'0.05em',cursor:'pointer',transition:'all .15s',fontFamily:"'Space Grotesk',sans-serif",
+                    background: ppFilter===cat ? 'linear-gradient(135deg,var(--gold),var(--gold2))' : 'transparent',
+                    color: ppFilter===cat ? '#0a0806' : 'rgba(232,220,200,0.5)',
+                    borderColor: ppFilter===cat ? 'transparent' : 'rgba(201,168,76,0.15)',
+                  }}>
+                  {cat==='all'?'All':cat.charAt(0).toUpperCase()+cat.slice(1)}
+                </button>
+              ))}
+            </div>
+            {/* Games grid */}
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))',gap:12}}>
+              {PP_GAMES.filter(g=>ppFilter==='all'||g.cat===ppFilter).map(g=>(
+                <div key={g.s}
+                  onClick={()=>setIframeGame(g)}
+                  style={{borderRadius:10,overflow:'hidden',cursor:'pointer',position:'relative',aspectRatio:'3/4',background:'#0d0d18',border:'1px solid rgba(201,168,76,0.1)',transition:'all .2s',flexShrink:0}}
+                  onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-3px)';e.currentTarget.style.boxShadow='0 8px 24px rgba(0,0,0,0.5)';e.currentTarget.style.borderColor='rgba(201,168,76,0.35)';const ov=e.currentTarget.querySelector('.pp-play-overlay');if(ov){ov.style.background='rgba(0,0,0,0.3)';const d=ov.querySelector('div');if(d){d.style.opacity='1';d.style.transform='scale(1)';}};}}
+                  onMouseLeave={e=>{e.currentTarget.style.transform='';e.currentTarget.style.boxShadow='';e.currentTarget.style.borderColor='rgba(201,168,76,0.1)';const ov=e.currentTarget.querySelector('.pp-play-overlay');if(ov){ov.style.background='rgba(0,0,0,0)';const d=ov.querySelector('div');if(d){d.style.opacity='0';d.style.transform='scale(0.8)';}};}}>
+                  <img
+                    src={PP_THUMB(g.s)}
+                    alt={g.n}
+                    style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}
+                    onError={e=>{e.target.style.display='none';e.target.nextSibling.style.display='flex';}}
+                  />
+                  {/* Fallback if image fails */}
+                  <div style={{display:'none',position:'absolute',inset:0,alignItems:'center',justifyContent:'center',flexDirection:'column',gap:8,background:'linear-gradient(135deg,#0d0d18,#1a1428)',padding:12}}>
+                    <div style={{fontSize:28}}>🎰</div>
+                    <div style={{fontSize:11,fontWeight:600,color:'#e8e0d0',textAlign:'center',lineHeight:1.3}}>{g.n}</div>
+                  </div>
+                  {/* HOT badge */}
+                  {g.hot&&<div style={{position:'absolute',top:8,left:8,fontSize:8,padding:'2px 6px',background:'#c0394c',color:'#fff',borderRadius:3,fontWeight:700,letterSpacing:'1px',fontFamily:"'Space Grotesk',sans-serif"}}>HOT</div>}
+                  {/* Game name overlay */}
+                  <div style={{position:'absolute',bottom:0,left:0,right:0,padding:'18px 10px 10px',background:'linear-gradient(transparent,rgba(0,0,0,0.85))',pointerEvents:'none'}}>
+                    <div style={{fontSize:11,fontWeight:600,color:'#e8e0d0',lineHeight:1.25}}>{g.n}</div>
+                    <div style={{fontSize:9,color:'rgba(201,168,76,0.6)',marginTop:2,fontFamily:"'Space Grotesk',sans-serif"}}>RTP {g.rtp}%</div>
+                  </div>
+                  {/* Play overlay on hover */}
+                  <div className="pp-play-overlay" style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0)',transition:'background .2s',pointerEvents:'none'}}>
+                    <div style={{width:44,height:44,borderRadius:'50%',background:'rgba(201,168,76,0.9)',display:'flex',alignItems:'center',justifyContent:'center',opacity:0,transform:'scale(0.8)',transition:'all .2s'}}>
+                      <span style={{fontSize:16,marginLeft:2}}>▶</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Section header */}
           <div className="sec-title-v3">
             <span className="sec-title-v3-bar"/>
@@ -16785,6 +16999,9 @@ function App(){
           <div className="live-toast-icon">🏆</div>
         </div>
       )}
+
+      {/* ── PROVIDER GAME IFRAME ── */}
+      {iframeGame&&<GameIframeModal game={iframeGame} onClose={()=>setIframeGame(null)}/>}
 
       {/* ── MOBILE BOTTOM NAV ── */}
       <div className="bottom-nav">

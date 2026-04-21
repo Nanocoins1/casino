@@ -1,0 +1,8 @@
+node_modules/
+.git/
+.claude/
+*.log
+dalle_response.json
+gen_cleopatra*.js
+gen_cleo*.js
+test_openai.js
