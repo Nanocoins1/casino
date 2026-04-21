@@ -3822,6 +3822,11 @@ body { color: #e8e2d4 !important; }
 
 /* ── NEON: Hero grid → single column on mobile ── */
 @media(max-width:768px){
+  /* Opulent hero compact padding */
+  .opulent-hero-section { padding: 14px 14px 20px !important; }
+  .opulent-text-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
+  .opulent-text-grid-quote { display: none !important; }
+  .opulent-hero-grid { gap: 20px !important; }
   /* Neon hero: force single column */
   [data-theme="neon"] .neon-hero-grid {
     grid-template-columns: 1fr !important;
@@ -7515,11 +7520,11 @@ function OpulentLobbyHero({ nav }) {
             <span className="o-italic" style={{color:O.burgundy}}>salon</span> of <br/>
             chance.
           </h1>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:32,marginBottom:36}}>
+          <div className="opulent-text-grid" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:32,marginBottom:36}}>
             <p className="o-serif" style={{fontSize:17,lineHeight:1.55,color:O.inkMuted,margin:0,fontWeight:400}}>
               Within the gilded halls of Hathor, four thousand two hundred and eighty games await the discerning guest — each curated, each provably fair.
             </p>
-            <p className="o-serif" style={{fontSize:17,lineHeight:1.55,color:O.inkMuted,margin:0,fontWeight:400,fontStyle:'italic'}}>
+            <p className="o-serif opulent-text-grid-quote" style={{fontSize:17,lineHeight:1.55,color:O.inkMuted,margin:0,fontWeight:400,fontStyle:'italic'}}>
               "An address worth keeping. The attention to tables, the ceremony of a withdrawal settled in under a minute — it reminds one of Europe's finer rooms."
               <span style={{display:'block',marginTop:8,fontSize:11,letterSpacing:'0.12em',color:O.inkDim,fontStyle:'normal'}}>— THE PRIVATE GAMING JOURNAL</span>
             </p>
@@ -16776,27 +16781,30 @@ function App(){
       {/* ── MOBILE BOTTOM NAV ── */}
       <div className="bottom-nav">
         {(()=>{
-          // Theme-specific nav items
+          // Theme-specific nav items — last item always opens Inbox if logged in, Menu if not
+          const inboxItem = user
+            ? {p:'__inbox', i:'✉️', l:'Inbox', inbox:true}
+            : {p:'__menu', i:'☰', l:(t.menu||'Meniu')};
           const royalItems = [
-            {p:'lobby', i:'🏛️', iN:'⬡', l:'Lobby'},
-            {p:'slots',  i:'🎰', iN:'◈', l:(t.slots||'Slots')},
-            {p:'__deposit', i:'💛', iN:'⬟', l:(t.deposit2||'Depozitas'), special:true},
-            {p:'live',  i:'🔴', iN:'◉', l:'Live'},
-            {p:'__menu', i:'☰', iN:'≡', l:(t.menu||'Meniu')},
+            {p:'lobby', i:'🏛️', l:'Lobby'},
+            {p:'slots',  i:'🎰', l:(t.slots||'Slots')},
+            {p:'__deposit', i:'💳', l:(t.deposit2||'Papildyti'), special:true},
+            {p:'live',  i:'🔴', l:'Live'},
+            inboxItem,
           ];
           const neonItems = [
-            {p:'lobby', i:'⬡', l:'Home'},
-            {p:'slots',  i:'◈', l:'Games'},
-            {p:'__deposit', i:'⬟', l:'Deposit', special:true},
-            {p:'live',  i:'◉', l:'Live'},
-            {p:'__menu', i:'≡', l:'Me'},
+            {p:'lobby', i:'🏠', l:'Home'},
+            {p:'slots',  i:'🎮', l:'Games'},
+            {p:'__deposit', i:'💎', l:'Deposit', special:true},
+            {p:'live',  i:'📡', l:'Live'},
+            inboxItem,
           ];
           const opulentItems = [
-            {p:'lobby', i:'I', l:'Lobby'},
-            {p:'slots',  i:'II', l:'Games'},
-            {p:'__deposit', i:'→', l:'Cashier', special:true},
-            {p:'live',  i:'III', l:'Live'},
-            {p:'__menu', i:'IV', l:'More'},
+            {p:'lobby', i:'🏛', l:'Lobby'},
+            {p:'slots',  i:'♠️', l:'Games'},
+            {p:'__deposit', i:'💰', l:'Cashier', special:true},
+            {p:'live',  i:'🎴', l:'Live'},
+            inboxItem,
           ];
           const items = theme==='neon' ? neonItems : theme==='opulent' ? opulentItems : royalItems;
           return items.map(x=>(
@@ -16804,14 +16812,25 @@ function App(){
               <button key={x.p}
                 className="bn-item bn-deposit-btn"
                 onClick={()=>{ window.open('/cashier.html','_self'); }}>
-                <span className="bn-icon" style={{fontSize:theme==='opulent'?18:20}}>{x.i}</span>
+                <span className="bn-icon" style={{fontSize:20}}>{x.i}</span>
+                <span className="bn-label">{x.l}</span>
+              </button>
+            ) : x.inbox ? (
+              <button key={x.p}
+                className="bn-item"
+                style={{position:'relative'}}
+                onClick={()=>{ setInboxUnread(0); setProfileDefaultTab('inbox'); setShowAvatar(true); }}>
+                <span className="bn-icon" style={{fontSize:20,position:'relative',display:'inline-block'}}>
+                  {x.i}
+                  {inboxUnread>0&&<span style={{position:'absolute',top:-4,right:-6,background:'#ff3d71',color:'#fff',borderRadius:'50%',fontSize:8,width:14,height:14,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,lineHeight:1}}>{inboxUnread>9?'9+':inboxUnread}</span>}
+                </span>
                 <span className="bn-label">{x.l}</span>
               </button>
             ) : (
               <button key={x.p}
                 className={`bn-item${(x.p==='__menu'?sbOpen:page===x.p)?' active':''}`}
                 onClick={()=>{ if(x.p==='__menu'){setSbOpen(o=>!o);}else{nav(x.p);} }}>
-                <span className="bn-icon" style={{fontSize:theme==='opulent'?13:20}}>{x.i}</span>
+                <span className="bn-icon" style={{fontSize:20}}>{x.i}</span>
                 <span className="bn-label">{x.l}</span>
               </button>
             )
