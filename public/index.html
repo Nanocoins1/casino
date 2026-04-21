@@ -15743,7 +15743,7 @@ const PP_GAMES = [
   // 🏺 EGYPTIAN / ADVENTURE
   {s:'vs10bookoftut',       n:'Book of Tut',             cat:'slots', rtp:96.5},
   {s:'vs25journey',         n:'John Hunter – Book of Tut',cat:'slots', rtp:96.7},
-  {s:'vs40cleocatra',       n:'Cleocatra',               cat:'slots', rtp:95.9},
+  {s:'vs20cleocatra',       n:'Cleocatra',               cat:'slots', rtp:95.9},
   {s:'vs5aztecgems',        n:'Aztec Gems',              cat:'slots', rtp:96.5},
   {s:'vs10egyptcls',        n:'Ancient Egypt Classic',   cat:'slots', rtp:95.0},
   {s:'vs25minesweeper',     n:'Mines of the Aztec',      cat:'slots', rtp:96.5},
@@ -15857,17 +15857,23 @@ function GameIframeModal({ game, onClose }) {
   return (
     <div style={{position:'fixed',inset:0,zIndex:9999,background:'rgba(0,0,0,0.96)',display:'flex',flexDirection:'column'}}>
       {/* Header bar */}
-      <div style={{height:48,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 16px',background:'rgba(0,0,0,0.8)',borderBottom:'1px solid rgba(201,168,76,0.15)',flexShrink:0}}>
-        <div style={{display:'flex',alignItems:'center',gap:10}}>
-          <span style={{fontFamily:"'Cinzel',serif",fontSize:11,letterSpacing:'3px',color:'rgba(201,168,76,0.5)'}}>HATHOR</span>
-          <span style={{color:'rgba(255,255,255,0.2)'}}>·</span>
-          <span style={{fontSize:13,fontWeight:600,color:'#e8e0d0'}}>{game.n}</span>
-          <span style={{fontSize:9,padding:'2px 6px',background:'rgba(201,168,76,0.12)',border:'1px solid rgba(201,168,76,0.2)',borderRadius:3,color:'rgba(201,168,76,0.7)',letterSpacing:'1px',fontFamily:"'Space Grotesk',sans-serif"}}>DEMO</span>
+      <div style={{height:52,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 12px',background:'rgba(0,0,0,0.92)',borderBottom:'1px solid rgba(201,168,76,0.15)',flexShrink:0,gap:10}}>
+        {/* ← Back to Lobby */}
+        <button onClick={onClose} style={{display:'flex',alignItems:'center',gap:7,background:'rgba(201,168,76,0.1)',border:'1px solid rgba(201,168,76,0.3)',borderRadius:8,color:'#c9a84c',cursor:'pointer',padding:'7px 14px',fontSize:13,fontWeight:700,fontFamily:"'Space Grotesk',sans-serif",transition:'all .15s',whiteSpace:'nowrap',flexShrink:0}}
+          onMouseEnter={e=>{e.currentTarget.style.background='rgba(201,168,76,0.2)';e.currentTarget.style.borderColor='rgba(201,168,76,0.6)';}}
+          onMouseLeave={e=>{e.currentTarget.style.background='rgba(201,168,76,0.1)';e.currentTarget.style.borderColor='rgba(201,168,76,0.3)';}}>
+          ← Lobby
+        </button>
+        {/* Game title */}
+        <div style={{display:'flex',alignItems:'center',gap:8,minWidth:0,overflow:'hidden'}}>
+          <span style={{fontSize:13,fontWeight:600,color:'#e8e0d0',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{game.n}</span>
+          <span style={{fontSize:9,padding:'2px 6px',background:'rgba(201,168,76,0.12)',border:'1px solid rgba(201,168,76,0.2)',borderRadius:3,color:'rgba(201,168,76,0.7)',letterSpacing:'1px',fontFamily:"'Space Grotesk',sans-serif",flexShrink:0}}>DEMO</span>
         </div>
-        <button onClick={onClose} style={{background:'none',border:'1px solid rgba(255,255,255,0.1)',borderRadius:8,color:'rgba(255,255,255,0.5)',cursor:'pointer',padding:'6px 14px',fontSize:12,fontFamily:"'Space Grotesk',sans-serif",transition:'all .15s'}}
-          onMouseEnter={e=>e.target.style.borderColor='rgba(201,168,76,0.4)'}
-          onMouseLeave={e=>e.target.style.borderColor='rgba(255,255,255,0.1)'}>
-          ✕ Close
+        {/* ✕ close (smaller, secondary) */}
+        <button onClick={onClose} style={{background:'none',border:'1px solid rgba(255,255,255,0.08)',borderRadius:8,color:'rgba(255,255,255,0.35)',cursor:'pointer',padding:'6px 10px',fontSize:12,fontFamily:"'Space Grotesk',sans-serif",flexShrink:0}}
+          onMouseEnter={e=>{e.currentTarget.style.color='rgba(255,255,255,0.7)';e.currentTarget.style.borderColor='rgba(255,255,255,0.2)';}}
+          onMouseLeave={e=>{e.currentTarget.style.color='rgba(255,255,255,0.35)';e.currentTarget.style.borderColor='rgba(255,255,255,0.08)';}}>
+          ✕
         </button>
       </div>
       {/* iframe */}
