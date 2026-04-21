@@ -126,13 +126,14 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: hidden; max-width: 100vw; }
 body {
   background: var(--bg);
   font-family: 'Space Grotesk', sans-serif;
   color: var(--cream);
   min-height: 100vh;
   overflow-x: hidden;
+  max-width: 100vw;
 }
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
@@ -3797,6 +3798,26 @@ body { color: #e8e2d4 !important; }
   .hero-stat { padding:8px 10px !important; }
   .hero-stat-val { font-size:13px !important; }
 }
+/* ══ GLOBAL MOBILE OVERFLOW FIX ══════════════════════════ */
+@media(max-width:768px){
+  html, body, #root, .app-shell, .main-content {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+  /* Aurora/grid bg — hide on mobile to prevent layout overflow */
+  .n-aurora-bg { display: none !important; }
+  .n-grid-bg   { display: none !important; }
+  /* Neon hero: compact padding + stats 2×2 */
+  .neon-hero-section { padding: 14px 14px 0 !important; border-radius: 16px !important; }
+  .neon-ticker-section { padding: 8px 14px !important; }
+  .neon-stats-grid { grid-template-columns: repeat(2,1fr) !important; gap: 12px 0 !important; margin-top: 24px !important; }
+  .neon-stats-grid > div { padding: 0 10px !important; }
+  /* Neon hero main card */
+  .neon-hero-main { padding: 22px 18px 20px !important; min-height: unset !important; }
+  .neon-hero-main p { max-width: 100% !important; font-size: 14px !important; }
+  .neon-hero-main h1 { font-size: clamp(34px,9vw,52px) !important; }
+}
+
 /* ══ THEME-SPECIFIC MOBILE OVERRIDES ══════════════════════ */
 
 /* ── NEON: Hero grid → single column on mobile ── */
@@ -7330,7 +7351,7 @@ function NeonLobbyHero({ nav }) {
     setTilt({x:y*-6, y:x*8});
   };
   return (
-    <section style={{padding:'28px 28px 0', position:'relative', zIndex:2,
+    <section className="neon-hero-section" style={{padding:'28px 28px 0', position:'relative', zIndex:2,
       backgroundImage:"url('/img/hero-neon.png')",
       backgroundSize:'cover', backgroundPosition:'center 40%',
       borderRadius:24, overflow:'hidden', marginBottom:0}}>
@@ -7363,7 +7384,7 @@ function NeonLobbyHero({ nav }) {
               Browse games
             </button>
           </div>
-          <div style={{marginTop:48,display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:0,borderTop:`1px solid ${N.line}`,paddingTop:20}}>
+          <div className="neon-stats-grid" style={{marginTop:48,display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:0,borderTop:`1px solid ${N.line}`,paddingTop:20}}>
             {[{k:'JACKPOT POOL',v:'₿ 12.84',s:'≈ $878,500'},{k:'HANDS TODAY',v:'2.4M',s:'played'},{k:'AVG WITHDRAW',v:'48s',s:'median'},{k:'RTP',v:'99%',s:'originals'}].map((s,i)=>(
               <div key={i} style={{padding:'0 14px',borderLeft:i?`1px solid ${N.line}`:'none'}}>
                 <div style={{fontSize:9,letterSpacing:'0.22em',color:N.inkDim,fontFamily:N.mono}}>{s.k}</div>
@@ -7430,7 +7451,7 @@ function NeonLobbyTicker() {
   ];
   const all = [...wins,...wins];
   return (
-    <section style={{padding:'16px 28px',position:'relative',zIndex:2}}>
+    <section className="neon-ticker-section" style={{padding:'16px 28px',position:'relative',zIndex:2}}>
       <div className="n-glass" style={{padding:0,overflow:'hidden',display:'flex',alignItems:'stretch',height:52}}>
         <div style={{display:'flex',alignItems:'center',gap:8,padding:'0 18px',borderRight:`1px solid ${N.line}`,background:'rgba(255,120,180,0.08)'}}>
           <span style={{width:8,height:8,borderRadius:'50%',background:N.live,boxShadow:`0 0 10px ${N.live}`}} className="n-pulse-ring"/>
