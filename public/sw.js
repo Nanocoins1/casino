@@ -1,5 +1,5 @@
-// HATHOR Casino — Service Worker v4.8 (GLB material fix — invalidate 3D models)
-var CACHE = 'hathor-v4.8';
+// HATHOR Casino — Service Worker v4.9 (GLB metallic fix — force cache refresh)
+var CACHE = 'hathor-v4.9';
 var STATIC = [
   '/',
   '/manifest.json',
