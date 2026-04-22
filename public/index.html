@@ -12242,6 +12242,7 @@ const LANGS = {
     enterCasino:'Įeiti į Kazino', yourName:'Jūsų vardas', newPlayer:'Nauji nariai gauna 10 000 žetonų',
     balance:'Balansas', level:'Lygis', lobby:'Lobis', slots:'Automatai', roulette:'Ruletė',
     bj:'Blackjack', poker:'Pokeris', sports:'Sportas', stats:'Statistika', leaderboard:'Lyderiai',
+    sportsBetTitle:'Sporto Lažybos', sportsBetSub:'Futbolas · Krepšinis · Tenisas · Ledo ritulys · Live koeficientai', sportsLiveCount:'500+ LIVE RINKŲ', enterSportsbook:'ĮEITI Į LAŽYBAS',
     cashier:'Kasos', spin:'SUKTI', spinning:'SUKASI...', deal:'DALINTI', hit:'IMTI', stand:'STOTI',
     double:'DVIGUBAS', newHand:'NAUJA RANKA', placeBet:'STATYTI', fold:'Pasitraukti', check:'Tikrinti',
     call:'Palyginti', raise:'Didinti', allin:'Viskas 🔥', deposit:'Įnešti', withdraw:'Išimti',
@@ -16764,13 +16765,113 @@ function App(){
             </div>
           )}
 
+          {/* ═══ SPORTS BETTING — separate niche, prominent placement ═══ */}
+          <div className="sports-hero-card" style={{marginBottom:24}}>
+            <div
+              onClick={()=>requireAuth(()=>nav('sports'))}
+              className="sports-banner-new"
+              style={{
+                position:'relative', cursor:'pointer', borderRadius:16, overflow:'hidden',
+                padding:'clamp(20px,3.5vw,36px) clamp(20px,3.5vw,40px)',
+                minHeight:180,
+                background: theme==='opulent'
+                  ? 'linear-gradient(135deg,#8a1e2e 0%,#5a1420 100%)'
+                  : theme==='neon'
+                  ? 'linear-gradient(135deg,#0a1628 0%,#1a2f4a 50%,#0a3a5a 100%)'
+                  : 'linear-gradient(135deg,#0f3a52 0%,#083250 50%,#042030 100%)',
+                border: theme==='opulent'
+                  ? '1px solid rgba(201,168,76,0.4)'
+                  : '1px solid rgba(107,225,255,0.3)',
+                boxShadow: '0 12px 40px rgba(0,0,0,0.4)',
+                display:'flex', alignItems:'center', justifyContent:'space-between',
+                gap:24, flexWrap:'wrap',
+                transition:'transform .25s, box-shadow .25s'
+              }}
+              onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-2px)';e.currentTarget.style.boxShadow='0 16px 48px rgba(0,0,0,0.5)';}}
+              onMouseLeave={e=>{e.currentTarget.style.transform='';e.currentTarget.style.boxShadow='0 12px 40px rgba(0,0,0,0.4)';}}
+            >
+              {/* Diagonal sport pattern overlay */}
+              <div style={{
+                position:'absolute', inset:0, opacity:0.08, pointerEvents:'none',
+                backgroundImage:'radial-gradient(circle at 10% 20%,#fff 1px,transparent 1px), radial-gradient(circle at 90% 80%,#fff 1px,transparent 1px)',
+                backgroundSize:'50px 50px,70px 70px',
+              }}/>
+              {/* LEFT — title + subtitle + sport icons */}
+              <div style={{position:'relative', flex:'1 1 300px', minWidth:240}}>
+                <div style={{
+                  display:'inline-flex', alignItems:'center', gap:8,
+                  padding:'4px 12px', borderRadius:20,
+                  background:'rgba(255,85,119,0.18)',
+                  border:'1px solid rgba(255,85,119,0.4)',
+                  fontSize:10, fontWeight:700, letterSpacing:'0.22em',
+                  color:'#ff7a8c', marginBottom:14,
+                  fontFamily:"'Space Grotesk',sans-serif"
+                }}>
+                  <span style={{width:6,height:6,borderRadius:'50%',background:'#ff7a8c',boxShadow:'0 0 8px #ff7a8c',animation:'pulse 1.6s infinite'}}/>
+                  LIVE NOW
+                </div>
+                <h2 style={{
+                  margin:'0 0 6px', fontWeight:900,
+                  fontSize:'clamp(26px,3.2vw,40px)', lineHeight:1.05,
+                  color:theme==='opulent'?'#fffaf2':'#e8f4ff',
+                  letterSpacing:'-0.5px',
+                  fontFamily: theme==='opulent'?'"Cormorant Garamond",serif':"'Inter',sans-serif",
+                  fontStyle: theme==='opulent'?'italic':'normal',
+                  textShadow:'0 2px 12px rgba(0,0,0,0.5)'
+                }}>
+                  {t.sportsBetTitle || 'Sports Betting'}
+                </h2>
+                <div style={{
+                  fontSize:13, color:'rgba(232,240,250,0.75)', marginBottom:18,
+                  fontFamily:"'Space Grotesk',sans-serif", letterSpacing:'0.3px'
+                }}>
+                  {t.sportsBetSub || 'Football · Basketball · Tennis · Hockey · Live odds · In-play betting'}
+                </div>
+                {/* Sport icons */}
+                <div style={{display:'flex', gap:10, flexWrap:'wrap', fontSize:28}}>
+                  {['⚽','🏀','🎾','🏒','⚾','🏈','🥊','🏐'].map((s,i)=>(
+                    <span key={i} style={{
+                      width:42, height:42, display:'inline-flex',
+                      alignItems:'center', justifyContent:'center',
+                      background:'rgba(255,255,255,0.08)',
+                      border:'1px solid rgba(255,255,255,0.15)',
+                      borderRadius:10, backdropFilter:'blur(6px)',
+                      transition:'transform .2s'
+                    }}>{s}</span>
+                  ))}
+                </div>
+              </div>
+              {/* RIGHT — CTA */}
+              <div style={{position:'relative', display:'flex', flexDirection:'column', alignItems:'flex-end', gap:10}}>
+                <div style={{fontSize:11, color:'rgba(232,240,250,0.5)', letterSpacing:'0.2em', fontFamily:"'Space Grotesk',sans-serif"}}>
+                  {t.sportsLiveCount || '500+ LIVE MARKETS'}
+                </div>
+                <button
+                  onClick={e=>{e.stopPropagation();requireAuth(()=>nav('sports'));}}
+                  className="sports-enter-btn"
+                  style={{
+                    padding:'14px 32px', fontSize:14, fontWeight:800, letterSpacing:'0.1em',
+                    background: theme==='opulent'
+                      ? 'linear-gradient(135deg,#f0c060,#c9a84c)'
+                      : 'linear-gradient(135deg,#6be1ff,#7cf0c2)',
+                    color:'#0a1628', border:'none', borderRadius:10, cursor:'pointer',
+                    boxShadow:'0 4px 20px rgba(107,225,255,0.35)',
+                    fontFamily:"'Inter',sans-serif",
+                    transition:'transform .2s, box-shadow .2s'
+                  }}
+                >
+                  {t.enterSportsbook || 'ENTER SPORTSBOOK'} →
+                </button>
+              </div>
+            </div>
+          </div>
+
           {/* ── FEATURED CAROUSEL — teminiai vaizdai ── */}
           {(()=>{
             const fThumb = getThumbMap(theme);
             const featuredGames = [
               {href:'/dragon-crash.html', id:'dragon',    iconImg:'/img/icon-dragon.webp',    title:'Dragon Crash',  sub:'Fly high · Cash out in time'},
               {href:'/nexus-slots.html',  id:'slots',     iconImg:'/img/icon-slots.png',     title:'NEXUS SLOTS',   sub:'3D Reels · Jackpot pool'},
-              {page:'sports',             id:'sports',    iconImg:'/img/icon-sports.webp',    title:'Sports Live',   sub:'EPL · NBA · Live odds', btn:'BET →'},
               {href:'/wheel.html',        id:'wheel',     iconImg:'/img/icon-wheel.webp',     title:'NEXUS WHEEL',   sub:'3D Spin · Up to 50×'},
               {href:'/blackjack.html',    id:'blackjack', iconImg:'/img/icon-blackjack.png', title:'Blackjack',     sub:'21 · Hit, Stand, Double'},
               {href:'/mines.html',        id:'mines',     iconImg:'/img/icon-mines.webp',     title:'Mines',         sub:'5×5 grid · Diamonds or mines?'},
