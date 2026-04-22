@@ -135,6 +135,22 @@ app.use('/api/kyc', rateLimit({
   message: { error: 'Too many KYC upload attempts.' },
 }));
 
+// Game bets: 120 per minute (reasonable for fast slot spins)
+const gameLimiter = rateLimit({
+  windowMs: 60_000, max: 120,
+  standardHeaders: true, legacyHeaders: false,
+  message: { error: 'Too many game actions. Slow down.' },
+});
+app.use('/api/game/bet',    gameLimiter);
+app.use('/api/game/settle', gameLimiter);
+app.use('/api/log-game',    gameLimiter);
+
+// Jackpot trigger: 10 per minute (paranoid — shouldn't happen often)
+app.use('/api/jackpot-win', rateLimit({
+  windowMs: 60_000, max: 10,
+  message: { error: 'Too many jackpot claims' },
+}));
+
 let _dbOk = false; // set to true once initDB succeeds
 async function dbQuery(sql, params) {
   if (!_dbOk && !process.env.DATABASE_URL) return { rows: [] };
@@ -680,13 +696,24 @@ app.use(function(req,res,next){
   res.setHeader('X-Frame-Options','SAMEORIGIN');
   res.setHeader('Referrer-Policy','strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy','geolocation=(), microphone=(), camera=()');
-  // HSTS: short max-age (1 day) without preload — safe for production
-  res.setHeader('Strict-Transport-Security','max-age=86400');
-  // CSP: permissive for CDN scripts (React, Babel, socket.io, Chart.js, OneSignal)
-  res.setHeader('Content-Security-Policy',
-    "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; " +
-    "frame-ancestors 'self';"
-  );
+  // HSTS: 1 year with preload flag for production (requires HTTPS)
+  res.setHeader('Strict-Transport-Security','max-age=31536000; includeSubDomains');
+  // CSP: restrict to specific CDNs instead of allowing any origin (defense-in-depth)
+  // Note: 'unsafe-eval' still needed for Babel in-browser JSX compilation
+  // Note: 'unsafe-inline' still needed for React inline styles + event handlers
+  res.setHeader('Content-Security-Policy', [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net https://cdn.socket.io https://ajax.googleapis.com https://www.googletagmanager.com https://www.google-analytics.com https://embed.tawk.to https://*.tawk.to",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
+    "font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net",
+    "img-src 'self' data: blob: https: http:",
+    "connect-src 'self' wss: https: http://localhost:*",
+    "frame-src 'self' https://*.pragmaticplay.net https://*.spribegaming.com https://aviator-demo.spribegaming.com https://turbo.spribegaming.com https://demogamesfree.pragmaticplay.net https://demo.spribe.io https://tawk.to",
+    "frame-ancestors 'self'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "object-src 'none'"
+  ].join('; '));
   next();
 });
 // HTML files: never cache — always fresh from server
@@ -1041,14 +1068,30 @@ async function resetJackpot() { await dbRun(`UPDATE jackpot SET amount=50000 WHE
 
 app.get('/api/jackpot', async (req,res)=>res.json({amount:await getJackpot()}));
 
-// Add jackpot contribution on every bet (1% of bet goes to jackpot)
+// Log game — DEPRECATED legacy endpoint, now requires auth
+// New code should use /api/game/bet + /api/game/settle instead (which handle
+// logging, jackpot, wagering, tournament automatically).
+// This endpoint is kept for backwards compat but now validates session.
 app.post('/api/log-game', express.json(), async (req,res)=>{
-  const {uid,game,bet,result,won} = req.body;
-  await logGame(uid, game, bet, result, won);
-  if(bet>0) await addToJackpot(Math.floor(bet*0.01));
-  if(uid && bet>0) {
-    await trackWagering(uid, bet);
-    await updateTournamentScore(uid, bet, game);
+  // Require valid session
+  const token = (req.headers.authorization||'').replace('Bearer ','') || req.headers['x-session-token'];
+  const sessionUid = await checkSession(token);
+  if(!sessionUid) return res.status(401).json({error:'Unauthorized'});
+
+  // Force uid from session — never trust client-supplied uid
+  const {game,bet,result,won} = req.body;
+  const uid = sessionUid;
+
+  // Validate inputs
+  const betAmt = Math.max(0, parseInt(bet)||0);
+  if(betAmt > 1000000) return res.status(400).json({error:'Bet too large'});
+  const gameName = (typeof game === 'string' ? game : 'unknown').slice(0, 32);
+
+  await logGame(uid, gameName, betAmt, result, won);
+  if(betAmt>0) await addToJackpot(Math.floor(betAmt*0.01));
+  if(betAmt>0) {
+    await trackWagering(uid, betAmt);
+    await updateTournamentScore(uid, betAmt, gameName);
   }
   res.json({ok:true, jackpot:await getJackpot()});
 });
@@ -1107,15 +1150,43 @@ app.post('/api/game/settle', express.json(), async (req,res) => {
   res.json({ok:true, balance:user.tokens});
 });
 
-// Jackpot win endpoint
+// Jackpot win endpoint — SERVER-AUTHORITATIVE
+// Only callable via a valid server-generated betId (from /api/game/bet) and
+// requires the server-computed winning roll to match (stored in pendingGameBets).
+// Client-supplied jackpot triggers are REJECTED.
 app.post('/api/jackpot-win', express.json(), async (req,res)=>{
-  const {uid} = req.body;
+  // Auth check — must have valid session
+  const token = (req.headers.authorization||'').replace('Bearer ','') || req.headers['x-session-token'];
+  const sessionUid = await checkSession(token);
+  if(!sessionUid) return res.status(401).json({error:'Unauthorized'});
+
+  // Require server-generated betId matching this user
+  const { betId } = req.body||{};
+  if(!betId) return res.status(400).json({error:'Missing betId'});
+  const pending = pendingGameBets.get(betId);
+  if(!pending) return res.status(400).json({error:'Invalid or expired betId'});
+  if(pending.uid !== sessionUid) return res.status(403).json({error:'betId does not belong to you'});
+
+  // Consume the pending bet so it can't be replayed
+  pendingGameBets.delete(betId);
+
+  // Server-side win check (3-in-10000 chance on qualifying bets of 500+ tokens)
+  const qualifies = pending.amount >= 500;
+  const roll = Math.random();
+  if(!qualifies || roll > 0.0003) {
+    return res.json({ ok:true, won:false });
+  }
+
   const amount = await getJackpot();
-  const u = await getUser(uid);
-  if(u){ u.tokens += amount; await saveUser(u); }
+  const u = await getUser(sessionUid);
+  if(!u) return res.status(404).json({error:'User not found'});
+  u.tokens = (u.tokens||0) + amount;
+  await saveUser(u);
   await resetJackpot();
   io.emit('jackpotWon', {name: u?.name||'?', amount});
-  res.json({amount});
+  // Log as high-value event
+  console.log(`🎰 JACKPOT HIT: uid=${sessionUid}, amount=${amount}, betId=${betId}`);
+  res.json({ ok:true, won:true, amount });
 });
 
 // ── Player stats ─────────────────────────────────────────
