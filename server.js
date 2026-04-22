@@ -496,31 +496,37 @@ const saveUser = async u => {
 };
 
 // ── Levels ───────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+// VIP LEVELS — unified system
+// XP earned from bets: 1 XP per 500 tokens wagered (~€5)
+// Cashback: % of weekly net losses (paid Mondays)
+// Daily bonus: % of yesterday's net losses (capped per level)
+// ══════════════════════════════════════════════════════════
 const LEVELS=[
-  {level:1,name:'Bronze',   xpNeeded:0,     emoji:'🥉',color:'#cd7f32',cashback:0,  xpMult:1.0, dailyBonus:500,  withdrawLimit:5000,  badge:''},
-  {level:2,name:'Silver',   xpNeeded:500,   emoji:'🥈',color:'#c0c0c0',cashback:1,  xpMult:1.1, dailyBonus:750,  withdrawLimit:10000, badge:'SILVER'},
-  {level:3,name:'Gold',     xpNeeded:1500,  emoji:'🥇',color:'#ffd700',cashback:2,  xpMult:1.25,dailyBonus:1000, withdrawLimit:25000, badge:'GOLD'},
-  {level:4,name:'Platinum', xpNeeded:4000,  emoji:'💎',color:'#e5e4e2',cashback:3,  xpMult:1.5, dailyBonus:1500, withdrawLimit:50000, badge:'PLAT'},
-  {level:5,name:'Diamond',  xpNeeded:10000, emoji:'👑',color:'#b9f2ff',cashback:5,  xpMult:2.0, dailyBonus:2000, withdrawLimit:100000,badge:'VIP'},
-  {level:6,name:'VIP Elite',xpNeeded:25000, emoji:'🌟',color:'#ffd680',cashback:8,  xpMult:3.0, dailyBonus:3000, withdrawLimit:999999,badge:'ELITE'},
+  // level, name, xpNeeded, cashback %, xpMult, dailyBonus base+% of losses, withdraw limit
+  {level:1,name:'Bronze',   xpNeeded:0,     emoji:'🥉',color:'#cd7f32',cashback:0,  xpMult:1.0, dailyMin:50,  dailyPct:0.5, dailyMax:500,  withdrawLimit:10000, badge:''},
+  {level:2,name:'Silver',   xpNeeded:500,   emoji:'🥈',color:'#c0c0c0',cashback:1,  xpMult:1.1, dailyMin:100, dailyPct:1.0, dailyMax:750,  withdrawLimit:25000, badge:'SILVER'},
+  {level:3,name:'Gold',     xpNeeded:1500,  emoji:'🥇',color:'#ffd700',cashback:2,  xpMult:1.25,dailyMin:150, dailyPct:1.5, dailyMax:1000, withdrawLimit:50000, badge:'GOLD'},
+  {level:4,name:'Platinum', xpNeeded:4000,  emoji:'💎',color:'#e5e4e2',cashback:3,  xpMult:1.5, dailyMin:200, dailyPct:2.0, dailyMax:1500, withdrawLimit:100000,badge:'PLAT'},
+  {level:5,name:'Diamond',  xpNeeded:10000, emoji:'👑',color:'#b9f2ff',cashback:5,  xpMult:2.0, dailyMin:300, dailyPct:2.5, dailyMax:2000, withdrawLimit:250000,badge:'VIP'},
+  {level:6,name:'VIP Elite',xpNeeded:25000, emoji:'🌟',color:'#ffd680',cashback:8,  xpMult:3.0, dailyMin:500, dailyPct:3.0, dailyMax:3000, withdrawLimit:999999,badge:'ELITE'},
 ];
+// For backwards compat — keep dailyBonus field (= dailyMax)
+LEVELS.forEach(l => l.dailyBonus = l.dailyMax);
 const getLvInfo = xp => { let l=LEVELS[0]; for(const x of LEVELS){if(xp>=x.xpNeeded)l=x;} return l; };
 const nextLvInfo = xp => LEVELS.find(l=>l.xpNeeded>xp)||null;
 
-// ── VIP Program ───────────────────────────────────────────
-const VIP_LEVELS = [
-  { level: 0, name: 'Bronze',   minXp: 0,      cashback: 0,   withdrawLimit: 10000,  badge: '🥉' },
-  { level: 1, name: 'Silver',   minXp: 1000,   cashback: 1,   withdrawLimit: 25000,  badge: '🥈' },
-  { level: 2, name: 'Gold',     minXp: 5000,   cashback: 2,   withdrawLimit: 50000,  badge: '🥇' },
-  { level: 3, name: 'Platinum', minXp: 15000,  cashback: 3,   withdrawLimit: 100000, badge: '💎' },
-  { level: 4, name: 'Diamond',  minXp: 50000,  cashback: 5,   withdrawLimit: 500000, badge: '👑' },
-  { level: 5, name: 'VIP',      minXp: 150000, cashback: 8,   withdrawLimit: 999999, badge: '⚜️' },
-];
+// XP calculation from bet amount
+// Formula: 1 XP per 500 tokens wagered (= €5)
+// Example: 5000 token bet → 10 XP base (before level multiplier)
+function xpFromBet(betAmount) {
+  const b = parseFloat(betAmount) || 0;
+  return Math.max(1, Math.floor(b / 500));
+}
 
+// Legacy compat — getVipLevel now delegates to unified LEVELS system
 function getVipLevel(xp) {
-  let level = VIP_LEVELS[0];
-  for (const l of VIP_LEVELS) { if (xp >= l.minXp) level = l; }
-  return level;
+  return getLvInfo(xp);
 }
 
 async function processWeeklyCashback() {
@@ -587,27 +593,64 @@ async function processCashback(uid) {
   return { cashbackAmt, level: lv.name };
 }
 
-async function addXP(uid, xp) {
+// Add XP to user
+// If bet provided: calculate XP from bet (1 XP per 500 tokens)
+// If only xp provided: use directly (for bonuses, tournaments, etc.)
+async function addXP(uid, xpOrBet, fromBet = false) {
   const u = await getUser(uid); if(!u) return null;
   const oldLv = getLvInfo(u.xp||0);
   const mult = oldLv.xpMult || 1.0;
-  u.xp = (u.xp||0) + Math.round(xp * mult);
+  // Convert bet to XP if needed
+  const baseXp = fromBet ? xpFromBet(xpOrBet) : xpOrBet;
+  u.xp = (u.xp||0) + Math.round(baseXp * mult);
   u.level = getLvInfo(u.xp).level;
   await saveUser(u);
   const newLv = getLvInfo(u.xp);
-  return {levelUp:newLv.level>oldLv.level, newLevel:newLv, xp:u.xp};
+  return {levelUp:newLv.level>oldLv.level, newLevel:newLv, xp:u.xp, xpGained:Math.round(baseXp * mult)};
 }
 
-// ── Daily bonus ──────────────────────────────────────────
-const DAILY=[500,750,1000,1250,1500,2000,3000];
+// ── Daily bonus — scales with yesterday's losses ──────────
+// Formula: max(dailyMin, yesterday_net_loss × dailyPct%) capped at dailyMax
+// This rewards active players (more losses = more bonus, up to cap)
+// and still gives a minimum to inactive/winning players.
 async function claimBonus(uid) {
   const u = await getUser(uid); if(!u) return null;
   const today = new Date().toISOString().split('T')[0];
   if(u.last_bonus===today) return {alreadyClaimed:true};
-  const amount = DAILY[Math.floor(Math.random()*DAILY.length)];
-  u.tokens += amount; u.last_bonus = today; u.xp = (u.xp||0)+50;
+
+  // Get level config for bonus formula
+  const lv = getLvInfo(u.xp || 0);
+
+  // Calculate yesterday's net losses (00:00 - 23:59 yesterday UTC)
+  const now = new Date();
+  const yStart = new Date(now); yStart.setUTCDate(yStart.getUTCDate()-1); yStart.setUTCHours(0,0,0,0);
+  const yEnd   = new Date(yStart); yEnd.setUTCHours(23,59,59,999);
+  let yesterdayLoss = 0;
+  try {
+    const row = await dbGet(
+      `SELECT COALESCE(SUM(CASE WHEN result < bet THEN bet-result ELSE 0 END),0) AS net_loss
+       FROM game_log WHERE uid=$1 AND ts>=$2 AND ts<=$3`,
+      [uid, yStart.toISOString(), yEnd.toISOString()]
+    );
+    yesterdayLoss = parseInt(row?.net_loss || 0);
+  } catch(e) { /* ignore if game_log not ready */ }
+
+  // Calculate bonus amount
+  const fromLosses = Math.floor(yesterdayLoss * (lv.dailyPct || 0.5) / 100);
+  const amount = Math.max(lv.dailyMin || 50, Math.min(lv.dailyMax || 500, fromLosses || (lv.dailyMin || 50)));
+
+  u.tokens += amount;
+  u.last_bonus = today;
+  // Daily bonus gives flat +50 XP (base reward for login engagement)
+  u.xp = (u.xp||0) + 50;
   await saveUser(u);
-  return {amount, tokens:u.tokens};
+  return {
+    amount,
+    tokens: u.tokens,
+    yesterdayLoss,
+    level: lv.name,
+    source: yesterdayLoss > 0 ? `${lv.dailyPct}% of yesterday's losses` : `minimum (${lv.dailyMin})`
+  };
 }
 
 // ── Uploads ──────────────────────────────────────────────
@@ -896,7 +939,14 @@ io.on('connection', async socket=>{
       if(rgRow.self_exclusion_until&&new Date(rgRow.self_exclusion_until)>now){socket.emit('selfExcluded');return;}
       if(rgRow.cool_off_until&&new Date(rgRow.cool_off_until)>now){socket.emit('coolOff');return;}
     }
-    const res=await addXP(socket.uid,xp||10);
+    // ── Preferred: calculate XP from bet (1 XP per 500 tokens)
+    // ── Fallback: use provided xp value (for non-bet actions like bonuses)
+    let res;
+    if(bet && bet > 0) {
+      res = await addXP(socket.uid, bet, true); // fromBet=true
+    } else {
+      res = await addXP(socket.uid, xp||1);
+    }
     const u=await getUser(socket.uid);if(u){u.games_played=(u.games_played||0)+1;await saveUser(u);}
     if(res&&res.levelUp) socket.emit('levelUp',res.newLevel);
     // Update wagering progress if user has active bonus

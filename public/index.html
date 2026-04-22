@@ -9102,6 +9102,8 @@ function ClassicSlot({user,setUser,forceMachine}){
     if(user.tokens<bet||spinning)return;
     sfx.click();setResult(null);setWinCells([]);setWinInfo('');setSpinning(true);
     setUser(u=>({...u,tokens:u.tokens-bet}));
+    // Award XP based on bet size (every spin, win or loss)
+    socket.emit('addXP',{bet:bet,game:'slots'});
     const final=rnd();
     ivRef.current=setInterval(()=>setAnim(rnd()),65);
     [0,1,2,3,4].forEach(col=>setTimeout(()=>{
@@ -9121,7 +9123,6 @@ function ClassicSlot({user,setUser,forceMachine}){
         setWinInfo(wins.map(w=>`${w.sym}×${w.len} ×${w.mult}`).join('  ·  '));
         setResult({txt:totalMult>=50?`🏆 JACKPOT! +${fmt(Math.floor(bet*totalMult))}`:totalMult>=15?`🌟 BIG WIN! +${fmt(Math.floor(bet*totalMult))}`:`✨ +${fmt(Math.floor(bet*totalMult))}`,win:true});
         if(totalMult>=50)sfx.jackpot();else sfx.win();
-        socket.emit('addXP',{xp:20});
       }else{
         setResult({txt:'No win this time',win:false});sfx.lose();
       }
@@ -9406,6 +9407,8 @@ function GrandFortune({user,setUser,t=LANGS.en}){
     sfx.chip();
 
     const betSnap=bet;
+    // Award XP based on bet (every spin)
+    socket.emit('addXP',{bet:betSnap,game:'slots'});
     // Stop reels one by one
     for(let r=0;r<HSLOT_NR;r++){
       const delay=700+r*320;
@@ -9433,7 +9436,6 @@ function GrandFortune({user,setUser,t=LANGS.en}){
             winTimerRef.current=setTimeout(()=>setShowWin(false),wt==='jackpot'?5500:3200);
             if(wt==='jackpot'){sfx.jackpot();setJpFill(16);}else sfx.win();
             fireParticles(wt);
-            socket.emit('addXP',{xp:Math.min(100,totalMult)});
             socket.emit('saveTokens',{tokens:user.tokens-betSnap+won});
           }else{
             sfx.lose();
@@ -10476,6 +10478,7 @@ function Roulette({user,setUser}){
     if(!betType||user.tokens<bet)return;
     sfx.click(); setSpinning(true); setResult(null);
     setUser(u=>({...u,tokens:u.tokens-bet}));
+    socket.emit('addXP',{bet:bet,game:'roulette'});
     const num=Math.floor(Math.random()*37);
     setDeg(d=>d+1800+Math.random()*540);
     setTimeout(()=>{
@@ -10493,7 +10496,6 @@ function Roulette({user,setUser}){
         setUser(u=>({...u,tokens:u.tokens+payout}));
         setResult({num,won:true,msg:`+${fmt(payout)}`});
         sfx.win();
-        socket.emit('addXP',{xp:15});
       } else {
         setResult({num,won:false,msg:'No win'});
         sfx.lose();
@@ -10566,6 +10568,7 @@ function Blackjack({user,setUser}){
     const d=mkDeck(); const p=[d.pop(),d.pop()]; const dl=[d.pop(),d.pop()];
     setDeck(d);setPlayer(p);setDealer(dl);setPhase('play');setStatus('');setSType('');
     setUser(u=>({...u,tokens:u.tokens-bet}));
+    socket.emit('addXP',{bet:bet,game:'blackjack'});
     if(score(p)===21)end(p,dl,d,true);
   };
   const hit=()=>{sfx.card();const d=[...deck];const p=[...player,d.pop()];setDeck(d);setPlayer(p);if(score(p)>21)end(p,dealer,d,false,true);};
@@ -10586,7 +10589,7 @@ function Blackjack({user,setUser}){
     else if(ps>ds){msg='YOU WIN! 🎉';t='win';win=bet*m*2;sfx.win();}
     else if(ps===ds){msg='PUSH';t='push';win=bet*m;}
     else{msg='DEALER WINS';t='lose';sfx.lose();}
-    if(win>0){setUser(u=>({...u,tokens:u.tokens+win}));socket.emit('addXP',{xp:t==='win'?25:5});}
+    if(win>0){setUser(u=>({...u,tokens:u.tokens+win}));}
     setStatus(msg);setSType(t);
     socket.emit('saveTokens',{tokens:user.tokens-bet*m+win});
   };
