@@ -112,7 +112,8 @@
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <!-- ── Deferred — only loaded when needed ── -->
 <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script type="module" defer src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+<!-- model-viewer: no defer — needs to register <model-viewer> custom element before React uses it -->
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
 <style>
 /* ═══════════════════════════════════════════════════
    HATHOR ROYAL — PREMIUM BLACK & GOLD DESIGN SYSTEM
@@ -7368,10 +7369,11 @@ function Cleopatra({ height = 540 }) {
         max-camera-orbit="auto auto auto"
         min-field-of-view="35deg"
         max-field-of-view="35deg"
-        exposure="1.1"
-        shadow-intensity="1.2"
-        shadow-softness="0.9"
-        environment-image="neutral"
+        exposure="0.95"
+        shadow-intensity="1.5"
+        shadow-softness="0.75"
+        environment-image="legacy"
+        tone-mapping="aces"
         style={{ width:'100%', height:'100%', background:'transparent', '--poster-color':'transparent', position:'relative', zIndex:1, touchAction:'none', pointerEvents:'none', userSelect:'none' }}
       />
 
@@ -16834,17 +16836,35 @@ function App(){
                 }}>
                   {t.sportsBetSub || 'Football · Basketball · Tennis · Hockey · Live odds · In-play betting'}
                 </div>
-                {/* Sport icons */}
-                <div style={{display:'flex', gap:10, flexWrap:'wrap', fontSize:28}}>
-                  {['⚽','🏀','🎾','🏒','⚾','🏈','🥊','🏐'].map((s,i)=>(
-                    <span key={i} style={{
-                      width:42, height:42, display:'inline-flex',
+                {/* Premium 3D sport icons — DALL-E HD renders */}
+                <div style={{display:'flex', gap:12, flexWrap:'wrap'}}>
+                  {[
+                    {n:'soccer',     a:'Soccer'},
+                    {n:'basketball', a:'Basketball'},
+                    {n:'tennis',     a:'Tennis'},
+                    {n:'hockey',     a:'Hockey'},
+                    {n:'baseball',   a:'Baseball'},
+                    {n:'football',   a:'Football'},
+                    {n:'boxing',     a:'Boxing'},
+                    {n:'volleyball', a:'Volleyball'},
+                  ].map((s,i)=>(
+                    <div key={i} className="sport-icon-pill" style={{
+                      width:52, height:52, display:'flex',
                       alignItems:'center', justifyContent:'center',
-                      background:'rgba(255,255,255,0.08)',
-                      border:'1px solid rgba(255,255,255,0.15)',
-                      borderRadius:10, backdropFilter:'blur(6px)',
-                      transition:'transform .2s'
-                    }}>{s}</span>
+                      background:'rgba(0,0,0,0.35)',
+                      border:'1px solid rgba(255,255,255,0.12)',
+                      borderRadius:12,
+                      backdropFilter:'blur(10px)',
+                      WebkitBackdropFilter:'blur(10px)',
+                      boxShadow:'0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)',
+                      transition:'transform .25s cubic-bezier(.34,1.6,.64,1), box-shadow .2s',
+                      overflow:'hidden'
+                    }}
+                    onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-3px) scale(1.08)';e.currentTarget.style.boxShadow='0 8px 20px rgba(0,0,0,0.5), 0 0 20px rgba(255,255,255,0.15)';}}
+                    onMouseLeave={e=>{e.currentTarget.style.transform='';e.currentTarget.style.boxShadow='0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)';}}
+                    >
+                      <img src={'/images/sports/icons/'+s.n+'.webp'} alt={s.a} loading="lazy" style={{width:'84%',height:'84%',objectFit:'contain',filter:'drop-shadow(0 2px 4px rgba(0,0,0,0.6))',userSelect:'none',pointerEvents:'none'}}/>
+                    </div>
                   ))}
                 </div>
               </div>
