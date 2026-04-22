@@ -4596,6 +4596,16 @@ function scheduleNextDailyPush() {
   }, ms);
 }
 
+// ── 404 handler (must be after all routes) ────────────────
+app.use((req, res) => {
+  // API calls get JSON 404
+  if (req.path.startsWith('/api/') || req.path.startsWith('/admin/')) {
+    return res.status(404).json({ error: 'Not found' });
+  }
+  // HTML requests get the branded 404 page
+  res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+});
+
 initDB().then(() => {
   server.listen(PORT,()=>console.log(`🎰 HATHOR Royal Casino v2 (PostgreSQL) → http://localhost:${PORT}`));
   // Run VIP cashback on startup and every 24h
