@@ -1,0 +1,30 @@
+# HATHOR Casino — robots.txt
+# https://www.robotstxt.org/
+
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /login.html
+Allow: /terms.html
+Allow: /privacy.html
+Allow: /responsible.html
+Allow: /aml.html
+Allow: /provably-fair.html
+Allow: /affiliate.html
+
+# Disallow admin, API, and internal areas
+Disallow: /admin.html
+Disallow: /admin-affiliates.html
+Disallow: /admin/
+Disallow: /api/
+Disallow: /kyc-file/
+Disallow: /update.html
+Disallow: /verify.html
+Disallow: /video-preview.html
+Disallow: /mascot-preview.html
+
+# Crawl-delay for politeness
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://hathor.casino/sitemap.xml
