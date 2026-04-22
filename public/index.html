@@ -9,8 +9,12 @@
 <meta name="apple-mobile-web-app-title" content="HATHOR Casino"/>
 <meta name="theme-color" content="#050508"/>
 <link rel="manifest" href="/manifest.json"/>
-<link rel="icon" type="image/png" href="/img/icon-192.png"/>
-<link rel="apple-touch-icon" href="/img/icon-512.png"/>
+<link rel="icon" type="image/png" sizes="32x32" href="/img/icon-192.png"/>
+<link rel="icon" type="image/png" sizes="192x192" href="/img/icon-192.png"/>
+<link rel="apple-touch-icon" sizes="512x512" href="/img/icon-512.png"/>
+<link rel="shortcut icon" href="/img/favicon.webp"/>
+<meta name="msapplication-TileImage" content="/img/icon-512.png"/>
+<meta name="msapplication-TileColor" content="#050508"/>
 <title>HATHOR Casino — Premium Crypto Casino | Slots, Live Casino & Sports Betting</title>
 <meta name="description" content="HATHOR Casino — Play 1,000+ premium casino games with instant crypto payouts. Slots, Blackjack, Roulette, Live Poker, Crash & Sports Betting. Anjouan licensed. Join free!"/>
 <meta name="keywords" content="crypto casino, online casino, bitcoin casino, slots, blackjack, roulette, live casino, sports betting, crash game, HATHOR casino"/>
@@ -3878,6 +3882,33 @@ body { color: #e8e2d4 !important; }
   .hero-stat { padding:8px 10px !important; }
   .hero-stat-val { font-size:13px !important; }
 }
+/* ══ MOBILE POLISH (additional improvements) ══════════════ */
+@media(max-width:768px){
+  /* Game iframe modal — full-screen on mobile */
+  .game-iframe-modal-header {
+    height: 48px !important;
+    padding: 0 10px !important;
+  }
+  /* PP game grid — more compact on mobile */
+  .pp-grid-mobile { grid-template-columns: repeat(2,1fr) !important; gap: 8px !important; }
+  /* Game modal iframe - better mobile viewport */
+  iframe[title*="Game"], iframe[allow*="fullscreen"] {
+    touch-action: manipulation;
+  }
+  /* Prevent accidental zoom on input focus */
+  input, select, textarea { font-size: 16px !important; }
+  /* Reduce padding on nested sections */
+  .main-content > * { max-width: 100% !important; }
+  /* Fix floating elements over bottom nav */
+  .viktor-btn, .support-btn { bottom: 84px !important; right: 14px !important; }
+  /* Touch-friendly buttons */
+  button, .btn, [role="button"] {
+    min-height: 40px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(201,168,76,0.2);
+  }
+}
+
 /* ══ GLOBAL MOBILE OVERFLOW FIX ══════════════════════════ */
 @media(max-width:768px){
   html, body, #root, .app-shell, .main-content {
@@ -15945,7 +15976,7 @@ function GameIframeModal({ game, onClose }) {
       {/* Header bar */}
       <div style={{height:52,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 12px',background:'rgba(0,0,0,0.92)',borderBottom:'1px solid rgba(201,168,76,0.15)',flexShrink:0,gap:10}}>
         {/* ← Back to Lobby */}
-        <button onClick={onClose} style={{display:'flex',alignItems:'center',gap:7,background:'rgba(201,168,76,0.1)',border:'1px solid rgba(201,168,76,0.3)',borderRadius:8,color:'#c9a84c',cursor:'pointer',padding:'7px 14px',fontSize:13,fontWeight:700,fontFamily:"'Space Grotesk',sans-serif",transition:'all .15s',whiteSpace:'nowrap',flexShrink:0}}
+        <button onClick={onClose} aria-label="Back to lobby" title="Back to lobby (ESC)" style={{display:'flex',alignItems:'center',gap:7,background:'rgba(201,168,76,0.1)',border:'1px solid rgba(201,168,76,0.3)',borderRadius:8,color:'#c9a84c',cursor:'pointer',padding:'7px 14px',fontSize:13,fontWeight:700,fontFamily:"'Space Grotesk',sans-serif",transition:'all .15s',whiteSpace:'nowrap',flexShrink:0}}
           onMouseEnter={e=>{e.currentTarget.style.background='rgba(201,168,76,0.2)';e.currentTarget.style.borderColor='rgba(201,168,76,0.6)';}}
           onMouseLeave={e=>{e.currentTarget.style.background='rgba(201,168,76,0.1)';e.currentTarget.style.borderColor='rgba(201,168,76,0.3)';}}>
           ← Lobby
@@ -15956,7 +15987,7 @@ function GameIframeModal({ game, onClose }) {
           <span style={{fontSize:9,padding:'2px 6px',background:'rgba(201,168,76,0.12)',border:'1px solid rgba(201,168,76,0.2)',borderRadius:3,color:'rgba(201,168,76,0.7)',letterSpacing:'1px',fontFamily:"'Space Grotesk',sans-serif",flexShrink:0}}>{(game.provider||'pp').toUpperCase()} · DEMO</span>
         </div>
         {/* ✕ close (smaller, secondary) */}
-        <button onClick={onClose} style={{background:'none',border:'1px solid rgba(255,255,255,0.08)',borderRadius:8,color:'rgba(255,255,255,0.35)',cursor:'pointer',padding:'6px 10px',fontSize:12,fontFamily:"'Space Grotesk',sans-serif",flexShrink:0}}
+        <button onClick={onClose} aria-label="Close game" title="Close (ESC)" style={{background:'none',border:'1px solid rgba(255,255,255,0.08)',borderRadius:8,color:'rgba(255,255,255,0.35)',cursor:'pointer',padding:'6px 10px',fontSize:12,fontFamily:"'Space Grotesk',sans-serif",flexShrink:0}}
           onMouseEnter={e=>{e.currentTarget.style.color='rgba(255,255,255,0.7)';e.currentTarget.style.borderColor='rgba(255,255,255,0.2)';}}
           onMouseLeave={e=>{e.currentTarget.style.color='rgba(255,255,255,0.35)';e.currentTarget.style.borderColor='rgba(255,255,255,0.08)';}}>
           ✕

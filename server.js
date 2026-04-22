@@ -2407,7 +2407,7 @@ app.post('/api/auth/register', express.json(), async (req, res) => {
       } catch(pe) { console.warn('Promo apply error:', pe.message); }
     }
     // Send verification email
-    const baseUrl = process.env.BASE_URL || 'https://casino-production-0712.up.railway.app';
+    const baseUrl = process.env.BASE_URL || process.env.SITE_URL || 'https://hathor.casino';
     const vToken = require('crypto').randomBytes(32).toString('hex');
     const vExpires = new Date(Date.now() + 24*60*60*1000);
     await dbRun(`INSERT INTO email_verify_tokens(token,uid,expires_at) VALUES($1,$2,$3)`, [vToken, uid, vExpires]).catch(()=>{});
@@ -2497,7 +2497,7 @@ app.post('/api/auth/forgot-password', authLimiter, express.json(), async (req,re
       const expires = new Date(Date.now() + 60*60*1000); // 1 hour
       await dbRun(`DELETE FROM password_reset_tokens WHERE uid=$1`, [row.uid]);
       await dbRun(`INSERT INTO password_reset_tokens(token,uid,expires_at) VALUES($1,$2,$3)`, [token, row.uid, expires]);
-      const baseUrl = process.env.BASE_URL || 'https://casino-production-0712.up.railway.app';
+      const baseUrl = process.env.BASE_URL || process.env.SITE_URL || 'https://hathor.casino';
       await sendEmail(email.toLowerCase(), 'Reset your HATHOR password', emailTpl.emailPasswordReset(row.name || 'Player', `${baseUrl}/login.html?mode=reset&token=${token}`));
     }
   } catch(e) { console.error('Forgot password error:', e.message); }
@@ -2551,7 +2551,7 @@ app.post('/api/auth/resend-verification', express.json(), async (req,res) => {
     const expires = new Date(Date.now() + 24*60*60*1000); // 24 hours
     await dbRun(`DELETE FROM email_verify_tokens WHERE uid=$1`, [uid]);
     await dbRun(`INSERT INTO email_verify_tokens(token,uid,expires_at) VALUES($1,$2,$3)`, [vToken, uid, expires]);
-    const baseUrl = process.env.BASE_URL || 'https://casino-production-0712.up.railway.app';
+    const baseUrl = process.env.BASE_URL || process.env.SITE_URL || 'https://hathor.casino';
     await sendEmail(authRow.email, 'Verify your HATHOR email address', emailTpl.emailVerify(authRow.name || 'Player', `${baseUrl}/api/auth/verify-email/${vToken}`));
     res.json({ok:true});
   } catch(e) { res.status(500).json({error:'Server error'}); }
@@ -2769,16 +2769,54 @@ app.get('/admin/kyc/stats', adminAuth, async (req,res)=>{
 
 // Admin: patvirtinti KYC
 app.post('/admin/kyc/approve/:uid',adminAuth,requirePerm('kyc.approve'),async (req,res)=>{
-  await dbRun(`UPDATE kyc SET status='approved',reviewed_at=NOW() WHERE uid=$1`, [req.params.uid]);
-  if(sockets[req.params.uid]) sockets[req.params.uid].socket.emit('kycStatusUpdate',{status:'approved'});
+  const uid = req.params.uid;
+  await dbRun(`UPDATE kyc SET status='approved',reviewed_at=NOW() WHERE uid=$1`, [uid]);
+  if(sockets[uid]) sockets[uid].socket.emit('kycStatusUpdate',{status:'approved'});
+  // Notify user via email
+  try {
+    const u = await dbGet(`SELECT a.email, u.name FROM auth a JOIN users u ON a.uid=u.uid WHERE a.uid=$1`, [uid]);
+    if(u?.email) {
+      await sendEmail(u.email, '✅ KYC Approved — HATHOR Casino',
+        emailTpl.emailGeneric(
+          'Identity Verified ✅',
+          `<p style="line-height:1.7">Hello ${u.name || 'Player'},</p>
+           <p style="line-height:1.7">Great news! Your identity has been successfully verified.</p>
+           <p style="line-height:1.7">You now have full access to all HATHOR Casino features including withdrawals, high-stake tables, and VIP benefits.</p>`,
+          'ACCESS FULL CASINO',
+          process.env.SITE_URL || 'https://hathor.casino'
+        )
+      );
+    }
+  } catch(e) { console.error('KYC approval email error:', e.message); }
   res.json({ok:true});
 });
 
 // Admin: atmesti KYC
 app.post('/admin/kyc/reject/:uid',adminAuth,requirePerm('kyc.reject'),express.json(),async (req,res)=>{
+  const uid = req.params.uid;
   const reason=req.body?.reason||'Could not verify documents';
-  await dbRun(`UPDATE kyc SET status='rejected',rejection_reason=$1,reviewed_at=NOW() WHERE uid=$2`, [reason,req.params.uid]);
-  if(sockets[req.params.uid]) sockets[req.params.uid].socket.emit('kycStatusUpdate',{status:'rejected',reason});
+  await dbRun(`UPDATE kyc SET status='rejected',rejection_reason=$1,reviewed_at=NOW() WHERE uid=$2`, [reason,uid]);
+  if(sockets[uid]) sockets[uid].socket.emit('kycStatusUpdate',{status:'rejected',reason});
+  // Notify user via email
+  try {
+    const u = await dbGet(`SELECT a.email, u.name FROM auth a JOIN users u ON a.uid=u.uid WHERE a.uid=$1`, [uid]);
+    if(u?.email) {
+      await sendEmail(u.email, 'KYC Verification Update — HATHOR Casino',
+        emailTpl.emailGeneric(
+          'Additional Information Needed',
+          `<p style="line-height:1.7">Hello ${u.name || 'Player'},</p>
+           <p style="line-height:1.7">We reviewed your submitted documents but need additional information:</p>
+           <div style="padding:14px;background:rgba(138,30,46,0.08);border:1px solid rgba(138,30,46,0.25);border-radius:6px;margin:16px 0">
+             <strong style="color:#c9a84c">Reason:</strong><br/>
+             <span style="color:rgba(232,224,208,0.8)">${reason}</span>
+           </div>
+           <p style="line-height:1.7">Please resubmit your documents via the KYC page. If you have questions, contact support.</p>`,
+          'RESUBMIT DOCUMENTS',
+          (process.env.SITE_URL || 'https://hathor.casino') + '/kyc.html'
+        )
+      );
+    }
+  } catch(e) { console.error('KYC reject email error:', e.message); }
   res.json({ok:true});
 });
 
@@ -3800,7 +3838,7 @@ app.get('/api/referral/my-code', async (req, res) => {
     const user = await getUser(uid);
     if(!user) return res.status(404).json({error:'User not found'});
     const code = getPlayerRefCode(user.name);
-    const baseUrl = process.env.SITE_URL || 'https://casino-production-0712.up.railway.app';
+    const baseUrl = process.env.SITE_URL || 'https://hathor.casino';
     const link = `${baseUrl}/?pref=${encodeURIComponent(code)}`;
     // Get referrals
     const referrals = await dbAll(
