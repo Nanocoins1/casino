@@ -16773,15 +16773,12 @@ function App(){
               style={{
                 position:'relative', cursor:'pointer', borderRadius:16, overflow:'hidden',
                 padding:'clamp(20px,3.5vw,36px) clamp(20px,3.5vw,40px)',
-                minHeight:180,
-                background: theme==='opulent'
-                  ? 'linear-gradient(135deg,#8a1e2e 0%,#5a1420 100%)'
-                  : theme==='neon'
-                  ? 'linear-gradient(135deg,#0a1628 0%,#1a2f4a 50%,#0a3a5a 100%)'
-                  : 'linear-gradient(135deg,#0f3a52 0%,#083250 50%,#042030 100%)',
+                minHeight:220,
                 border: theme==='opulent'
                   ? '1px solid rgba(201,168,76,0.4)'
-                  : '1px solid rgba(107,225,255,0.3)',
+                  : theme==='neon'
+                  ? '1px solid rgba(107,225,255,0.3)'
+                  : '1px solid rgba(201,168,76,0.25)',
                 boxShadow: '0 12px 40px rgba(0,0,0,0.4)',
                 display:'flex', alignItems:'center', justifyContent:'space-between',
                 gap:24, flexWrap:'wrap',
@@ -16790,11 +16787,21 @@ function App(){
               onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-2px)';e.currentTarget.style.boxShadow='0 16px 48px rgba(0,0,0,0.5)';}}
               onMouseLeave={e=>{e.currentTarget.style.transform='';e.currentTarget.style.boxShadow='0 12px 40px rgba(0,0,0,0.4)';}}
             >
-              {/* Diagonal sport pattern overlay */}
+              {/* AI-generated 3D theme background image */}
+              <img
+                src={theme==='neon' ? '/images/sports/banner-neon.webp' : theme==='opulent' ? '/images/sports/banner-opulent.webp' : '/images/sports/banner-royal.webp'}
+                alt=""
+                loading="lazy"
+                style={{position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', objectPosition:'center', pointerEvents:'none', userSelect:'none'}}
+              />
+              {/* Dark gradient overlay for text readability */}
               <div style={{
-                position:'absolute', inset:0, opacity:0.08, pointerEvents:'none',
-                backgroundImage:'radial-gradient(circle at 10% 20%,#fff 1px,transparent 1px), radial-gradient(circle at 90% 80%,#fff 1px,transparent 1px)',
-                backgroundSize:'50px 50px,70px 70px',
+                position:'absolute', inset:0, pointerEvents:'none',
+                background: theme==='opulent'
+                  ? 'linear-gradient(90deg, rgba(90,20,32,0.85) 0%, rgba(90,20,32,0.5) 50%, rgba(26,20,20,0.3) 100%)'
+                  : theme==='neon'
+                  ? 'linear-gradient(90deg, rgba(6,12,22,0.85) 0%, rgba(6,12,22,0.5) 50%, rgba(6,12,22,0.25) 100%)'
+                  : 'linear-gradient(90deg, rgba(0,0,0,0.8) 0%, rgba(4,32,48,0.5) 50%, rgba(8,50,80,0.25) 100%)',
               }}/>
               {/* LEFT — title + subtitle + sport icons */}
               <div style={{position:'relative', flex:'1 1 300px', minWidth:240}}>
