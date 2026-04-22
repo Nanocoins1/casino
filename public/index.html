@@ -15791,6 +15791,12 @@ function LiveTicker({t=LANGS.en}){
 const PP_THUMB = s => `https://static.pragmaticplay.net/game-icons/1.0/${s}/${s}.jpg`;
 const PP_URL   = s => `https://demogamesfree.pragmaticplay.net/gs2c/openGame.do?gameSymbol=${s}&websiteUrl=https://hathor.casino&jurisdiction=99&lang=en`;
 
+// Spribe demo URL — provider: spribe
+const SPRIBE_URL = s => `https://demo.spribe.io/launch/${s}?currency=USD&operator=HATHOR&jurisdiction=CW&lang=en`;
+
+// Generic game URL resolver — supports pragmatic play + spribe
+const getGameUrl = g => g.provider === 'spribe' ? SPRIBE_URL(g.s) : PP_URL(g.s);
+
 const PP_GAMES = [
   // ✅ Visos testuotos ir patvirtintos (43 žaidimai)
   // 🏺 EGYPTIAN / ADVENTURE
@@ -15856,6 +15862,20 @@ const PP_GAMES = [
   {s:'vs5firehot',       n:'Fire Hot 5',            cat:'slots', rtp:96.5},
   {s:'vs40firehot',      n:'Fire Hot 40',           cat:'slots', rtp:96.5},
   {s:'vs100firehot',     n:'Fire Hot 100',          cat:'slots', rtp:96.5},
+
+  // 🚀 SPRIBE PROVIDER GAMES
+  {s:'aviator',       n:'Aviator',              cat:'crash',  rtp:97.0, hot:true, provider:'spribe'},
+  {s:'balloon',       n:'Balloon',              cat:'crash',  rtp:97.0, provider:'spribe'},
+  {s:'mines',         n:'Mines',                cat:'dice',   rtp:97.0, hot:true, provider:'spribe'},
+  {s:'plinko',        n:'Plinko',               cat:'dice',   rtp:97.0, provider:'spribe'},
+  {s:'dice',          n:'Dice',                 cat:'dice',   rtp:97.3, provider:'spribe'},
+  {s:'goal',          n:'Goal',                 cat:'crash',  rtp:97.0, provider:'spribe'},
+  {s:'hotline',       n:'Hotline',              cat:'slots',  rtp:96.0, provider:'spribe'},
+  {s:'keno',          n:'Keno',                 cat:'dice',   rtp:96.3, provider:'spribe'},
+  {s:'mini-roulette', n:'Mini Roulette',        cat:'roulette', rtp:97.3, provider:'spribe'},
+  // 🎄 PP NAUJIENOS
+  {s:'vs20sbxmas',    n:'Sweet Bonanza Xmas',   cat:'slots',  rtp:96.5, hot:true},
+  {s:'vs7pigs',       n:'7 Piggies',            cat:'slots',  rtp:96.5},
 ];
 
 function GameIframeModal({ game, onClose }) {
@@ -15878,7 +15898,7 @@ function GameIframeModal({ game, onClose }) {
         {/* Game title */}
         <div style={{display:'flex',alignItems:'center',gap:8,minWidth:0,overflow:'hidden'}}>
           <span style={{fontSize:13,fontWeight:600,color:'#e8e0d0',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{game.n}</span>
-          <span style={{fontSize:9,padding:'2px 6px',background:'rgba(201,168,76,0.12)',border:'1px solid rgba(201,168,76,0.2)',borderRadius:3,color:'rgba(201,168,76,0.7)',letterSpacing:'1px',fontFamily:"'Space Grotesk',sans-serif",flexShrink:0}}>DEMO</span>
+          <span style={{fontSize:9,padding:'2px 6px',background:'rgba(201,168,76,0.12)',border:'1px solid rgba(201,168,76,0.2)',borderRadius:3,color:'rgba(201,168,76,0.7)',letterSpacing:'1px',fontFamily:"'Space Grotesk',sans-serif",flexShrink:0}}>{(game.provider||'pp').toUpperCase()} · DEMO</span>
         </div>
         {/* ✕ close (smaller, secondary) */}
         <button onClick={onClose} style={{background:'none',border:'1px solid rgba(255,255,255,0.08)',borderRadius:8,color:'rgba(255,255,255,0.35)',cursor:'pointer',padding:'6px 10px',fontSize:12,fontFamily:"'Space Grotesk',sans-serif",flexShrink:0}}
@@ -15889,7 +15909,7 @@ function GameIframeModal({ game, onClose }) {
       </div>
       {/* iframe */}
       <iframe
-        src={PP_URL(game.s)}
+        src={getGameUrl(game)}
         style={{flex:1,border:'none',width:'100%',background:'#000'}}
         allow="fullscreen"
         title={game.n}
@@ -16792,13 +16812,13 @@ function App(){
             <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16,padding:'0 4px'}}>
               <div style={{display:'flex',alignItems:'center',gap:12}}>
                 <div className="sec-title-v3">🎰 PROVIDER GAMES</div>
-                <span style={{fontSize:9,padding:'2px 7px',background:'rgba(201,168,76,0.1)',border:'1px solid rgba(201,168,76,0.2)',borderRadius:3,color:'rgba(201,168,76,0.6)',letterSpacing:'1px',fontFamily:"'Space Grotesk',sans-serif"}}>PRAGMATIC PLAY · DEMO</span>
+                <span style={{fontSize:9,padding:'2px 7px',background:'rgba(201,168,76,0.1)',border:'1px solid rgba(201,168,76,0.2)',borderRadius:3,color:'rgba(201,168,76,0.6)',letterSpacing:'1px',fontFamily:"'Space Grotesk',sans-serif"}}>PRAGMATIC PLAY · SPRIBE · DEMO</span>
               </div>
               <span style={{fontSize:10,color:'rgba(201,168,76,0.45)',fontFamily:"'Space Grotesk',sans-serif"}}>{PP_GAMES.length} games</span>
             </div>
             {/* Filter tabs */}
             <div style={{display:'flex',gap:6,marginBottom:16,overflowX:'auto',scrollbarWidth:'none',paddingBottom:4}}>
-              {['all','slots','blackjack','roulette','baccarat','crash'].map(cat=>(
+              {['all','slots','crash','dice','roulette','blackjack','baccarat'].map(cat=>(
                 <button key={cat}
                   onClick={()=>setPpFilter(cat)}
                   style={{padding:'6px 14px',borderRadius:999,border:'1px solid',flexShrink:0,fontSize:11,fontWeight:600,letterSpacing:'0.05em',cursor:'pointer',transition:'all .15s',fontFamily:"'Space Grotesk',sans-serif",
