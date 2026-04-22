@@ -21,7 +21,7 @@
 <!-- Open Graph -->
 <meta property="og:title" content="HATHOR Casino — Premium Crypto Casino"/>
 <meta property="og:description" content="1,000+ games · Instant Crypto Payouts · Sports Betting · Live Casino. Join HATHOR and play Slots, Blackjack, Roulette, Crash & more!"/>
-<meta property="og:image" content="https://hathor.casino/img/loading-screen.png"/>
+<meta property="og:image" content="https://hathor.casino/img/loading-screen.webp"/>
 <meta property="og:image:width" content="1200"/>
 <meta property="og:image:height" content="630"/>
 <meta property="og:type" content="website"/>
@@ -33,7 +33,7 @@
 <meta name="twitter:site" content="@HathorCasino"/>
 <meta name="twitter:title" content="HATHOR Casino — Premium Crypto Casino"/>
 <meta name="twitter:description" content="1,000+ games · Instant Crypto Payouts · Sports Betting · Crash & more!"/>
-<meta name="twitter:image" content="https://hathor.casino/img/loading-screen.png"/>
+<meta name="twitter:image" content="https://hathor.casino/img/loading-screen.webp"/>
 <!-- Google Analytics GA4 — replace G-XXXXXXXXXX with your Measurement ID -->
 <!-- Get your ID at: https://analytics.google.com → Admin → Data Streams → Web stream details -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
@@ -54,13 +54,27 @@
     }
   };
 </script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@400;600;700;900&family=DM+Mono:wght@400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<!-- ── Preconnect to external CDNs for faster loading ── -->
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="preconnect" href="https://unpkg.com" crossorigin/>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
+<link rel="preconnect" href="https://cdn.socket.io" crossorigin/>
+<link rel="dns-prefetch" href="https://www.googletagmanager.com"/>
+<link rel="dns-prefetch" href="https://static.pragmaticplay.net"/>
+<link rel="dns-prefetch" href="https://demogamesfree.pragmaticplay.net"/>
+
+<!-- ── Google Fonts (optimized — reduced weights) ── -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Cinzel:wght@400;600;700&family=Space+Grotesk:wght@400;600;700&family=Orbitron:wght@600;700&family=DM+Mono:wght@400;500&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Playfair+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet"/>
+
+<!-- ── Core scripts (React PRODUCTION builds — 10x smaller than dev) ── -->
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
-<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<!-- ── Deferred — only loaded when needed ── -->
+<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script type="module" defer src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
 <style>
 /* ═══════════════════════════════════════════════════
    HATHOR ROYAL — PREMIUM BLACK & GOLD DESIGN SYSTEM
@@ -845,7 +859,7 @@ body {
 .win-celebration-overlay::before {
   content: '';
   position: absolute; inset: 0;
-  background: url('/img/win-celebration.png') center/cover no-repeat;
+  background: url('/img/win-celebration.webp') center/cover no-repeat;
   opacity: 0.18; pointer-events: none;
 }
 @keyframes winOverlayIn {
@@ -854,7 +868,7 @@ body {
 /* ── LOADING SCREEN ── */
 #hathor-loading {
   position: fixed; inset: 0; z-index: 9999;
-  background: #04030a url('/img/loading-screen.png') center/cover no-repeat;
+  background: #04030a url('/img/loading-screen.webp') center/cover no-repeat;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   transition: opacity 0.6s ease;
 }
@@ -3262,7 +3276,7 @@ body { color: #e8e2d4 !important; }
 .pc-welcome {
   background:
     linear-gradient(135deg,rgba(20,14,4,.82) 0%,rgba(12,8,1,.78) 55%,rgba(18,10,4,.88) 100%),
-    url('/img/bonus-bg.png') center/cover no-repeat;
+    url('/img/bonus-bg.webp') center/cover no-repeat;
   background-blend-mode: multiply, normal;
   border-color: rgba(240,192,96,0.2);
   box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 0 0 1px rgba(240,192,96,0.08), inset 0 1px 0 rgba(255,240,100,0.1);
@@ -3274,7 +3288,7 @@ body { color: #e8e2d4 !important; }
 .pc-vip {
   background:
     linear-gradient(135deg,rgba(12,6,18,.82) 0%,rgba(8,4,14,.78) 55%,rgba(14,6,20,.88) 100%),
-    url('/img/vip-card-bg.png') center/cover no-repeat;
+    url('/img/vip-card-bg.webp') center/cover no-repeat;
   background-blend-mode: multiply, normal;
   border-color: rgba(180,140,255,0.2);
   box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 0 0 1px rgba(180,140,255,0.08), inset 0 1px 0 rgba(200,160,255,0.1);
@@ -3286,7 +3300,7 @@ body { color: #e8e2d4 !important; }
 .pc-daily {
   background:
     linear-gradient(135deg,rgba(4,14,10,.82) 0%,rgba(3,10,7,.78) 55%,rgba(5,16,12,.88) 100%),
-    url('/img/promo-daily.png') center/cover no-repeat;
+    url('/img/promo-daily.webp') center/cover no-repeat;
   background-blend-mode: multiply, normal;
   border-color: rgba(76,200,140,0.2);
   box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 0 0 1px rgba(76,200,140,0.08), inset 0 1px 0 rgba(100,220,160,0.1);
@@ -3494,7 +3508,7 @@ body { color: #e8e2d4 !important; }
 .mint-hero {
   position:relative; border-radius:24px; overflow:visible;
   margin-bottom:28px; min-height:360px;
-  background: url('/img/hero-casino.png?v=2') center/cover no-repeat;
+  background: url('/img/hero-casino.webp?v=2') center/cover no-repeat;
   border:1px solid rgba(201,168,76,0.22);
   box-shadow: 0 0 0 1px rgba(201,168,76,0.08) inset, 0 32px 80px rgba(0,0,0,0.9), 0 0 60px rgba(201,168,76,0.05) inset;
   display:flex; align-items:stretch;
@@ -5296,7 +5310,7 @@ body {
 
 /* 6. HERO — mint-hero override (ensure photo shows) */
 .mint-hero {
-  background: url('/img/hero-casino.png') center/cover no-repeat !important;
+  background: url('/img/hero-casino.webp') center/cover no-repeat !important;
   border: 1px solid rgba(201,168,76,0.22) !important;
   border-radius: 24px !important;
   overflow: hidden !important;
@@ -5391,7 +5405,7 @@ body {
 .pc-welcome {
   background:
     linear-gradient(135deg,rgba(20,14,4,.82) 0%,rgba(12,8,1,.78) 55%,rgba(18,10,4,.88) 100%),
-    url('/img/bonus-bg.png') center/cover no-repeat !important;
+    url('/img/bonus-bg.webp') center/cover no-repeat !important;
   background-blend-mode: multiply, normal !important;
   border: 1px solid rgba(240,192,96,0.2) !important;
 }
@@ -5399,7 +5413,7 @@ body {
 .pc-vip {
   background:
     linear-gradient(135deg,rgba(12,6,18,.82) 0%,rgba(8,4,14,.78) 55%,rgba(14,6,20,.88) 100%),
-    url('/img/vip-card-bg.png') center/cover no-repeat !important;
+    url('/img/vip-card-bg.webp') center/cover no-repeat !important;
   background-blend-mode: multiply, normal !important;
   border: 1px solid rgba(180,140,255,0.2) !important;
 }
@@ -5407,7 +5421,7 @@ body {
 .pc-daily {
   background:
     linear-gradient(135deg,rgba(4,14,10,.82) 0%,rgba(3,10,7,.78) 55%,rgba(5,16,12,.88) 100%),
-    url('/img/win-celebration.png') center/cover no-repeat !important;
+    url('/img/win-celebration.webp') center/cover no-repeat !important;
   background-blend-mode: multiply, normal !important;
   border: 1px solid rgba(76,200,140,0.2) !important;
 }
@@ -7411,7 +7425,7 @@ function NeonLobbyHero({ nav }) {
   };
   return (
     <section className="neon-hero-section" style={{padding:'28px 28px 0', position:'relative', zIndex:2,
-      backgroundImage:"url('/img/hero-neon.png')",
+      backgroundImage:"url('/img/hero-neon.webp')",
       backgroundSize:'cover', backgroundPosition:'center 40%',
       borderRadius:24, overflow:'hidden', marginBottom:0}}>
       {/* Dark overlay over photo */}
@@ -7556,7 +7570,7 @@ window.O = O;
 function OpulentLobbyHero({ nav }) {
   return (
     <section className="opulent-hero-section" style={{position:'relative',padding:'60px 40px 40px',maxWidth:'100%',margin:'0',
-      backgroundImage:"url('/img/hero-opulent.png')",
+      backgroundImage:"url('/img/hero-opulent.webp')",
       backgroundSize:'cover', backgroundPosition:'center 35%'}}>
       {/* Warm cream overlay — preserves paper feel */}
       <div style={{position:'absolute',inset:0,background:'linear-gradient(135deg,rgba(245,239,230,0.88) 0%,rgba(240,232,218,0.82) 50%,rgba(245,239,230,0.75) 100%)',pointerEvents:'none'}}/>
@@ -7857,7 +7871,7 @@ function VIPCard({user,lv,nextLv,t}){
   }
 
   return(
-    <div className="vip-card" style={{background:'linear-gradient(135deg, rgba(14,12,8,0.96) 0%, rgba(30,22,6,0.96) 100%), url(/img/vip-card-bg.png) center/cover no-repeat',backgroundBlendMode:'multiply',border:'1px solid '+(lv.color||'#c9a84c')+'44',borderRadius:16,padding:20,position:'relative',overflow:'hidden'}}>
+    <div className="vip-card" style={{background:'linear-gradient(135deg, rgba(14,12,8,0.96) 0%, rgba(30,22,6,0.96) 100%), url(/img/vip-card-bg.webp) center/cover no-repeat',backgroundBlendMode:'multiply',border:'1px solid '+(lv.color||'#c9a84c')+'44',borderRadius:16,padding:20,position:'relative',overflow:'hidden'}}>
       <div style={{position:'absolute',top:-40,right:-40,width:120,height:120,borderRadius:'50%',background:(lv.color||'#c9a84c')+'18',filter:'blur(30px)',pointerEvents:'none'}}/>
       <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:16}}>
         <div style={{width:52,height:52,borderRadius:'50%',background:'linear-gradient(135deg,'+(lv.color||'#c9a84c')+'33,'+(lv.color||'#c9a84c')+'11)',border:'2px solid '+(lv.color||'#c9a84c')+'66',display:'flex',alignItems:'center',justifyContent:'center',fontSize:24}}>
@@ -8497,18 +8511,18 @@ function GuestModal({onClose}){
 // ═══════════════════════════════════════════════════
 // Avatar vaizdai — DALL-E portretai
 const AVATAR_IMAGES=[
-  {src:'/img/av-lion.png',    label:'Lion'},
-  {src:'/img/av-tiger.png',   label:'Tiger'},
-  {src:'/img/av-wolf.png',    label:'Wolf'},
-  {src:'/img/av-eagle.png',   label:'Eagle'},
-  {src:'/img/av-dragon.png',  label:'Dragon'},
-  {src:'/img/av-king.png',    label:'King'},
-  {src:'/img/av-queen.png',   label:'Queen'},
-  {src:'/img/av-phantom.png', label:'Phantom'},
-  {src:'/img/av-viking.png',  label:'Viking'},
-  {src:'/img/av-pharaoh.png', label:'Pharaoh'},
-  {src:'/img/av-ace.png',     label:'Ace'},
-  {src:'/img/av-diamond.png', label:'Diamond'},
+  {src:'/img/av-lion.webp',    label:'Lion'},
+  {src:'/img/av-tiger.webp',   label:'Tiger'},
+  {src:'/img/av-wolf.webp',    label:'Wolf'},
+  {src:'/img/av-eagle.webp',   label:'Eagle'},
+  {src:'/img/av-dragon.webp',  label:'Dragon'},
+  {src:'/img/av-king.webp',    label:'King'},
+  {src:'/img/av-queen.webp',   label:'Queen'},
+  {src:'/img/av-phantom.webp', label:'Phantom'},
+  {src:'/img/av-viking.webp',  label:'Viking'},
+  {src:'/img/av-pharaoh.webp', label:'Pharaoh'},
+  {src:'/img/av-ace.webp',     label:'Ace'},
+  {src:'/img/av-diamond.webp', label:'Diamond'},
 ];
 
 function AvatarModal({user,onClose,onUpdate,defaultTab}){
@@ -9606,10 +9620,10 @@ function ppBestHand(hole,comm){
 
 // ── AI bots ───────────────────────────────────────────
 const PP_BOTS=[
-  {id:'diamond_ray',name:'Diamond Ray',emoji:'💎',av:'/img/av-diamond-ray.png',pers:'aggressive',color:'#c9a84c'},
-  {id:'the_phantom',name:'The Phantom',emoji:'🎭',av:'/img/av-the-phantom.png',pers:'balanced',  color:'#aa44ff'},
-  {id:'crown_vic',  name:'Crown Vic',  emoji:'👑',av:'/img/av-crown-vic.png',  pers:'passive',   color:'#f0c060'},
-  {id:'lady_noir',  name:'Lady Noir',  emoji:'🖤',av:'/img/av-lady-noir.png',  pers:'balanced',  color:'#ff66bb'}
+  {id:'diamond_ray',name:'Diamond Ray',emoji:'💎',av:'/img/av-diamond-ray.webp',pers:'aggressive',color:'#c9a84c'},
+  {id:'the_phantom',name:'The Phantom',emoji:'🎭',av:'/img/av-the-phantom.webp',pers:'balanced',  color:'#aa44ff'},
+  {id:'crown_vic',  name:'Crown Vic',  emoji:'👑',av:'/img/av-crown-vic.webp',  pers:'passive',   color:'#f0c060'},
+  {id:'lady_noir',  name:'Lady Noir',  emoji:'🖤',av:'/img/av-lady-noir.webp',  pers:'balanced',  color:'#ff66bb'}
 ];
 
 const PP_BOT_CHAT={
@@ -11449,7 +11463,7 @@ function ViktorFace({speaking, loading}){
 
   return(
     <div className="viktor-face">
-      <img src="/img/viktor-portrait.png" alt="Viktor" style={{width:'100%',height:'100%',objectFit:'cover',borderRadius:'50%'}}
+      <img src="/img/viktor-portrait.webp" alt="Viktor" style={{width:'100%',height:'100%',objectFit:'cover',borderRadius:'50%'}}
         onError={e=>{e.target.style.display='none';}}/>
       <canvas ref={canvasRef} width={56} height={56} className="viktor-canvas" style={{display:'none'}}/>
     </div>
@@ -14419,77 +14433,77 @@ const GAME_META = {
 
 // ── DALL-E thumbnail vaizdų žemėlapis (Royal / default) ──
 const THUMB_MAP_ROYAL = {
-  slots:       '/img/thumb-slots.png',
-  roulette:    '/img/thumb-roulette.png',
-  blackjack:   '/img/thumb-blackjack.png',
-  bj:          '/img/thumb-blackjack.png',
-  poker:       '/img/thumb-poker.png',
-  prempoker:   '/img/thumb-prempoker.png',
-  videopoker:  '/img/thumb-videopoker.png',
-  crash:       '/img/thumb-crash.png',
-  dragon:      '/img/thumb-dragon.png',
-  mines:       '/img/thumb-mines.png',
-  sports:      '/img/thumb-sports.png',
-  wheel:       '/img/thumb-wheel.png',
-  dice:        '/img/thumb-dice.png',
-  hilo:        '/img/thumb-hilo.png',
-  coin:        '/img/thumb-coinflip.png',
-  coinflip:    '/img/thumb-coinflip.png',
-  limbo:       '/img/thumb-limbo.png',
-  baccarat:    '/img/thumb-baccarat.png',
-  keno:        '/img/thumb-keno.png',
-  krioklis:    '/img/thumb-krioklis.png',
-  pyramid:     '/img/thumb-pyramid.png',
-  dragontower: '/img/thumb-dragontower.png',
-  slotsclassic:'/img/thumb-slots-classic.png',
+  slots:       '/img/thumb-slots.webp',
+  roulette:    '/img/thumb-roulette.webp',
+  blackjack:   '/img/thumb-blackjack.webp',
+  bj:          '/img/thumb-blackjack.webp',
+  poker:       '/img/thumb-poker.webp',
+  prempoker:   '/img/thumb-prempoker.webp',
+  videopoker:  '/img/thumb-videopoker.webp',
+  crash:       '/img/thumb-crash.webp',
+  dragon:      '/img/thumb-dragon.webp',
+  mines:       '/img/thumb-mines.webp',
+  sports:      '/img/thumb-sports.webp',
+  wheel:       '/img/thumb-wheel.webp',
+  dice:        '/img/thumb-dice.webp',
+  hilo:        '/img/thumb-hilo.webp',
+  coin:        '/img/thumb-coinflip.webp',
+  coinflip:    '/img/thumb-coinflip.webp',
+  limbo:       '/img/thumb-limbo.webp',
+  baccarat:    '/img/thumb-baccarat.webp',
+  keno:        '/img/thumb-keno.webp',
+  krioklis:    '/img/thumb-krioklis.webp',
+  pyramid:     '/img/thumb-pyramid.webp',
+  dragontower: '/img/thumb-dragontower.webp',
+  slotsclassic:'/img/thumb-slots-classic.webp',
 };
 
 // ── Neon temos paveikslėliai ──
 const THUMB_MAP_NEON = {
   ...THUMB_MAP_ROYAL,
-  slots:     '/img/thumb-slots-neon.png',
-  roulette:  '/img/thumb-roulette-neon.png',
-  blackjack: '/img/thumb-blackjack-neon.png',
-  bj:        '/img/thumb-blackjack-neon.png',
-  poker:     '/img/thumb-poker-neon.png',
-  prempoker: '/img/thumb-prempoker-neon.png',
-  crash:     '/img/thumb-crash-neon.png',
-  dragon:    '/img/thumb-dragon-neon.png',
-  mines:     '/img/thumb-mines-neon.png',
-  wheel:     '/img/thumb-wheel-neon.png',
-  dice:      '/img/thumb-dice-neon.png',
-  baccarat:  '/img/thumb-baccarat-neon.png',
-  pyramid:   '/img/thumb-pyramid-neon.png',
-  sports:    '/img/thumb-sports-neon.png',
+  slots:     '/img/thumb-slots-neon.webp',
+  roulette:  '/img/thumb-roulette-neon.webp',
+  blackjack: '/img/thumb-blackjack-neon.webp',
+  bj:        '/img/thumb-blackjack-neon.webp',
+  poker:     '/img/thumb-poker-neon.webp',
+  prempoker: '/img/thumb-prempoker-neon.webp',
+  crash:     '/img/thumb-crash-neon.webp',
+  dragon:    '/img/thumb-dragon-neon.webp',
+  mines:     '/img/thumb-mines-neon.webp',
+  wheel:     '/img/thumb-wheel-neon.webp',
+  dice:      '/img/thumb-dice-neon.webp',
+  baccarat:  '/img/thumb-baccarat-neon.webp',
+  pyramid:   '/img/thumb-pyramid-neon.webp',
+  sports:    '/img/thumb-sports-neon.webp',
 };
 
 // ── Opulent temos paveikslėliai ──
 const THUMB_MAP_OPULENT = {
   ...THUMB_MAP_ROYAL,
-  slots:     '/img/thumb-slots-opulent.png',
-  roulette:  '/img/thumb-roulette-opulent.png',
-  blackjack: '/img/thumb-blackjack-opulent.png',
-  bj:        '/img/thumb-blackjack-opulent.png',
-  poker:     '/img/thumb-poker-opulent.png',
-  prempoker: '/img/thumb-prempoker-opulent.png',
-  crash:     '/img/thumb-crash-opulent.png',
-  dragon:    '/img/thumb-dragon-opulent.png',
-  mines:     '/img/thumb-mines-opulent.png',
-  wheel:     '/img/thumb-wheel-opulent.png',
-  dice:      '/img/thumb-dice-opulent.png',
-  baccarat:  '/img/thumb-baccarat-opulent.png',
-  pyramid:   '/img/thumb-pyramid-opulent.png',
-  sports:    '/img/thumb-sports-opulent.png',
+  slots:     '/img/thumb-slots-opulent.webp',
+  roulette:  '/img/thumb-roulette-opulent.webp',
+  blackjack: '/img/thumb-blackjack-opulent.webp',
+  bj:        '/img/thumb-blackjack-opulent.webp',
+  poker:     '/img/thumb-poker-opulent.webp',
+  prempoker: '/img/thumb-prempoker-opulent.webp',
+  crash:     '/img/thumb-crash-opulent.webp',
+  dragon:    '/img/thumb-dragon-opulent.webp',
+  mines:     '/img/thumb-mines-opulent.webp',
+  wheel:     '/img/thumb-wheel-opulent.webp',
+  dice:      '/img/thumb-dice-opulent.webp',
+  baccarat:  '/img/thumb-baccarat-opulent.webp',
+  pyramid:   '/img/thumb-pyramid-opulent.webp',
+  sports:    '/img/thumb-sports-opulent.webp',
   // (remaining games inherit from ROYAL)
-  videopoker:  '/img/thumb-videopoker.png',
-  hilo:        '/img/thumb-hilo.png',
-  coin:        '/img/thumb-coinflip.png',
-  coinflip:    '/img/thumb-coinflip.png',
-  limbo:       '/img/thumb-limbo.png',
-  keno:        '/img/thumb-keno.png',
-  krioklis:    '/img/thumb-krioklis.png',
-  dragontower: '/img/thumb-dragontower.png',
-  slotsclassic:'/img/thumb-slots-classic.png',
+  videopoker:  '/img/thumb-videopoker.webp',
+  hilo:        '/img/thumb-hilo.webp',
+  coin:        '/img/thumb-coinflip.webp',
+  coinflip:    '/img/thumb-coinflip.webp',
+  limbo:       '/img/thumb-limbo.webp',
+  keno:        '/img/thumb-keno.webp',
+  krioklis:    '/img/thumb-krioklis.webp',
+  dragontower: '/img/thumb-dragontower.webp',
+  slotsclassic:'/img/thumb-slots-classic.webp',
 };
 
 // ── Pagalbinė funkcija: gauti žemėlapį pagal temą ──
@@ -14508,25 +14522,25 @@ const ICON_MAP = {
   slots:      '/img/icon-slots.png',
   roulette:   '/img/icon-roulette.png',
   crash:      '/img/icon-crash.png',       // Raketinis
-  dragon:     '/img/icon-dragon.png',      // Drakonas (ATSKIRAS!)
-  mines:      '/img/icon-mines.png',
-  dice:       '/img/icon-dice.png',
+  dragon:     '/img/icon-dragon.webp',      // Drakonas (ATSKIRAS!)
+  mines:      '/img/icon-mines.webp',
+  dice:       '/img/icon-dice.webp',
   poker:      '/img/icon-poker.png',       // Klasikinės kortos
-  prempoker:  '/img/icon-prempoker.png',   // Karūna + žetonai (ATSKIRAS!)
-  videopoker: '/img/icon-videopoker.png',  // Ekranas/mašina (ATSKIRAS!)
-  coin:       '/img/icon-coin.png',
-  coinflip:   '/img/icon-coin.png',
-  wheel:      '/img/icon-wheel.png',
-  keno:       '/img/icon-keno.png',
-  krioklis:   '/img/icon-krioklis.png',
+  prempoker:  '/img/icon-prempoker.webp',   // Karūna + žetonai (ATSKIRAS!)
+  videopoker: '/img/icon-videopoker.webp',  // Ekranas/mašina (ATSKIRAS!)
+  coin:       '/img/icon-coin.webp',
+  coinflip:   '/img/icon-coin.webp',
+  wheel:      '/img/icon-wheel.webp',
+  keno:       '/img/icon-keno.webp',
+  krioklis:   '/img/icon-krioklis.webp',
   blackjack:  '/img/icon-blackjack.png',
   bj:         '/img/icon-blackjack.png',
-  baccarat:   '/img/icon-baccarat.png',
-  sports:     '/img/icon-sports.png',
-  hilo:       '/img/icon-hilo.png',
-  limbo:      '/img/icon-limbo.png',
-  pyramid:     '/img/icon-pyramid.png',
-  dragontower: '/img/icon-dragon.png',
+  baccarat:   '/img/icon-baccarat.webp',
+  sports:     '/img/icon-sports.webp',
+  hilo:       '/img/icon-hilo.webp',
+  limbo:      '/img/icon-limbo.webp',
+  pyramid:     '/img/icon-pyramid.webp',
+  dragontower: '/img/icon-dragon.webp',
   slotsclassic:'/img/icon-slots.png',
 };
 
@@ -15728,18 +15742,18 @@ function RobotHero() {
 
 // ── Live wins feed data ──
 const LIVE_WINS_DATA=[
-  {av:'/img/av-lion.png',    name:'CryptoKing', gameKey:'dragonCrash', amt:12400},
-  {av:'/img/av-tiger.png',   name:'LuckyAce',   gameKey:'blackjack',   amt:5800},
-  {av:'/img/av-wolf.png',    name:'NightRider',  gameKey:'roulette',    amt:38000},
-  {av:'/img/av-eagle.png',   name:'GoldPanda',   gameKey:'mines',       amt:2200},
-  {av:'/img/av-viking.png',  name:'VikingX',     gameKey:'nexusSlots',  amt:91500},
-  {av:'/img/av-dragon.png',  name:'LtBoss',      gameKey:'crash',       amt:7600},
-  {av:'/img/av-queen.png',   name:'QueenBet',    gameKey:'coinFlip',    amt:4400},
-  {av:'/img/av-ace.png',     name:'Matador88',   gameKey:'hilo',        amt:15200},
-  {av:'/img/av-phantom.png', name:'SkyWalker',   gameKey:'dragonTower', amt:24000},
-  {av:'/img/av-king.png',    name:'RoyalFlush',  gameKey:'poker',       amt:66000},
-  {av:'/img/av-diamond.png', name:'AceHunter',   gameKey:'baccarat',    amt:8800},
-  {av:'/img/av-pharaoh.png', name:'NeonBlade',   gameKey:'limbo',       amt:3300},
+  {av:'/img/av-lion.webp',    name:'CryptoKing', gameKey:'dragonCrash', amt:12400},
+  {av:'/img/av-tiger.webp',   name:'LuckyAce',   gameKey:'blackjack',   amt:5800},
+  {av:'/img/av-wolf.webp',    name:'NightRider',  gameKey:'roulette',    amt:38000},
+  {av:'/img/av-eagle.webp',   name:'GoldPanda',   gameKey:'mines',       amt:2200},
+  {av:'/img/av-viking.webp',  name:'VikingX',     gameKey:'nexusSlots',  amt:91500},
+  {av:'/img/av-dragon.webp',  name:'LtBoss',      gameKey:'crash',       amt:7600},
+  {av:'/img/av-queen.webp',   name:'QueenBet',    gameKey:'coinFlip',    amt:4400},
+  {av:'/img/av-ace.webp',     name:'Matador88',   gameKey:'hilo',        amt:15200},
+  {av:'/img/av-phantom.webp', name:'SkyWalker',   gameKey:'dragonTower', amt:24000},
+  {av:'/img/av-king.webp',    name:'RoyalFlush',  gameKey:'poker',       amt:66000},
+  {av:'/img/av-diamond.webp', name:'AceHunter',   gameKey:'baccarat',    amt:8800},
+  {av:'/img/av-pharaoh.webp', name:'NeonBlade',   gameKey:'limbo',       amt:3300},
 ];
 // duplicate for seamless scroll
 const LIVE_WINS=[...LIVE_WINS_DATA,...LIVE_WINS_DATA];
@@ -16005,18 +16019,18 @@ function App(){
   const [liveToast,setLiveToast]=useState(null);
   React.useEffect(function(){
     const TOASTS=[
-      {av:'/img/av-lion.png',   name:'CryptoKing',   game:'Dragon Crash',   amt:12400},
-      {av:'/img/av-tiger.png',  name:'NightFox',      game:'Blackjack',      amt:3200},
-      {av:'/img/av-wolf.png',   name:'StormRider',    game:'Mines',          amt:8800},
-      {av:'/img/av-eagle.png',  name:'GoldenEagle',   game:'Roulette',       amt:5600},
-      {av:'/img/av-dragon.png', name:'DragonHunter',  game:'VIP Poker',  amt:21500},
-      {av:'/img/av-king.png',   name:'RoyalBluff',    game:'HiLo',           amt:4100},
-      {av:'/img/av-queen.png',  name:'DiamondLady',   game:'Baccarat',       amt:7300},
-      {av:'/img/av-phantom.png',name:'MidnightGhost', game:'Limbo',          amt:9900},
-      {av:'/img/av-viking.png', name:'NorthernAce',   game:'Slots',          amt:6600},
-      {av:'/img/av-pharaoh.png',name:'AncientKing',   game:'Pyramid Drop',   amt:15200},
-      {av:'/img/av-ace.png',    name:'CardShark99',   game:'Dragon Crash',   amt:33000},
-      {av:'/img/av-diamond.png',name:'BlueDiamond',   game:'Crash',          amt:11800},
+      {av:'/img/av-lion.webp',   name:'CryptoKing',   game:'Dragon Crash',   amt:12400},
+      {av:'/img/av-tiger.webp',  name:'NightFox',      game:'Blackjack',      amt:3200},
+      {av:'/img/av-wolf.webp',   name:'StormRider',    game:'Mines',          amt:8800},
+      {av:'/img/av-eagle.webp',  name:'GoldenEagle',   game:'Roulette',       amt:5600},
+      {av:'/img/av-dragon.webp', name:'DragonHunter',  game:'VIP Poker',  amt:21500},
+      {av:'/img/av-king.webp',   name:'RoyalBluff',    game:'HiLo',           amt:4100},
+      {av:'/img/av-queen.webp',  name:'DiamondLady',   game:'Baccarat',       amt:7300},
+      {av:'/img/av-phantom.webp',name:'MidnightGhost', game:'Limbo',          amt:9900},
+      {av:'/img/av-viking.webp', name:'NorthernAce',   game:'Slots',          amt:6600},
+      {av:'/img/av-pharaoh.webp',name:'AncientKing',   game:'Pyramid Drop',   amt:15200},
+      {av:'/img/av-ace.webp',    name:'CardShark99',   game:'Dragon Crash',   amt:33000},
+      {av:'/img/av-diamond.webp',name:'BlueDiamond',   game:'Crash',          amt:11800},
     ];
     let idx=Math.floor(Math.random()*TOASTS.length);
     const show=function(){
@@ -16206,7 +16220,7 @@ function App(){
     {id:'__link_mines',icon:'💣',label:(t.games&&t.games.mines&&t.games.mines.title)||'Mines',href:'/mines.html'},
     {id:'__link_hilo',icon:'📈',label:(t.games&&t.games.hilo&&t.games.hilo.title)||'HiLo',href:'/hilo.html'},
     {id:'__link_krioklis',icon:'🔮',label:(t.games&&t.games.krioklis&&t.games.krioklis.title)||'Plinko',href:'/plinko.html'},
-    {id:'__link_dice',icon:'🎲',img:'/img/icon-dice.png',label:(t.games&&t.games.dice&&t.games.dice.title)||'Dice',href:'/dice.html'},
+    {id:'__link_dice',icon:'🎲',img:'/img/icon-dice.webp',label:(t.games&&t.games.dice&&t.games.dice.title)||'Dice',href:'/dice.html'},
     {id:'__link_wheel',icon:'🎡',img:'/img/icon-roulette.png',label:(t.games&&t.games.nexusWheel&&t.games.nexusWheel.title)||'NEXUS WHEEL',href:'/wheel.html',badge:'NEW',badgeCls:'new'},
     {id:'__link_keno',icon:'🎱',label:(t.games&&t.games.keno&&t.games.keno.title)||'Keno',href:'/keno.html'},
     {id:'__link_baccarat',icon:'🎴',img:'/img/icon-blackjack.png',label:(t.games&&t.games.baccarat&&t.games.baccarat.title)||'Baccarat',href:'/baccarat.html'},
@@ -16634,12 +16648,12 @@ function App(){
           {(()=>{
             const fThumb = getThumbMap(theme);
             const featuredGames = [
-              {href:'/dragon-crash.html', id:'dragon',    iconImg:'/img/icon-dragon.png',    title:'Dragon Crash',  sub:'Fly high · Cash out in time'},
+              {href:'/dragon-crash.html', id:'dragon',    iconImg:'/img/icon-dragon.webp',    title:'Dragon Crash',  sub:'Fly high · Cash out in time'},
               {href:'/nexus-slots.html',  id:'slots',     iconImg:'/img/icon-slots.png',     title:'NEXUS SLOTS',   sub:'3D Reels · Jackpot pool'},
-              {page:'sports',             id:'sports',    iconImg:'/img/icon-sports.png',    title:'Sports Live',   sub:'EPL · NBA · Live odds', btn:'BET →'},
-              {href:'/wheel.html',        id:'wheel',     iconImg:'/img/icon-wheel.png',     title:'NEXUS WHEEL',   sub:'3D Spin · Up to 50×'},
+              {page:'sports',             id:'sports',    iconImg:'/img/icon-sports.webp',    title:'Sports Live',   sub:'EPL · NBA · Live odds', btn:'BET →'},
+              {href:'/wheel.html',        id:'wheel',     iconImg:'/img/icon-wheel.webp',     title:'NEXUS WHEEL',   sub:'3D Spin · Up to 50×'},
               {href:'/blackjack.html',    id:'blackjack', iconImg:'/img/icon-blackjack.png', title:'Blackjack',     sub:'21 · Hit, Stand, Double'},
-              {href:'/mines.html',        id:'mines',     iconImg:'/img/icon-mines.png',     title:'Mines',         sub:'5×5 grid · Diamonds or mines?'},
+              {href:'/mines.html',        id:'mines',     iconImg:'/img/icon-mines.webp',     title:'Mines',         sub:'5×5 grid · Diamonds or mines?'},
             ];
             const overlayStyle = theme==='opulent'
               ? 'linear-gradient(to bottom,rgba(245,239,230,0.05) 0%,rgba(26,20,20,0.82) 100%)'
@@ -16746,11 +16760,11 @@ function App(){
           {/* Category tabs */}
           <div className="cat-tabs">
             {[
-              {id:'visi',     l:t.allGames||'All Games', img:'/img/cat-all.png'},
-              {id:'stalai',   l:'Tables',                img:'/img/cat-tables.png'},
-              {id:'automatai',l:'Slots',                 img:'/img/cat-slots.png'},
-              {id:'kripto',   l:'Crash',                 img:'/img/cat-crash.png'},
-              {id:'sportas',  l:'Sports',                img:'/img/cat-sports.png'},
+              {id:'visi',     l:t.allGames||'All Games', img:'/img/cat-all.webp'},
+              {id:'stalai',   l:'Tables',                img:'/img/cat-tables.webp'},
+              {id:'automatai',l:'Slots',                 img:'/img/cat-slots.webp'},
+              {id:'kripto',   l:'Crash',                 img:'/img/cat-crash.webp'},
+              {id:'sportas',  l:'Sports',                img:'/img/cat-sports.webp'},
               {id:'fav',      l:t.favorites||'Favorites',img:null},
             ].map(c=>{
               const cnt=c.id==='fav'?favGames.size
@@ -16794,7 +16808,7 @@ function App(){
             <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))',gap:12}}>
               {(()=>{
                 // Theme-specific card visuals
-                const cardBg   = theme==='neon'?'/images/cards/card-neon.png':theme==='opulent'?'/images/cards/card-opulent.png':'/images/cards/card-royal.png';
+                const cardBg   = theme==='neon'?'/images/cards/card-neon.webp':theme==='opulent'?'/images/cards/card-opulent.webp':'/images/cards/card-royal.webp';
                 const overlayGrad = theme==='neon'
                   ? 'linear-gradient(to bottom,rgba(3,8,6,0.05) 0%,rgba(3,12,10,0.18) 40%,rgba(3,10,8,0.75) 72%,rgba(2,8,6,0.97) 100%)'
                   : theme==='opulent'
@@ -16813,7 +16827,7 @@ function App(){
                   onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-4px) scale(1.02)';e.currentTarget.style.boxShadow='0 10px 30px rgba(0,0,0,0.55)';e.currentTarget.style.borderColor=borderHover;const ov=e.currentTarget.querySelector('.pp-play-overlay');if(ov){ov.style.opacity='1';}}}
                   onMouseLeave={e=>{e.currentTarget.style.transform='';e.currentTarget.style.boxShadow='';e.currentTarget.style.borderColor=borderClr;const ov=e.currentTarget.querySelector('.pp-play-overlay');if(ov){ov.style.opacity='0';}}}>
                   {/* Themed card background */}
-                  <img src={cardBg} alt="" style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',objectPosition:'center 20%',userSelect:'none',pointerEvents:'none'}}/>
+                  <img src={cardBg} alt="" loading="lazy" decoding="async" style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',objectPosition:'center 20%',userSelect:'none',pointerEvents:'none'}}/>
                   {/* Gradient overlay */}
                   <div style={{position:'absolute',inset:0,background:overlayGrad}}/>
                   {/* HOT badge */}
@@ -16959,7 +16973,7 @@ function App(){
         <>
           <div className="win-celebration-overlay"/>
           <div className="levelup-banner">
-            <img src="/img/win-celebration.png" alt="" style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',borderRadius:12,opacity:0.15}} onError={e=>e.target.style.display='none'}/>
+            <img src="/img/win-celebration.webp" alt="" style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',borderRadius:12,opacity:0.15}} onError={e=>e.target.style.display='none'}/>
             <h3 style={{position:'relative'}}>{lvUp.e} {t.levelUp||'LEVEL UP!'}</h3>
             <p style={{position:'relative'}}>{t.yourLevel||'You reached'} {lvUp.name}</p>
           </div>

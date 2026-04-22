@@ -7,6 +7,13 @@
       "runtimeArgs": ["server.js"],
       "port": 3000,
       "autoPort": false
+    },
+    {
+      "name": "static",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["preview-server.js"],
+      "port": 8080,
+      "autoPort": true
     }
   ]
 }

@@ -34,7 +34,7 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 /* ─── DICE ─── */
 .dice-layout{flex:1;display:grid;grid-template-columns:1fr 280px;overflow:hidden;}
 @media(max-width:750px){.dice-layout{grid-template-columns:1fr;grid-template-rows:auto auto;overflow:visible;}}
-.dice-area{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#060610 url('/img/dice-bg.png') center/cover no-repeat;padding:24px;gap:28px;position:relative;}
+.dice-area{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#060610 url('/img/dice-bg.webp') center/cover no-repeat;padding:24px;gap:28px;position:relative;}
 .dice-area::before{content:'';position:absolute;inset:0;background:rgba(4,4,16,0.68);pointer-events:none;z-index:0;}
 .dice-area>*{position:relative;z-index:1;}
 
@@ -89,7 +89,7 @@ input[type=range]{position:absolute;width:100%;opacity:0;height:40px;cursor:poin
 .stat-l{font-size:9px;letter-spacing:1px;color:rgba(232,224,208,.25);margin-top:2px;}
 
 /* ─── LIMBO ─── */
-.limbo-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#060610 url('/img/dice-bg.png') center/cover no-repeat;padding:24px;gap:24px;position:relative;}
+.limbo-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#060610 url('/img/dice-bg.webp') center/cover no-repeat;padding:24px;gap:24px;position:relative;}
 .limbo-area::before{content:'';position:absolute;inset:0;background:rgba(4,4,16,0.68);pointer-events:none;z-index:0;}
 .limbo-area>*{position:relative;z-index:1;}
 .limbo-display{text-align:center;}

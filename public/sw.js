@@ -1,5 +1,5 @@
-// HATHOR Casino — Service Worker v4.6
-var CACHE = 'hathor-v4.6';
+// HATHOR Casino — Service Worker v4.7 (performance pass)
+var CACHE = 'hathor-v4.7';
 var STATIC = [
   '/',
   '/manifest.json',
@@ -8,36 +8,36 @@ var STATIC = [
 
 // Key images to pre-cache for instant lobby loading
 var IMG_CACHE = [
-  '/img/favicon.png',
+  '/img/favicon.webp',
   '/img/hathor-logo-mark.png',
   '/img/hathor-logo-topbar.png',
   '/img/hathor-text-3d.png',
   '/img/topbar-bg.jpg',
-  '/img/loading-screen.png',
-  '/img/win-celebration.png',
-  '/img/bonus-bg.png',
-  '/img/vip-card-bg.png',
+  '/img/loading-screen.webp',
+  '/img/win-celebration.webp',
+  '/img/bonus-bg.webp',
+  '/img/vip-card-bg.webp',
   '/img/cashier-hero.jpg',
-  '/img/cat-all.png',
-  '/img/cat-tables.png',
-  '/img/cat-slots.png',
-  '/img/cat-crash.png',
-  '/img/cat-sports.png',
+  '/img/cat-all.webp',
+  '/img/cat-tables.webp',
+  '/img/cat-slots.webp',
+  '/img/cat-crash.webp',
+  '/img/cat-sports.webp',
   '/img/icon-slots.png',
   '/img/icon-roulette.png',
   '/img/icon-blackjack.png',
   '/img/icon-crash.png',
-  '/img/icon-dragon.png',
-  '/img/icon-mines.png',
-  '/img/icon-dice.png',
-  '/img/icon-pyramid.png',
-  '/img/av-lion.png',
-  '/img/av-tiger.png',
-  '/img/av-wolf.png',
-  '/img/av-eagle.png',
-  '/img/av-dragon.png',
-  '/img/av-king.png',
-  '/img/av-queen.png',
+  '/img/icon-dragon.webp',
+  '/img/icon-mines.webp',
+  '/img/icon-dice.webp',
+  '/img/icon-pyramid.webp',
+  '/img/av-lion.webp',
+  '/img/av-tiger.webp',
+  '/img/av-wolf.webp',
+  '/img/av-eagle.webp',
+  '/img/av-dragon.webp',
+  '/img/av-king.webp',
+  '/img/av-queen.webp',
   // AI-generated nav icons (DALL-E 3)
   '/img/nav-lobby.png',
   '/img/nav-slots.png',
@@ -184,8 +184,8 @@ self.addEventListener('push', function(e) {
   }
   var options = {
     body: data.body || '',
-    icon: data.icon || '/img/favicon.png',
-    badge: '/img/favicon.png',
+    icon: data.icon || '/img/favicon.webp',
+    badge: '/img/favicon.webp',
     vibrate: [200, 100, 200],
     data: { url: data.url || '/' },
     actions: [

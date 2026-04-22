@@ -52,12 +52,12 @@
       "short_name": "Mines",
       "description": "5×5 grid — diamonds vs mines",
       "url": "/mines.html?s=pwa",
-      "icons": [{"src": "/img/icon-mines.png", "sizes": "96x96"}]
+      "icons": [{"src": "/img/icon-mines.webp", "sizes": "96x96"}]
     }
   ],
   "screenshots": [
     {
-      "src": "/img/loading-screen.png",
+      "src": "/img/loading-screen.webp",
       "sizes": "1024x1024",
       "type": "image/png",
       "form_factor": "narrow",
