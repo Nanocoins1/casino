@@ -7369,11 +7369,10 @@ function Cleopatra({ height = 540 }) {
         max-camera-orbit="auto auto auto"
         min-field-of-view="35deg"
         max-field-of-view="35deg"
-        exposure="0.95"
-        shadow-intensity="1.5"
-        shadow-softness="0.75"
-        environment-image="legacy"
-        tone-mapping="aces"
+        exposure="1.0"
+        shadow-intensity="1.0"
+        shadow-softness="0.5"
+        tone-mapping="neutral"
         style={{ width:'100%', height:'100%', background:'transparent', '--poster-color':'transparent', position:'relative', zIndex:1, touchAction:'none', pointerEvents:'none', userSelect:'none' }}
       />
 
@@ -12161,7 +12160,7 @@ const LANGS = {
     code:'en', flag:'🇬🇧', name:'English',
     enterCasino:'Enter Casino', yourName:'Your Name', newPlayer:'New members receive 10,000 tokens',
     balance:'Balance', level:'Level', lobby:'Lobby', slots:'Slots', roulette:'Roulette',
-    bj:'Blackjack', poker:'Poker', sports:'Sports', stats:'Stats', leaderboard:'Leaderboard',
+    bj:'Blackjack', poker:'Poker', sports:'Sports', sportsBetTitle:'Sports Betting', sportsBetSub:'Football · Basketball · Tennis · Hockey · Live odds · In-play betting', sportsLiveCount:'500+ LIVE MARKETS', enterSportsbook:'ENTER SPORTSBOOK', stats:'Stats', leaderboard:'Leaderboard',
     cashier:'Cashier', spin:'SPIN', spinning:'SPINNING...', deal:'DEAL', hit:'HIT', stand:'STAND',
     double:'DOUBLE DOWN', newHand:'NEW HAND', placeBet:'PLACE BET', fold:'Fold', check:'Check',
     call:'Call', raise:'Raise', allin:'All In 🔥', deposit:'Deposit', withdraw:'Withdraw',
@@ -12243,7 +12242,7 @@ const LANGS = {
     code:'lt', flag:'🇱🇹', name:'Lietuvių',
     enterCasino:'Įeiti į Kazino', yourName:'Jūsų vardas', newPlayer:'Nauji nariai gauna 10 000 žetonų',
     balance:'Balansas', level:'Lygis', lobby:'Lobis', slots:'Automatai', roulette:'Ruletė',
-    bj:'Blackjack', poker:'Pokeris', sports:'Sportas', stats:'Statistika', leaderboard:'Lyderiai',
+    bj:'Blackjack', poker:'Pokeris', sports:'Sportas', sportsBetTitle:'Sports Betting', sportsBetSub:'Football · Basketball · Tennis · Hockey · Live odds · In-play betting', sportsLiveCount:'500+ LIVE MARKETS', enterSportsbook:'ENTER SPORTSBOOK', stats:'Statistika', leaderboard:'Lyderiai',
     sportsBetTitle:'Sporto Lažybos', sportsBetSub:'Futbolas · Krepšinis · Tenisas · Ledo ritulys · Live koeficientai', sportsLiveCount:'500+ LIVE RINKŲ', enterSportsbook:'ĮEITI Į LAŽYBAS',
     cashier:'Kasos', spin:'SUKTI', spinning:'SUKASI...', deal:'DALINTI', hit:'IMTI', stand:'STOTI',
     double:'DVIGUBAS', newHand:'NAUJA RANKA', placeBet:'STATYTI', fold:'Pasitraukti', check:'Tikrinti',
@@ -12326,7 +12325,7 @@ const LANGS = {
     code:'ru', flag:'🇷🇺', name:'Русский',
     enterCasino:'Войти в Казино', yourName:'Ваше имя', newPlayer:'Новые участники получают 10 000 жетонов',
     balance:'Баланс', level:'Уровень', lobby:'Лобби', slots:'Автоматы', roulette:'Рулетка',
-    bj:'Блэкджек', poker:'Покер', sports:'Спорт', stats:'Статистика', leaderboard:'Лидеры',
+    bj:'Блэкджек', poker:'Покер', sports:'Спорт', sportsBetTitle:"Ставки на спорт", sportsBetSub:"Футбол · Баскетбол · Теннис · Хоккей · Live коэффициенты · Live ставки", sportsLiveCount:"500+ LIVE РЫНКОВ", enterSportsbook:"ВОЙТИ В СПОРТ", stats:'Статистика', leaderboard:'Лидеры',
     cashier:'Касса', spin:'КРУТИТЬ', spinning:'КРУТИТСЯ...', deal:'РАЗДАТЬ', hit:'ЕЩЁ', stand:'СТОП',
     double:'УДВОИТЬ', newHand:'НОВАЯ РУКА', placeBet:'СДЕЛАТЬ СТАВКУ', fold:'Пас', check:'Чек',
     call:'Колл', raise:'Рейз', allin:'Ва-банк 🔥', deposit:'Пополнить', withdraw:'Вывести',
@@ -12407,7 +12406,7 @@ const LANGS = {
     code:'de', flag:'🇩🇪', name:'Deutsch',
     enterCasino:'Casino betreten', yourName:'Ihr Name', newPlayer:'Neue Mitglieder erhalten 10.000 Chips',
     balance:'Guthaben', level:'Level', lobby:'Lobby', slots:'Spielautomaten', roulette:'Roulette',
-    bj:'Blackjack', poker:'Poker', sports:'Sport', stats:'Statistiken', leaderboard:'Bestenliste',
+    bj:'Blackjack', poker:'Poker', sports:'Sport', sportsBetTitle:"Sportwetten", sportsBetSub:"Fußball · Basketball · Tennis · Hockey · Live-Quoten · Live-Wetten", sportsLiveCount:"500+ LIVE MÄRKTE", enterSportsbook:"SPORTWETTEN", stats:'Statistiken', leaderboard:'Bestenliste',
     cashier:'Kasse', spin:'DREHEN', spinning:'DREHT...', deal:'GEBEN', hit:'KARTE', stand:'HALTEN',
     double:'VERDOPPELN', newHand:'NEUE HAND', placeBet:'WETTE PLATZIEREN', fold:'Aufgeben', check:'Checken',
     call:'Callen', raise:'Erhöhen', allin:'Alles 🔥', deposit:'Einzahlen', withdraw:'Auszahlen',
@@ -12484,7 +12483,7 @@ const LANGS = {
     code:'pl', flag:'🇵🇱', name:'Polski',
     enterCasino:'Wejdź do kasyna', yourName:'Twoje imię', newPlayer:'Nowi gracze otrzymują 10 000 żetonów',
     balance:'Saldo', level:'Poziom', lobby:'Lobby', slots:'Automaty', roulette:'Ruletka',
-    bj:'Blackjack', poker:'Poker', sports:'Sport', stats:'Statystyki', leaderboard:'Ranking',
+    bj:'Blackjack', poker:'Poker', sports:'Sport', sportsBetTitle:"Zakłady sportowe", sportsBetSub:"Piłka nożna · Koszykówka · Tenis · Hokej · Kursy live · Na żywo", sportsLiveCount:"500+ RYNKÓW LIVE", enterSportsbook:"PRZEJDŹ DO ZAKŁADÓW", stats:'Statystyki', leaderboard:'Ranking',
     cashier:'Kasa', spin:'KRĘĆ', spinning:'KRĘCI...', deal:'ROZDAJ', hit:'DOBIERZ', stand:'STÓJ',
     double:'PODWÓJ', newHand:'NOWA GRA', placeBet:'POSTAW', fold:'Pas', check:'Czek',
     call:'Call', raise:'Podbij', allin:'All In 🔥', deposit:'Wpłata', withdraw:'Wypłata',
@@ -12560,7 +12559,7 @@ const LANGS = {
     code:'fr', flag:'🇫🇷', name:'Français',
     enterCasino:'Entrer au casino', yourName:'Votre nom', newPlayer:'Les nouveaux joueurs reçoivent 10 000 jetons',
     balance:'Solde', level:'Niveau', lobby:'Lobby', slots:'Machines', roulette:'Roulette',
-    bj:'Blackjack', poker:'Poker', sports:'Sports', stats:'Statistiques', leaderboard:'Classement',
+    bj:'Blackjack', poker:'Poker', sports:'Sports', sportsBetTitle:"Paris Sportifs", sportsBetSub:"Football · Basketball · Tennis · Hockey · Cotes en direct · Paris en direct", sportsLiveCount:"500+ MARCHÉS LIVE", enterSportsbook:"ACCÉDER AUX PARIS", stats:'Statistiques', leaderboard:'Classement',
     cashier:'Caisse', spin:'TOURNER', spinning:'EN JEU...', deal:'DISTRIBUER', hit:'TIRER', stand:'RESTER',
     double:'DOUBLER', newHand:'NOUVELLE MAIN', placeBet:'MISER', fold:'Se coucher', check:'Checker',
     call:'Suivre', raise:'Relancer', allin:'All In 🔥', deposit:'Dépôt', withdraw:'Retrait',
@@ -12636,7 +12635,7 @@ const LANGS = {
     code:'tr', flag:'🇹🇷', name:'Türkçe',
     enterCasino:'Kumarhaneye gir', yourName:'Adınız', newPlayer:'Yeni üyeler 10.000 jeton alır',
     balance:'Bakiye', level:'Seviye', lobby:'Lobi', slots:'Slotlar', roulette:'Rulet',
-    bj:'Blackjack', poker:'Poker', sports:'Spor', stats:'İstatistik', leaderboard:'Sıralama',
+    bj:'Blackjack', poker:'Poker', sports:'Spor', sportsBetTitle:"Spor Bahisleri", sportsBetSub:"Futbol · Basketbol · Tenis · Hokey · Canlı oranlar · Canlı bahis", sportsLiveCount:"500+ CANLI PAZAR", enterSportsbook:"SPOR BAHİSLERİ", stats:'İstatistik', leaderboard:'Sıralama',
     cashier:'Kasa', spin:'DÖNDÜR', spinning:'DÖNÜYOR...', deal:'DAĞIT', hit:'ÇEK', stand:'DUR',
     double:'İKİYE KATLA', newHand:'YENİ EL', placeBet:'BAHİS KOY', fold:'Fold', check:'Check',
     call:'Call', raise:'Artır', allin:'All In 🔥', deposit:'Yatır', withdraw:'Çek',
@@ -12712,7 +12711,7 @@ const LANGS = {
     code:'ar', flag:'🇸🇦', name:'العربية',
     enterCasino:'دخول الكازينو', yourName:'اسمك', newPlayer:'الأعضاء الجدد يحصلون على 10,000 رمز',
     balance:'الرصيد', level:'المستوى', lobby:'الردهة', slots:'السلوتس', roulette:'الروليت',
-    bj:'بلاك جاك', poker:'بوكر', sports:'رياضة', stats:'إحصائيات', leaderboard:'المتصدرون',
+    bj:'بلاك جاك', poker:'بوكر', sports:'رياضة', sportsBetTitle:"المراهنات الرياضية", sportsBetSub:"كرة قدم · كرة سلة · تنس · هوكي · احتمالات مباشرة", sportsLiveCount:"+500 سوق مباشر", enterSportsbook:"دخول الرياضة", stats:'إحصائيات', leaderboard:'المتصدرون',
     cashier:'الكاشير', spin:'دوّر', spinning:'يدور...', deal:'وزّع', hit:'اسحب', stand:'قف',
     double:'ضاعف', newHand:'يد جديدة', placeBet:'ضع رهانك', fold:'انسحب', check:'تحقق',
     call:'اتبع', raise:'ارفع', allin:'كل شيء 🔥', deposit:'إيداع', withdraw:'سحب',
@@ -12788,7 +12787,7 @@ const LANGS = {
     code:'zh', flag:'🇨🇳', name:'中文',
     enterCasino:'进入赌场', yourName:'您的姓名', newPlayer:'新会员获得10,000代币',
     balance:'余额', level:'等级', lobby:'大厅', slots:'老虎机', roulette:'轮盘',
-    bj:'21点', poker:'扑克', sports:'体育', stats:'统计', leaderboard:'排行榜',
+    bj:'21点', poker:'扑克', sports:'体育', sportsBetTitle:"体育博彩", sportsBetSub:"足球 · 篮球 · 网球 · 冰球 · 实时赔率 · 滚球投注", sportsLiveCount:"500+ 即时市场", enterSportsbook:"进入体育投注", stats:'统计', leaderboard:'排行榜',
     cashier:'收银台', spin:'旋转', spinning:'旋转中...', deal:'发牌', hit:'要牌', stand:'停牌',
     double:'加倍', newHand:'新局', placeBet:'下注', fold:'弃牌', check:'过牌',
     call:'跟注', raise:'加注', allin:'全押 🔥', deposit:'存款', withdraw:'取款',
@@ -12864,7 +12863,7 @@ const LANGS = {
     code:'hi', flag:'🇮🇳', name:'हिन्दी',
     enterCasino:'कैसीनो में प्रवेश करें', yourName:'आपका नाम', newPlayer:'नए सदस्यों को 10,000 टोकन मिलते हैं',
     balance:'शेष राशि', level:'स्तर', lobby:'लॉबी', slots:'स्लॉट्स', roulette:'रूलेट',
-    bj:'ब्लैकजैक', poker:'पोकर', sports:'खेल', stats:'आँकड़े', leaderboard:'लीडरबोर्ड',
+    bj:'ब्लैकजैक', poker:'पोकर', sports:'खेल', sportsBetTitle:"खेल सट्टेबाजी", sportsBetSub:"फुटबॉल · बास्केटबॉल · टेनिस · हॉकी · लाइव ऑड्स", sportsLiveCount:"500+ लाइव मार्केट", enterSportsbook:"स्पोर्ट्सबुक", stats:'आँकड़े', leaderboard:'लीडरबोर्ड',
     cashier:'कैशियर', spin:'घुमाएँ', spinning:'घूम रहा है...', deal:'बाँटें', hit:'कार्ड लें', stand:'रुकें',
     double:'दोगुना', newHand:'नया हाथ', placeBet:'दाँव लगाएँ', fold:'फोल्ड', check:'चेक',
     call:'कॉल', raise:'बढ़ाएँ', allin:'ऑल इन 🔥', deposit:'जमा', withdraw:'निकासी',
@@ -12927,7 +12926,7 @@ const LANGS = {
     code:'uk', flag:'🇺🇦', name:'Українська',
     enterCasino:'Увійти до Казино', yourName:'Ваше ім’я', newPlayer:'Нові учасники отримують 10 000 жетонів',
     balance:'Баланс', level:'Рівень', lobby:'Лобі', slots:'Слоти', roulette:'Рулетка',
-    bj:'Блекджек', poker:'Покер', sports:'Спорт', stats:'Статистика', leaderboard:'Лідери',
+    bj:'Блекджек', poker:'Покер', sports:'Спорт', sportsBetTitle:"Спортивні ставки", sportsBetSub:"Футбол · Баскетбол · Теніс · Хокей · Live коефіцієнти", sportsLiveCount:"500+ LIVE РИНКІВ", enterSportsbook:"ДО СПОРТ-СТАВОК", stats:'Статистика', leaderboard:'Лідери',
     cashier:'Каса', spin:'КРУТИТИ', spinning:'КРУТИТЬСЯ...', deal:'РОЗДАТИ', hit:'ЩЕ', stand:'СТОП',
     double:'ПОДВОЇТИ', newHand:'НОВА РУКА', placeBet:'ЗРОБИТИ СТАВКУ', fold:'Пас', check:'Чек',
     call:'Колл', raise:'Рейз', allin:'Ва-банк 🔥', deposit:'Депозит', withdraw:'Виведення',
