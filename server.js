@@ -40,15 +40,18 @@ try {
   }
 } catch(e) { console.warn('⚠️  web-push not installed — native push unavailable'); }
 
+// Import premium email templates (emailBase, emailWelcome, emailPasswordReset, etc.)
+const emailTpl = require('./email-templates');
+
 let emailTransporter = null;
 if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
   emailTransporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: parseInt(process.env.SMTP_PORT) || 587,
-    secure: false,
+    secure: process.env.SMTP_SECURE === 'true',
     auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
   });
-  console.log('📧 Email transporter configured');
+  console.log('📧 Email transporter configured (' + process.env.SMTP_HOST + ')');
 } else {
   console.log('📧 Email not configured (set SMTP_HOST/USER/PASS env vars)');
 }
@@ -56,8 +59,9 @@ if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
 async function sendEmail(to, subject, html) {
   if (!emailTransporter) return;
   try {
+    const fromAddr = process.env.EMAIL_FROM || process.env.SMTP_FROM || process.env.SMTP_USER;
     await emailTransporter.sendMail({
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      from: `"HATHOR Casino" <${fromAddr}>`,
       to, subject, html
     });
   } catch(e) {
@@ -65,22 +69,9 @@ async function sendEmail(to, subject, html) {
   }
 }
 
+// ── Backwards-compatible wrapper for old emailTemplate(title, content) calls ──
 function emailTemplate(title, content) {
-  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0a0806;font-family:Arial,sans-serif">
-  <div style="max-width:600px;margin:0 auto;padding:40px 20px">
-    <div style="text-align:center;margin-bottom:32px">
-      <h1 style="font-family:Georgia,serif;color:#c9a84c;font-size:28px;margin:0;letter-spacing:4px">⬡ HATHOR</h1>
-      <p style="color:rgba(201,168,76,0.5);font-size:11px;letter-spacing:3px;margin:4px 0 0">ROYAL CASINO</p>
-    </div>
-    <div style="background:rgba(201,168,76,0.04);border:1px solid rgba(201,168,76,0.15);border-radius:16px;padding:32px">
-      <h2 style="color:#e8e2d4;font-size:20px;margin:0 0 16px">${title}</h2>
-      ${content}
-    </div>
-    <p style="text-align:center;color:rgba(232,226,212,0.2);font-size:11px;margin-top:24px">
-      HATHOR Royal Casino · <a href="https://casino-production-0712.up.railway.app" style="color:rgba(201,168,76,0.4)">Play Now</a>
-    </p>
-  </div>
-  </body></html>`;
+  return emailTpl.emailGeneric(title, content);
 }
 
 const app    = express();
@@ -1841,10 +1832,7 @@ app.get('/api/crypto/status/:paymentId', async (req,res)=>{
         const depUser = await dbGet(`SELECT a.email, u.tokens FROM auth a JOIN users u ON a.uid=u.uid WHERE a.uid=$1`, [tx.uid]);
         if (depUser?.email) {
           const eurAmount = (tx.amount_tokens / 100).toFixed(2);
-          await sendEmail(depUser.email, 'Deposit confirmed — HATHOR Casino', emailTemplate(
-            'Deposit Confirmed ✅',
-            `<p style="color:rgba(232,226,212,0.7);line-height:1.7">Your deposit of <strong style="color:#c9a84c">€${eurAmount}</strong> has been confirmed. Your new balance: <strong style="color:#c9a84c">${depUser.tokens} tokens</strong></p>`
-          ));
+          await sendEmail(depUser.email, '✅ Deposit Confirmed — HATHOR Casino', emailTpl.emailDepositConfirmed(depUser.name || 'Player', eurAmount, 'EUR'));
         }
       } catch(e) {}
       return res.json({status:'finished', tokens: tx.amount_tokens, demo:true});
@@ -1866,10 +1854,7 @@ app.get('/api/crypto/status/:paymentId', async (req,res)=>{
           const depUser = await dbGet(`SELECT a.email, u.tokens FROM auth a JOIN users u ON a.uid=u.uid WHERE a.uid=$1`, [tx.uid]);
           if (depUser?.email) {
             const eurAmount = (tx.amount_tokens / 100).toFixed(2);
-            await sendEmail(depUser.email, 'Deposit confirmed — HATHOR Casino', emailTemplate(
-              'Deposit Confirmed ✅',
-              `<p style="color:rgba(232,226,212,0.7);line-height:1.7">Your deposit of <strong style="color:#c9a84c">€${eurAmount}</strong> has been confirmed. Your new balance: <strong style="color:#c9a84c">${depUser.tokens} tokens</strong></p>`
-            ));
+            await sendEmail(depUser.email, '✅ Deposit Confirmed — HATHOR Casino', emailTpl.emailDepositConfirmed(depUser.name || 'Player', eurAmount, 'EUR'));
           }
         } catch(e) {}
       }
@@ -1906,10 +1891,7 @@ app.post('/api/crypto/ipn', express.json(), async (req,res)=>{
       const depUser = await dbGet(`SELECT a.email, u.tokens FROM auth a JOIN users u ON a.uid=u.uid WHERE a.uid=$1`, [tx.uid]);
       if (depUser?.email) {
         const eurAmount = (tx.amount_tokens / 100).toFixed(2);
-        await sendEmail(depUser.email, 'Deposit confirmed — HATHOR Casino', emailTemplate(
-          'Deposit Confirmed ✅',
-          `<p style="color:rgba(232,226,212,0.7);line-height:1.7">Your deposit of <strong style="color:#c9a84c">€${eurAmount}</strong> has been confirmed. Your new balance: <strong style="color:#c9a84c">${depUser.tokens} tokens</strong></p>`
-        ));
+        await sendEmail(depUser.email, '✅ Deposit Confirmed — HATHOR Casino', emailTpl.emailDepositConfirmed(depUser.name || 'Player', eurAmount, 'EUR'));
       }
     } catch(e) {}
   }
@@ -2429,13 +2411,9 @@ app.post('/api/auth/register', express.json(), async (req, res) => {
     const vToken = require('crypto').randomBytes(32).toString('hex');
     const vExpires = new Date(Date.now() + 24*60*60*1000);
     await dbRun(`INSERT INTO email_verify_tokens(token,uid,expires_at) VALUES($1,$2,$3)`, [vToken, uid, vExpires]).catch(()=>{});
-    await sendEmail(email, 'Welcome to HATHOR Royal Casino! 🎰', emailTemplate(
-      'Welcome, ' + name + '!',
-      `<p style="color:rgba(232,226,212,0.7);line-height:1.7">Your account has been created. You start with <strong style="color:#c9a84c">${(10000+promoBonus).toLocaleString()} tokens</strong>${promoBonus?` (including <strong style="color:#4ade80">+${promoBonus.toLocaleString()} promo bonus</strong>)`:''} — good luck! 🍀</p>
-       <p style="margin:16px 0 8px;color:rgba(232,226,212,0.7);">Please verify your email address:</p>
-       <a href="${baseUrl}/api/auth/verify-email/${vToken}" style="display:inline-block;padding:14px 28px;background:linear-gradient(135deg,#c9a84c,#ffd680);color:#0a0806;text-decoration:none;border-radius:10px;font-weight:700">Verify Email →</a>
-       <p style="margin-top:12px;color:rgba(232,226,212,0.4);font-size:12px">Link expires in 24 hours.</p>`
-    ));
+    // Send 2 emails: welcome + verification
+    await sendEmail(email, '👑 Welcome to HATHOR Casino', emailTpl.emailWelcome(name));
+    await sendEmail(email, 'Verify your HATHOR email address', emailTpl.emailVerify(name, `${baseUrl}/api/auth/verify-email/${vToken}`));
     res.json({ok:true, token, uid, promoBonus, user:{...user, levelInfo:getLvInfo(0), kycStatus:'unverified'}});
   } catch(e) { res.status(500).json({error:'Serverio klaida: '+e.message}); }
 });
@@ -2520,12 +2498,7 @@ app.post('/api/auth/forgot-password', authLimiter, express.json(), async (req,re
       await dbRun(`DELETE FROM password_reset_tokens WHERE uid=$1`, [row.uid]);
       await dbRun(`INSERT INTO password_reset_tokens(token,uid,expires_at) VALUES($1,$2,$3)`, [token, row.uid, expires]);
       const baseUrl = process.env.BASE_URL || 'https://casino-production-0712.up.railway.app';
-      await sendEmail(email.toLowerCase(), 'Reset your HATHOR Casino password', emailTemplate(
-        'Password Reset',
-        `<p style="color:rgba(232,226,212,0.7);line-height:1.7">Click the button below to reset your password. This link expires in 1 hour.</p>
-         <a href="${baseUrl}/login.html?mode=reset&token=${token}" style="display:inline-block;margin-top:16px;padding:14px 28px;background:linear-gradient(135deg,#c9a84c,#ffd680);color:#0a0806;text-decoration:none;border-radius:10px;font-weight:700">Reset Password →</a>
-         <p style="margin-top:16px;color:rgba(232,226,212,0.4);font-size:12px">If you didn't request this, ignore this email.</p>`
-      ));
+      await sendEmail(email.toLowerCase(), 'Reset your HATHOR password', emailTpl.emailPasswordReset(row.name || 'Player', `${baseUrl}/login.html?mode=reset&token=${token}`));
     }
   } catch(e) { console.error('Forgot password error:', e.message); }
   res.json({ok:true});
@@ -2579,11 +2552,7 @@ app.post('/api/auth/resend-verification', express.json(), async (req,res) => {
     await dbRun(`DELETE FROM email_verify_tokens WHERE uid=$1`, [uid]);
     await dbRun(`INSERT INTO email_verify_tokens(token,uid,expires_at) VALUES($1,$2,$3)`, [vToken, uid, expires]);
     const baseUrl = process.env.BASE_URL || 'https://casino-production-0712.up.railway.app';
-    await sendEmail(authRow.email, 'Verify your HATHOR Casino email', emailTemplate(
-      'Email Verification',
-      `<p style="color:rgba(232,226,212,0.7);line-height:1.7">Click below to verify your email address.</p>
-       <a href="${baseUrl}/api/auth/verify-email/${vToken}" style="display:inline-block;margin-top:16px;padding:14px 28px;background:linear-gradient(135deg,#c9a84c,#ffd680);color:#0a0806;text-decoration:none;border-radius:10px;font-weight:700">Verify Email →</a>`
-    ));
+    await sendEmail(authRow.email, 'Verify your HATHOR email address', emailTpl.emailVerify(authRow.name || 'Player', `${baseUrl}/api/auth/verify-email/${vToken}`));
     res.json({ok:true});
   } catch(e) { res.status(500).json({error:'Server error'}); }
 });
@@ -4257,10 +4226,7 @@ app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async
           const depUser = await dbGet(`SELECT a.email, u.tokens FROM auth a JOIN users u ON a.uid=u.uid WHERE a.uid=$1`, [uid]);
           if (depUser?.email) {
             const eurAmount = (pi.amount / 100).toFixed(2);
-            await sendEmail(depUser.email, 'Deposit confirmed — HATHOR Casino', emailTemplate(
-              'Deposit Confirmed ✅',
-              `<p style="color:rgba(232,226,212,0.7);line-height:1.7">Your deposit of <strong style="color:#c9a84c">€${eurAmount}</strong> has been confirmed. Your new balance: <strong style="color:#c9a84c">${depUser.tokens} tokens</strong></p>`
-            ));
+            await sendEmail(depUser.email, '✅ Deposit Confirmed — HATHOR Casino', emailTpl.emailDepositConfirmed(depUser.name || 'Player', eurAmount, 'EUR'));
           }
         } catch(emailErr) {}
       } catch(e) { console.error('Stripe webhook DB error:', e.message); }
@@ -4285,10 +4251,7 @@ app.post('/api/stripe/demo-confirm', express.json(), async (req, res) => {
       const depUser = await dbGet(`SELECT a.email, u.tokens FROM auth a JOIN users u ON a.uid=u.uid WHERE a.uid=$1`, [uid]);
       if (depUser?.email) {
         const eurAmount = parseFloat(amountEur)||0;
-        await sendEmail(depUser.email, 'Deposit confirmed — HATHOR Casino', emailTemplate(
-          'Deposit Confirmed ✅',
-          `<p style="color:rgba(232,226,212,0.7);line-height:1.7">Your deposit of <strong style="color:#c9a84c">€${eurAmount.toFixed(2)}</strong> has been confirmed. Your new balance: <strong style="color:#c9a84c">${depUser.tokens} tokens</strong></p>`
-        ));
+        await sendEmail(depUser.email, '✅ Deposit Confirmed — HATHOR Casino', emailTpl.emailDepositConfirmed(depUser.name || 'Player', eurAmount.toFixed(2), 'EUR'));
       }
     } catch(emailErr) {}
     res.json({ ok: true, tokens: parseInt(tokens) });
