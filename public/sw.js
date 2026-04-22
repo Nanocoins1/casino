@@ -1,5 +1,5 @@
-// HATHOR Casino — Service Worker v4.7 (performance pass)
-var CACHE = 'hathor-v4.7';
+// HATHOR Casino — Service Worker v4.8 (GLB material fix — invalidate 3D models)
+var CACHE = 'hathor-v4.8';
 var STATIC = [
   '/',
   '/manifest.json',
