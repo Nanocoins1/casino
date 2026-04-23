@@ -222,6 +222,7 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
     <div class="tab" onclick="showTab('push',this)">🔔 Push</div>
     <div class="tab" id="tab-staff" onclick="showTab('staff',this)" style="display:none;">👥 Darbuotojai</div>
     <div class="tab" onclick="showTab('bonuses',this)">🎁 Bonusai</div>
+    <div class="tab" onclick="showTab('ai',this)">🤖 AI Tools</div>
   </div>
 
   <div class="content">
@@ -903,6 +904,83 @@ tbody td{padding:11px 14px;color:rgba(232,224,208,.75);}
         <thead><tr><th>Staff Member</th><th>Role</th><th>Created</th><th>Last Login</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody id="staffTbody"><tr><td colspan="6" style="text-align:center;padding:20px;color:rgba(232,224,208,0.3);">Kraunama...</td></tr></tbody>
       </table>
+    </div>
+
+    <!-- AI TOOLS -->
+    <div class="section" id="sec-ai">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;color:#e8e2d4;">🤖 AI Automation Tools</h2>
+        <div style="font-size:12px;color:rgba(232,224,208,0.5);">Powered by Claude Sonnet 4.5 & Haiku 4.5</div>
+      </div>
+
+      <!-- Quick triggers -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:24px;">
+        <div style="background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.25);border-radius:10px;padding:16px;">
+          <div style="font-weight:700;color:#c9a84c;margin-bottom:4px;">🔍 Run AML Scan Now</div>
+          <div style="font-size:12px;color:rgba(232,224,208,0.55);margin-bottom:10px;">Manually trigger AML pattern detection scan. Normally runs hourly.</div>
+          <button class="btn btn-primary btn-sm" onclick="runAmlScanNow()" id="btnAml">Run Scan</button>
+          <div id="amlResult" style="margin-top:10px;font-size:12px;"></div>
+        </div>
+        <div style="background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.25);border-radius:10px;padding:16px;">
+          <div style="font-weight:700;color:#c9a84c;margin-bottom:4px;">📊 Generate Daily Report</div>
+          <div style="font-size:12px;color:rgba(232,224,208,0.55);margin-bottom:10px;">Generate & email today's executive report. Auto-runs at 9 AM UTC daily.</div>
+          <button class="btn btn-primary btn-sm" onclick="generateReportNow()" id="btnReport">Generate & Email</button>
+          <div id="reportResult" style="margin-top:10px;font-size:12px;"></div>
+        </div>
+      </div>
+
+      <!-- Content Factory -->
+      <div style="background:rgba(138,30,46,0.05);border:1px solid rgba(138,30,46,0.25);border-radius:10px;padding:20px;">
+        <h3 style="color:#c9a84c;margin:0 0 6px;font-size:16px;">✍️ Content Factory</h3>
+        <p style="font-size:12px;color:rgba(232,224,208,0.55);margin:0 0 16px;">Generate marketing content: blog posts, social media, email newsletters, promo copy.</p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:12px;">
+          <div>
+            <label style="font-size:11px;color:rgba(232,224,208,0.5);display:block;margin-bottom:4px;">Type</label>
+            <select class="inp" id="cf-type" style="background:#0d0d1a;cursor:pointer;width:100%;">
+              <option value="blog_post">📝 Blog Post</option>
+              <option value="social_twitter">🐦 Twitter/X (3 posts)</option>
+              <option value="social_instagram">📸 Instagram Caption</option>
+              <option value="social_facebook">👥 Facebook Post</option>
+              <option value="email_newsletter">📧 Email Newsletter</option>
+              <option value="promo_copy">🎁 Promo Copy</option>
+              <option value="landing_headline">🎯 Landing Headlines (5)</option>
+              <option value="seo_meta">🔎 SEO Meta Tags</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;color:rgba(232,224,208,0.5);display:block;margin-bottom:4px;">Tone</label>
+            <select class="inp" id="cf-tone" style="background:#0d0d1a;cursor:pointer;width:100%;">
+              <option value="professional yet playful">Professional + playful</option>
+              <option value="exciting and urgent">Exciting + urgent</option>
+              <option value="luxurious and sophisticated">Luxurious</option>
+              <option value="friendly and conversational">Friendly</option>
+              <option value="bold and confident">Bold + confident</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;color:rgba(232,224,208,0.5);display:block;margin-bottom:4px;">Language</label>
+            <select class="inp" id="cf-lang" style="background:#0d0d1a;cursor:pointer;width:100%;">
+              <option value="English">English</option>
+              <option value="Lithuanian">Lithuanian</option>
+              <option value="Russian">Russian</option>
+              <option value="German">German</option>
+              <option value="Spanish">Spanish</option>
+              <option value="French">French</option>
+            </select>
+          </div>
+        </div>
+
+        <label style="font-size:11px;color:rgba(232,224,208,0.5);display:block;margin-bottom:4px;">Topic</label>
+        <input class="inp" id="cf-topic" placeholder='e.g. "New Egyptian-themed slot launch", "Weekend deposit match 100%"' style="width:100%;margin-bottom:10px;">
+
+        <label style="font-size:11px;color:rgba(232,224,208,0.5);display:block;margin-bottom:4px;">Extra context (optional)</label>
+        <textarea class="inp" id="cf-extra" rows="2" placeholder='e.g. "Promo runs Oct 1-7, min deposit $20, code WELCOME100"' style="width:100%;resize:vertical;margin-bottom:12px;"></textarea>
+
+        <button class="btn btn-primary" onclick="generateContent()" id="btnCf">✨ Generate Content</button>
+
+        <div id="cfResult" style="margin-top:16px;"></div>
+      </div>
     </div>
 
   </div>
@@ -1632,6 +1710,89 @@ function confirmReject() {
   api(`/admin/kyc/reject/${rejectTargetUid}`,{method:'POST',body:JSON.stringify({reason})}).then(d => {
     if(d.ok) { toast('KYC atmesta','ok'); closeReject(); loadKYC(currentKYCFilter); loadKYCStats(); }
   });
+}
+
+// ── AI Tools ──────────────────────────────────────
+function runAmlScanNow() {
+  const btn = document.getElementById('btnAml');
+  const out = document.getElementById('amlResult');
+  btn.disabled = true; btn.textContent = 'Scanning...';
+  out.innerHTML = '<div style="color:rgba(232,224,208,0.55);">🔄 Running SQL heuristics + AI analysis...</div>';
+  api('/admin/ai/aml-scan',{method:'POST'}).then(d => {
+    btn.disabled = false; btn.textContent = 'Run Scan';
+    if(d.error) { out.innerHTML = '<div style="color:#e44;">❌ '+d.error+'</div>'; return; }
+    if(!d.flagged_count) {
+      out.innerHTML = '<div style="color:#5c8;">✅ Scan complete — no high-risk patterns detected</div>';
+    } else {
+      const items = d.flagged.map(f => `
+        <div style="padding:8px;margin:6px 0;background:rgba(138,30,46,0.1);border-left:3px solid #e44;border-radius:4px;">
+          <strong>${f.user.name}</strong> <span style="opacity:0.6">(${f.uid.slice(0,8)}...)</span>
+          <div style="color:#e44;margin-top:2px;">Risk: ${f.aiVerdict.risk_level.toUpperCase()} (${f.aiVerdict.confidence}%)</div>
+          <div style="margin-top:4px;">${f.aiVerdict.reason}</div>
+          <div style="margin-top:4px;font-size:11px;opacity:0.7;">Action: ${f.aiVerdict.recommended_action}</div>
+        </div>
+      `).join('');
+      out.innerHTML = `<div style="color:#e44;font-weight:700;margin-bottom:8px;">🚨 ${d.flagged_count} flagged user(s):</div>${items}<div style="font-size:11px;color:rgba(232,224,208,0.5);margin-top:6px;">Also emailed to admin.</div>`;
+    }
+  }).catch(e => {
+    btn.disabled = false; btn.textContent = 'Run Scan';
+    out.innerHTML = '<div style="color:#e44;">❌ '+e.message+'</div>';
+  });
+}
+
+function generateReportNow() {
+  const btn = document.getElementById('btnReport');
+  const out = document.getElementById('reportResult');
+  btn.disabled = true; btn.textContent = 'Generating...';
+  out.innerHTML = '<div style="color:rgba(232,224,208,0.55);">🔄 Gathering stats + AI analysis...</div>';
+  api('/admin/ai/daily-report',{method:'POST'}).then(d => {
+    btn.disabled = false; btn.textContent = 'Generate & Email';
+    if(d.error) { out.innerHTML = '<div style="color:#e44;">❌ '+d.error+'</div>'; return; }
+    out.innerHTML = '<div style="color:#5c8;">✅ Report emailed to <strong>'+(d.sent_to||'admin')+'</strong></div>';
+  }).catch(e => {
+    btn.disabled = false; btn.textContent = 'Generate & Email';
+    out.innerHTML = '<div style="color:#e44;">❌ '+e.message+'</div>';
+  });
+}
+
+function generateContent() {
+  const type = document.getElementById('cf-type').value;
+  const tone = document.getElementById('cf-tone').value;
+  const language = document.getElementById('cf-lang').value;
+  const topic = document.getElementById('cf-topic').value.trim();
+  const extra = document.getElementById('cf-extra').value.trim();
+  const btn = document.getElementById('btnCf');
+  const out = document.getElementById('cfResult');
+
+  if(!topic) { toast('Įveskite temą (topic)','err'); return; }
+
+  btn.disabled = true; btn.textContent = '✨ Generating...';
+  out.innerHTML = '<div style="color:rgba(232,224,208,0.55);padding:12px;">🔄 Claude Sonnet is writing your content (5-15 sec)...</div>';
+
+  api('/admin/ai/content',{method:'POST',body:JSON.stringify({type,tone,language,topic,extra})}).then(d => {
+    btn.disabled = false; btn.textContent = '✨ Generate Content';
+    if(d.error) { out.innerHTML = '<div style="color:#e44;padding:12px;">❌ '+d.error+'</div>'; return; }
+    const safe = (d.content||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    out.innerHTML = `
+      <div style="background:rgba(0,0,0,0.3);border:1px solid rgba(201,168,76,0.2);border-radius:8px;padding:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="color:#c9a84c;font-weight:700;">Generated ${d.type} — ${d.topic}</div>
+          <button class="btn btn-ghost btn-sm" onclick="copyContent()">📋 Copy</button>
+        </div>
+        <pre id="cfOutput" style="white-space:pre-wrap;font-family:'Inter',sans-serif;color:#e8e0d0;line-height:1.6;margin:0;font-size:13px;">${safe}</pre>
+        ${d.usage ? `<div style="font-size:11px;color:rgba(232,224,208,0.4);margin-top:10px;">Usage: ${d.usage.input_tokens} in / ${d.usage.output_tokens} out tokens</div>` : ''}
+      </div>
+    `;
+  }).catch(e => {
+    btn.disabled = false; btn.textContent = '✨ Generate Content';
+    out.innerHTML = '<div style="color:#e44;padding:12px;">❌ '+e.message+'</div>';
+  });
+}
+
+function copyContent() {
+  const el = document.getElementById('cfOutput');
+  if(!el) return;
+  navigator.clipboard.writeText(el.textContent).then(() => toast('Zkopijuota!','ok')).catch(() => toast('Kopijavimas nepavyko','err'));
 }
 
 // ── Bets log ──────────────────────────────────────

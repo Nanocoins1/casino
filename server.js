@@ -45,6 +45,15 @@ try {
 // Import premium email templates (emailBase, emailWelcome, emailPasswordReset, etc.)
 const emailTpl = require('./email-templates');
 
+// Import KYC Auto-Review (Claude Vision AI) — returns auto_approve | auto_reject | needs_human
+const { autoReviewKyc } = require('./kyc-ai-review');
+
+// Import AML Pattern Detection (Claude Haiku) — hourly scans for money laundering patterns
+const { scheduleAmlScans, runAmlScan } = require('./aml-detection');
+
+// Import Daily AI Report (Claude Sonnet) — executive summary emailed at 9 AM UTC
+const { scheduleDailyReport, generateDailyReport } = require('./daily-ai-report');
+
 let emailTransporter = null;
 if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
   emailTransporter = nodemailer.createTransport({
@@ -3084,7 +3093,87 @@ app.post('/api/kyc/submit', kycUpload.fields([
     WHERE kyc.status NOT IN ('approved')
   `, [uid,'pending',full_name,birth_date,country||'',id_type||'passport',id_front,id_back,selfie]);
 
+  // Respond immediately — AI review runs async in background (10-20 sec)
   res.json({ok:true,status:'pending'});
+
+  // ══ AI Auto-Review via Claude Vision (async, non-blocking) ══
+  (async () => {
+    try {
+      const kycPayload = {
+        uid, full_name, birth_date, country, id_type: id_type || 'passport',
+        id_front, id_back, selfie
+      };
+      const aiResult = await autoReviewKyc(kycPayload);
+      console.log(`[KYC AI] uid=${uid} → ${aiResult.decision} (conf=${aiResult.confidence}%) reason="${aiResult.reason}"`);
+
+      // Fetch user email for notifications
+      const u = await dbGet(`SELECT a.email, u.name FROM auth a JOIN users u ON a.uid=u.uid WHERE a.uid=$1`, [uid]).catch(()=>null);
+
+      if (aiResult.decision === 'auto_approve') {
+        await dbRun(`UPDATE kyc SET status='approved', reviewed_at=NOW(), rejection_reason=$1 WHERE uid=$2 AND status='pending'`,
+          [`[AI] ${aiResult.reason}`, uid]);
+        if (sockets[uid]) sockets[uid].socket.emit('kycStatusUpdate', { status: 'approved' });
+        if (u?.email) {
+          await sendEmail(u.email, '✅ KYC Approved — HATHOR Casino',
+            emailTpl.emailGeneric(
+              'Identity Verified ✅',
+              `<p style="line-height:1.7">Hello ${u.name || 'Player'},</p>
+               <p style="line-height:1.7">Great news! Your identity has been successfully verified.</p>
+               <p style="line-height:1.7">You now have full access to all HATHOR Casino features including withdrawals, high-stake tables, and VIP benefits.</p>`,
+              'ACCESS FULL CASINO',
+              process.env.SITE_URL || 'https://hathor.casino'
+            )
+          ).catch(e => console.error('[KYC AI] approval email error:', e.message));
+        }
+      } else if (aiResult.decision === 'auto_reject') {
+        const reason = aiResult.reason || 'Documents could not be verified';
+        await dbRun(`UPDATE kyc SET status='rejected', rejection_reason=$1, reviewed_at=NOW() WHERE uid=$2 AND status='pending'`,
+          [`[AI] ${reason}`, uid]);
+        if (sockets[uid]) sockets[uid].socket.emit('kycStatusUpdate', { status: 'rejected', reason });
+        if (u?.email) {
+          await sendEmail(u.email, 'KYC Verification Update — HATHOR Casino',
+            emailTpl.emailGeneric(
+              'Additional Information Needed',
+              `<p style="line-height:1.7">Hello ${u.name || 'Player'},</p>
+               <p style="line-height:1.7">We reviewed your submitted documents but need additional information:</p>
+               <div style="padding:14px;background:rgba(138,30,46,0.08);border:1px solid rgba(138,30,46,0.25);border-radius:6px;margin:16px 0">
+                 <strong style="color:#c9a84c">Reason:</strong><br/>
+                 <span style="color:rgba(232,224,208,0.8)">${reason}</span>
+               </div>
+               <p style="line-height:1.7">Please resubmit your documents via the KYC page. If you have questions, contact support.</p>`,
+              'RESUBMIT DOCUMENTS',
+              (process.env.SITE_URL || 'https://hathor.casino') + '/kyc.html'
+            )
+          ).catch(e => console.error('[KYC AI] reject email error:', e.message));
+        }
+      } else {
+        // needs_human — stays 'pending', notify admin
+        await dbRun(`UPDATE kyc SET rejection_reason=$1 WHERE uid=$2 AND status='pending'`,
+          [`[AI flagged for review] ${aiResult.reason}`, uid]).catch(()=>{});
+        try {
+          const adminEmailSetting = await dbGet(`SELECT value FROM settings WHERE key='admin_email'`).catch(()=>null);
+          const adminEmail = adminEmailSetting?.value || process.env.SMTP_USER;
+          if (adminEmail) {
+            const details = aiResult.details ? `<pre style="font-size:12px;background:#111;padding:10px;border-radius:4px;color:#c9a84c">${JSON.stringify(aiResult.details, null, 2)}</pre>` : '';
+            await sendEmail(adminEmail, `🔍 KYC Needs Human Review — ${full_name}`,
+              emailTpl.emailGeneric(
+                'KYC Flagged by AI',
+                `<p style="line-height:1.7"><strong>User:</strong> ${full_name} (${uid})</p>
+                 <p style="line-height:1.7"><strong>AI Decision:</strong> needs_human (${aiResult.confidence}% confidence)</p>
+                 <p style="line-height:1.7"><strong>AI Reason:</strong> ${aiResult.reason}</p>
+                 ${details}`,
+                'REVIEW IN ADMIN PANEL',
+                (process.env.SITE_URL || 'https://hathor.casino') + '/admin.html'
+              )
+            ).catch(e => console.error('[KYC AI] admin notify error:', e.message));
+          }
+        } catch(e) { console.error('[KYC AI] admin notify error:', e.message); }
+      }
+    } catch(e) {
+      console.error('[KYC AI] auto-review failed for uid=' + uid + ':', e.message);
+      // On AI failure, KYC stays 'pending' — admin reviews manually (normal flow)
+    }
+  })();
 });
 
 // KYC statusas
@@ -3186,6 +3275,108 @@ app.post('/admin/kyc/reject/:uid',adminAuth,requirePerm('kyc.reject'),express.js
 app.delete('/admin/kyc/:uid', adminAuth, async (req,res)=>{
   await dbRun(`DELETE FROM kyc WHERE uid=$1`, [req.params.uid]);
   res.json({ok:true});
+});
+
+// ══════════════════════════════════════════════════════════
+// AI AUTOMATION — on-demand triggers (Content Factory, AML, Report)
+// ══════════════════════════════════════════════════════════
+
+// Re-run AI on a specific KYC submission (owner override)
+app.post('/admin/ai/kyc-rescan/:uid', adminAuth, async (req, res) => {
+  try {
+    const kyc = await dbGet(`SELECT uid, full_name, birth_date, country, id_type, id_front, id_back, selfie FROM kyc WHERE uid=$1`, [req.params.uid]);
+    if (!kyc) return res.status(404).json({ error: 'KYC not found' });
+    const result = await autoReviewKyc(kyc);
+    res.json(result);
+  } catch(e) {
+    console.error('[admin/ai/kyc-rescan]', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Run AML scan on-demand
+app.post('/admin/ai/aml-scan', adminAuth, async (req, res) => {
+  try {
+    const deps = await app.locals.aiDeps();
+    const flagged = await app.locals.runAmlScan(deps);
+    res.json({ ok: true, flagged_count: flagged.length, flagged });
+  } catch(e) {
+    console.error('[admin/ai/aml-scan]', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Generate daily report on-demand (emails admin)
+app.post('/admin/ai/daily-report', adminAuth, async (req, res) => {
+  try {
+    const deps = await app.locals.aiDeps();
+    await app.locals.generateDailyReport(deps);
+    res.json({ ok: true, sent_to: deps.adminEmail });
+  } catch(e) {
+    console.error('[admin/ai/daily-report]', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ══ CONTENT FACTORY ══
+// Generate marketing content on-demand: blog post, social media, email newsletter, promo copy
+app.post('/admin/ai/content', adminAuth, express.json(), async (req, res) => {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
+
+  const { type, topic, tone, length, language, extra } = req.body || {};
+  if (!type || !topic) return res.status(400).json({ error: 'type and topic required' });
+
+  const validTypes = ['blog_post', 'social_twitter', 'social_instagram', 'social_facebook', 'email_newsletter', 'promo_copy', 'landing_headline', 'seo_meta'];
+  if (!validTypes.includes(type)) return res.status(400).json({ error: 'invalid type. allowed: ' + validTypes.join(', ') });
+
+  const toneStr = tone || 'professional yet playful';
+  const langStr = language || 'English';
+  const lengthStr = length || 'medium';
+
+  const typePrompts = {
+    blog_post: `Write a ${lengthStr} blog post (500-800 words) about: ${topic}. Include an attention-grabbing headline, intro, 3-4 sections with subheadings, and a CTA to visit HATHOR Casino.`,
+    social_twitter: `Write 3 Twitter/X posts (max 280 chars each) about: ${topic}. Make them engaging, include 2-3 relevant hashtags, occasional emoji.`,
+    social_instagram: `Write an Instagram caption (150-250 words) about: ${topic}. Include 8-12 hashtags at the end, 1-2 emoji in text, call to action.`,
+    social_facebook: `Write a Facebook post (100-200 words) about: ${topic}. Engaging, conversational, 1-2 emoji, end with a question to drive engagement.`,
+    email_newsletter: `Write an email newsletter (subject line + body, 300-500 words) about: ${topic}. Subject line must be <50 chars and compelling. Body has a hook, 2-3 value points, CTA button text.`,
+    promo_copy: `Write promotional copy for a casino promotion about: ${topic}. Include: headline (<12 words), subheadline (<20 words), 3 bullet benefits, CTA button text. Urgency without being pushy.`,
+    landing_headline: `Write 5 landing page headline variants (each <12 words) for: ${topic}. Each should be distinct in angle (benefit-focused, curiosity, FOMO, social proof, outcome-focused).`,
+    seo_meta: `Write SEO meta tags for a page about: ${topic}. Include: title (50-60 chars), meta description (150-160 chars), 5 focus keywords.`
+  };
+
+  const systemPrompt = `You are HATHOR Casino's brand content writer. HATHOR is a premium online casino with Egyptian/royal aesthetic, Anjouan licensed, crypto-friendly (Bitcoin, Ethereum, etc.), featuring slots, table games, live dealer, and sports betting. Tone: ${toneStr}. Language: ${langStr}.
+Rules:
+- Comply with responsible gambling — never promise guaranteed wins
+- Include "18+" or age gating implicitly when relevant
+- No lies about odds, no pressure tactics
+- Brand voice: sophisticated, inviting, confident — not aggressive
+- Never include fake bonus codes — use placeholders like [CODE_HERE]`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5-20250929',
+        max_tokens: 2000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: typePrompts[type] + (extra ? `\n\nAdditional context: ${extra}` : '') }]
+      })
+    });
+    const data = await response.json();
+    if (data.error) return res.status(500).json({ error: data.error.message || 'AI error' });
+    const content = data.content?.[0]?.text || '';
+    console.log(`[Content Factory] admin generated ${type} about "${topic}" (${content.length} chars)`);
+    res.json({ ok: true, type, topic, content, usage: data.usage });
+  } catch(e) {
+    console.error('[Content Factory]', e.message);
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // ══════════════════════════════════════════════════════════
@@ -4975,4 +5166,19 @@ initDB().then(() => {
   setInterval(() => processWeeklyCashback().catch(console.error), 24 * 60 * 60 * 1000);
   // Schedule daily bonus push at 9 AM UTC
   scheduleNextDailyPush();
+
+  // ══ AI AUTOMATION ══
+  // Factory re-resolves adminEmail each run (so admin can change it live in settings)
+  const makeAiDeps = async () => {
+    const row = await dbGet(`SELECT value FROM settings WHERE key='admin_email'`).catch(()=>null);
+    const adminEmail = row?.value || process.env.SMTP_USER || null;
+    return { dbAll, dbGet, sendEmail, emailTpl, adminEmail };
+  };
+  scheduleAmlScans(makeAiDeps);          // hourly AML pattern detection
+  scheduleDailyReport(makeAiDeps);       // 9 AM UTC executive report
+
+  // Expose on-demand AI tools for admin (used by /admin/ai/* routes)
+  app.locals.aiDeps = makeAiDeps;
+  app.locals.runAmlScan = runAmlScan;
+  app.locals.generateDailyReport = generateDailyReport;
 });
