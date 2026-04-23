@@ -11547,6 +11547,7 @@ function ViktorFace({speaking, loading}){
 
 
 function AICroupier({user,currentPage,t=LANGS.en,open:openProp,onClose}){
+  const { theme: _viktorTheme } = (typeof useTheme === 'function') ? useTheme() : { theme: 'royal' };
   const [openLocal,setOpenLocal]=useState(false);
   const open=openProp!==undefined?openProp:openLocal;
   const setOpen=(v)=>{setOpenLocal(v);if(!v&&onClose)onClose();};
@@ -11621,7 +11622,7 @@ function AICroupier({user,currentPage,t=LANGS.en,open:openProp,onClose}){
     stopSpeaking();
     setMsgs(m=>[...m,{id:Date.now(),from:'player',text:msg}]);
     try{
-      const r=await fetch('/api/croupier',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({uid:user.uid,message:msg,context:currentPage})});
+      const r=await fetch('/api/croupier',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({uid:user.uid,message:msg,context:currentPage,theme:_viktorTheme})});
       const d=await r.json();
       setMsgs(m=>[...m,{id:Date.now()+1,from:'viktor',text:d.reply}]);
       if(!open)setHasNew(true);
