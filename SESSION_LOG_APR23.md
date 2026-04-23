@@ -2,9 +2,9 @@
 
 Darbas atliktas kol užėjai pas veterinarą.
 
-## 📦 Git commits (nuo `9b2c8e6` iki `2252585`)
+## 📦 Git commits (nuo `9b2c8e6` iki `cbc55a4`)
 
-Iš viso **6 commits**, visi push'inti į Railway:
+Iš viso **9 commits**, visi push'inti į Railway:
 
 | Commit | Trumpai |
 |---|---|
@@ -14,6 +14,8 @@ Iš viso **6 commits**, visi push'inti į Railway:
 | `3d9f6df` | Premium login page su ornate logo + Nile hero |
 | `5d1677f` | RTP kalibravimas → **96.51%** (2M spins simulation) |
 | `2252585` | Priestess dealer avatar casino-holdem, 3cp, blackjack |
+| `d4a8ac4` | Layout + payline coordinate bugfixes |
+| `cbc55a4` | Anticipation effect + Quick Spin + 7 audio cues |
 
 ---
 
@@ -37,6 +39,8 @@ Iš viso **6 commits**, visi push'inti į Railway:
 
 ### Vizualai
 - ✨ Ciniminis reel spin su staggered timing (800ms → 1600ms)
+- ✨ **Anticipation effect** — kai 2 scatters jau nukrito, reelai 3-5 sulėtėja +1.2s su auksiniu glow
+- ✨ **Quick Spin** (⚡ mygtukas) — trumpiau 300-620ms
 - ✨ Gilded reel frame overlay
 - ✨ Winning symbols pulsuoja su dim non-winners
 - ✨ Multi-color payline canvas (iki 20 vienu metu)
@@ -45,6 +49,16 @@ Iš viso **6 commits**, visi push'inti į Railway:
 - ✨ 60 physics-based golden coins particle sistema
 - ✨ Free Spins room keičia background į bonus chamber
 - ✨ Mobile responsive (desktop/mobile backgrounds)
+
+### Audio (7 Web Audio API sintezuoti efektai)
+- 🔊 Spin start whoosh
+- 🔊 Reel stop thunk (kiekvienam reelui)
+- 🔊 Anticipation rising tone (scatter build-up)
+- 🔊 Small win chime
+- 🔊 Big Win C-E-G-C arpeggio
+- 🔊 Mega Win 7-note ascending square
+- 🔊 Free Spins trigger 5-note sine arpeggio
+- 🔇 Mute toggle mygtukas
 
 ### UX
 - `Space` = spin
