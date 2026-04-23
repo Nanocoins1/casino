@@ -7,7 +7,9 @@ if(typeof fetch === 'undefined'){
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
-const { v4: uuidv4 } = require('uuid');
+// Use Node's built-in crypto.randomUUID() instead of uuid package
+// (uuid v14+ is ESM-only, breaks Node 18 CommonJS. crypto.randomUUID is native since 14.17)
+const uuidv4 = () => require('crypto').randomUUID();
 const multer = require('multer');
 const fs = require('fs');
 const crypto = require('crypto');
@@ -643,7 +645,7 @@ async function processCashback(uid) {
   u.tokens += cashbackAmt;
   await saveUser(u);
   // Log as bonus
-  const id = require('uuid').v4();
+  const id = uuidv4();
   await dbRun(`INSERT INTO bonuses(id,uid,type,amount,wagering_req,wagered,status,expires_at) VALUES($1,$2,$3,$4,0,0,$5,$6)`,
     [id, uid, 'cashback', cashbackAmt, 'completed', new Date().toISOString()]);
   return { cashbackAmt, level: lv.name };
@@ -1353,7 +1355,7 @@ app.post('/api/tokens/send', express.json(), async (req,res)=>{
   if(!deducted.rows.length) return res.status(400).json({error:'Insufficient balance'});
   await dbRun(`UPDATE users SET tokens=tokens+$1 WHERE uid=$2`, [amt, recipient.uid]);
   await dbRun(`INSERT INTO token_transfers(id,from_uid,to_uid,amount,note) VALUES($1,$2,$3,$4,$5)`,
-    [require('uuid').v4(), uid, recipient.uid, amt, req.body.note||null]);
+    [uuidv4(), uid, recipient.uid, amt, req.body.note||null]);
   // Notify recipient via socket if online
   try {
     const io = req.app.get('io');
