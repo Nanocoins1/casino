@@ -8738,12 +8738,12 @@ function AvatarModal({user,onClose,onUpdate,defaultTab}){
   return(
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" style={{maxWidth:tab==='inbox'?580:460,maxHeight:'92vh',overflowY:tab==='inbox'?'visible':'auto',padding:tab==='inbox'?'20px 20px 16px':'28px 28px 24px',transition:'max-width .2s,padding .2s',position:'relative'}} onClick={e=>e.stopPropagation()}>
-        {/* Close X button — always visible top-right */}
-        <button onClick={onClose} aria-label="Close" title="Close (ESC)"
-          style={{position:'absolute',top:12,right:12,width:32,height:32,borderRadius:8,background:'rgba(255,255,255,0.06)',border:'1px solid rgba(232,224,208,0.15)',color:'rgba(232,224,208,0.7)',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',fontSize:16,fontWeight:600,transition:'all .15s',zIndex:10}}
-          onMouseEnter={e=>{e.currentTarget.style.background='rgba(201,168,76,0.15)';e.currentTarget.style.borderColor='rgba(201,168,76,0.4)';e.currentTarget.style.color='#c9a84c';}}
-          onMouseLeave={e=>{e.currentTarget.style.background='rgba(255,255,255,0.06)';e.currentTarget.style.borderColor='rgba(232,224,208,0.15)';e.currentTarget.style.color='rgba(232,224,208,0.7)';}}
-        >✕</button>
+        {/* Close button — big, prominent, top-right — can't miss */}
+        <button onClick={onClose} aria-label="Close profile" title="Close (ESC)"
+          style={{position:'absolute',top:10,right:10,minWidth:42,height:42,padding:'0 14px',borderRadius:10,background:'linear-gradient(135deg,#c9a84c,#f0c060)',border:'1px solid rgba(201,168,76,0.6)',color:'#0a0806',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:6,fontSize:14,fontWeight:800,transition:'all .15s',zIndex:100,boxShadow:'0 4px 14px rgba(201,168,76,0.3)'}}
+          onMouseEnter={e=>{e.currentTarget.style.transform='scale(1.05)';e.currentTarget.style.boxShadow='0 6px 20px rgba(201,168,76,0.5)';}}
+          onMouseLeave={e=>{e.currentTarget.style.transform='';e.currentTarget.style.boxShadow='0 4px 14px rgba(201,168,76,0.3)';}}
+        >✕ <span style={{fontSize:11,letterSpacing:'0.08em'}}>UŽDARYTI</span></button>
         <h3 style={{marginBottom:16,marginRight:40}}>My Profile</h3>
 
         {/* Tabs */}
@@ -17232,7 +17232,7 @@ function App(){
         setPendingReward(null);
       }}/>}
       {showGuestModal&&<GuestModal onClose={()=>setShowGuestModal(false)}/>}
-      {showAvatar&&user&&<AvatarModal user={user} onClose={()=>{setShowAvatar(false);setProfileDefaultTab('profile');}} onUpdate={url=>setUser(u=>({...u,avatar:url}))} defaultTab={profileDefaultTab}/>}
+      {showAvatar&&user&&<AvatarModal user={user} onClose={()=>{setShowAvatar(false);setProfileDefaultTab('profile');}} onUpdate={(value,type)=>setUser(u=>type==='name'?({...u,name:value}):({...u,avatar:value}))} defaultTab={profileDefaultTab}/>}
       {showBonus&&user&&<DailyBonus onClose={()=>setShowBonus(false)} onClaim={amt=>bumpTokens(amt)} t={t}/>}
       {lvUp&&(
         <>
