@@ -167,9 +167,12 @@ async function dbRun(sql, params) {
 }
 
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'hathor2026';
-if(ADMIN_PASSWORD === 'hathor2026') {
-  console.warn('⚠️  WARNING: Using default ADMIN_PASSWORD. Set ADMIN_PASSWORD env var before real-money launch!');
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+if(!ADMIN_PASSWORD || ADMIN_PASSWORD.length < 16) {
+  console.error('❌ FATAL: ADMIN_PASSWORD env var missing or too weak (<16 chars).');
+  console.error('   Set a strong password in Railway env vars before starting.');
+  console.error('   Generate one: node -e "console.log(require(\'crypto\').randomBytes(24).toString(\'base64url\'))"');
+  process.exit(1);
 }
 
 // ── Admin Staff tables (migration safe) ───────────────────
@@ -189,14 +192,51 @@ function hasPerm(role, perm) {
   return perms.includes('*') || perms.includes(perm);
 }
 
-function hashAdminPw(pw) {
-  return crypto.createHash('sha256').update(pw + 'hathor_staff_2026').digest('hex');
+// Admin password hashing — scrypt with per-password salt
+// Format: "scrypt$<salt_hex>$<hash_hex>" — stored in admin_staff.password_hash
+// Legacy SHA256 format auto-migrated on first successful login (see authenticateAdmin)
+const { scryptSync } = require('crypto');
+function hashAdminPw(pw, saltHex) {
+  const salt = saltHex ? Buffer.from(saltHex, 'hex') : crypto.randomBytes(16);
+  const hash = scryptSync(pw, salt, 64);
+  return 'scrypt$' + salt.toString('hex') + '$' + hash.toString('hex');
+}
+function verifyAdminPw(pw, stored) {
+  if(!stored) return false;
+  // New format: scrypt
+  if(stored.startsWith('scrypt$')) {
+    const parts = stored.split('$');
+    if(parts.length !== 3) return false;
+    const saltHex = parts[1];
+    const expectedHash = Buffer.from(parts[2], 'hex');
+    const computed = scryptSync(pw, Buffer.from(saltHex, 'hex'), 64);
+    // Timing-safe comparison
+    if(computed.length !== expectedHash.length) return false;
+    return crypto.timingSafeEqual(computed, expectedHash);
+  }
+  // Legacy SHA256 fallback — for migration of old admins
+  const legacyHash = crypto.createHash('sha256').update(pw + 'hathor_staff_2026').digest('hex');
+  const legacyBuf = Buffer.from(legacyHash, 'hex');
+  const storedBuf = Buffer.from(stored, 'hex');
+  if(legacyBuf.length !== storedBuf.length) return false;
+  return crypto.timingSafeEqual(legacyBuf, storedBuf);
+}
+function isLegacyAdminHash(stored) {
+  return stored && !stored.startsWith('scrypt$');
+}
+// Constant-time string comparison (prevents timing attacks)
+function safeStrEqual(a, b) {
+  if(typeof a !== 'string' || typeof b !== 'string') return false;
+  const aBuf = Buffer.from(a);
+  const bBuf = Buffer.from(b);
+  if(aBuf.length !== bBuf.length) return false;
+  return crypto.timingSafeEqual(aBuf, bBuf);
 }
 
 // Middleware — accepts superadmin password OR valid staff token
 const adminAuth = async (req, res, next) => {
   const key = req.headers['x-admin-key'] || req.query.key;
-  if(key === ADMIN_PASSWORD) {
+  if(key && safeStrEqual(key, ADMIN_PASSWORD)) {
     req.adminRole = 'superadmin';
     req.adminUser = 'superadmin';
     return next();
@@ -2369,13 +2409,22 @@ app.post('/api/pf/blackjack', express.json(), async (req,res)=>{
 
 // ── STAFF AUTH ENDPOINTS ─────────────────────────────────
 
-// Staff login
+// Staff login — uses verifyAdminPw (scrypt + timingSafeEqual, legacy-compatible)
 app.post('/admin/staff/login', express.json(), async (req,res)=>{
   const {username,password} = req.body||{};
   if(!username||!password) return res.status(400).json({error:'Missing data'});
   const staff = await dbGet(`SELECT * FROM admin_staff WHERE username=$1 AND active=1`, [username]);
-  if(!staff || staff.password_hash !== hashAdminPw(password))
+  // verifyAdminPw handles both new (scrypt) and legacy (SHA256) hashes
+  if(!staff || !verifyAdminPw(password, staff.password_hash))
     return res.status(401).json({error:'Invalid username or password'});
+  // Auto-migrate legacy SHA256 hashes to scrypt on successful login
+  if(isLegacyAdminHash(staff.password_hash)) {
+    try {
+      const newHash = hashAdminPw(password);
+      await dbRun(`UPDATE admin_staff SET password_hash=$1 WHERE id=$2`, [newHash, staff.id]);
+      console.log(`[auth] Migrated admin ${staff.username} to scrypt hash`);
+    } catch(e) { console.error('[auth] Hash migration failed:', e.message); }
+  }
   const token = 'staff_' + crypto.randomBytes(32).toString('hex');
   const expires = new Date(Date.now()+12*3600000).toISOString().replace('T',' ').substring(0,19);
   await dbRun(`INSERT INTO admin_sessions(token,staff_id,role,username,expires_at) VALUES($1,$2,$3,$4,$5)`, [token,staff.id,staff.role,staff.username,expires]);
@@ -2691,7 +2740,8 @@ app.post('/api/auth/login', express.json(), async (req, res) => {
   if(!authRow) return res.status(401).json({error:'Invalid email or password'});
   try {
     const hash = await hashPwd(password, authRow.salt);
-    if(hash !== authRow.password_hash) return res.status(401).json({error:'Invalid email or password'});
+    // Timing-safe comparison (prevents timing attacks on password)
+    if(!safeStrEqual(hash, authRow.password_hash)) return res.status(401).json({error:'Invalid email or password'});
     const user = await getUser(authRow.uid);
     if(!user) return res.status(404).json({error:'Paskyra nerasta'});
     if(user.banned) return res.status(403).json({error:'This account is banned. Please contact support.'});
