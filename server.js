@@ -707,7 +707,12 @@ app.use(function(req,res,next){
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
     "font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net",
     "img-src 'self' data: blob: https: http:",
-    "connect-src 'self' wss: https: http://localhost:*",
+    // connect-src: needs blob: so THREE.js can fetch GLB textures via blob: URLs
+    "connect-src 'self' wss: https: http://localhost:* blob:",
+    // worker-src: model-viewer uses Web Workers via blob: for Draco/meshopt decoders
+    "worker-src blob: 'self'",
+    // child-src: fallback for worker-src in older browsers
+    "child-src blob: 'self'",
     "frame-src 'self' https://*.pragmaticplay.net https://*.spribegaming.com https://aviator-demo.spribegaming.com https://turbo.spribegaming.com https://demogamesfree.pragmaticplay.net https://demo.spribe.io https://tawk.to",
     "frame-ancestors 'self'",
     "base-uri 'self'",
