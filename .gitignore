@@ -4,3 +4,6 @@ node_modules/
 *.sqlite.bak
 .clone/
 .claude/worktrees/
+
+# Claude Code personal settings
+.claude/settings.local.json
