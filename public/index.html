@@ -817,29 +817,16 @@ body {
 }
 .card-suit { font-size: 22px; }
 
-/* Back face — deep black with gold diamond pattern */
+/* Back face — PREMIUM Eye of Horus design */
 .card-back {
   position: absolute; inset: 0; border-radius: 5px;
-  background: linear-gradient(135deg, #0a0800 0%, #1a1200 50%, #0a0800 100%);
-  border: 1px solid rgba(201,168,76,0.35);
+  background: #0a0820 url('/img/poker-premium/card-back.png') center/cover no-repeat;
+  border: 1px solid rgba(201,168,76,0.45);
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(201,168,76,0.15);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.75), inset 0 1px 0 rgba(201,168,76,0.2);
   overflow: hidden;
 }
-/* Diamond crosshatch pattern on back */
-.card-back::before {
-  content: ''; position: absolute; inset: 4px; border-radius: 3px;
-  border: 1px solid rgba(201,168,76,0.2);
-  background-image:
-    repeating-linear-gradient(45deg,  rgba(201,168,76,0.06) 0, rgba(201,168,76,0.06) 1px, transparent 0, transparent 50%),
-    repeating-linear-gradient(-45deg, rgba(201,168,76,0.06) 0, rgba(201,168,76,0.06) 1px, transparent 0, transparent 50%);
-  background-size: 8px 8px;
-}
-.card-back::after {
-  content: '♦'; font-size: 22px; color: rgba(201,168,76,0.35);
-  position: relative; z-index: 1;
-  text-shadow: 0 0 12px rgba(201,168,76,0.3);
-}
+.card-back::before,.card-back::after{display:none;}
 
 .card.sm { width: 48px; height: 68px; }
 .card.sm .card-rank    { font-size: 11px; top: 4px; left: 5px; }
