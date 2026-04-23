@@ -8666,7 +8666,12 @@ function AvatarModal({user,onClose,onUpdate,defaultTab}){
   },[tab,statsData]);
 
   const pick=e=>{const f=e.target.files[0];if(!f)return;setFile(f);setSelectedEmoji(null);const r=new FileReader();r.onload=ev=>setPreview(ev.target.result);r.readAsDataURL(f);};
-  const pickEmoji=em=>{setSelectedEmoji(em);setPreview(null);setFile(null);};
+  const pickEmoji=em=>{
+    setSelectedEmoji(em);setPreview(null);setFile(null);
+    // Auto-save avatar on pick — no need to click "Save" separately
+    socket.emit('updateAvatar',{avatarUrl:em});
+    if(onUpdate) onUpdate(em);
+  };
   const save=async()=>{
     if(selectedEmoji){
       // Store emoji as avatar
