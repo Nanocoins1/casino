@@ -7231,10 +7231,10 @@ window.Icon = Icon;
 <!-- 3. Cleopatra 3D Mascot -->
 <script type="text/babel">
 const CLEO_VARIANTS = [
-  { id:'v12', src:'/assets/cleopatra-bigwave-v2.glb',     label:'⭐',    name:'Hello',   animated:true,  tier:'featured' },
-  { id:'v13', src:'/assets/cleopatra-excitedwalk-v2.glb', label:'🎲 I',  name:'Excited', animated:true,  tier:'rotation' },
-  { id:'v7',  src:'/assets/cleopatra-dance-v2.glb',       label:'🎲 II', name:'Dance',   animated:true,  tier:'rotation' },
-  { id:'v1',  src:'/assets/cleopatra-v2.glb',             label:'🗿',    name:'Statue',  animated:false, tier:'rotation' },
+  { id:'v12', src:'/assets/cleopatra-bigwave-v3.glb',     label:'⭐',    name:'Hello',   animated:true,  tier:'featured' },
+  { id:'v13', src:'/assets/cleopatra-excitedwalk-v3.glb', label:'🎲 I',  name:'Excited', animated:true,  tier:'rotation' },
+  { id:'v7',  src:'/assets/cleopatra-dance-v3.glb',       label:'🎲 II', name:'Dance',   animated:true,  tier:'rotation' },
+  { id:'v1',  src:'/assets/cleopatra-v3.glb',             label:'🗿',    name:'Statue',  animated:false, tier:'rotation' },
 ];
 
 function Cleopatra({ height = 540 }) {
@@ -7365,14 +7365,11 @@ function Cleopatra({ height = 540 }) {
         disable-tap
         camera-orbit="90deg 90deg auto"
         field-of-view="35deg"
-        min-camera-orbit="auto auto auto"
-        max-camera-orbit="auto auto auto"
         min-field-of-view="35deg"
         max-field-of-view="35deg"
+        environment-image="neutral"
         exposure="1.0"
         shadow-intensity="1.0"
-        shadow-softness="0.5"
-        tone-mapping="neutral"
         style={{ width:'100%', height:'100%', background:'transparent', '--poster-color':'transparent', position:'relative', zIndex:1, touchAction:'none', pointerEvents:'none', userSelect:'none' }}
       />
 
