@@ -14527,6 +14527,7 @@ const GAME_META = {
 
 // ── DALL-E thumbnail vaizdų žemėlapis (Royal / default) ──
 const THUMB_MAP_ROYAL = {
+  pharaohs:    '/img/slot-pharaohs-gold/symbol-pharaoh.png',
   slots:       '/img/thumb-slots.webp',
   roulette:    '/img/thumb-roulette.webp',
   blackjack:   '/img/thumb-blackjack.webp',
@@ -15401,6 +15402,7 @@ function getGames(t){
   {name:(g.roulette&&g.roulette.title)||'Roulette',desc:(g.roulette&&g.roulette.desc)||'European wheel · 37 numbers',icon:'🎡',thumb:'roulette',badge:'🔴 LIVE',cat:'stalai',href:'/roulette.html',color:'linear-gradient(135deg,#1a0a00,#5c2a00)'},
   {name:(g.baccarat&&g.baccarat.title)||'Baccarat',desc:(g.baccarat&&g.baccarat.desc)||'Player, Banker or Tie',icon:'🎴',thumb:'baccarat',badge:'',cat:'stalai',href:'/baccarat.html',color:'linear-gradient(135deg,#001a2e,#003d6b)'},
   {name:(g.videoPoker&&g.videoPoker.title)||'Video Poker',desc:(g.videoPoker&&g.videoPoker.desc)||'Jacks or Better — up to 800×',icon:'🂡',thumb:'videopoker',badge:'✨ NEW',cat:'stalai',href:'/videopoker.html',color:'linear-gradient(135deg,#1a1a00,#4d4d00)'},
+  {name:"Pharaoh's Gold",desc:'Egyptian royal slot · Wild Hathor · Free Spins',icon:'𓂀',thumb:'pharaohs',badge:'✨ SIGNATURE',cat:'automatai',href:'/pharaohs-gold.html',color:'linear-gradient(135deg,#0a0820,#3d2e08)'},
   {name:(g.nexusSlots&&g.nexusSlots.title)||'NEXUS SLOTS',desc:(g.nexusSlots&&g.nexusSlots.desc)||'3D reels · particle effects · JACKPOT',icon:'🎰',thumb:'slots',badge:'🔥 HOT',cat:'automatai',href:'/nexus-slots.html',color:'linear-gradient(135deg,#1a0000,#660000)'},
   {name:(g.slotsClassic&&g.slotsClassic.title)||'Classic Slots',desc:(g.slotsClassic&&g.slotsClassic.desc)||'5 reels · 9 paylines · Crown 500× WILD 2000×',icon:'🎲',thumb:'slotsclassic',badge:'',cat:'automatai',href:'/slots.html',color:'linear-gradient(135deg,#0e0a02,#1c1608)'},
   {name:(g.keno&&g.keno.title)||'Keno',desc:(g.keno&&g.keno.desc)||'80-ball lottery',icon:'🎱',thumb:'keno',badge:'',cat:'automatai',href:'/keno.html',color:'linear-gradient(135deg,#00141a,#003d4d)'},
@@ -16351,6 +16353,7 @@ function App(){
     {id:'__div2'},
     {id:'__label2',label:t.sbGames||'GAMES'},
     {id:'__link_dragon_crash',icon:'🐉',img:'/img/icon-crash.png',label:(t.games&&t.games.dragonCrash&&t.games.dragonCrash.title)||'Dragon Crash',href:'/dragon-crash.html',badge:'NEW',badgeCls:'new'},
+    {id:'__link_pharaohs',icon:'𓂀',img:'/img/slot-pharaohs-gold/symbol-pharaoh.png',label:"Pharaoh's Gold",href:'/pharaohs-gold.html',badge:'SIGNATURE',badgeCls:'new'},
     {id:'__link_nexus',icon:'🎰',img:'/img/icon-slots.png',label:(t.games&&t.games.nexusSlots&&t.games.nexusSlots.title)||'NEXUS SLOTS',href:'/nexus-slots.html',badge:'NEW',badgeCls:'new'},
     {id:'__link_crash',icon:'🚀',img:'/img/icon-crash.png',label:(t.games&&t.games.crash&&t.games.crash.title)||'Crash',href:'/crash.html',badge:'HOT',badgeCls:'hot'},
     {id:'__link_slots',icon:'🎰',img:'/img/icon-slots.png',label:(t.games&&t.games.slotsClassic&&t.games.slotsClassic.title)||'Slots',href:'/slots.html'},
@@ -16915,6 +16918,7 @@ function App(){
             const fThumb = getThumbMap(theme);
             const featuredGames = [
               {href:'/dragon-crash.html', id:'dragon',    iconImg:'/img/icon-dragon.webp',    title:'Dragon Crash',  sub:'Fly high · Cash out in time'},
+              {href:'/pharaohs-gold.html',id:'pharaohs',  iconImg:'/img/slot-pharaohs-gold/symbol-pharaoh.png', title:"Pharaoh's Gold", sub:'Egyptian royal · Hathor Wild · Free Spins'},
               {href:'/nexus-slots.html',  id:'slots',     iconImg:'/img/icon-slots.png',     title:'NEXUS SLOTS',   sub:'3D Reels · Jackpot pool'},
               {href:'/wheel.html',        id:'wheel',     iconImg:'/img/icon-wheel.webp',     title:'NEXUS WHEEL',   sub:'3D Spin · Up to 50×'},
               {href:'/blackjack.html',    id:'blackjack', iconImg:'/img/icon-blackjack.png', title:'Blackjack',     sub:'21 · Hit, Stand, Double'},
