@@ -291,6 +291,61 @@ CREATE TABLE admin_actions_log (
 
 ---
 
+### Fazė 6 — NAŠUMAS IR UX
+
+---
+
+**✅ NAŠUMAS — GERAI:**
+
+| Metrika | Reikšmė | Būsena |
+|---|---|---|
+| `public/` dydis | 166 MB (~87% WebP) | ✅ Didieji assets suspausti |
+| `public/index.html` | 928 KB | ⚠️ Didokas, bet be būtinybės |
+| React build | Production 18.3.1 ✅ | ✅ (Phase 2) |
+| Preconnect/dns-prefetch hints | 8 | ✅ |
+| Service Worker | v4.9 | ✅ Stale-while-revalidate |
+| CSP su blob: | ✅ | (Phase 2) |
+| Mobile breakpoints | 15+ (320px–1024px) | ✅ |
+
+---
+
+**🟡 MEDIUM-08: 530KB inline Babel skriptas**
+- Problema: visas React JSX kodas vienoje `<script type="text/babel">`
+- Babel naršyklėje kompiliuoja kiekvieną kartą (production warning)
+- Poveikis: ~500ms-2s pridedamas puslapio boot'ui
+- **Sprendimas (ilgalaikis):** Vite arba webpack build pipeline
+- **Trumpalaikis sprendimas:** ignoruoti — veikia bet lėtai
+- Prioritetas: post-launch refactor
+
+---
+
+**🟡 MEDIUM-09: Lazy loading ne visur**
+- Tik 4 iš 28 `<img>` turi `loading="lazy"`
+- Poveikis: nematomi paveikslėliai vis tiek kraunasi iš karto
+- Sprendimas: pridėti `loading="lazy" decoding="async"` visiems ne-hero paveikslėliams
+- Prioritetas: LOW (performance win)
+
+---
+
+**🟠 HIGH-06: Nėra DB indexų**
+- Serverio kode rodo tik `PRIMARY KEY` ir `UNIQUE` (auto-indexed)
+- **Trūksta:** indexų dažniausioms query'ams:
+  - `game_log(uid, ts)` — dabar skaitomas kaip sequential scan
+  - `transactions(uid, created_at)`
+  - `sessions(uid)` — reikalingas logout
+  - `rg_limits(uid)` — jau PK ✅
+- Poveikis: 10-100× lėčiau kai >100k žaidimų
+- **Siūlymas:** DB migration pridėti index'us
+- Reikalauja DB schema pakeitimo → jūsų leidimo
+
+---
+
+**🟢 LOW-01: Sistemos cleanup reikalingas**
+- Rastas 7.8MB debug failas `public/images/cleo-texture.png` — ištrintas ✅
+- Dėl to dydis: 174M → 166M
+
+---
+
 **🟠 HIGH-02: npm pakete pažeidžiamumai (PATAISYTA)**
 - `nodemailer` <=8.0.4: SMTP command injection, DoS (4 CVEs)
 - `uuid` <14: buffer bounds check
