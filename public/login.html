@@ -27,8 +27,10 @@
 html,body{height:100%;}
 body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cream);
   display:flex;align-items:center;justify-content:center;min-height:100vh;
-  background-image:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(124,58,237,.15),transparent),
-    radial-gradient(ellipse 60% 40% at 80% 80%,rgba(240,192,96,.06),transparent);}
+  background-image:
+    linear-gradient(to bottom, rgba(4,4,10,0.72) 0%, rgba(10,8,32,0.85) 100%),
+    url('/img/brand/hero-loading.png');
+  background-size:cover;background-position:center;background-attachment:fixed;}
 
 /* Card */
 .card{width:100%;max-width:440px;padding:0 20px;}
@@ -133,8 +135,9 @@ body{background:var(--bg);font-family:'Space Grotesk',sans-serif;color:var(--cre
 <div class="lang-wrap"><div class="lang-bar" id="langBar"></div></div>
 <div class="card">
   <div class="logo-wrap">
-    <div class="logo">⬡ HATHOR</div>
-    <div class="logo-sub">ROYAL CASINO</div>
+    <img src="/img/brand/logo-ornate.png" alt="HATHOR Casino" style="width:min(300px,80%);height:auto;display:block;margin:0 auto;filter:drop-shadow(0 4px 24px rgba(201,168,76,0.4));" onerror="this.style.display='none';this.nextElementSibling.style.display='block';this.nextElementSibling.nextElementSibling.style.display='block';"/>
+    <div class="logo" style="display:none;">⬡ HATHOR</div>
+    <div class="logo-sub" style="margin-top:10px;">EGYPTIAN ROYAL CASINO</div>
   </div>
 
   <div class="panel">
