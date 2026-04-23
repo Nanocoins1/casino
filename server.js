@@ -1720,12 +1720,15 @@ app.post('/api/croupier', express.json(), async (req,res)=>{
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if(!apiKey) return res.json({reply:'Viktor is currently unavailable.'});
 
-  // Gather rich context
+  // ═══ Gather RICH DB context (Viktor v3 — full player awareness) ═══
   const u = await getUser(uid) || {name:'Guest', tokens:0, level:1, xp:0, games_played:0};
-  const logs = await dbAll(`SELECT game,bet,result,won FROM game_log WHERE uid=$1 ORDER BY ts DESC LIMIT 5`, [uid]).catch(()=>[]);
+
+  // Recent 5 games
+  const logs = await dbAll(`SELECT game,bet,result,won,ts FROM game_log WHERE uid=$1 ORDER BY ts DESC LIMIT 5`, [uid]).catch(()=>[]);
   const recentGames = logs.length
     ? logs.map(l => `${l.game}${l.won?' WIN':' loss'} (bet ${l.bet})`).join(', ')
     : 'no recent plays';
+
   // Net result today
   const todayStart = new Date(); todayStart.setUTCHours(0,0,0,0);
   const todayRow = await dbGet(
@@ -1737,6 +1740,48 @@ app.post('/api/croupier', express.json(), async (req,res)=>{
                     : todayNet > 0 ? 'slightly ahead today'
                     : todayNet > -2000 ? 'roughly breaking even'
                     : 'having a rough session (behind today)';
+
+  // KYC status (critical for withdraws)
+  const kycRow = await dbGet(`SELECT status, submitted_at, rejection_reason FROM kyc WHERE uid=$1`, [uid]).catch(()=>null);
+  const kycStatus = kycRow?.status || 'unverified';
+
+  // Pending/recent deposits (NOWPayments in flight)
+  const pendingDep = await dbAll(
+    `SELECT currency, amount_tokens, status, created_at FROM transactions
+     WHERE uid=$1 AND type='deposit' AND status NOT IN ('finished','completed','expired','failed')
+     ORDER BY created_at DESC LIMIT 3`, [uid]).catch(()=>[]);
+  const pendingDeposits = pendingDep.length
+    ? pendingDep.map(d => {
+        const mins = Math.round((Date.now() - new Date(d.created_at).getTime()) / 60000);
+        return `${d.amount_tokens} tokens (${d.currency}) status=${d.status}, ${mins}min ago`;
+      }).join('; ')
+    : 'none pending';
+
+  // Pending withdrawals
+  const pendingWd = await dbGet(
+    `SELECT amount_tokens, currency, created_at FROM transactions
+     WHERE uid=$1 AND type='withdrawal' AND status='pending' ORDER BY created_at DESC LIMIT 1`, [uid]).catch(()=>null);
+  const pendingWithdraw = pendingWd
+    ? `${pendingWd.amount_tokens} tokens (${pendingWd.currency}) awaiting admin approval`
+    : 'none';
+
+  // Active bonuses + wagering progress
+  const activeBonus = await dbGet(
+    `SELECT type, amount, wagering_req, wagered FROM bonuses
+     WHERE uid=$1 AND status='active' ORDER BY created_at DESC LIMIT 1`, [uid]).catch(()=>null);
+  const bonusInfo = activeBonus
+    ? `${activeBonus.type} bonus of ${activeBonus.amount} tokens, wagering ${activeBonus.wagered}/${activeBonus.wagering_req}`
+    : 'no active bonuses';
+
+  // Responsible gambling limits (if any)
+  const rgRow = await dbGet(`SELECT * FROM rg_limits WHERE uid=$1`, [uid]).catch(()=>null);
+  const rgStatus = rgRow
+    ? [rgRow.daily_deposit_limit && `dep limit ${rgRow.daily_deposit_limit}`,
+       rgRow.daily_loss_limit && `loss limit ${rgRow.daily_loss_limit}`,
+       rgRow.self_exclusion_until && new Date(rgRow.self_exclusion_until) > new Date() && 'SELF-EXCLUDED',
+       rgRow.cool_off_until && new Date(rgRow.cool_off_until) > new Date() && 'COOL-OFF PERIOD'
+      ].filter(Boolean).join(', ') || 'no limits set'
+    : 'no limits set';
 
   const lv = getLvInfo(u.xp || 0);
   const jackpot = await getJackpot();
@@ -1757,15 +1802,27 @@ app.post('/api/croupier', express.json(), async (req,res)=>{
 CHARACTER:
 ${tone}
 
-YOU REMEMBER this specific player's session and react to it:
+YOU HAVE LIVE ACCESS to this player's account (use this data to give specific, helpful answers):
 - Name: ${u.name}
 - VIP Level: ${lv.name} ${lv.emoji} (${u.xp||0} XP)
 - Balance: ${(u.tokens||0).toLocaleString()} tokens (1 token = €0.01)
 - Games played total: ${u.games_played||0}
-- Recent plays: ${recentGames}
-- Today's mood: ${sessionMood}
+- Recent 5 plays: ${recentGames}
+- Today's session mood: ${sessionMood}
 - Jackpot pool: ${jackpot.toLocaleString()} tokens
-- Current context: ${context || 'lobby'}
+- KYC status: ${kycStatus}${kycRow?.rejection_reason ? ' (rejected: ' + kycRow.rejection_reason + ')' : ''}
+- Pending deposits: ${pendingDeposits}
+- Pending withdrawals: ${pendingWithdraw}
+- Active bonus: ${bonusInfo}
+- Responsible gambling: ${rgStatus}
+- Current app context: ${context || 'lobby'}
+
+USE THIS DATA IN YOUR RESPONSES. Examples:
+- "Where is my deposit?" → check Pending deposits above, give specific status
+- "Is my KYC approved?" → check KYC status, explain current state
+- "Can I withdraw?" → check balance + KYC + limits, answer accurately
+- "Did I claim bonus?" → check Active bonus, explain wagering progress
+- NEVER make up data — only use what's listed above
 
 YOUR RESPONSIBILITIES:
 1. Keep replies SHORT (1-3 sentences, maximum 4)
