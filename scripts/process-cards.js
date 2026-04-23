@@ -20,6 +20,11 @@ const OUTPUT_DIR  = path.join(__dirname, '..', 'public', 'img', 'cards');
 const BLACK_THRESHOLD = 25; // pixels with all RGB below this = "black background"
 const MARGIN_PAD = 8;       // add small margin around detected card
 
+// Check if pixel is gold-ish (high R, high G, B noticeably lower)
+function isGoldPixel(r, g, b) {
+  return r > 130 && g > 100 && r > b + 40 && g > b + 20;
+}
+
 async function detectCardBounds(filepath) {
   // Read raw pixels
   const { data, info } = await sharp(filepath)
@@ -28,19 +33,15 @@ async function detectCardBounds(filepath) {
 
   const { width: w, height: h, channels } = info;
 
-  // Find bounding box of non-black pixels
+  // ─── PASS 1: find non-black bounding box (the card body) ───
   let minX = w, maxX = 0, minY = h, maxY = 0;
   let foundAny = false;
 
-  // Sample every 2nd pixel for speed
   for (let y = 0; y < h; y += 2) {
     for (let x = 0; x < w; x += 2) {
       const idx = (y * w + x) * channels;
-      const r = data[idx];
-      const g = data[idx + 1];
-      const b = data[idx + 2];
-      const isNonBlack = r > BLACK_THRESHOLD || g > BLACK_THRESHOLD || b > BLACK_THRESHOLD;
-      if (isNonBlack) {
+      const r = data[idx], g = data[idx + 1], b = data[idx + 2];
+      if (r > BLACK_THRESHOLD || g > BLACK_THRESHOLD || b > BLACK_THRESHOLD) {
         if (x < minX) minX = x;
         if (x > maxX) maxX = x;
         if (y < minY) minY = y;
@@ -49,33 +50,67 @@ async function detectCardBounds(filepath) {
       }
     }
   }
-
   if (!foundAny) throw new Error('No non-black pixels found');
 
-  // Apply margin padding, clamp to image bounds
-  minX = Math.max(0, minX - MARGIN_PAD);
-  minY = Math.max(0, minY - MARGIN_PAD);
-  maxX = Math.min(w - 1, maxX + MARGIN_PAD);
-  maxY = Math.min(h - 1, maxY + MARGIN_PAD);
+  // ─── PASS 2: tighten each edge to where gold frame starts ───
+  // Scan inward from each edge of the card body along a middle line,
+  // looking for the row/column where gold pixels dominate (>= 20% of line).
+  const centerX = Math.floor((minX + maxX) / 2);
+  const centerY = Math.floor((minY + maxY) / 2);
 
-  // Important: crop should NOT include the watermark area.
-  // Watermark sits in BOTTOM-RIGHT of the FULL image.
-  // Since the card is centered with black margin, if the card's
-  // right edge is LESS than (w - watermark zone), we're fine.
-  // But if the detected card happens to extend all the way right
-  // (e.g., because watermark pixels exceed threshold), we trim.
-  const watermarkZone = Math.floor(Math.max(w, h) * 0.05); // 5% corner
-  if (maxX > w - watermarkZone && maxY > h - watermarkZone) {
-    // Card extends into watermark corner — shrink slightly
-    maxX = Math.min(maxX, w - watermarkZone);
-    maxY = Math.min(maxY, h - watermarkZone);
+  const isGoldDominantRow = (y, fromX, toX) => {
+    let goldCount = 0, total = 0;
+    const step = Math.max(1, Math.floor((toX - fromX) / 100));
+    for (let x = fromX; x <= toX; x += step) {
+      const idx = (y * w + x) * channels;
+      if (isGoldPixel(data[idx], data[idx + 1], data[idx + 2])) goldCount++;
+      total++;
+    }
+    return total > 0 && goldCount / total >= 0.2;
+  };
+  const isGoldDominantCol = (x, fromY, toY) => {
+    let goldCount = 0, total = 0;
+    const step = Math.max(1, Math.floor((toY - fromY) / 100));
+    for (let y = fromY; y <= toY; y += step) {
+      const idx = (y * w + x) * channels;
+      if (isGoldPixel(data[idx], data[idx + 1], data[idx + 2])) goldCount++;
+      total++;
+    }
+    return total > 0 && goldCount / total >= 0.2;
+  };
+
+  // Find top edge of gold frame (scan down from minY)
+  let goldTop = minY;
+  for (let y = minY; y < centerY; y++) {
+    if (isGoldDominantRow(y, minX, maxX)) { goldTop = y; break; }
+  }
+  // Find bottom edge of gold frame (scan up from maxY)
+  let goldBottom = maxY;
+  for (let y = maxY; y > centerY; y--) {
+    if (isGoldDominantRow(y, minX, maxX)) { goldBottom = y; break; }
+  }
+  // Find left edge (scan right from minX)
+  let goldLeft = minX;
+  for (let x = minX; x < centerX; x++) {
+    if (isGoldDominantCol(x, minY, maxY)) { goldLeft = x; break; }
+  }
+  // Find right edge (scan left from maxX)
+  let goldRight = maxX;
+  for (let x = maxX; x > centerX; x--) {
+    if (isGoldDominantCol(x, minY, maxY)) { goldRight = x; break; }
   }
 
+  // Sanity fallback: if gold detection failed on any edge, use non-black bounds
+  if (goldTop >= centerY)    goldTop = minY;
+  if (goldBottom <= centerY) goldBottom = maxY;
+  if (goldLeft >= centerX)   goldLeft = minX;
+  if (goldRight <= centerX)  goldRight = maxX;
+
   return {
-    left: minX,
-    top: minY,
-    width: maxX - minX,
-    height: maxY - minY,
+    left: goldLeft,
+    top: goldTop,
+    width: goldRight - goldLeft,
+    height: goldBottom - goldTop,
     origW: w, origH: h
   };
 }
