@@ -775,7 +775,17 @@ const SUITS=['♠','♥','♦','♣'],RANKS=['2','3','4','5','6','7','8','9','10
 const VV={'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14};
 const RED=new Set(['♥','♦']);
 const createDeck=()=>SUITS.flatMap(s=>RANKS.map(r=>({suit:s,rank:r,value:VV[r],red:RED.has(s)})));
-const shuffle=arr=>{const d=[...arr];for(let i=d.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[d[i],d[j]]=[d[j],d[i]];}return d;};
+// Crypto-secure Fisher-Yates shuffle (required for fair poker, Anjouan compliance).
+// Math.random() is NOT cryptographically secure and can be predicted.
+const shuffle=arr=>{
+  const d=[...arr];
+  for(let i=d.length-1;i>0;i--){
+    // crypto.randomInt is uniform & unpredictable (since Node 14.10)
+    const j=crypto.randomInt(0, i+1);
+    [d[i],d[j]]=[d[j],d[i]];
+  }
+  return d;
+};
 
 function evalHand(cards){
   if(cards.length<5)return{score:0,name:'N/A'};
@@ -1201,9 +1211,10 @@ app.post('/api/jackpot-win', express.json(), async (req,res)=>{
   pendingGameBets.delete(betId);
 
   // Server-side win check (3-in-10000 chance on qualifying bets of 500+ tokens)
+  // Using crypto.randomInt for unpredictability (required for real-money gambling)
   const qualifies = pending.amount >= 500;
-  const roll = Math.random();
-  if(!qualifies || roll > 0.0003) {
+  const roll = crypto.randomInt(0, 10000); // integer in [0, 9999]
+  if(!qualifies || roll >= 3) {
     return res.json({ ok:true, won:false });
   }
 

@@ -114,6 +114,65 @@ Lygio sistema:
 
 ---
 
+### Fazė 4 — RNG ir PROVABLY FAIR
+
+---
+
+**🔴 CRITICAL-05: Poker shuffle naudojo Math.random() (PATAISYTA)**
+- Failas: `server.js:778`
+- Problema: `Math.random()` nėra kriptografiškai saugus —
+  gali būti prognozuojamas. Anjouan licencijai reikalingas crypto RNG
+  visuose statomuose rezultatuose.
+- **PATAISYTA:** pakeista į `crypto.randomInt(0, i+1)` (Fisher-Yates)
+- Paveikia: visas poker (Texas Hold'em, Premium Poker, Casino Hold'em)
+
+---
+
+**🔴 CRITICAL-06: Jackpot roll naudojo Math.random() (PATAISYTA)**
+- Failas: `server.js:1205`
+- Problema: Jackpot win chance (3/10000) skaičiuojamas su `Math.random()`
+- **PATAISYTA:** `crypto.randomInt(0, 10000)` (uniform, unpredictable)
+
+---
+
+**✅ Provably Fair implementacija — TEISINGA:**
+
+- Server seed: `crypto.randomBytes(32)` (256 bitai entropijos) ✅
+- Seed hash: SHA256 ✅ (rodomas žaidėjui prieš rundą)
+- Combined formula: `${serverSeed}:${clientSeed}:${nonce}` ✅
+- Result: HMAC-SHA256 ✅ (industry standard)
+- Seeds per user laikomi memory + DB audit
+- Client seed: žaidėjas gali pakeisti ✅
+- Nonce: didinamas kiekvieną rundą ✅
+- Rotate endpoint: `/api/provably-fair/rotate` ✅ (nauja server seed)
+- Verify endpoint: `/api/provably-fair/verify` ✅
+
+**🟡 MEDIUM-05: Modulo bias `generateResult`**
+- Failas: `server.js:2210-2212`
+- Problema: `parseInt(hmac.slice(0,8), 16) % max` įveda švelnų bias
+  kai `max` nėra 2 laipsnis (pvz. 37 ruletei).
+- Poveikis: **labai mažas** — rekomenduojama pataisyti jei Anjouan auditoriai paprašys strict uniform
+- Sprendimas: rejection sampling (uint32 range, reject values ≥ floor(max_u32/N)*N)
+- Prioritetas: LOW — dauguma provably fair casino naudoja tokį patį approach
+
+---
+
+**🟠 HIGH-03: Custom žaidimai (React) nenaudoja secure API**
+- Failai: `public/index.html` (slots, roulette, blackjack)
+- Problema: 71 `Math.random()` naudojimai frontend'e. Žaidimų rezultatai
+  skaičiuojami **client-side** — žaidėjas su browser'io DevTools gali
+  manipuliuoti.
+- **Dabar BE REALIŲ PINIGŲ** šitas nežalinga (tik displayed tokens).
+- **Jei pradėsim realų money žaidimą** su šiais custom games — kritinė saugumo spraga.
+- **Sprendimas:**
+  - **A (rekomenduojama):** Pereiti prie AXIS/Slotegrator žaidimų —
+    providerių serveriai apskaičiuoja rezultatus, mūsų platforma tik rodo
+  - **B:** Migrate custom games į `/api/game/bet` + `/api/game/settle`
+    ~ 1-2 savaitės darbo
+- Būsena: dokumentuota, sprendimas priklauso nuo verslo sprendimo apie AXIS
+
+---
+
 **🟠 HIGH-02: npm pakete pažeidžiamumai (PATAISYTA)**
 - `nodemailer` <=8.0.4: SMTP command injection, DoS (4 CVEs)
 - `uuid` <14: buffer bounds check
