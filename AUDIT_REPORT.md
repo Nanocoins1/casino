@@ -173,6 +173,124 @@ Lygio sistema:
 
 ---
 
+### Fazė 5 — ANJOUAN LICENCIJOS ATITIKIMAS
+
+---
+
+**✅ RESPONSIBLE GAMBLING — VISKAS YRA:**
+
+| Funkcija | Būsena | Detalės |
+|---|---|---|
+| Self-exclusion | ✅ | `rg_limits.self_exclusion_until`, patikrinama per Socket.io |
+| Cool-off period | ✅ | `rg_limits.cool_off_until` |
+| Deposit limits (dienos) | ✅ | `daily_deposit_limit` |
+| Loss limits (dienos) | ✅ | `daily_loss_limit` |
+| Bet limits (dienos) | ✅ | `daily_bet_limit` |
+| Session time limits | ✅ | `session_limit_minutes` |
+| Kelti limitą 24h lag | ✅ | `isRaising()` logic |
+| Help lines (BeGambleAware) | ✅ | `public/responsible.html` |
+| LT lokalus helpline 116 123 | ✅ | Disclaimer'iuose |
+
+---
+
+**✅ KYC (Know Your Customer):**
+
+| Funkcija | Būsena | Detalės |
+|---|---|---|
+| Dokumento upload (ID) | ✅ | `public/kyc.html` + `/api/kyc` |
+| Proof of address | ✅ | |
+| Selfie with document | ✅ | |
+| Admin review workflow | ✅ | `/admin/kyc/approve`, `/admin/kyc/reject` |
+| Status tracking | ✅ | pending / approved / rejected |
+| Reject reason | ✅ | Email sent to user |
+| Required before withdrawal | ⚠️ | **Patikrinti** jei blokuoja withdraw |
+
+---
+
+**✅ AML (Anti-Money Laundering):**
+
+| Funkcija | Būsena |
+|---|---|
+| AML policy puslapis | ✅ `public/aml.html` |
+| Transakcijų sekimas | ✅ `transactions` lentelė |
+| Suspicious activity flag | ⚠️ Reikia implementuoti (big deposit → fast withdraw detection) |
+
+---
+
+**✅ AGE VERIFICATION:**
+- 18+ gate per `localStorage.age_verified`
+- Rodomas prieš main app
+- Check'inamas app startup'e (`ageVerified` state)
+
+---
+
+**✅ COMPLIANCE PAGES:**
+
+| Puslapis | Failas |
+|---|---|
+| Terms & Conditions | `public/terms.html` |
+| Privacy Policy | `public/privacy.html` |
+| AML Policy | `public/aml.html` |
+| Responsible Gambling | `public/responsible.html` |
+| Provably Fair | `public/provably-fair.html` |
+
+---
+
+**✅ GDPR / Cookies:**
+- Cookie consent banner (`COOKIE_KEY='hrc_cookie_consent'`)
+- Consent granulus: essential / analytics / marketing
+- Tawk.to respect'uoja consent pasirinkimą
+
+---
+
+**🟠 HIGH-04: Nėra audit log'ų administracinių veiksmų**
+- Problema: admin KYC approve/reject, balance adjustments,
+  withdrawal approvals neturi dedicated audit lentelės
+- Dalinis: `game_log` (plays), `transactions` (deposits), `provably_fair` (rounds)
+- Trūksta: `admin_actions_log` su (admin_uid, action, target_uid, old/new values, ip, user_agent, ts)
+- Reikalauja DB schema pakeitimo — 🟡 jūsų leidimo
+- Anjouan tipiškai reikalauja audit trail visoms administracinėms operacijoms
+
+**Siūlomas sprendimas:**
+```sql
+CREATE TABLE admin_actions_log (
+  id SERIAL PRIMARY KEY,
+  admin_uid TEXT NOT NULL,
+  action TEXT NOT NULL, -- 'kyc_approve', 'kyc_reject', 'balance_adjust', etc.
+  target_uid TEXT,
+  old_value JSONB,
+  new_value JSONB,
+  ip TEXT,
+  user_agent TEXT,
+  ts TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+---
+
+**🟠 HIGH-05: Nėra prisijungimo audit trail**
+- Problema: Nėra lentelės `login_attempts` su IP, UA, success/fail
+- Anjouan tipiškai reikalauja tracking'o
+- **Siūlomas sprendimas:** pridėti `login_attempts` lentelę + logginti
+
+---
+
+**🟡 MEDIUM-06: Anjouan licencijos NUMERIS nepridėtas**
+- Matyti tik "ANJOUAN" tekstas footer'iuose (įskaitant 11 kalbų disclaimer)
+- Trūksta tikro **licencijos numerio** su OpenGaming watermark / seal
+- Sprendimas: pridėti nr į footer + env var `ANJOUAN_LICENSE_NUMBER`
+- Prioritetas: kai gausite numerį (pagal PROGRESS.md dar laukiama)
+
+---
+
+**🟡 MEDIUM-07: AML suspicious pattern detection**
+- Nėra logic'os kuri flagina: didelis deposit → greitas withdraw be žaidimo
+- Anjouan prašo aktyvaus transaction monitoring
+- Sprendimas: Cron job scan'inti `transactions` + `game_log`, pridėti
+  flag stulpelį + admin alerts
+
+---
+
 **🟠 HIGH-02: npm pakete pažeidžiamumai (PATAISYTA)**
 - `nodemailer` <=8.0.4: SMTP command injection, DoS (4 CVEs)
 - `uuid` <14: buffer bounds check
