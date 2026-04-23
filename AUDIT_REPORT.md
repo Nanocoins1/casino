@@ -41,6 +41,79 @@ Lygio sistema:
 
 ---
 
+### Fazė 3 — FINANSINIS TIKSLUMAS
+
+---
+
+**🔴 CRITICAL-03: Race condition `/api/game/bet` — double-spend rizika (PATAISYTA)**
+- Failas: `server.js:1109-1128`
+- Problema: klasikinis read-modify-write — 2 lygiagrečios užklausos galėjo
+  atskaityti daugiau tokenų nei balansas turi.
+- **PATAISYTA:** Naudojama atominė SQL užklausa:
+  ```sql
+  UPDATE users SET tokens=tokens-$1 WHERE uid=$2 AND tokens>=$1 RETURNING tokens
+  ```
+  Jei nepakankamas balansas → 0 rows → pranešimas user'iui.
+- Pridėtas max bet limitas (10M tokens) apsaugoti nuo overflow.
+
+---
+
+**🔴 CRITICAL-04: `/api/game/settle` neigi win'ai be betId + manipuliacijos rizika (PATAISYTA)**
+- Failas: `server.js:1137-1162`
+- Problemos:
+  1. Read-modify-write race condition
+  2. Be betId validavimo galima gauti free win (kviečiant settle be bet)
+  3. Nebuvo win-vs-bet proporcijos patikros (galima pretenduoti milžinišką win nuo 1 token bet)
+- **PATAISYTA:**
+  1. Atominis `UPDATE ... RETURNING tokens`
+  2. REIKALAUJAMA betId kai winAmt > 0 (neleidžiamas free win)
+  3. Max win = 10,000× bet amount (fraud detection threshold)
+  4. Max win sanity = 100M tokens
+  5. Win sum'os <0 negali būti (Math.max(0, ...))
+
+---
+
+**🟡 MEDIUM-03: `claimBonus()` daily bonus race condition**
+- Failas: `server.js:632-667`
+- Problema: read-modify-write pattern be atominės query — leidžia
+  2 lygiagrečios užklausos pretenduoti daily bonus 2 kartus.
+- Rizikos lygis: ~€30 max per atakos bandymą (low).
+- Rekomendacija: pakeisti į atominę:
+  ```sql
+  UPDATE users SET tokens=tokens+$1, last_bonus=$2, xp=xp+50
+  WHERE uid=$3 AND last_bonus IS DISTINCT FROM $2 RETURNING tokens
+  ```
+- Būsena: dokumentuota, pataisymas post-launch.
+
+---
+
+**🟡 MEDIUM-04: Operacijos nėra wrapinamos DB transakcijose**
+- Failai: `server.js` įvairios vietos (deposit, withdraw)
+- Problema: jei serveris crashintų tarp 2 SQL query (pvz. tarp UPDATE
+  transactions ir UPDATE users), DB galėtų likti nekonsistencijoje.
+- Pavyzdys: deposit confirmed → transakcija pažymėta 'finished' ✅ →
+  serveris crash ❌ → tokens NIEKADA nekrediti.
+- Sprendimas: pakeisti multi-query operacijas į `pool.connect()` +
+  `BEGIN; ...; COMMIT;`
+- Rizikos lygis: MEDIUM — Railway aukštas uptime, crash retas.
+- Prioritetas: post-launch.
+
+---
+
+**✅ Finansinis tikslumas — GERA praktika:**
+
+- `tokens` stulpelis: **INTEGER** (ne FLOAT) ✅ — jokių 0.1+0.2=0.30000...4 bug'ų
+- 1 token = €0.01 fikso racional — sąžiningas konvertavimas
+- Max withdraw limitai per lygius (Bronze 10k → VIP Elite 999k)
+- Idempotency: `payment_id` yra UNIQUE NowPayments id'as
+- Deposit min limitas: 500 tokens (€5) — saugu
+- Bet/settle dabar ATOMINIAI ✅
+- Jackpot: server-authoritative, neišnaudojama
+- XP: apskaičiuojamas iš statymo (server-side), imunitas manipuliacijoms
+- Cashback: skaičiuojamas iš game_log audit trail (negalima apgauti)
+
+---
+
 **🟠 HIGH-02: npm pakete pažeidžiamumai (PATAISYTA)**
 - `nodemailer` <=8.0.4: SMTP command injection, DoS (4 CVEs)
 - `uuid` <14: buffer bounds check

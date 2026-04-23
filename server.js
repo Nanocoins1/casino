@@ -1113,18 +1113,24 @@ app.post('/api/game/bet', express.json(), async (req,res) => {
   const { amount, game } = req.body||{};
   const bet = parseInt(amount)||0;
   if(bet <= 0) return res.status(400).json({error:'Invalid bet'});
-  const user = await getUser(uid);
-  if(!user) return res.status(400).json({error:'User not found'});
-  if((user.tokens||0) < bet) return res.status(400).json({error:'Insufficient balance'});
-  user.tokens = (user.tokens||0) - bet;
-  await saveUser(user);
+  // Sanity: max single bet (prevents overflow, aligns with responsible gambling)
+  if(bet > 10_000_000) return res.status(400).json({error:'Bet exceeds maximum'});
+  // ATOMIC bet deduction — prevents race condition double-spend
+  // Uses UPDATE ... WHERE tokens >= $1 RETURNING tokens
+  // If balance insufficient, no rows affected → null return
+  const updated = await dbGet(
+    `UPDATE users SET tokens=tokens-$1 WHERE uid=$2 AND tokens>=$1 RETURNING tokens`,
+    [bet, uid]
+  );
+  if(!updated) return res.status(400).json({error:'Insufficient balance'});
+  const newBalance = parseInt(updated.tokens||0);
   const betId = uuidv4();
   pendingGameBets.set(betId, {uid, amount:bet, game:game||'unknown', ts:Date.now()});
   // Cleanup bets older than 10 min
   for(const [id,b] of pendingGameBets) if(Date.now()-b.ts>600000) pendingGameBets.delete(id);
   // Emit balance update to any open lobby socket
-  if(sockets[uid]) sockets[uid].socket.emit('balanceSync',{tokens:user.tokens});
-  res.json({ok:true, betId, balance:user.tokens});
+  if(sockets[uid]) sockets[uid].socket.emit('balanceSync',{tokens:newBalance});
+  res.json({ok:true, betId, balance:newBalance});
 });
 
 // POST /api/game/settle — credit win after game ends
@@ -1133,15 +1139,34 @@ app.post('/api/game/settle', express.json(), async (req,res) => {
   const uid = await checkSession(token);
   if(!uid) return res.status(401).json({error:'Unauthorized'});
   const { betId, won, game } = req.body||{};
-  const winAmt = parseInt(won)||0;
+  const winAmt = Math.max(0, parseInt(won)||0);
+  // Sanity: max single win (prevents overflow + fraud detection threshold)
+  if(winAmt > 100_000_000) return res.status(400).json({error:'Win amount exceeds maximum'});
   const pending = betId ? pendingGameBets.get(betId) : null;
+  // STRICT: settle MUST have a valid betId to prevent free wins
+  // Only allow no-betId if explicitly compatibility mode (winAmt=0 for logging losses)
+  if(!pending && winAmt > 0) return res.status(400).json({error:'Invalid or expired betId (required for wins)'});
   if(pending) {
     if(pending.uid !== uid) return res.status(403).json({error:'Invalid betId'});
     pendingGameBets.delete(betId);
+    // Validate win isn't absurd vs bet (max 10000x to detect manipulation)
+    if(winAmt > pending.amount * 10000) {
+      console.warn(`[game/settle] Suspicious win: uid=${uid}, bet=${pending.amount}, won=${winAmt}`);
+      return res.status(400).json({error:'Win amount exceeds sanity limit'});
+    }
   }
-  const user = await getUser(uid);
-  if(!user) return res.status(400).json({error:'User not found'});
-  if(winAmt > 0) { user.tokens = (user.tokens||0) + winAmt; await saveUser(user); }
+  // ATOMIC credit (atomic increment)
+  let newBalance = null;
+  if(winAmt > 0) {
+    const updated = await dbGet(
+      `UPDATE users SET tokens=tokens+$1 WHERE uid=$2 RETURNING tokens`,
+      [winAmt, uid]
+    );
+    newBalance = parseInt(updated?.tokens||0);
+  } else {
+    const row = await dbGet(`SELECT tokens FROM users WHERE uid=$1`, [uid]);
+    newBalance = parseInt(row?.tokens||0);
+  }
   // Log game + XP + tournament + jackpot
   const betAmt = pending?.amount||0;
   const gameName = game||pending?.game||'unknown';
@@ -1151,8 +1176,8 @@ app.post('/api/game/settle', express.json(), async (req,res) => {
     await trackWagering(uid, betAmt);
     await updateTournamentScore(uid, betAmt, gameName);
   }
-  if(sockets[uid]) sockets[uid].socket.emit('balanceSync',{tokens:user.tokens});
-  res.json({ok:true, balance:user.tokens});
+  if(sockets[uid]) sockets[uid].socket.emit('balanceSync',{tokens:newBalance});
+  res.json({ok:true, balance:newBalance});
 });
 
 // Jackpot win endpoint — SERVER-AUTHORITATIVE
