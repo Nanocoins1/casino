@@ -1227,8 +1227,11 @@ const RESERVED_NAME_WORDS = [
   'помощник','администратор','модератор','поддержка'
 ];
 function isReservedName(name){
-  const lower = name.toLowerCase().replace(/[^a-z0-9]/g,'');
-  return RESERVED_NAME_WORDS.some(w => lower.includes(w.replace(/[^a-z0-9]/g,'')));
+  // Only reject EXACT matches (case-insensitive), not substring.
+  // Example: "admin" → rejected, "administer" → allowed, "real_admin" → allowed.
+  // Prevents impersonation without blocking legitimate usernames.
+  const lower = name.toLowerCase().trim();
+  return RESERVED_NAME_WORDS.some(w => lower === w.toLowerCase());
 }
 
 app.post('/api/user/update-name', express.json(), async (req,res)=>{

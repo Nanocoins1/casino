@@ -7231,10 +7231,10 @@ window.Icon = Icon;
 <!-- 3. Cleopatra 3D Mascot -->
 <script type="text/babel">
 const CLEO_VARIANTS = [
-  { id:'v12', src:'/assets/cleopatra-bigwave.glb?v=3',     label:'⭐',    name:'Hello',   animated:true,  tier:'featured' },
-  { id:'v13', src:'/assets/cleopatra-excitedwalk.glb?v=3', label:'🎲 I',  name:'Excited', animated:true,  tier:'rotation' },
-  { id:'v7',  src:'/assets/cleopatra-dance.glb?v=3',       label:'🎲 II', name:'Dance',   animated:true,  tier:'rotation' },
-  { id:'v1',  src:'/assets/cleopatra.glb?v=3',             label:'🗿',    name:'Statue',  animated:false, tier:'rotation' },
+  { id:'v12', src:'/assets/cleopatra-bigwave-v2.glb',     label:'⭐',    name:'Hello',   animated:true,  tier:'featured' },
+  { id:'v13', src:'/assets/cleopatra-excitedwalk-v2.glb', label:'🎲 I',  name:'Excited', animated:true,  tier:'rotation' },
+  { id:'v7',  src:'/assets/cleopatra-dance-v2.glb',       label:'🎲 II', name:'Dance',   animated:true,  tier:'rotation' },
+  { id:'v1',  src:'/assets/cleopatra-v2.glb',             label:'🗿',    name:'Statue',  animated:false, tier:'rotation' },
 ];
 
 function Cleopatra({ height = 540 }) {
@@ -8598,6 +8598,12 @@ const AVATAR_IMAGES=[
 ];
 
 function AvatarModal({user,onClose,onUpdate,defaultTab}){
+  // ESC key closes modal
+  useEffect(()=>{
+    const h = e => { if(e.key==='Escape') onClose(); };
+    document.addEventListener('keydown', h);
+    return () => document.removeEventListener('keydown', h);
+  },[onClose]);
   const [preview,setPreview]=useState(user.avatar||null);
   const [file,setFile]=useState(null);
   const [tab,setTab]=useState(defaultTab||'profile'); // 'profile'|'stats'|'history'|'transfer'|'security'
@@ -8726,8 +8732,14 @@ function AvatarModal({user,onClose,onUpdate,defaultTab}){
 
   return(
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" style={{maxWidth:tab==='inbox'?580:460,maxHeight:'92vh',overflowY:tab==='inbox'?'visible':'auto',padding:tab==='inbox'?'20px 20px 16px':'28px 28px 24px',transition:'max-width .2s,padding .2s'}} onClick={e=>e.stopPropagation()}>
-        <h3 style={{marginBottom:16}}>My Profile</h3>
+      <div className="modal" style={{maxWidth:tab==='inbox'?580:460,maxHeight:'92vh',overflowY:tab==='inbox'?'visible':'auto',padding:tab==='inbox'?'20px 20px 16px':'28px 28px 24px',transition:'max-width .2s,padding .2s',position:'relative'}} onClick={e=>e.stopPropagation()}>
+        {/* Close X button — always visible top-right */}
+        <button onClick={onClose} aria-label="Close" title="Close (ESC)"
+          style={{position:'absolute',top:12,right:12,width:32,height:32,borderRadius:8,background:'rgba(255,255,255,0.06)',border:'1px solid rgba(232,224,208,0.15)',color:'rgba(232,224,208,0.7)',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',fontSize:16,fontWeight:600,transition:'all .15s',zIndex:10}}
+          onMouseEnter={e=>{e.currentTarget.style.background='rgba(201,168,76,0.15)';e.currentTarget.style.borderColor='rgba(201,168,76,0.4)';e.currentTarget.style.color='#c9a84c';}}
+          onMouseLeave={e=>{e.currentTarget.style.background='rgba(255,255,255,0.06)';e.currentTarget.style.borderColor='rgba(232,224,208,0.15)';e.currentTarget.style.color='rgba(232,224,208,0.7)';}}
+        >✕</button>
+        <h3 style={{marginBottom:16,marginRight:40}}>My Profile</h3>
 
         {/* Tabs */}
         <div className="modal-tabs">
