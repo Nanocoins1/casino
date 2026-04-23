@@ -8517,27 +8517,30 @@ function InboxTabContent({tok, user}){
             })}
           </div>
 
-          {/* Compose */}
-          <div style={{padding:'8px 12px',borderTop:'1px solid rgba(255,255,255,0.06)',
-            background:'rgba(0,0,0,0.15)',display:'flex',gap:8,alignItems:'flex-end'}}>
-            <input
+          {/* Compose — multiline textarea for comfortable writing */}
+          <div style={{padding:'12px 14px',borderTop:'1px solid rgba(255,255,255,0.06)',
+            background:'rgba(0,0,0,0.15)',display:'flex',gap:10,alignItems:'flex-end'}}>
+            <textarea
               value={body}
               onChange={e=>setBody(e.target.value)}
-              onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}}
-              placeholder="Žinutė..."
+              onKeyDown={e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();sendMsg();}}}
+              placeholder="Rašykite žinutę... (Ctrl+Enter = siųsti)"
+              rows={3}
               style={{flex:1,background:'rgba(255,255,255,0.07)',border:'1px solid rgba(255,255,255,0.1)',
-                borderRadius:22,padding:'9px 16px',color:'rgba(232,224,208,0.9)',fontSize:13,outline:'none',
-                fontFamily:'inherit',transition:'border-color .15s'}}
-              onFocus={e=>e.target.style.borderColor='rgba(201,168,76,0.35)'}
+                borderRadius:14,padding:'10px 14px',color:'rgba(232,224,208,0.95)',fontSize:14,outline:'none',
+                fontFamily:'inherit',transition:'border-color .15s',lineHeight:1.5,
+                resize:'vertical',minHeight:60,maxHeight:180}}
+              onFocus={e=>e.target.style.borderColor='rgba(201,168,76,0.5)'}
               onBlur={e=>e.target.style.borderColor='rgba(255,255,255,0.1)'}
             />
             <button onClick={sendMsg} disabled={sending||!body.trim()}
-              style={{width:38,height:38,borderRadius:'50%',flexShrink:0,cursor:body.trim()?'pointer':'default',
+              style={{padding:'12px 20px',height:'fit-content',minHeight:44,borderRadius:12,flexShrink:0,
+                cursor:body.trim()?'pointer':'default',
                 background:body.trim()?'linear-gradient(135deg,#c9a84c,#a07830)':'rgba(255,255,255,0.06)',
                 border:'none',color:body.trim()?'#0a0806':'rgba(232,224,208,.25)',
-                fontSize:16,display:'flex',alignItems:'center',justifyContent:'center',
-                transition:'all .2s',transform:body.trim()?'scale(1)':'scale(0.92)'}}>
-              {sending?'⏳':'➤'}
+                fontSize:14,fontWeight:700,letterSpacing:'0.05em',
+                transition:'all .2s'}}>
+              {sending?'⏳':'Siųsti →'}
             </button>
           </div>
 
