@@ -133,17 +133,24 @@ async function processCard(sourcePath, outputPath) {
 
 // Mapping: staging filename → card code
 const CARD_MAP = {
-  // Previous batch (Kings)
-  'card-1-new.png': 'clubs-Q-scorpion-alt', // Alternative Queen of Clubs (scorpion)
-  'card-2-new.png': 'spades-K',              // King of Spades
-  'card-3-new.png': 'clubs-K',               // King of Clubs
-  'card-4-new.png': 'hearts-K',              // King of Hearts
-  // New batch (Queens + Diamond King)
-  'new-1.png': 'diamonds-K',                 // King of Diamonds
-  'new-2.png': 'hearts-Q',                   // Queen of Hearts
-  'new-3.png': 'clubs-Q',                    // Queen of Clubs (replaces scorpion for set consistency)
-  'new-4.png': 'spades-Q',                   // Queen of Spades
-  'new-5.png': 'diamonds-Q'                  // Queen of Diamonds
+  // Batch 1 (Kings)
+  'card-1-new.png': 'clubs-Q-scorpion-alt',
+  'card-2-new.png': 'spades-K',
+  'card-3-new.png': 'clubs-K',
+  'card-4-new.png': 'hearts-K',
+  // Batch 2 (Queens + Diamond King)
+  'new-1.png': 'diamonds-K',
+  'new-2.png': 'hearts-Q',
+  'new-3.png': 'clubs-Q',
+  'new-4.png': 'spades-Q',
+  'new-5.png': 'diamonds-Q',
+  // Batch 3 (Jacks + Aces)
+  'batch3-1.png': 'clubs-J-alt',    // Greek-warrior style variant
+  'batch3-2.png': 'clubs-J',         // Pharaoh-warrior (main)
+  'batch3-3.png': 'hearts-J',        // Lion jester king
+  'batch3-4.png': 'spades-A',        // Blue sapphire spade + wings
+  'batch3-5.png': 'clubs-A',         // Emerald club + wings
+  'batch3-6.png': 'diamonds-A'       // Ruby diamond + wings
 };
 
 async function main() {
