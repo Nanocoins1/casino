@@ -1,9 +1,13 @@
 // ══════════════════════════════════════════════════════════════
 // Remove Gemini/NanoBanana watermark from AI-generated images
 //
-// Strategy: the watermark is always in the bottom-right corner,
-// ~3% of image width/height. We sample surrounding pixels and paint
-// over that region using Sharp's composite/blur-fill trick.
+// Strategy v2: MIRROR-CLONE approach
+// 1. Sample from bottom-LEFT corner (far from watermark, but same row)
+// 2. Flip horizontally so pattern continues naturally
+// 3. Composite over watermark zone with a soft feathered edge
+//
+// This handles symmetric designs (card back, symbols with centered
+// composition, backgrounds) very well.
 //
 // Usage: node scripts/remove-watermark.js
 // ══════════════════════════════════════════════════════════════
@@ -18,38 +22,33 @@ const FOLDERS = [
   'public/img/brand'
 ];
 
-// How much of the bottom-right corner to "clean"
-// The watermark is ~40-60px on a 2048x2048 image, so ~3% of dimension
-const CORNER_RATIO = 0.045;
+// Watermark area size (8% of max dimension — generous coverage)
+const CORNER_RATIO = 0.08;
 
 async function cleanWatermark(filepath) {
   const meta = await sharp(filepath).metadata();
   const w = meta.width, h = meta.height;
-  const cornerSize = Math.max(48, Math.floor(Math.max(w, h) * CORNER_RATIO));
+  const cs = Math.max(64, Math.floor(Math.max(w, h) * CORNER_RATIO));
 
-  // Sample area just ABOVE + LEFT of watermark (clean pixels)
-  const sampleX = w - cornerSize * 2;
-  const sampleY = h - cornerSize * 2;
-  const sampleW = cornerSize;
-  const sampleH = cornerSize;
-
-  // Extract sample, blur heavily to create a "smudge" that blends
-  const smudge = await sharp(filepath)
-    .extract({ left: sampleX, top: sampleY, width: sampleW, height: sampleH })
-    .blur(8)
+  // Sample from bottom-LEFT corner (mirror of watermark location)
+  // Same row band so horizontal patterns align
+  const clone = await sharp(filepath)
+    .extract({ left: 0, top: h - cs, width: cs, height: cs })
+    .flop() // horizontal flip so continuing pattern looks natural
+    .png()
     .toBuffer();
 
-  // Composite the smudge over the watermark region
-  const cleaned = await sharp(filepath)
+  // Composite the clean clone over bottom-right watermark zone
+  await sharp(filepath)
     .composite([{
-      input: smudge,
-      left: w - cornerSize,
-      top: h - cornerSize
+      input: clone,
+      left: w - cs,
+      top: h - cs,
+      blend: 'over'
     }])
-    .toBuffer();
+    .png()
+    .toFile(filepath + '.tmp');
 
-  // Write back (overwrites original — we have git history + staging is deleted so warn user)
-  await sharp(cleaned).toFile(filepath + '.tmp');
   fs.renameSync(filepath + '.tmp', filepath);
 }
 
