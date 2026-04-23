@@ -134,9 +134,10 @@ body::before{
 .reel{
   position:relative;overflow:hidden;
   background: linear-gradient(180deg, rgba(10,8,32,0.9) 0%, rgba(5,4,15,0.95) 100%);
-  display:flex;flex-direction:column;
+  --cell-h: calc(100% / 3);
 }
 .reel-strip{
+  position:absolute;top:0;left:0;right:0;
   display:flex;flex-direction:column;
   transition:transform cubic-bezier(0.25, 0.75, 0.3, 1) 1.2s;
   will-change:transform;
@@ -145,10 +146,13 @@ body::before{
   transition:none;
 }
 .cell{
-  flex:1;min-height:33.333%;aspect-ratio:1/1;
+  width:100%;
+  height:var(--cell-h);
+  flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
   position:relative;
   padding:4%;
+  box-sizing:border-box;
 }
 .cell img{
   max-width:100%;max-height:100%;
@@ -656,6 +660,9 @@ function seedGrid(){
 function renderGrid(){
   for(let r=0; r<REELS; r++){
     const reel = document.getElementById('reel-'+r);
+    // Lock cell height to pixel value based on reel height
+    const cellH = reel.offsetHeight / ROWS;
+    if(cellH > 0) reel.style.setProperty('--cell-h', cellH + 'px');
     const strip = reel.querySelector('.reel-strip');
     strip.style.transform = 'translateY(0)';
     strip.innerHTML = '';
@@ -672,6 +679,16 @@ function renderGrid(){
       cell.appendChild(img);
       strip.appendChild(cell);
     }
+  }
+}
+
+// Called on resize/load to refresh cell heights
+function refreshCellHeights(){
+  for(let r=0; r<REELS; r++){
+    const reel = document.getElementById('reel-'+r);
+    if(!reel) continue;
+    const cellH = reel.offsetHeight / ROWS;
+    if(cellH > 0) reel.style.setProperty('--cell-h', cellH + 'px');
   }
 }
 
@@ -775,6 +792,11 @@ function doSpin(totalBet, betId){
   let reelsStopped = 0;
 
   reels.forEach((reel, r) => {
+    // Lock cell height to pixels BEFORE adding many cells
+    // (prevents flex shrinking the extended strip)
+    const cellH = reel.offsetHeight / ROWS;
+    reel.style.setProperty('--cell-h', cellH + 'px');
+
     // Build a fake strip with many symbols + target at the end
     const strip = reel.querySelector('.reel-strip');
     const extraSymbols = 20 + r * 5; // each reel spins longer
@@ -811,7 +833,6 @@ function doSpin(totalBet, betId){
     strip.offsetHeight;
 
     // Animate to show last ROWS symbols (the target)
-    const cellH = reel.offsetHeight / ROWS;
     const targetOffset = -(symbols.length - ROWS) * cellH;
 
     const duration = 800 + r * 200; // staggered: 800, 1000, 1200, 1400, 1600ms
@@ -840,6 +861,7 @@ function doSpin(totalBet, betId){
         strip.appendChild(cell);
       }
 
+      // Keep cell height as pixels (already synced to reel height)
       reelsStopped++;
       playReelStop();
 
@@ -1036,35 +1058,30 @@ function highlightWins(wins){
 
 function drawPaylines(wins){
   const canvas = document.getElementById('paylineCanvas');
-  const rect = canvas.parentElement.getBoundingClientRect();
+  const rect = canvas.getBoundingClientRect();
   canvas.width = rect.width;
   canvas.height = rect.height;
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Calculate actual reel area bounds (matches CSS: top 9%, left 7%, right 7%, bottom 12%)
-  const areaTop = rect.height * 0.09;
-  const areaLeft = rect.width * 0.07;
-  const areaRight = rect.width * 0.93;
-  const areaBottom = rect.height * 0.88;
-  const areaW = areaRight - areaLeft;
-  const areaH = areaBottom - areaTop;
-  const reelW = areaW / REELS;
-  const cellH = areaH / ROWS;
+  // Canvas is already positioned at reels area (CSS top:9%, left:7%, etc.)
+  // so coordinates are 0..width, 0..height = direct reel grid
+  const reelW = canvas.width / REELS;
+  const cellH = canvas.height / ROWS;
 
-  const colors = ['#ffd680','#d93752','#5bd97b','#00e5ff','#a855f7','#ff9f43','#ff6b9d'];
+  const colors = ['#ffd680','#d93752','#5bd97b','#00e5ff','#a855f7','#ff9f43','#ff6b9d','#ffa502','#00e676','#ff4081'];
 
   wins.forEach((w, idx) => {
     const line = PAYLINES[w.lineIdx];
     const color = colors[idx % colors.length];
     ctx.strokeStyle = color;
     ctx.lineWidth = 4;
-    ctx.shadowBlur = 12;
+    ctx.shadowBlur = 14;
     ctx.shadowColor = color;
     ctx.beginPath();
     for(let r=0; r<REELS; r++){
-      const x = areaLeft + r * reelW + reelW/2;
-      const y = areaTop + line[r] * cellH + cellH/2;
+      const x = r * reelW + reelW/2;
+      const y = line[r] * cellH + cellH/2;
       if(r===0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     }
@@ -1297,14 +1314,21 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// Resize canvas on window resize
+// Resize canvas + cell heights on window resize
 window.addEventListener('resize', () => {
   setTimeout(() => {
+    refreshCellHeights();
     const canvas = document.getElementById('paylineCanvas');
-    const rect = canvas.parentElement.getBoundingClientRect();
+    const rect = canvas.getBoundingClientRect();
     canvas.width = rect.width;
     canvas.height = rect.height;
+    clearPaylines();
   }, 100);
+});
+
+// Refresh cell heights once images load (dimensions may shift)
+window.addEventListener('load', () => {
+  setTimeout(refreshCellHeights, 100);
 });
 </script>
 </body>
