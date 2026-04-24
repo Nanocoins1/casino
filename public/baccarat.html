@@ -21,6 +21,7 @@
   <meta name="twitter:description" content="Play baccarat at HATHOR Casino. Player, banker, tie bets. Elegant card game with high RTP and instant payouts."/>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="/css/game-ui.css"/>
+<link rel="stylesheet" href="/css/premium-cards.css"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
@@ -486,11 +487,13 @@ function handTotal(cards) {
 }
 
 // ── Card rendering ──
+const _BACC_SUIT_CODE = {'♠':'s','♥':'h','♦':'d','♣':'c'};
 function createCardEl(card, faceDown, side) {
   const el = document.createElement('div');
   el.className = 'card' + (card.isRed ? ' red' : ' black') + ` deal-${side}`;
+  const suitCode = _BACC_SUIT_CODE[card.suit] || '';
   el.innerHTML = `
-    <div class="card-front">
+    <div class="card-front" data-rank="${card.rank}" data-suit="${suitCode}">
       <span class="card-rank-top">${card.rank}</span>
       <span class="card-suit-top">${card.suit}</span>
       <span class="card-center-suit">${card.suit}</span>

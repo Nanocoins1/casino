@@ -9810,6 +9810,16 @@ function ppAIDecide(bot,hole,comm,toCall,pot,chips){
 }
 
 // ── PPCard ────────────────────────────────────────────
+// Premium court-card PNG lookup (J/Q/K/A for each suit)
+const PP_SUIT_CODE={'♥':'h','♦':'d','♠':'s','♣':'c'};
+const PP_COURT=new Set(['A','J','Q','K']);
+function ppPremiumImg(card){
+  const code=PP_SUIT_CODE[card.s];
+  if(!code||!PP_COURT.has(card.r))return null;
+  // Jack of Diamonds missing — fall back to CSS text rendering
+  if(card.r==='J'&&code==='d')return null;
+  return '/img/cards/'+({'h':'hearts','d':'diamonds','s':'spades','c':'clubs'}[code])+'-'+card.r+'.png';
+}
 function PPCard({card,hidden,small}){
   const sz=small?36:52;
   const base={
@@ -9823,12 +9833,20 @@ function PPCard({card,hidden,small}){
     return <div style={{...base,background:'rgba(255,255,255,0.04)',border:'1px dashed rgba(201,168,76,0.2)'}}/>;
   }
   if(hidden){
+    // Premium Eye of Horus card back
     return(
       <div style={{...base,
-        background:'linear-gradient(135deg,#1a3a6a 0%,#0d1e3a 100%)',
-        border:'1px solid rgba(100,140,220,0.4)'}}>
-        <span style={{fontSize:small?8:12,color:'rgba(100,140,220,0.6)'}}>🂠</span>
-      </div>
+        background:'#0a0820 url(/img/poker-premium/card-back.png) center/cover no-repeat',
+        border:'1px solid rgba(201,168,76,0.35)'}}/>
+    );
+  }
+  const premiumImg=ppPremiumImg(card);
+  if(premiumImg){
+    // Use AI-generated premium court card
+    return(
+      <div style={{...base,
+        background:'#0a0820 url('+premiumImg+') center/cover no-repeat',
+        border:'1px solid rgba(201,168,76,0.35)'}}/>
     );
   }
   const red=PP_RED.has(card.s);

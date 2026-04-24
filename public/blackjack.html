@@ -21,6 +21,7 @@
   <meta name="twitter:description" content="Play classic blackjack at HATHOR Casino. Hit, stand, double, split. 99.5% RTP, provably fair, instant payouts."/>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="/css/game-ui.css"/>
+<link rel="stylesheet" href="/css/premium-cards.css"/>
 <link rel="icon" type="image/png" href="/img/favicon.webp"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -713,6 +714,9 @@ function handScore(hand){
 function isBJ(hand){ return hand.length===2 && handScore(hand).val===21; }
 
 // ─── Render ────────────────────────────────────────
+// Map suit symbol → single-letter code for premium card data-suit attribute
+var SUIT_SYM_TO_CODE = { '♠':'s', '♥':'h', '♦':'d', '♣':'c' };
+
 function cardHTML(c, faceDown, delay){
   var d = (delay||0)*1000;
   if(faceDown){
@@ -724,7 +728,8 @@ function cardHTML(c, faceDown, delay){
   var isFace = FACE.has(c.rank);
   var cls = 'card '+(c.red?'red':'blk')+(isFace?' face':'');
   var centerContent = isFace ? (FACE_SYM[c.rank]||c.rank) : c.suit;
-  return '<div class="'+cls+' new-card" style="animation-delay:'+d+'ms">'+
+  var suitCode = SUIT_SYM_TO_CODE[c.suit] || '';
+  return '<div class="'+cls+' new-card" data-rank="'+c.rank+'" data-suit="'+suitCode+'" style="animation-delay:'+d+'ms">'+
     '<div class="card-inner">'+
       '<div class="card-tl"><span class="card-rank">'+c.rank+'</span><span class="card-suit-sm">'+c.suit+'</span></div>'+
       '<span class="card-center">'+centerContent+'</span>'+

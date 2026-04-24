@@ -21,6 +21,7 @@
   <meta name="twitter:description" content="Play Video Poker at HATHOR Casino. 5-card draw poker vs machine. High RTP, provably fair dealing."/>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="/css/game-ui.css"/>
+<link rel="stylesheet" href="/css/premium-cards.css"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
@@ -439,9 +440,12 @@ function renderCards(){
     inner.className='card-inner'+(card.faceUp?'':' flipped');
     inner.id='cardInner'+i;
 
-    // face
+    // face (with data-rank/data-suit for premium-cards.css)
     const face=document.createElement('div');
     face.className='card-face '+(SUIT_COLOR[card.suit]||'black');
+    const suitCode = {'♠':'s','♥':'h','♦':'d','♣':'c'}[card.suit] || '';
+    face.setAttribute('data-rank', card.rank);
+    face.setAttribute('data-suit', suitCode);
     face.innerHTML=`
       <div class="rank-tl"><span>${card.rank}</span><span class="s">${card.suit}</span></div>
       <div class="suit-center">${card.suit}</div>
