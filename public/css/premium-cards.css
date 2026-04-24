@@ -1,59 +1,41 @@
 /* ═══════════════════════════════════════════════════════════
    HATHOR Premium Egyptian Playing Cards
-   Applies PNG backgrounds to court cards (A, J, Q, K).
-   Number cards (2-10) keep their existing CSS rendering.
-
-   Court cards require data-rank + data-suit attributes:
-   - data-rank: "A" | "J" | "Q" | "K"
-   - data-suit: "h" | "d" | "s" | "c"
-
-   15/16 cards ready — Jack of Diamonds falls back to CSS
-   rendering until the final PNG arrives.
+   15/16 court cards ready — Jack of Diamonds still pending.
+   Uses !important to override per-game shorthand `background:`.
    ═══════════════════════════════════════════════════════════ */
 
-/* Base card styling for court cards with PNG */
+/* Base court-card styling */
 [data-rank="A"],
 [data-rank="J"],
 [data-rank="Q"],
 [data-rank="K"] {
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-color: #0a0820 !important;
+  overflow: hidden !important;
 }
 
-/* Hide inner text/suit for PNG-backed court cards */
-[data-rank="A"][data-suit="h"] .card-inner,
-[data-rank="J"][data-suit="h"] .card-inner,
-[data-rank="Q"][data-suit="h"] .card-inner,
-[data-rank="K"][data-suit="h"] .card-inner,
-[data-rank="A"][data-suit="s"] .card-inner,
-[data-rank="J"][data-suit="s"] .card-inner,
-[data-rank="Q"][data-suit="s"] .card-inner,
-[data-rank="K"][data-suit="s"] .card-inner,
-[data-rank="A"][data-suit="c"] .card-inner,
-[data-rank="J"][data-suit="c"] .card-inner,
-[data-rank="Q"][data-suit="c"] .card-inner,
-[data-rank="K"][data-suit="c"] .card-inner,
-[data-rank="A"][data-suit="d"] .card-inner,
-[data-rank="Q"][data-suit="d"] .card-inner,
-[data-rank="K"][data-suit="d"] .card-inner {
-  display: none !important;
-}
-
-/* Also hide inner elements from other markup variants:
-   - videopoker: .rank-tl, .rank-br, .suit-center
-   - baccarat: .card-rank-top, .card-suit-top, .card-center-suit, .card-rank-bot */
-[data-rank="A"] .rank-tl, [data-rank="A"] .rank-br, [data-rank="A"] .suit-center,
-[data-rank="J"] .rank-tl, [data-rank="J"] .rank-br, [data-rank="J"] .suit-center,
-[data-rank="Q"] .rank-tl, [data-rank="Q"] .rank-br, [data-rank="Q"] .suit-center,
-[data-rank="K"] .rank-tl, [data-rank="K"] .rank-br, [data-rank="K"] .suit-center,
+/* Hide all inner-text markup variants for court cards */
+[data-rank="A"] .card-inner, [data-rank="A"] .rank-tl, [data-rank="A"] .rank-br, [data-rank="A"] .suit-center,
 [data-rank="A"] .card-rank-top, [data-rank="A"] .card-suit-top, [data-rank="A"] .card-center-suit, [data-rank="A"] .card-rank-bot,
+[data-rank="A"] > .card-tl, [data-rank="A"] > .card-br, [data-rank="A"] > .card-center,
+[data-rank="J"] .card-inner, [data-rank="J"] .rank-tl, [data-rank="J"] .rank-br, [data-rank="J"] .suit-center,
 [data-rank="J"] .card-rank-top, [data-rank="J"] .card-suit-top, [data-rank="J"] .card-center-suit, [data-rank="J"] .card-rank-bot,
+[data-rank="J"] > .card-tl, [data-rank="J"] > .card-br, [data-rank="J"] > .card-center,
+[data-rank="Q"] .card-inner, [data-rank="Q"] .rank-tl, [data-rank="Q"] .rank-br, [data-rank="Q"] .suit-center,
 [data-rank="Q"] .card-rank-top, [data-rank="Q"] .card-suit-top, [data-rank="Q"] .card-center-suit, [data-rank="Q"] .card-rank-bot,
-[data-rank="K"] .card-rank-top, [data-rank="K"] .card-suit-top, [data-rank="K"] .card-center-suit, [data-rank="K"] .card-rank-bot {
+[data-rank="Q"] > .card-tl, [data-rank="Q"] > .card-br, [data-rank="Q"] > .card-center,
+[data-rank="K"] .card-inner, [data-rank="K"] .rank-tl, [data-rank="K"] .rank-br, [data-rank="K"] .suit-center,
+[data-rank="K"] .card-rank-top, [data-rank="K"] .card-suit-top, [data-rank="K"] .card-center-suit, [data-rank="K"] .card-rank-bot,
+[data-rank="K"] > .card-tl, [data-rank="K"] > .card-br, [data-rank="K"] > .card-center {
   display: none !important;
 }
-/* EXCEPTION: Jack of Diamonds keeps CSS rendering (PNG missing) */
+
+/* EXCEPTION: Jack of Diamonds PNG missing — keep CSS rendering */
+[data-rank="J"][data-suit="d"] {
+  background-image: none !important;
+}
 [data-rank="J"][data-suit="d"] .card-inner,
 [data-rank="J"][data-suit="d"] .rank-tl,
 [data-rank="J"][data-suit="d"] .rank-br,
@@ -61,58 +43,32 @@
 [data-rank="J"][data-suit="d"] .card-rank-top,
 [data-rank="J"][data-suit="d"] .card-suit-top,
 [data-rank="J"][data-suit="d"] .card-center-suit,
-[data-rank="J"][data-suit="d"] .card-rank-bot {
+[data-rank="J"][data-suit="d"] .card-rank-bot,
+[data-rank="J"][data-suit="d"] > .card-tl,
+[data-rank="J"][data-suit="d"] > .card-br,
+[data-rank="J"][data-suit="d"] > .card-center {
   display: revert !important;
 }
 
 /* ─── HEARTS ─── */
-[data-rank="A"][data-suit="h"] { background-image: url('/img/cards/hearts-A.png'); }
-[data-rank="J"][data-suit="h"] { background-image: url('/img/cards/hearts-J.png'); }
-[data-rank="Q"][data-suit="h"] { background-image: url('/img/cards/hearts-Q.png'); }
-[data-rank="K"][data-suit="h"] { background-image: url('/img/cards/hearts-K.png'); }
+[data-rank="A"][data-suit="h"] { background-image: url('/img/cards/hearts-A.png') !important; }
+[data-rank="J"][data-suit="h"] { background-image: url('/img/cards/hearts-J.png') !important; }
+[data-rank="Q"][data-suit="h"] { background-image: url('/img/cards/hearts-Q.png') !important; }
+[data-rank="K"][data-suit="h"] { background-image: url('/img/cards/hearts-K.png') !important; }
 
 /* ─── SPADES ─── */
-[data-rank="A"][data-suit="s"] { background-image: url('/img/cards/spades-A.png'); }
-[data-rank="J"][data-suit="s"] { background-image: url('/img/cards/spades-J.png'); }
-[data-rank="Q"][data-suit="s"] { background-image: url('/img/cards/spades-Q.png'); }
-[data-rank="K"][data-suit="s"] { background-image: url('/img/cards/spades-K.png'); }
+[data-rank="A"][data-suit="s"] { background-image: url('/img/cards/spades-A.png') !important; }
+[data-rank="J"][data-suit="s"] { background-image: url('/img/cards/spades-J.png') !important; }
+[data-rank="Q"][data-suit="s"] { background-image: url('/img/cards/spades-Q.png') !important; }
+[data-rank="K"][data-suit="s"] { background-image: url('/img/cards/spades-K.png') !important; }
 
 /* ─── CLUBS ─── */
-[data-rank="A"][data-suit="c"] { background-image: url('/img/cards/clubs-A.png'); }
-[data-rank="J"][data-suit="c"] { background-image: url('/img/cards/clubs-J.png'); }
-[data-rank="Q"][data-suit="c"] { background-image: url('/img/cards/clubs-Q.png'); }
-[data-rank="K"][data-suit="c"] { background-image: url('/img/cards/clubs-K.png'); }
+[data-rank="A"][data-suit="c"] { background-image: url('/img/cards/clubs-A.png') !important; }
+[data-rank="J"][data-suit="c"] { background-image: url('/img/cards/clubs-J.png') !important; }
+[data-rank="Q"][data-suit="c"] { background-image: url('/img/cards/clubs-Q.png') !important; }
+[data-rank="K"][data-suit="c"] { background-image: url('/img/cards/clubs-K.png') !important; }
 
-/* ─── DIAMONDS ─── (Jack missing — uses CSS fallback) */
-[data-rank="A"][data-suit="d"] { background-image: url('/img/cards/diamonds-A.png'); }
-[data-rank="Q"][data-suit="d"] { background-image: url('/img/cards/diamonds-Q.png'); }
-[data-rank="K"][data-suit="d"] { background-image: url('/img/cards/diamonds-K.png'); }
-
-/* Jack of Diamonds: no background image — falls through to game's
-   default CSS card rendering, so the rank "J" + ♦ suit still shows.
-   When the PNG arrives, we'll add:
-   [data-rank="J"][data-suit="d"] { background-image: url('/img/cards/diamonds-J.png'); }
-*/
-
-/* Enhanced card background color for all cards to unify look */
-.card[data-rank] {
-  border: 1px solid rgba(201, 168, 76, 0.25);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(201, 168, 76, 0.12);
-}
-
-/* When a court card is displayed, ensure smooth edges */
-[data-rank="A"],
-[data-rank="J"],
-[data-rank="Q"],
-[data-rank="K"] {
-  overflow: hidden;
-  border-radius: 6px;
-}
-
-/* Small card variant (used in some games) — still works at smaller size */
-.card.sm[data-rank="A"],
-.card.sm[data-rank="J"],
-.card.sm[data-rank="Q"],
-.card.sm[data-rank="K"] {
-  background-size: cover;
-}
+/* ─── DIAMONDS ─── (Jack missing — CSS fallback) */
+[data-rank="A"][data-suit="d"] { background-image: url('/img/cards/diamonds-A.png') !important; }
+[data-rank="Q"][data-suit="d"] { background-image: url('/img/cards/diamonds-Q.png') !important; }
+[data-rank="K"][data-suit="d"] { background-image: url('/img/cards/diamonds-K.png') !important; }
