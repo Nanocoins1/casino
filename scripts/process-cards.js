@@ -150,7 +150,11 @@ const CARD_MAP = {
   'batch3-3.png': 'hearts-J',        // Lion jester king
   'batch3-4.png': 'spades-A',        // Blue sapphire spade + wings
   'batch3-5.png': 'clubs-A',         // Emerald club + wings
-  'batch3-6.png': 'diamonds-A'       // Ruby diamond + wings
+  'batch3-6.png': 'diamonds-A',      // Ruby diamond + wings
+  // Batch 4 (previously missed files from Downloads)
+  'check-1.png': 'hearts-A',         // Ruby heart + wings + ankh
+  'check-2.png': 'spades-J',         // Royal scout on throne
+  'check-3.png': 'clubs-J-alt2'      // Another clubs warrior variant (keep as alt)
 };
 
 async function main() {
